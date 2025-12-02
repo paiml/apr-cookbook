@@ -1,0 +1,38 @@
+# PMAT Quality Gates Configuration
+# Toyota Way: Jidoka - Stop the line on defects
+
+[quality_gates]
+rust_min_grade = "A"
+max_score_drop = 3.0
+mode = "strict"
+block_on_regression = true
+block_on_new_files = true
+
+[thresholds]
+test_coverage = 95
+mutation_score = 80
+cyclomatic_complexity = 10
+
+[baseline]
+baseline_path = ".pmat/tdg-baseline.json"
+auto_update_on_main = true
+
+[analyze]
+# Files to analyze
+include = ["src/**/*.rs", "examples/**/*.rs"]
+exclude = ["target/**", "benches/**"]
+
+# Defect patterns to flag
+defect_patterns = [
+    "unwrap\\(\\)",
+    "expect\\(",
+    "panic!",
+    "todo!",
+    "unimplemented!",
+]
+
+# Allow these patterns in test code
+test_exceptions = [
+    "unwrap\\(\\)",
+    "expect\\(",
+]

@@ -1,0 +1,26 @@
+[book]
+authors = ["Pragmatic AI Labs <info@paiml.com>"]
+language = "en"
+multilingual = false
+src = "src"
+title = "APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment"
+description = "Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles"
+
+[build]
+build-dir = "book"
+create-missing = true
+use-default-preprocessors = true
+
+[output.html]
+default-theme = "rust"
+preferred-dark-theme = "navy"
+git-repository-url = "https://github.com/paiml/apr-cookbook"
+git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/paiml/apr-cookbook/edit/main/book/{path}"
+site-url = "/apr-cookbook/"
+
+[output.html.playground]
+editable = true
+copyable = true
+copy-js = true
+runnable = false

@@ -1,0 +1,230 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 700">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="50%" style="stop-color:#161b22"/>
+      <stop offset="100%" style="stop-color:#0d1117"/>
+    </linearGradient>
+    <linearGradient id="recipeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f97316"/>
+      <stop offset="100%" style="stop-color:#ea580c"/>
+    </linearGradient>
+    <linearGradient id="bundleGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6"/>
+      <stop offset="100%" style="stop-color:#2563eb"/>
+    </linearGradient>
+    <linearGradient id="convertGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981"/>
+      <stop offset="100%" style="stop-color:#059669"/>
+    </linearGradient>
+    <linearGradient id="encryptGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#8b5cf6"/>
+      <stop offset="100%" style="stop-color:#7c3aed"/>
+    </linearGradient>
+    <linearGradient id="simdGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ef4444"/>
+      <stop offset="100%" style="stop-color:#dc2626"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="700" fill="url(#bgGrad)"/>
+
+  <!-- Grid pattern -->
+  <g opacity="0.03">
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#fff" stroke-width="1"/>
+    </pattern>
+    <rect width="1200" height="700" fill="url(#grid)"/>
+  </g>
+
+  <!-- Main Title -->
+  <text x="600" y="80" text-anchor="middle" fill="#f97316" font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="bold" filter="url(#glow)">APR COOKBOOK</text>
+  <text x="600" y="115" text-anchor="middle" fill="#9ca3af" font-family="system-ui, -apple-system, sans-serif" font-size="18">Idiomatic Rust Patterns for ML Model Deployment</text>
+
+  <!-- Recipe Cards - Row 1 -->
+
+  <!-- Bundle Static -->
+  <g transform="translate(80, 160)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#3b82f6" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#bundleGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#bundleGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">📦 BUNDLE STATIC</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">include_bytes!()</text>
+    <text x="15" y="78" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Zero-copy loading</text>
+    <text x="15" y="96" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Single binary</text>
+  </g>
+
+  <!-- Bundle Quantized -->
+  <g transform="translate(300, 160)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#3b82f6" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#bundleGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#bundleGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">⚡ QUANTIZED</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">INT8 / INT4</text>
+    <text x="15" y="78" fill="#6ee7b7" font-family="monospace" font-size="10">✓ 75% smaller</text>
+    <text x="15" y="96" fill="#6ee7b7" font-family="monospace" font-size="10">✓ 2-4x faster</text>
+  </g>
+
+  <!-- Convert SafeTensors -->
+  <g transform="translate(520, 160)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#10b981" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#convertGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#convertGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🔄 SAFETENSORS</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">.safetensors → .apr</text>
+    <text x="15" y="78" fill="#6ee7b7" font-family="monospace" font-size="10">✓ HuggingFace compat</text>
+    <text x="15" y="96" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Memory-mapped</text>
+  </g>
+
+  <!-- Convert GGUF -->
+  <g transform="translate(740, 160)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#10b981" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#convertGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#convertGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🔄 GGUF IMPORT</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">.gguf → .apr</text>
+    <text x="15" y="78" fill="#6ee7b7" font-family="monospace" font-size="10">✓ llama.cpp models</text>
+    <text x="15" y="96" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Quantization preserved</text>
+  </g>
+
+  <!-- Export GGUF -->
+  <g transform="translate(960, 160)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#10b981" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#convertGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#convertGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">📤 GGUF EXPORT</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">.apr → .gguf</text>
+    <text x="15" y="78" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Tool ecosystem</text>
+    <text x="15" y="96" fill="#6ee7b7" font-family="monospace" font-size="10">✓ Ollama ready</text>
+  </g>
+
+  <!-- Recipe Cards - Row 2 -->
+
+  <!-- Encrypt Model -->
+  <g transform="translate(190, 310)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#8b5cf6" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#encryptGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#encryptGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🔐 ENCRYPT</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">AES-256-GCM</text>
+    <text x="15" y="78" fill="#c4b5fd" font-family="monospace" font-size="10">✓ Argon2id KDF</text>
+    <text x="15" y="96" fill="#c4b5fd" font-family="monospace" font-size="10">✓ IP protection</text>
+  </g>
+
+  <!-- SIMD Acceleration -->
+  <g transform="translate(410, 310)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#ef4444" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#simdGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#simdGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🚀 SIMD</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">trueno acceleration</text>
+    <text x="15" y="78" fill="#fca5a5" font-family="monospace" font-size="10">✓ AVX2 / AVX-512</text>
+    <text x="15" y="96" fill="#fca5a5" font-family="monospace" font-size="10">✓ ARM NEON</text>
+  </g>
+
+  <!-- WASM -->
+  <g transform="translate(630, 310)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#f97316" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#recipeGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#recipeGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🌐 WASM</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">Browser inference</text>
+    <text x="15" y="78" fill="#fdba74" font-family="monospace" font-size="10">✓ wasm32-unknown</text>
+    <text x="15" y="96" fill="#fdba74" font-family="monospace" font-size="10">✓ No dependencies</text>
+  </g>
+
+  <!-- Custom Models -->
+  <g transform="translate(850, 310)">
+    <rect width="200" height="120" rx="12" fill="#21262d" stroke="#f97316" stroke-width="2"/>
+    <rect width="200" height="35" rx="12" fill="url(#recipeGrad)"/>
+    <rect x="0" y="23" width="200" height="12" fill="url(#recipeGrad)"/>
+    <text x="100" y="24" text-anchor="middle" fill="#fff" font-family="monospace" font-size="13" font-weight="bold">🛠️ CUSTOM</text>
+    <text x="15" y="60" fill="#9ca3af" font-family="monospace" font-size="10">Custom architectures</text>
+    <text x="15" y="78" fill="#fdba74" font-family="monospace" font-size="10">✓ Layer composition</text>
+    <text x="15" y="96" fill="#fdba74" font-family="monospace" font-size="10">✓ Inference pipelines</text>
+  </g>
+
+  <!-- Sovereign Stack Integration -->
+  <g transform="translate(100, 470)">
+    <rect width="1000" height="100" rx="12" fill="#21262d" stroke="#374151" stroke-width="1"/>
+    <text x="500" y="30" text-anchor="middle" fill="#9ca3af" font-family="system-ui, -apple-system, sans-serif" font-size="14" font-weight="bold">SOVEREIGN STACK INTEGRATION</text>
+
+    <!-- trueno -->
+    <g transform="translate(80, 45)">
+      <rect width="120" height="40" rx="8" fill="#1f2937" stroke="#ef4444" stroke-width="2"/>
+      <text x="60" y="26" text-anchor="middle" fill="#ef4444" font-family="monospace" font-size="12" font-weight="bold">trueno</text>
+    </g>
+    <text x="220" y="72" fill="#6b7280" font-family="system-ui" font-size="20">→</text>
+
+    <!-- aprender -->
+    <g transform="translate(250, 45)">
+      <rect width="120" height="40" rx="8" fill="#1f2937" stroke="#3b82f6" stroke-width="2"/>
+      <text x="60" y="26" text-anchor="middle" fill="#3b82f6" font-family="monospace" font-size="12" font-weight="bold">aprender</text>
+    </g>
+    <text x="390" y="72" fill="#6b7280" font-family="system-ui" font-size="20">→</text>
+
+    <!-- apr-cookbook -->
+    <g transform="translate(420, 45)">
+      <rect width="160" height="40" rx="8" fill="#1f2937" stroke="#f97316" stroke-width="2"/>
+      <text x="80" y="26" text-anchor="middle" fill="#f97316" font-family="monospace" font-size="12" font-weight="bold">apr-cookbook</text>
+    </g>
+    <text x="600" y="72" fill="#6b7280" font-family="system-ui" font-size="20">→</text>
+
+    <!-- entrenar -->
+    <g transform="translate(630, 45)">
+      <rect width="120" height="40" rx="8" fill="#1f2937" stroke="#10b981" stroke-width="2"/>
+      <text x="60" y="26" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="12" font-weight="bold">entrenar</text>
+    </g>
+    <text x="770" y="72" fill="#6b7280" font-family="system-ui" font-size="20">→</text>
+
+    <!-- Production -->
+    <g transform="translate(800, 45)">
+      <rect width="160" height="40" rx="8" fill="#1f2937" stroke="#8b5cf6" stroke-width="2"/>
+      <text x="80" y="26" text-anchor="middle" fill="#8b5cf6" font-family="monospace" font-size="12" font-weight="bold">🚀 Production</text>
+    </g>
+  </g>
+
+  <!-- CLI Tools -->
+  <g transform="translate(100, 590)">
+    <rect width="480" height="70" rx="12" fill="#0d1117" stroke="#374151" stroke-width="1"/>
+    <text x="20" y="25" fill="#6b7280" font-family="monospace" font-size="11">$</text>
+    <text x="35" y="25" fill="#f97316" font-family="monospace" font-size="11">apr-info</text>
+    <text x="105" y="25" fill="#9ca3af" font-family="monospace" font-size="11">model.apr</text>
+    <text x="200" y="25" fill="#6b7280" font-family="monospace" font-size="11"># Inspect model metadata</text>
+    <text x="20" y="50" fill="#6b7280" font-family="monospace" font-size="11">$</text>
+    <text x="35" y="50" fill="#f97316" font-family="monospace" font-size="11">apr-bench</text>
+    <text x="115" y="50" fill="#9ca3af" font-family="monospace" font-size="11">model.apr -n 100</text>
+    <text x="280" y="50" fill="#6b7280" font-family="monospace" font-size="11"># Benchmark latency</text>
+  </g>
+
+  <!-- Stats -->
+  <g transform="translate(620, 590)">
+    <rect width="480" height="70" rx="12" fill="#21262d" stroke="#374151" stroke-width="1"/>
+    <text x="80" y="30" text-anchor="middle" fill="#9ca3af" font-family="monospace" font-size="11">Zero-Copy</text>
+    <text x="80" y="50" text-anchor="middle" fill="#10b981" font-family="monospace" font-size="16" font-weight="bold">✓</text>
+
+    <text x="200" y="30" text-anchor="middle" fill="#9ca3af" font-family="monospace" font-size="11">Pure Rust</text>
+    <text x="200" y="50" text-anchor="middle" fill="#f97316" font-family="monospace" font-size="16" font-weight="bold">100%</text>
+
+    <text x="320" y="30" text-anchor="middle" fill="#9ca3af" font-family="monospace" font-size="11">SIMD Ready</text>
+    <text x="320" y="50" text-anchor="middle" fill="#ef4444" font-family="monospace" font-size="16" font-weight="bold">✓</text>
+
+    <text x="440" y="30" text-anchor="middle" fill="#9ca3af" font-family="monospace" font-size="11">Encryption</text>
+    <text x="440" y="50" text-anchor="middle" fill="#8b5cf6" font-family="monospace" font-size="16" font-weight="bold">AES-256</text>
+  </g>
+</svg>
