@@ -1,0 +1,114 @@
+[package]
+name = "apr-cookbook"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+license = "MIT"
+description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
+repository = "https://github.com/paiml/apr-cookbook"
+keywords = ["machine-learning", "wasm", "apr", "ml-models", "rust"]
+categories = ["science", "wasm", "development-tools"]
+
+[lints.rust]
+unsafe_code = "deny"
+unreachable_pub = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+trivial_casts = "warn"
+trivial_numeric_casts = "warn"
+unused_import_braces = "warn"
+unused_lifetimes = "warn"
+unused_qualifications = "warn"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+missing_errors_doc = "allow"
+missing_panics_doc = "allow"
+module_name_repetitions = "allow"
+must_use_candidate = "allow"
+cast_precision_loss = "allow"
+cast_possible_truncation = "allow"
+cast_sign_loss = "allow"
+similar_names = "allow"
+many_single_char_names = "allow"
+doc_markdown = "allow"
+unreadable_literal = "allow"
+uninlined_format_args = "allow"
+unnecessary_wraps = "allow"
+
+[dependencies]
+# Sovereign Stack - crates.io published versions
+aprender = { version = "0.14.0", features = ["format-compression"] }
+trueno = "0.7.3"
+entrenar = { version = "0.2.3", optional = true }
+
+# CLI
+clap = { version = "4", features = ["derive"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Error handling
+thiserror = "1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen = "0.2"
+console_error_panic_hook = "0.1"
+web-sys = { version = "0.3", features = ["Performance", "Window", "console"] }
+
+[dev-dependencies]
+proptest = "1"
+criterion = { version = "0.5", features = ["html_reports"] }
+tempfile = "3"
+
+[features]
+default = []
+training = ["entrenar"]
+encryption = ["aprender/format-encryption"]
+full = ["training", "encryption"]
+
+# --- Examples ---
+
+[[example]]
+name = "bundle_static_model"
+path = "examples/bundling/bundle_static_model.rs"
+
+[[example]]
+name = "bundle_quantized_model"
+path = "examples/bundling/bundle_quantized_model.rs"
+
+[[example]]
+name = "bundle_encrypted_model"
+path = "examples/bundling/bundle_encrypted_model.rs"
+required-features = ["encryption"]
+
+[[example]]
+name = "convert_safetensors_to_apr"
+path = "examples/conversion/convert_safetensors_to_apr.rs"
+
+[[example]]
+name = "convert_apr_to_gguf"
+path = "examples/conversion/convert_apr_to_gguf.rs"
+
+[[example]]
+name = "convert_gguf_to_apr"
+path = "examples/conversion/convert_gguf_to_apr.rs"
+
+[[example]]
+name = "simd_matrix_operations"
+path = "examples/acceleration/simd_matrix_operations.rs"
+
+[[example]]
+name = "apr_info"
+path = "examples/cli/apr_info.rs"
+
+[[example]]
+name = "apr_bench"
+path = "examples/cli/apr_bench.rs"
+
+# --- Benchmarks ---
+
+[[bench]]
+name = "inference"
+harness = false

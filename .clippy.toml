@@ -1,0 +1,20 @@
+# Clippy configuration
+# https://doc.rust-lang.org/clippy/configuration.html
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 25
+
+# Maximum number of lines in a function
+too-many-lines-threshold = 100
+
+# Disallowed methods - prevent common footguns
+disallowed-methods = [
+    "std::option::Option::unwrap",
+    "std::result::Result::unwrap",
+]
+
+# Allowed wildcard imports
+allowed-wildcard-imports = ["super::*"]
+
+# MSRV for compatibility lints
+msrv = "1.75"
