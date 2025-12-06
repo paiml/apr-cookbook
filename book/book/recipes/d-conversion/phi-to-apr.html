@@ -1,0 +1,492 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Phi Model to APR - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/d-conversion/phi-to-apr.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="phi-model-to-apr"><a class="header" href="#phi-model-to-apr">Phi Model to APR</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<p>Convert Microsoft Phi models to APR format.</p>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example convert_phi_to_apr
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: Convert Microsoft Phi to APR
+//!
+//! **Category**: Format Conversion
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (N/A)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Convert Microsoft Phi-3 Mini (mock) to `.apr` format.
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example convert_phi_to_apr
+//! ```
+
+use apr_cookbook::prelude::*;
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new("convert_phi_to_apr")?;
+
+    println!("=== Recipe: {} ===", ctx.name());
+    println!("Converting Microsoft Phi-3 Mini (mock) to .apr format");
+    println!();
+
+    // Create mock Phi-3 tensor structure
+    // Real Phi-3-Mini has 3.8B parameters, we simulate the structure
+    let hidden_size = 3072;
+    let num_layers = 32;
+    let vocab_size = 32064;
+    let _head_dim = 96;
+    let num_heads = 32;
+
+    let mock_seed = hash_name_to_seed("phi3_mock");
+
+    // Build converter with Phi architecture
+    let mut converter = AprConverter::new();
+    converter.set_metadata(ConversionMetadata {
+        name: Some("phi-3-mini-mock".to_string()),
+        architecture: Some("phi3".to_string()),
+        source_format: Some(ConversionFormat::SafeTensors),
+        custom: [
+            ("hidden_size".to_string(), hidden_size.to_string()),
+            ("num_layers".to_string(), num_layers.to_string()),
+            ("vocab_size".to_string(), vocab_size.to_string()),
+            ("num_heads".to_string(), num_heads.to_string()),
+        ]
+        .into_iter()
+        .collect(),
+    });
+
+    // Add embedding layer (mock - smaller for demo)
+    let embed_dim = 256; // Reduced for demo
+    let embed_vocab = 1000; // Reduced for demo
+    let embed_data = generate_tensor_data(mock_seed, embed_vocab * embed_dim);
+    converter.add_tensor(TensorData {
+        name: "model.embed_tokens.weight".to_string(),
+        shape: vec![embed_vocab, embed_dim],
+        dtype: DataType::F16,
+        data: embed_data,
+    });
+
+    // Add a few attention layers (mock)
+    for layer_idx in 0..2 {
+        // Reduced layers for demo
+        let layer_seed = mock_seed.wrapping_add(layer_idx as u64 * 1000);
+
+        // Q, K, V projections
+        let qkv_size = 128 * 128; // Reduced for demo
+        converter.add_tensor(TensorData {
+            name: format!("model.layers.{}.self_attn.q_proj.weight", layer_idx),
+            shape: vec![128, 128],
+            dtype: DataType::F16,
+            data: generate_tensor_data(layer_seed, qkv_size),
+        });
+
+        converter.add_tensor(TensorData {
+            name: format!("model.layers.{}.self_attn.k_proj.weight", layer_idx),
+            shape: vec![128, 128],
+            dtype: DataType::F16,
+            data: generate_tensor_data(layer_seed.wrapping_add(1), qkv_size),
+        });
+
+        converter.add_tensor(TensorData {
+            name: format!("model.layers.{}.self_attn.v_proj.weight", layer_idx),
+            shape: vec![128, 128],
+            dtype: DataType::F16,
+            data: generate_tensor_data(layer_seed.wrapping_add(2), qkv_size),
+        });
+
+        // Output projection
+        converter.add_tensor(TensorData {
+            name: format!("model.layers.{}.self_attn.o_proj.weight", layer_idx),
+            shape: vec![128, 128],
+            dtype: DataType::F16,
+            data: generate_tensor_data(layer_seed.wrapping_add(3), qkv_size),
+        });
+    }
+
+    // Calculate stats
+    let total_params = converter.total_parameters();
+    ctx.record_metric("total_parameters", total_params as i64);
+    ctx.record_metric("tensor_count", converter.tensor_count() as i64);
+
+    // Convert to APR
+    let apr_bytes = converter.to_apr()?;
+    let apr_path = ctx.path("phi-3-mini-mock.apr");
+    std::fs::write(&amp;apr_path, &amp;apr_bytes)?;
+
+    ctx.record_metric("apr_size_bytes", apr_bytes.len() as i64);
+
+    // Verify loadable
+    let loaded = BundledModel::from_bytes(&amp;apr_bytes)?;
+
+    println!("Conversion complete:");
+    println!("  Source format: SafeTensors (mock)");
+    println!("  Target format: APR");
+    println!();
+    println!("Model architecture (mock):");
+    println!("  Hidden size: {}", hidden_size);
+    println!("  Num layers: {} (full), 2 (demo)", num_layers);
+    println!(
+        "  Vocab size: {} (full), {} (demo)",
+        vocab_size, embed_vocab
+    );
+    println!("  Num heads: {}", num_heads);
+    println!();
+    println!("Conversion stats:");
+    println!("  Tensors: {}", converter.tensor_count());
+    println!("  Parameters: {}", total_params);
+    println!("  APR size: {} bytes", apr_bytes.len());
+    println!("  Verified loadable: {}", loaded.size() &gt; 0);
+    println!();
+    println!("Saved to: {:?}", apr_path);
+
+    Ok(())
+}
+
+/// Generate deterministic tensor data
+fn generate_tensor_data(seed: u64, n_elements: usize) -&gt; Vec&lt;u8&gt; {
+    use rand::{Rng, SeedableRng};
+    let mut rng = rand::rngs::StdRng::seed_from_u64(seed);
+
+    // Generate F16 data (2 bytes per element)
+    let mut data = Vec::with_capacity(n_elements * 2);
+    for _ in 0..n_elements {
+        let val: f32 = rng.gen_range(-0.1f32..0.1f32);
+        // Convert to f16 representation (simplified: just truncate f32)
+        let f16_bits = f32_to_f16_bits(val);
+        data.extend_from_slice(&amp;f16_bits.to_le_bytes());
+    }
+    data
+}
+
+/// Convert f32 to f16 bits (simplified)
+fn f32_to_f16_bits(val: f32) -&gt; u16 {
+    let bits = val.to_bits();
+    let sign = ((bits &gt;&gt; 31) &amp; 1) as u16;
+    let exp = ((bits &gt;&gt; 23) &amp; 0xFF) as i32 - 127 + 15;
+    let frac = ((bits &gt;&gt; 13) &amp; 0x3FF) as u16;
+
+    if exp &lt;= 0 {
+        // Subnormal or zero
+        (sign &lt;&lt; 15) | frac
+    } else if exp &gt;= 31 {
+        // Infinity or NaN
+        (sign &lt;&lt; 15) | 0x7C00
+    } else {
+        (sign &lt;&lt; 15) | ((exp as u16) &lt;&lt; 10) | frac
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tensor_data_generation() {
+        let data = generate_tensor_data(42, 100);
+        assert_eq!(data.len(), 200); // 100 elements * 2 bytes (f16)
+    }
+
+    #[test]
+    fn test_deterministic_generation() {
+        let data1 = generate_tensor_data(42, 100);
+        let data2 = generate_tensor_data(42, 100);
+        assert_eq!(data1, data2);
+    }
+
+    #[test]
+    fn test_f16_conversion() {
+        let zero = f32_to_f16_bits(0.0);
+        assert_eq!(zero &amp; 0x7FFF, 0); // Zero has zero exp and frac
+
+        let one = f32_to_f16_bits(1.0);
+        assert_ne!(one, 0); // One is not zero
+    }
+
+    #[test]
+    fn test_converter_setup() {
+        let mut converter = AprConverter::new();
+        converter.add_tensor(TensorData {
+            name: "test".to_string(),
+            shape: vec![10, 10],
+            dtype: DataType::F16,
+            data: vec![0u8; 200],
+        });
+
+        assert_eq!(converter.tensor_count(), 1);
+        assert_eq!(converter.total_parameters(), 100);
+    }
+
+    #[test]
+    fn test_apr_output_valid() {
+        let mut converter = AprConverter::new();
+        converter.set_metadata(ConversionMetadata {
+            name: Some("test".to_string()),
+            ..Default::default()
+        });
+        converter.add_tensor(TensorData {
+            name: "w".to_string(),
+            shape: vec![10],
+            dtype: DataType::F16,
+            data: vec![0u8; 20],
+        });
+
+        let apr_bytes = converter.to_apr().unwrap();
+        assert_eq!(&amp;apr_bytes[0..4], b"APRN");
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_tensor_size(n_elements in 1usize..1000) {
+            let data = generate_tensor_data(42, n_elements);
+            prop_assert_eq!(data.len(), n_elements * 2);
+        }
+
+        #[test]
+        fn prop_f16_finite(val in -1000.0f32..1000.0) {
+            let f16 = f32_to_f16_bits(val);
+            // Should not produce NaN (0x7C01-0x7FFF or 0xFC01-0xFFFF)
+            let exp = (f16 &gt;&gt; 10) &amp; 0x1F;
+            let frac = f16 &amp; 0x3FF;
+            prop_assert!(!(exp == 31 &amp;&amp; frac != 0));
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/d-conversion/gguf-to-apr.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/d-conversion/onnx-to-apr.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/d-conversion/gguf-to-apr.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/d-conversion/onnx-to-apr.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

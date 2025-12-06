@@ -22,7 +22,9 @@
 //! - Integration with trueno SIMD
 //! - Encryption and signing
 
-use apr_cookbook::convert::{AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData};
+use apr_cookbook::convert::{
+    AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
+};
 use apr_cookbook::Result;
 use std::io::Cursor;
 
@@ -141,7 +143,10 @@ impl GgufReader {
 
         // Read tensor count
         cursor.read_exact(&mut buf8).map_err(|e| {
-            apr_cookbook::CookbookError::invalid_format(format!("Failed to read tensor count: {}", e))
+            apr_cookbook::CookbookError::invalid_format(format!(
+                "Failed to read tensor count: {}",
+                e
+            ))
         })?;
         let tensor_count = u64::from_le_bytes(buf8);
 
@@ -220,34 +225,13 @@ impl GgufReader {
 
         let metadata = vec![
             ("general.architecture".to_string(), "llama".to_string()),
-            (
-                "general.name".to_string(),
-                "llama-7b-q4_0".to_string(),
-            ),
-            (
-                "llama.context_length".to_string(),
-                "4096".to_string(),
-            ),
-            (
-                "llama.embedding_length".to_string(),
-                "4096".to_string(),
-            ),
-            (
-                "llama.block_count".to_string(),
-                "32".to_string(),
-            ),
-            (
-                "llama.attention.head_count".to_string(),
-                "32".to_string(),
-            ),
-            (
-                "llama.attention.head_count_kv".to_string(),
-                "8".to_string(),
-            ),
-            (
-                "general.quantization_version".to_string(),
-                "2".to_string(),
-            ),
+            ("general.name".to_string(), "llama-7b-q4_0".to_string()),
+            ("llama.context_length".to_string(), "4096".to_string()),
+            ("llama.embedding_length".to_string(), "4096".to_string()),
+            ("llama.block_count".to_string(), "32".to_string()),
+            ("llama.attention.head_count".to_string(), "32".to_string()),
+            ("llama.attention.head_count_kv".to_string(), "8".to_string()),
+            ("general.quantization_version".to_string(), "2".to_string()),
         ];
 
         Self {

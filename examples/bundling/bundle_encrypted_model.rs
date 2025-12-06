@@ -21,11 +21,11 @@
 //! - Compliance with data protection regulations
 //! - Secure model deployment in untrusted environments
 
+use apr_cookbook::Result;
 #[cfg(feature = "encryption")]
 use aprender::format::{
     load_encrypted, load_from_bytes_encrypted, save_encrypted, ModelType, SaveOptions,
 };
-use apr_cookbook::Result;
 use serde::{Deserialize, Serialize};
 
 /// Example model for encryption demonstration
@@ -152,8 +152,8 @@ fn main() -> Result<()> {
 
     // Demonstrate loading from bytes (include_bytes! pattern)
     println!("\nDemonstrating include_bytes!() pattern...");
-    let encrypted_bytes = std::fs::read(&encrypted_path)
-        .map_err(apr_cookbook::CookbookError::Io)?;
+    let encrypted_bytes =
+        std::fs::read(&encrypted_path).map_err(apr_cookbook::CookbookError::Io)?;
     println!(
         "  Read {} bytes (simulating include_bytes!)",
         encrypted_bytes.len()

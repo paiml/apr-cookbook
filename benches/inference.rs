@@ -1,5 +1,7 @@
 //! Inference performance benchmarks.
 
+#![allow(clippy::disallowed_methods)]
+
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 
 fn benchmark_bundled_model_parsing(c: &mut Criterion) {

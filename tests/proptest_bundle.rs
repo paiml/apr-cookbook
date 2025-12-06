@@ -2,6 +2,8 @@
 //!
 //! These tests verify invariants that should hold for any valid input.
 
+#![allow(clippy::disallowed_methods)]
+
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use proptest::prelude::*;
 
@@ -115,9 +117,7 @@ mod edge_cases {
     #[test]
     fn compression_flag_true() {
         let data = vec![0u8; 100];
-        let bundle = ModelBundle::new()
-            .with_payload(data)
-            .with_compression(true);
+        let bundle = ModelBundle::new().with_payload(data).with_compression(true);
 
         let bytes = bundle.build();
         let loaded = BundledModel::from_bytes(&bytes).unwrap();
