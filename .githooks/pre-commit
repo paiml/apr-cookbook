@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+# Pre-commit quality gate - O(1) checks only, max 30 seconds
+# Install: git config core.hooksPath .githooks
+
+set -euo pipefail
+
+readonly MAX_SECONDS=30
+readonly START_TIME=$SECONDS
+
+echo "🔍 Pre-commit Quality Gates (max ${MAX_SECONDS}s)"
+
+# 1. Format check on staged Rust files only (O(1) per file)
+echo -n "  fmt check... "
+STAGED_RS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.rs$' || true)
+if [[ -n "$STAGED_RS" ]]; then
+    if echo "$STAGED_RS" | xargs -r cargo fmt -- --check > /dev/null 2>&1; then
+        echo "✅"
+    else
+        echo "❌ Run: cargo fmt"
+        exit 1
+    fi
+else
+    echo "✅ (no .rs files)"
+fi
+
+# 2. Commit message task ID check (O(1))
+echo -n "  task ID... "
+# This runs in commit-msg hook, skip here
+echo "✅ (deferred)"
+
+# 3. No secrets check - staged files only (O(n) where n = staged files)
+echo -n "  secrets... "
+if git diff --cached --name-only | xargs -r grep -lE '(password|secret|api_key|token)\s*=' 2>/dev/null | grep -v -E '(test|example|mock)' > /dev/null; then
+    echo "⚠️  potential secrets detected"
+else
+    echo "✅"
+fi
+
+# 4. Shellcheck on staged bash scripts (O(n) where n = staged .sh files)
+echo -n "  shellcheck... "
+STAGED_SH=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' || true)
+if [[ -n "$STAGED_SH" ]]; then
+    if command -v shellcheck > /dev/null 2>&1; then
+        if echo "$STAGED_SH" | xargs -r shellcheck > /dev/null 2>&1; then
+            echo "✅"
+        else
+            echo "❌ Run: shellcheck on staged scripts"
+            exit 1
+        fi
+    else
+        echo "⚠️  shellcheck not installed"
+    fi
+else
+    echo "✅ (no .sh files)"
+fi
+
+ELAPSED=$((SECONDS - START_TIME))
+echo ""
+echo "✅ Passed in ${ELAPSED}s"
+exit 0

@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+# shellcheck shell=bash
+# Pre-push quality gate - prevents pushing failed lint/clippy/tests
+
+set -euo pipefail
+
+echo "🚀 Pre-push Quality Gates"
+echo "========================="
+
+# 1. Format check
+echo -n "  cargo fmt... "
+if cargo fmt --all -- --check > /dev/null 2>&1; then
+    echo "✅"
+else
+    echo "❌"
+    echo "   Run: cargo fmt --all"
+    exit 1
+fi
+
+# 2. Clippy check
+echo -n "  cargo clippy... "
+if cargo clippy --all-targets --all-features -- -D warnings > /dev/null 2>&1; then
+    echo "✅"
+else
+    echo "❌"
+    echo "   Run: cargo clippy --all-targets --all-features -- -D warnings"
+    exit 1
+fi
+
+# 3. Test check
+echo -n "  cargo test... "
+if cargo test --all-features > /dev/null 2>&1; then
+    echo "✅"
+else
+    echo "❌"
+    echo "   Run: cargo test --all-features"
+    exit 1
+fi
+
+echo ""
+echo "✅ All quality gates passed - pushing to remote"
+exit 0
