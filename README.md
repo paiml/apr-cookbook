@@ -4,7 +4,6 @@
 
 [![CI](https://github.com/paiml/apr-cookbook/actions/workflows/ci.yml/badge.svg)](https://github.com/paiml/apr-cookbook/actions/workflows/ci.yml)
 [![Book](https://github.com/paiml/apr-cookbook/actions/workflows/book.yml/badge.svg)](https://github.com/paiml/apr-cookbook/actions/workflows/book.yml)
-[![codecov](https://codecov.io/gh/paiml/apr-cookbook/branch/main/graph/badge.svg)](https://codecov.io/gh/paiml/apr-cookbook)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
 [![Book](https://img.shields.io/badge/book-online-blue)](https://paiml.github.io/apr-cookbook/)
