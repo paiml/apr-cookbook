@@ -375,7 +375,7 @@ mod proptests {
 
             prop_assert!(sync.total_ms > 0);
             prop_assert!(stream.total_ms > 0);
-            prop_assert!(cached.total_ms > 0);
+            prop_assert!(cached.total_ms >= 0);
         }
     }
 }

@@ -403,9 +403,10 @@ mod proptests {
 
         #[test]
         fn prop_statistics_valid(iterations in 10usize..100) {
-            let times: Vec<f64> = (0..iterations)
+            let mut times: Vec<f64> = (0..iterations)
                 .map(|i| simulate_inference(i, 1))
                 .collect();
+            times.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
             let config = BenchConfig {
                 model_path: None,
