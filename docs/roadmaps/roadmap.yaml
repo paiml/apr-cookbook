@@ -170,3 +170,84 @@ roadmap:
       - Recipe-based tutorials
       - GitHub Pages deployment
       - Hero SVG branding
+
+  # Phase 4: Advanced Integrations
+  - id: APR-014
+    title: "Custom Model Architecture example"
+    status: todo
+    priority: medium
+    labels: [examples, advanced]
+    description: |
+      Step-by-step example of defining a complex custom struct, implementing
+      Serde and aprender traits, and manually bundling with metadata.
+    acceptance_criteria:
+      - Custom struct implementation
+      - Manual bundling process
+      - Validation logic
+
+  - id: APR-015
+    title: "HTTP Inference Server example"
+    status: todo
+    priority: medium
+    labels: [examples, server, realizar]
+    description: |
+      Real-world backend example using `realizar` (../realizar) to load a
+      model at startup and serve predictions via a REST API endpoint.
+    acceptance_criteria:
+      - Server setup with realizar
+      - State management for model
+      - API endpoint implementation
+
+  - id: APR-016
+    title: "RAG/Pipeline Workflow example"
+    status: todo
+    priority: medium
+    labels: [examples, rag, trueno-rag]
+    description: |
+      Chaining demo using `trueno-rag` (../trueno-rag) for embedding,
+      similarity search, and generation context.
+    acceptance_criteria:
+      - Embedding model usage
+      - Vector search with trueno-rag
+      - Context injection to generation model
+
+  - id: APR-017
+    title: "Knowledge Distillation example"
+    status: todo
+    priority: medium
+    labels: [examples, training, advanced]
+    description: |
+      Example demonstrating knowledge distillation: training a smaller
+      student model to mimic a larger teacher model using entrenar.
+    acceptance_criteria:
+      - Teacher model loading
+      - Student model initialization
+      - Distillation loss function
+      - Training loop with entrenar
+
+  - id: APR-018
+    title: "Computer Vision example with presentar"
+    status: todo
+    priority: medium
+    labels: [examples, vision, presentar]
+    description: |
+      Example demonstrating CV tasks like classification using the
+      `presentar` library (../presentar).
+    acceptance_criteria:
+      - Image loading/preprocessing
+      - Classification inference
+      - Use of `presentar` crate
+
+  - id: APR-019
+    title: "Single-shot Defect Finder example"
+    status: todo
+    priority: medium
+    labels: [examples, analysis, organization-intelligence]
+    description: |
+      Example demonstrating a "single shot" defect finder for a code base
+      (e.g. a Rust project) using `organization-intelligence`
+      (../organization-intelligence).
+    acceptance_criteria:
+      - Codebase traversal/analysis
+      - Defect identification logic
+      - Integration with organization-intelligence

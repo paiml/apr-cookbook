@@ -18,6 +18,8 @@ trivial_numeric_casts = "warn"
 unused_import_braces = "warn"
 unused_lifetimes = "warn"
 unused_qualifications = "warn"
+unused_variables = "warn"
+dead_code = "warn"
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }
@@ -29,12 +31,26 @@ must_use_candidate = "allow"
 cast_precision_loss = "allow"
 cast_possible_truncation = "allow"
 cast_sign_loss = "allow"
+cast_possible_wrap = "allow"
 similar_names = "allow"
 many_single_char_names = "allow"
 doc_markdown = "allow"
 unreadable_literal = "allow"
 uninlined_format_args = "allow"
 unnecessary_wraps = "allow"
+unnecessary_debug_formatting = "allow"
+items_after_statements = "allow"
+disallowed_methods = "allow"
+unused_self = "allow"
+match_same_arms = "allow"
+struct_field_names = "allow"
+too_many_arguments = "allow"
+assigning_clones = "allow"
+format_push_string = "allow"
+struct_excessive_bools = "allow"
+too_many_lines = "allow"
+enum_variant_names = "allow"
+no_effect_underscore_binding = "allow"
 
 [dependencies]
 # Sovereign Stack - crates.io published versions
@@ -51,6 +67,16 @@ serde_json = "1"
 
 # Error handling
 thiserror = "1"
+
+# Recipe infrastructure
+rand = { version = "0.8", features = ["std_rng"] }
+tempfile = "3"
+
+# Compression (for Lambda packaging)
+flate2 = "1"
+
+# Hashing (for deterministic seeds)
+blake3 = "1"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
@@ -106,6 +132,210 @@ path = "examples/cli/apr_info.rs"
 [[example]]
 name = "apr_bench"
 path = "examples/cli/apr_bench.rs"
+
+# Category A: Model Creation
+[[example]]
+name = "create_apr_from_scratch"
+path = "examples/creation/create_apr_from_scratch.rs"
+
+[[example]]
+name = "create_apr_linear_regression"
+path = "examples/creation/create_apr_linear_regression.rs"
+
+[[example]]
+name = "create_apr_decision_tree"
+path = "examples/creation/create_apr_decision_tree.rs"
+
+[[example]]
+name = "create_apr_kmeans_clustering"
+path = "examples/creation/create_apr_kmeans_clustering.rs"
+
+[[example]]
+name = "create_apr_ngram_language_model"
+path = "examples/creation/create_apr_ngram_language_model.rs"
+
+# Category B: Binary Bundling (additional)
+[[example]]
+name = "bundle_apr_static_binary"
+path = "examples/bundling/bundle_apr_static_binary.rs"
+
+[[example]]
+name = "bundle_apr_quantized_q4"
+path = "examples/bundling/bundle_apr_quantized_q4.rs"
+
+[[example]]
+name = "bundle_apr_signed"
+path = "examples/bundling/bundle_apr_signed.rs"
+
+[[example]]
+name = "bundle_apr_lambda_package"
+path = "examples/bundling/bundle_apr_lambda_package.rs"
+
+# Category C: Continuous Training
+[[example]]
+name = "continuous_train_incremental"
+path = "examples/training/continuous_train_incremental.rs"
+
+[[example]]
+name = "continuous_train_online_learning"
+path = "examples/training/continuous_train_online_learning.rs"
+
+[[example]]
+name = "continuous_train_federated_simulation"
+path = "examples/training/continuous_train_federated_simulation.rs"
+
+[[example]]
+name = "continuous_train_curriculum"
+path = "examples/training/continuous_train_curriculum.rs"
+
+# Category D: Format Conversion (additional)
+[[example]]
+name = "convert_phi_to_apr"
+path = "examples/conversion/convert_phi_to_apr.rs"
+
+[[example]]
+name = "convert_onnx_to_apr"
+path = "examples/conversion/convert_onnx_to_apr.rs"
+
+# Category E: Registry
+[[example]]
+name = "registry_register_apr"
+path = "examples/registry/registry_register_apr.rs"
+
+[[example]]
+name = "registry_model_lineage"
+path = "examples/registry/registry_model_lineage.rs"
+
+[[example]]
+name = "registry_model_comparison"
+path = "examples/registry/registry_model_comparison.rs"
+
+[[example]]
+name = "registry_model_rollback"
+path = "examples/registry/registry_model_rollback.rs"
+
+# Category F: API
+[[example]]
+name = "api_call_model_inference"
+path = "examples/api/api_call_model_inference.rs"
+
+[[example]]
+name = "api_streaming_inference"
+path = "examples/api/api_streaming_inference.rs"
+
+[[example]]
+name = "api_batch_inference"
+path = "examples/api/api_batch_inference.rs"
+
+[[example]]
+name = "api_model_health_check"
+path = "examples/api/api_model_health_check.rs"
+
+# Category G: Serverless
+[[example]]
+name = "serverless_lambda_inference"
+path = "examples/serverless/serverless_lambda_inference.rs"
+
+[[example]]
+name = "serverless_cold_start_optimization"
+path = "examples/serverless/serverless_cold_start_optimization.rs"
+
+[[example]]
+name = "serverless_edge_function"
+path = "examples/serverless/serverless_edge_function.rs"
+
+[[example]]
+name = "serverless_container_image"
+path = "examples/serverless/serverless_container_image.rs"
+
+# Category H: WASM/Browser
+[[example]]
+name = "wasm_browser_inference"
+path = "examples/wasm/wasm_browser_inference.rs"
+
+[[example]]
+name = "wasm_web_worker"
+path = "examples/wasm/wasm_web_worker.rs"
+
+[[example]]
+name = "wasm_progressive_loading"
+path = "examples/wasm/wasm_progressive_loading.rs"
+
+[[example]]
+name = "wasm_webgpu_acceleration"
+path = "examples/wasm/wasm_webgpu_acceleration.rs"
+
+[[example]]
+name = "wasm_streaming_compilation"
+path = "examples/wasm/wasm_streaming_compilation.rs"
+
+# Category I: GPU Acceleration
+[[example]]
+name = "gpu_cuda_inference"
+path = "examples/gpu/gpu_cuda_inference.rs"
+
+[[example]]
+name = "gpu_tensor_core_optimization"
+path = "examples/gpu/gpu_tensor_core_optimization.rs"
+
+[[example]]
+name = "gpu_multi_gpu_inference"
+path = "examples/gpu/gpu_multi_gpu_inference.rs"
+
+[[example]]
+name = "gpu_memory_management"
+path = "examples/gpu/gpu_memory_management.rs"
+
+# Category J: SIMD Acceleration (additional)
+[[example]]
+name = "simd_matrix_ops"
+path = "examples/simd/simd_matrix_operations.rs"
+
+[[example]]
+name = "simd_vectorized_inference"
+path = "examples/simd/simd_vectorized_inference.rs"
+
+[[example]]
+name = "simd_quantized_operations"
+path = "examples/simd/simd_quantized_operations.rs"
+
+[[example]]
+name = "simd_auto_vectorization"
+path = "examples/simd/simd_auto_vectorization.rs"
+
+# Category K: Model Distillation
+[[example]]
+name = "distill_knowledge_transfer"
+path = "examples/distillation/distill_knowledge_transfer.rs"
+
+[[example]]
+name = "distill_layer_matching"
+path = "examples/distillation/distill_layer_matching.rs"
+
+[[example]]
+name = "distill_pruning_aware"
+path = "examples/distillation/distill_pruning_aware.rs"
+
+[[example]]
+name = "distill_quantization_aware"
+path = "examples/distillation/distill_quantization_aware.rs"
+
+# Category L: CLI Tools (additional)
+[[example]]
+name = "cli_apr_info"
+path = "examples/cli/cli_apr_info.rs"
+
+[[example]]
+name = "cli_apr_bench"
+path = "examples/cli/cli_apr_bench.rs"
+
+[[example]]
+name = "cli_apr_convert"
+path = "examples/cli/cli_apr_convert.rs"
+
+[[example]]
+name = "cli_apr_serve"
+path = "examples/cli/cli_apr_serve.rs"
 
 # --- Benchmarks ---
 

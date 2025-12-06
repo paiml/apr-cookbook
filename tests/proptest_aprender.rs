@@ -2,6 +2,8 @@
 //!
 //! These tests verify model serialization invariants.
 
+#![allow(clippy::disallowed_methods)]
+
 use apr_cookbook::aprender_integration::{
     load_model, load_model_from_bytes, save_model, AprModelInfo, SimpleModel,
 };

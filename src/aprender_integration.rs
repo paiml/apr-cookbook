@@ -128,8 +128,7 @@ pub fn load_model_from_bytes<M: DeserializeOwned>(
     data: &[u8],
     expected_type: ModelType,
 ) -> Result<M> {
-    format::load_from_bytes(data, expected_type)
-        .map_err(|e| CookbookError::Aprender(e.to_string()))
+    format::load_from_bytes(data, expected_type).map_err(|e| CookbookError::Aprender(e.to_string()))
 }
 
 /// A simple serializable model for testing.
@@ -179,6 +178,7 @@ impl SimpleModel {
 }
 
 #[cfg(test)]
+#[allow(clippy::disallowed_methods)]
 mod tests {
     use super::*;
     use aprender::format::Compression;

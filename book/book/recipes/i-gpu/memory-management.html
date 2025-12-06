@@ -1,0 +1,653 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust sidebar-visible" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Memory Management - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+        <!-- Start loading toc.js asap -->
+        <script src="../../toc.js"></script>
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            const html = document.documentElement;
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            html.classList.add("js");
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <!-- populated by js -->
+            <mdbook-sidebar-scrollbox class="sidebar-scrollbox"></mdbook-sidebar-scrollbox>
+            <noscript>
+                <iframe class="sidebar-iframe-outer" src="../../toc.html"></iframe>
+            </noscript>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/i-gpu/memory-management.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="memory-management"><a class="header" href="#memory-management">Memory Management</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example gpu_memory_management
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: GPU Memory Management
+//!
+//! **Category**: GPU Acceleration
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (N/A)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Manage GPU memory efficiently to avoid OOM.
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example gpu_memory_management
+//! ```
+
+use apr_cookbook::prelude::*;
+use serde::{Deserialize, Serialize};
+use std::collections::VecDeque;
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new("gpu_memory_management")?;
+
+    println!("=== Recipe: {} ===", ctx.name());
+    println!("GPU memory management strategies");
+    println!();
+
+    // GPU memory info
+    let gpu = GpuMemoryInfo {
+        total_mb: 24 * 1024, // 24GB
+        reserved_mb: 512,    // Driver/system
+    };
+
+    let available = gpu.total_mb - gpu.reserved_mb;
+    ctx.record_metric("gpu_total_mb", i64::from(gpu.total_mb));
+    ctx.record_metric("gpu_available_mb", i64::from(available));
+
+    println!("GPU Memory:");
+    println!("  Total: {}MB ({}GB)", gpu.total_mb, gpu.total_mb / 1024);
+    println!("  Reserved: {}MB", gpu.reserved_mb);
+    println!("  Available: {}MB", available);
+    println!();
+
+    // Create memory pool
+    let mut pool = GpuMemoryPool::new(available);
+
+    // Simulate model loading
+    let allocations = vec![
+        ("model_weights", 8 * 1024),   // 8GB
+        ("optimizer_state", 4 * 1024), // 4GB
+        ("activations", 2 * 1024),     // 2GB
+        ("gradients", 4 * 1024),       // 4GB
+        ("kv_cache", 4 * 1024),        // 4GB
+    ];
+
+    println!("Memory Allocations:");
+    println!("{:-&lt;50}", "");
+
+    for (name, size_mb) in &amp;allocations {
+        match pool.allocate(name, *size_mb) {
+            Ok(handle) =&gt; {
+                println!("  ✓ {} ({}MB) -&gt; handle {}", name, size_mb, handle);
+            }
+            Err(e) =&gt; {
+                println!("  ✗ {} ({}MB) -&gt; {}", name, size_mb, e);
+            }
+        }
+    }
+    println!("{:-&lt;50}", "");
+
+    // Memory status
+    let status = pool.status();
+    println!();
+    println!("Memory Status:");
+    println!(
+        "  Used: {}MB ({:.1}%)",
+        status.used_mb,
+        status.utilization * 100.0
+    );
+    println!("  Free: {}MB", status.free_mb);
+    println!("  Allocations: {}", status.num_allocations);
+    println!("  Fragmentation: {:.1}%", status.fragmentation * 100.0);
+
+    ctx.record_float_metric("memory_utilization", status.utilization);
+
+    // Demonstrate memory optimization
+    println!();
+    println!("Memory Optimization:");
+
+    // Free some memory
+    if let Some(handle) = pool.find_allocation("optimizer_state") {
+        pool.free(handle)?;
+        println!("  Freed optimizer_state (4GB)");
+    }
+
+    // Try gradient checkpointing (trade compute for memory)
+    let checkpoint_savings = 2 * 1024; // Save 2GB
+    println!("  Gradient checkpointing: saves {}MB", checkpoint_savings);
+
+    // Try activation offloading
+    if let Some(handle) = pool.find_allocation("activations") {
+        pool.offload_to_cpu(handle)?;
+        println!("  Offloaded activations to CPU");
+    }
+
+    // Final status
+    let final_status = pool.status();
+    println!();
+    println!("Final Memory Status:");
+    println!(
+        "  Used: {}MB ({:.1}%)",
+        final_status.used_mb,
+        final_status.utilization * 100.0
+    );
+    println!("  Free: {}MB", final_status.free_mb);
+
+    // Save memory log
+    let log_path = ctx.path("memory_log.json");
+    pool.save_log(&amp;log_path)?;
+    println!();
+    println!("Memory log saved to: {:?}", log_path);
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct GpuMemoryInfo {
+    total_mb: u32,
+    reserved_mb: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MemoryBlock {
+    handle: u32,
+    name: String,
+    size_mb: u32,
+    offloaded: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MemoryStatus {
+    used_mb: u32,
+    free_mb: u32,
+    total_mb: u32,
+    utilization: f64,
+    num_allocations: usize,
+    fragmentation: f64,
+}
+
+#[derive(Debug)]
+struct GpuMemoryPool {
+    total_mb: u32,
+    blocks: Vec&lt;MemoryBlock&gt;,
+    next_handle: u32,
+    log: VecDeque&lt;String&gt;,
+}
+
+impl GpuMemoryPool {
+    fn new(total_mb: u32) -&gt; Self {
+        Self {
+            total_mb,
+            blocks: Vec::new(),
+            next_handle: 1,
+            log: VecDeque::new(),
+        }
+    }
+
+    fn allocate(&amp;mut self, name: &amp;str, size_mb: u32) -&gt; Result&lt;u32&gt; {
+        let used: u32 = self
+            .blocks
+            .iter()
+            .filter(|b| !b.offloaded)
+            .map(|b| b.size_mb)
+            .sum();
+        let free = self.total_mb - used;
+
+        if size_mb &gt; free {
+            return Err(CookbookError::invalid_format(format!(
+                "OOM: need {}MB, only {}MB free",
+                size_mb, free
+            )));
+        }
+
+        let handle = self.next_handle;
+        self.next_handle += 1;
+
+        self.blocks.push(MemoryBlock {
+            handle,
+            name: name.to_string(),
+            size_mb,
+            offloaded: false,
+        });
+
+        self.log
+            .push_back(format!("ALLOC: {} ({}MB) -&gt; {}", name, size_mb, handle));
+
+        Ok(handle)
+    }
+
+    fn free(&amp;mut self, handle: u32) -&gt; Result&lt;()&gt; {
+        let idx = self
+            .blocks
+            .iter()
+            .position(|b| b.handle == handle)
+            .ok_or_else(|| {
+                CookbookError::invalid_format(format!("Invalid handle: {}", handle))
+            })?;
+
+        let block = self.blocks.remove(idx);
+        self.log
+            .push_back(format!("FREE: {} ({}MB)", block.name, block.size_mb));
+
+        Ok(())
+    }
+
+    fn offload_to_cpu(&amp;mut self, handle: u32) -&gt; Result&lt;()&gt; {
+        let block = self
+            .blocks
+            .iter_mut()
+            .find(|b| b.handle == handle)
+            .ok_or_else(|| {
+                CookbookError::invalid_format(format!("Invalid handle: {}", handle))
+            })?;
+
+        block.offloaded = true;
+        self.log.push_back(format!(
+            "OFFLOAD: {} ({}MB) -&gt; CPU",
+            block.name, block.size_mb
+        ));
+
+        Ok(())
+    }
+
+    fn find_allocation(&amp;self, name: &amp;str) -&gt; Option&lt;u32&gt; {
+        self.blocks
+            .iter()
+            .find(|b| b.name == name)
+            .map(|b| b.handle)
+    }
+
+    fn status(&amp;self) -&gt; MemoryStatus {
+        let used: u32 = self
+            .blocks
+            .iter()
+            .filter(|b| !b.offloaded)
+            .map(|b| b.size_mb)
+            .sum();
+        let free = self.total_mb - used;
+        let utilization = f64::from(used) / f64::from(self.total_mb);
+
+        // Simple fragmentation estimate
+        let fragmentation = if self.blocks.len() &gt; 1 {
+            0.05 * (self.blocks.len() - 1) as f64
+        } else {
+            0.0
+        };
+
+        MemoryStatus {
+            used_mb: used,
+            free_mb: free,
+            total_mb: self.total_mb,
+            utilization,
+            num_allocations: self.blocks.len(),
+            fragmentation: fragmentation.min(0.5),
+        }
+    }
+
+    fn save_log(&amp;self, path: &amp;std::path::Path) -&gt; Result&lt;()&gt; {
+        #[derive(Serialize)]
+        struct Log&lt;'a&gt; {
+            operations: &amp;'a VecDeque&lt;String&gt;,
+            final_status: MemoryStatus,
+        }
+
+        let log = Log {
+            operations: &amp;self.log,
+            final_status: self.status(),
+        };
+
+        let json = serde_json::to_string_pretty(&amp;log)
+            .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+        std::fs::write(path, json)?;
+        Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_pool_creation() {
+        let pool = GpuMemoryPool::new(1024);
+        assert_eq!(pool.total_mb, 1024);
+        assert!(pool.blocks.is_empty());
+    }
+
+    #[test]
+    fn test_allocate() {
+        let mut pool = GpuMemoryPool::new(1024);
+        let handle = pool.allocate("test", 256).unwrap();
+
+        assert_eq!(handle, 1);
+        assert_eq!(pool.blocks.len(), 1);
+    }
+
+    #[test]
+    fn test_allocate_oom() {
+        let mut pool = GpuMemoryPool::new(100);
+        let result = pool.allocate("too_big", 200);
+
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_free() {
+        let mut pool = GpuMemoryPool::new(1024);
+        let handle = pool.allocate("test", 256).unwrap();
+
+        pool.free(handle).unwrap();
+        assert!(pool.blocks.is_empty());
+    }
+
+    #[test]
+    fn test_offload() {
+        let mut pool = GpuMemoryPool::new(1024);
+        let handle = pool.allocate("test", 256).unwrap();
+
+        pool.offload_to_cpu(handle).unwrap();
+
+        let status = pool.status();
+        assert_eq!(status.used_mb, 0); // Offloaded doesn't count
+    }
+
+    #[test]
+    fn test_status() {
+        let mut pool = GpuMemoryPool::new(1000);
+        pool.allocate("a", 400).unwrap();
+        pool.allocate("b", 100).unwrap();
+
+        let status = pool.status();
+
+        assert_eq!(status.used_mb, 500);
+        assert_eq!(status.free_mb, 500);
+        assert!((status.utilization - 0.5).abs() &lt; 0.01);
+    }
+
+    #[test]
+    fn test_find_allocation() {
+        let mut pool = GpuMemoryPool::new(1024);
+        pool.allocate("weights", 256).unwrap();
+
+        let handle = pool.find_allocation("weights");
+        assert!(handle.is_some());
+
+        let none = pool.find_allocation("nonexistent");
+        assert!(none.is_none());
+    }
+
+    #[test]
+    fn test_save_log() {
+        let ctx = RecipeContext::new("test_memory_log").unwrap();
+        let path = ctx.path("log.json");
+
+        let mut pool = GpuMemoryPool::new(1024);
+        pool.allocate("test", 256).unwrap();
+        pool.save_log(&amp;path).unwrap();
+
+        assert!(path.exists());
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_allocate_within_bounds(total in 100u32..1000, alloc in 1u32..100) {
+            let mut pool = GpuMemoryPool::new(total);
+
+            if alloc &lt;= total {
+                let result = pool.allocate("test", alloc);
+                prop_assert!(result.is_ok());
+            }
+        }
+
+        #[test]
+        fn prop_utilization_bounded(sizes in proptest::collection::vec(10u32..100, 1..5)) {
+            let total: u32 = sizes.iter().sum::&lt;u32&gt;() + 100;
+            let mut pool = GpuMemoryPool::new(total);
+
+            for (i, size) in sizes.iter().enumerate() {
+                let _ = pool.allocate(&amp;format!("block{}", i), *size);
+            }
+
+            let status = pool.status();
+            prop_assert!(status.utilization &gt;= 0.0);
+            prop_assert!(status.utilization &lt;= 1.0);
+        }
+
+        #[test]
+        fn prop_free_reduces_used(total in 200u32..500, size in 50u32..100) {
+            let mut pool = GpuMemoryPool::new(total);
+            let handle = pool.allocate("test", size).unwrap();
+
+            let before = pool.status().used_mb;
+            pool.free(handle).unwrap();
+            let after = pool.status().used_mb;
+
+            prop_assert!(after &lt; before);
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/i-gpu/multi-gpu.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/j-simd/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/i-gpu/multi-gpu.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/j-simd/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

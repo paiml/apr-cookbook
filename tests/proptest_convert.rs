@@ -2,6 +2,8 @@
 //!
 //! These tests verify conversion invariants.
 
+#![allow(clippy::disallowed_methods)]
+
 use apr_cookbook::convert::{AprConverter, ConversionFormat, DataType, TensorData};
 use proptest::prelude::*;
 
