@@ -115,6 +115,80 @@ cargo run --example cli_apr_bench -- --demo
 cargo run --example cli_apr_serve -- --demo
 ```
 
+## Usage
+
+### Basic Model Loading
+
+```rust
+use apr_cookbook::prelude::*;
+
+fn main() -> Result<()> {
+    // Load model from file
+    let model = BundledModel::from_file("model.apr")?;
+
+    // Or embed at compile time
+    const EMBEDDED: &[u8] = include_bytes!("model.apr");
+    let model = BundledModel::from_bytes(EMBEDDED)?;
+
+    Ok(())
+}
+```
+
+### Format Conversion
+
+```rust
+use apr_cookbook::prelude::*;
+
+fn main() -> Result<()> {
+    // Convert SafeTensors to APR
+    let mut converter = AprConverter::new();
+    converter.set_metadata(ConversionMetadata {
+        name: Some("my-model".to_string()),
+        architecture: Some("transformer".to_string()),
+        ..Default::default()
+    });
+
+    let apr_bytes = converter.to_apr()?;
+    std::fs::write("model.apr", apr_bytes)?;
+
+    Ok(())
+}
+```
+
+### Running Examples
+
+All examples are self-contained and can be run with:
+
+```bash
+cargo run --example <example_name> [-- options]
+```
+
+## Contributing
+
+Contributions are welcome. Please follow these guidelines:
+
+1. **Fork and branch**: Create a feature branch from `main`
+2. **Follow the recipe pattern**: Each example must include the QA checklist header
+3. **Add tests**: Include unit tests and property-based tests (proptest)
+4. **Run quality checks**: Ensure `cargo clippy` and `cargo fmt` pass
+5. **Submit PR**: Open a pull request with a clear description
+
+### Code Standards
+
+- All examples must pass the 10-point QA checklist
+- Minimum 95% test coverage for new code
+- No `unwrap()` in production code paths
+- Property-based tests for core functionality
+
+### Commit Messages
+
+Use conventional commit format:
+```
+feat: Add new recipe for X
+fix: Resolve issue with Y
+docs: Update README with Z
+```
+
 ## Documentation
 
 - **[The APR Cookbook](https://paiml.github.io/apr-cookbook/)** — Online book with all 52 recipes

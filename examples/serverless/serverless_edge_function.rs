@@ -29,15 +29,9 @@ use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-fn main() -> Result<()> {
-    let mut ctx = RecipeContext::new("serverless_edge_function")?;
-
-    println!("=== Recipe: {} ===", ctx.name());
-    println!("Edge function deployment simulation");
-    println!();
-
-    // Define edge locations
-    let locations = vec![
+/// Get predefined edge locations
+fn get_edge_locations() -> Vec<EdgeLocation> {
+    vec![
         EdgeLocation {
             id: "us-east-1",
             name: "US East (Virginia)",
@@ -63,29 +57,22 @@ fn main() -> Result<()> {
             name: "Asia (Singapore)",
             latency_base_ms: 18,
         },
-    ];
+    ]
+}
 
-    ctx.record_metric("edge_locations", locations.len() as i64);
-
-    // Create edge deployment
-    let mut deployment = EdgeDeployment::new("fraud-detector-edge");
-
-    println!("Deploying to edge locations:");
-    for loc in &locations {
-        deployment.deploy(loc)?;
-        println!("  ✓ {}: {}", loc.id, loc.name);
-    }
-    println!();
-
-    // Simulate requests from different regions
-    let requests = vec![
+/// Get test client requests
+fn get_test_requests() -> Vec<(&'static str, &'static str)> {
+    vec![
         ("client-nyc", "us-east-1"),
         ("client-la", "us-west-2"),
         ("client-london", "eu-west-1"),
         ("client-tokyo", "ap-northeast-1"),
         ("client-singapore", "ap-southeast-1"),
-    ];
+    ]
+}
 
+/// Print request routing results
+fn print_routing_results(deployment: &EdgeDeployment, requests: &[(&str, &str)]) -> Result<()> {
     println!("Request routing:");
     println!("{:-<60}", "");
     println!(
@@ -94,7 +81,7 @@ fn main() -> Result<()> {
     );
     println!("{:-<60}", "");
 
-    for (client, region) in &requests {
+    for (client, region) in requests {
         let result = deployment.route_request(client, region)?;
         println!(
             "{:<20} {:<15} {:>8}ms {:>10}",
@@ -102,34 +89,55 @@ fn main() -> Result<()> {
         );
     }
     println!("{:-<60}", "");
+    Ok(())
+}
 
-    // Compare with centralized deployment
-    println!();
-    println!("Latency comparison (Edge vs Centralized):");
-
-    let mut total_edge = 0u32;
-    let mut total_central = 0u32;
-
-    for (_, region) in &requests {
-        let edge_latency = deployment.get_edge_latency(region);
-        let central_latency = 50u32; // Assume centralized is 50ms
-
-        total_edge += edge_latency;
-        total_central += central_latency;
-    }
+/// Calculate and print latency comparison
+fn print_latency_comparison(deployment: &EdgeDeployment, requests: &[(&str, &str)]) -> (f64, f64) {
+    let total_edge: u32 = requests
+        .iter()
+        .map(|(_, region)| deployment.get_edge_latency(region))
+        .sum();
+    let total_central = 50u32 * requests.len() as u32;
 
     let avg_edge = f64::from(total_edge) / requests.len() as f64;
     let avg_central = f64::from(total_central) / requests.len() as f64;
     let improvement = ((avg_central - avg_edge) / avg_central) * 100.0;
 
-    ctx.record_float_metric("avg_edge_latency_ms", avg_edge);
-    ctx.record_float_metric("latency_improvement_pct", improvement);
-
+    println!();
+    println!("Latency comparison (Edge vs Centralized):");
     println!("  Average edge latency: {:.1}ms", avg_edge);
     println!("  Average central latency: {:.1}ms", avg_central);
     println!("  Improvement: {:.1}%", improvement);
 
-    // Save deployment config
+    (avg_edge, improvement)
+}
+
+fn main() -> Result<()> {
+    let mut ctx = RecipeContext::new("serverless_edge_function")?;
+
+    println!("=== Recipe: {} ===", ctx.name());
+    println!("Edge function deployment simulation");
+    println!();
+
+    let locations = get_edge_locations();
+    ctx.record_metric("edge_locations", locations.len() as i64);
+
+    let mut deployment = EdgeDeployment::new("fraud-detector-edge");
+    println!("Deploying to edge locations:");
+    for loc in &locations {
+        deployment.deploy(loc)?;
+        println!("  ✓ {}: {}", loc.id, loc.name);
+    }
+    println!();
+
+    let requests = get_test_requests();
+    print_routing_results(&deployment, &requests)?;
+
+    let (avg_edge, improvement) = print_latency_comparison(&deployment, &requests);
+    ctx.record_float_metric("avg_edge_latency_ms", avg_edge);
+    ctx.record_float_metric("latency_improvement_pct", improvement);
+
     let config_path = ctx.path("edge_deployment.json");
     deployment.save(&config_path)?;
     println!();
