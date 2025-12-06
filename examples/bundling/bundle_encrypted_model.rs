@@ -71,30 +71,82 @@ impl SentimentClassifier {
 }
 
 #[cfg(feature = "encryption")]
+mod demo {
+    #[allow(clippy::wildcard_imports)]
+    use super::*;
+    use std::path::Path;
+
+    pub(super) fn print_model_info(model: &SentimentClassifier) {
+        println!("Created sentiment classifier:");
+        println!("  Vocabulary size: {}", model.vocab_size);
+        println!("  Embedding dimension: {}", model.embed_dim);
+        println!(
+            "  Total parameters: {}",
+            model.embeddings.len() + model.weights.len() + 1
+        );
+    }
+
+    pub(super) fn print_size_comparison(encrypted_path: &Path, unencrypted_path: &Path) {
+        let encrypted_size = std::fs::metadata(encrypted_path)
+            .map(|m| m.len())
+            .unwrap_or(0);
+        let unencrypted_size = std::fs::metadata(unencrypted_path)
+            .map(|m| m.len())
+            .unwrap_or(0);
+
+        println!("File sizes:");
+        println!("  Unencrypted: {} bytes", unencrypted_size);
+        println!(
+            "  Encrypted:   {} bytes (+{} bytes overhead)",
+            encrypted_size,
+            encrypted_size.saturating_sub(unencrypted_size)
+        );
+    }
+
+    pub(super) fn print_wrong_password_result(
+        result: std::result::Result<SentimentClassifier, aprender::AprenderError>,
+    ) {
+        match result {
+            Ok(_) => println!("  ✗ Unexpected success with wrong password!"),
+            Err(e) => {
+                let err_msg = e.to_string();
+                if err_msg.contains("ecrypt") || err_msg.contains("auth") {
+                    println!("  ✓ Correctly rejected wrong password");
+                } else {
+                    println!("  ✓ Decryption failed as expected: {}", err_msg);
+                }
+            }
+        }
+    }
+
+    pub(super) fn print_usage_example() {
+        println!("\n=== Production Usage ===");
+        println!("```rust");
+        println!("// Embed encrypted model at compile time");
+        println!("const MODEL: &[u8] = include_bytes!(\"model.apr.enc\");");
+        println!();
+        println!("fn load_model(password: &str) -> Result<MyModel> {{");
+        println!("    load_from_bytes_encrypted(MODEL, ModelType::Custom, password)");
+        println!("}}");
+        println!("```");
+    }
+}
+
+#[cfg(feature = "encryption")]
 fn main() -> Result<()> {
     use tempfile::tempdir;
 
     println!("=== APR Cookbook: Encrypted Model Bundling ===\n");
 
-    // Create a mock model
     let model = SentimentClassifier::mock();
-    println!("Created sentiment classifier:");
-    println!("  Vocabulary size: {}", model.vocab_size);
-    println!("  Embedding dimension: {}", model.embed_dim);
-    println!(
-        "  Total parameters: {}",
-        model.embeddings.len() + model.weights.len() + 1
-    );
+    demo::print_model_info(&model);
 
-    // Create temporary directory for demonstration
     let dir = tempdir().map_err(apr_cookbook::CookbookError::Io)?;
     let encrypted_path = dir.path().join("sentiment.apr.enc");
     let unencrypted_path = dir.path().join("sentiment.apr");
-
-    // Password for encryption (in production, use secure key management)
     let password = "demo_password_123!";
 
-    // Save encrypted model
+    // Save models
     println!("\nSaving encrypted model...");
     save_encrypted(
         &model,
@@ -107,7 +159,6 @@ fn main() -> Result<()> {
     )
     .map_err(|e| apr_cookbook::CookbookError::Aprender(e.to_string()))?;
 
-    // Also save unencrypted for size comparison
     aprender::format::save(
         &model,
         ModelType::Custom,
@@ -116,23 +167,9 @@ fn main() -> Result<()> {
     )
     .map_err(|e| apr_cookbook::CookbookError::Aprender(e.to_string()))?;
 
-    // Compare file sizes
-    let encrypted_size = std::fs::metadata(&encrypted_path)
-        .map(|m| m.len())
-        .unwrap_or(0);
-    let unencrypted_size = std::fs::metadata(&unencrypted_path)
-        .map(|m| m.len())
-        .unwrap_or(0);
+    demo::print_size_comparison(&encrypted_path, &unencrypted_path);
 
-    println!("File sizes:");
-    println!("  Unencrypted: {} bytes", unencrypted_size);
-    println!(
-        "  Encrypted:   {} bytes (+{} bytes overhead)",
-        encrypted_size,
-        encrypted_size.saturating_sub(unencrypted_size)
-    );
-
-    // Inspect encrypted model
+    // Inspect
     println!("\nInspecting encrypted model...");
     let info = aprender::format::inspect(&encrypted_path)
         .map_err(|e| apr_cookbook::CookbookError::Aprender(e.to_string()))?;
@@ -140,17 +177,15 @@ fn main() -> Result<()> {
     println!("  Encrypted: {}", info.encrypted);
     println!("  Signed: {}", info.signed);
 
-    // Load with correct password
+    // Load and verify
     println!("\nLoading encrypted model with correct password...");
     let loaded: SentimentClassifier = load_encrypted(&encrypted_path, ModelType::Custom, password)
         .map_err(|e| apr_cookbook::CookbookError::Aprender(e.to_string()))?;
-
-    // Verify roundtrip
     assert_eq!(model, loaded, "Model mismatch after decryption!");
     println!("  ✓ Model loaded successfully");
     println!("  ✓ Decryption verified (model matches original)");
 
-    // Demonstrate loading from bytes (include_bytes! pattern)
+    // From bytes
     println!("\nDemonstrating include_bytes!() pattern...");
     let encrypted_bytes =
         std::fs::read(&encrypted_path).map_err(apr_cookbook::CookbookError::Io)?;
@@ -165,32 +200,13 @@ fn main() -> Result<()> {
     assert_eq!(model, from_bytes, "Model mismatch from bytes!");
     println!("  ✓ Loaded from bytes successfully");
 
-    // Demonstrate wrong password handling
+    // Wrong password
     println!("\nTesting wrong password...");
-    let wrong_result: std::result::Result<SentimentClassifier, _> =
-        load_encrypted(&encrypted_path, ModelType::Custom, "wrong_password");
-    match wrong_result {
-        Ok(_) => println!("  ✗ Unexpected success with wrong password!"),
-        Err(e) => {
-            let err_msg = e.to_string();
-            if err_msg.contains("ecrypt") || err_msg.contains("auth") {
-                println!("  ✓ Correctly rejected wrong password");
-            } else {
-                println!("  ✓ Decryption failed as expected: {}", err_msg);
-            }
-        }
-    }
+    let wrong_result = load_encrypted(&encrypted_path, ModelType::Custom, "wrong_password");
+    demo::print_wrong_password_result(wrong_result);
 
     println!("\n[SUCCESS] Encrypted model demonstration complete!");
-    println!("\n=== Production Usage ===");
-    println!("```rust");
-    println!("// Embed encrypted model at compile time");
-    println!("const MODEL: &[u8] = include_bytes!(\"model.apr.enc\");");
-    println!();
-    println!("fn load_model(password: &str) -> Result<MyModel> {{");
-    println!("    load_from_bytes_encrypted(MODEL, ModelType::Custom, password)");
-    println!("}}");
-    println!("```");
+    demo::print_usage_example();
 
     Ok(())
 }
