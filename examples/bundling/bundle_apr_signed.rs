@@ -133,10 +133,10 @@ fn verify_mock_signature(data: &[u8], signature: &[u8], _public_key: &[u8]) -> b
 
 /// Simple hash function for demonstration
 fn simple_hash(data: &[u8]) -> u64 {
-    let mut hash = 0u64;
-    for (i, &byte) in data.iter().enumerate() {
-        hash = hash.wrapping_add(u64::from(byte).wrapping_mul((i as u64).wrapping_add(1)));
-        hash = hash.rotate_left(7);
+    let mut hash = 0xcbf29ce484222325; // FNV offset basis
+    for byte in data {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3); // FNV prime
     }
     hash
 }
@@ -144,6 +144,7 @@ fn simple_hash(data: &[u8]) -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use rand::SeedableRng;
 
     #[test]
     fn test_signature_creation() {

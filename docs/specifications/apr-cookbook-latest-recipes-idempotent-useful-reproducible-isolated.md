@@ -397,7 +397,7 @@ fn main() -> Result<()> {
         let checkpoint = ctx.path(format!("checkpoint_{}.apr", batch_id));
         aprender::format::save(&model, ModelType::Linear, &checkpoint, SaveOptions::default())?;
 
-        println!("Batch {}: loss={:.4}, params={}",
+        println!("Batch {}: loss={{:.4}}, params={{}}",
             batch_id, model.last_loss(), model.num_params());
     }
 
@@ -595,7 +595,7 @@ fn main() -> Result<()> {
 
     println!("\nResponse:");
     println!("{}", serde_json::to_string_pretty(&response)?);
-    println!("\nThroughput: {:.1} tokens/sec",
+    println!("\nThroughput: {{:.1}} tokens/sec",
         response.tokens_generated as f64 / (response.latency_ms as f64 / 1000.0));
 
     Ok(())
@@ -751,8 +751,8 @@ fn main() -> Result<()> {
 
     println!("Matrix multiplication {}x{}:", size, size);
     println!("  Backend: {:?}", backend);
-    println!("  Time: {:.2}ms", gpu_time.as_secs_f64() * 1000.0);
-    println!("  GFLOPS: {:.1}",
+    println!("  Time: {{:.2}}ms", gpu_time.as_secs_f64() * 1000.0);
+    println!("  GFLOPS: {{:.1}}",
         (2.0 * (size as f64).powi(3)) / gpu_time.as_secs_f64() / 1e9);
 
     Ok(())
@@ -802,9 +802,9 @@ fn main() -> Result<()> {
     let scalar_time = start.elapsed();
 
     println!("\nDot product of {} elements:", size);
-    println!("  SIMD:   {:.2}ms (result: {:.6})", simd_time.as_secs_f64() * 1000.0, dot);
-    println!("  Scalar: {:.2}ms (result: {:.6})", scalar_time.as_secs_f64() * 1000.0, dot_scalar);
-    println!("  Speedup: {:.1}x", scalar_time.as_secs_f64() / simd_time.as_secs_f64());
+    println!("  SIMD:   {{:.2}}ms (result: {{:.6}})", simd_time.as_secs_f64() * 1000.0, dot);
+    println!("  Scalar: {{:.2}}ms (result: {{:.6}})", scalar_time.as_secs_f64() * 1000.0, dot_scalar);
+    println!("  Speedup: {{:.1}}x", scalar_time.as_secs_f64() / simd_time.as_secs_f64());
 
     Ok(())
 }
@@ -861,7 +861,7 @@ fn main() -> Result<()> {
         teacher_params, teacher_params as f64 * 4.0 / 1e6);
     println!("  Student: {} params ({:.1}MB)",
         student_params, student_params as f64 * 4.0 / 1e6);
-    println!("  Compression: {:.0}x", teacher_params as f64 / student_params as f64);
+    println!("  Compression: {{:.0}}x", teacher_params as f64 / student_params as f64);
 
     // Create distilled student model
     let student = create_student_model(&mut ctx.rng, student_layers, student_hidden)?;
@@ -978,51 +978,7 @@ proptest! {
 }
 ```
 
-### 4.3 Git Hooks (Implemented)
-
-The repository enforces quality gates via `.githooks/`:
-
-```bash
-# Configure git to use project hooks
-git config core.hooksPath .githooks
-```
-
-#### Pre-commit Hook (O(1), <30s)
-
-| Check | Description | Enforcement |
-|-------|-------------|-------------|
-| `cargo fmt` | Format staged `.rs` files only | Block on failure |
-| Secrets scan | Detect API keys, tokens in staged files | Warning |
-| `bashrs lint` | Lint staged `.sh`/`.bash` files | Block on error |
-
-```bash
-# Hook uses bashrs with error-level enforcement
-bashrs lint --level error --ignore SEC010 "$file"
-```
-
-#### Commit-msg Hook (O(1))
-
-Validates commit messages include work item reference:
-
-```
-feat: Add feature (Refs APR-XXX)
-fix: Bug fix (Refs #123)
-chore: Update deps (Refs my-ticket)
-```
-
-Pattern: `Refs (APR-[0-9]+|PMAT-[0-9]+|#[0-9]+|[a-zA-Z]+-[a-zA-Z0-9]+)`
-
-#### Pre-push Hook (Full Suite)
-
-| Check | Command | Enforcement |
-|-------|---------|-------------|
-| Format | `cargo fmt --all -- --check` | Block |
-| Lint | `cargo clippy --all-targets --all-features -- -D warnings` | Block |
-| Tests | `cargo test --all-features` | Block |
-
-All hooks pass `bashrs lint --level error` validation.
-
-### 4.4 CI Pipeline
+### 4.3 CI Pipeline
 
 ```yaml
 # .github/workflows/recipes.yml
