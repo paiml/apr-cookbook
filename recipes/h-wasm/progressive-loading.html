@@ -1,0 +1,670 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Progressive Loading - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">14.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">15.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">16.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">17.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">18.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">19.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">20.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">21.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Continuous Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">22.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">23.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">24.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">25.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">26.</strong> Curriculum Learning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">27.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">28.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">29.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">30.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">31.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">32.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">33.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">34.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">35.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">36.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">37.</strong> Model Rollback</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">38.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">39.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">40.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">41.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">42.</strong> Health Check</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">43.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">44.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">45.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">46.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">47.</strong> Container Image</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">48.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">49.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">50.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html" class="active"><strong aria-hidden="true">51.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">52.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">53.</strong> Streaming Compilation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">54.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">55.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">56.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">57.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">58.</strong> Memory Management</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">60.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">61.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">62.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">63.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">64.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">65.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">66.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">67.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">68.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">69.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">70.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">71.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">72.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">73.</strong> apr-serve</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">74.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">75.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">76.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">77.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">78.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/h-wasm/progressive-loading.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="progressive-loading"><a class="header" href="#progressive-loading">Progressive Loading</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example wasm_progressive_loading
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: Progressive Model Loading
+//!
+//! **Category**: WASM/Browser
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (Verified)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Load model progressively with UI feedback.
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example wasm_progressive_loading
+//! ```
+
+use apr_cookbook::prelude::*;
+use serde::{Deserialize, Serialize};
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new(&quot;wasm_progressive_loading&quot;)?;
+
+    println!(&quot;=== Recipe: {} ===&quot;, ctx.name());
+    println!(&quot;Progressive model loading simulation&quot;);
+    println!();
+
+    // Define model chunks
+    let chunks = vec![
+        ModelChunk {
+            id: 0,
+            name: &quot;metadata&quot;.to_string(),
+            size_kb: 5,
+            required: true,
+        },
+        ModelChunk {
+            id: 1,
+            name: &quot;embeddings&quot;.to_string(),
+            size_kb: 200,
+            required: true,
+        },
+        ModelChunk {
+            id: 2,
+            name: &quot;layer_0&quot;.to_string(),
+            size_kb: 150,
+            required: true,
+        },
+        ModelChunk {
+            id: 3,
+            name: &quot;layer_1&quot;.to_string(),
+            size_kb: 150,
+            required: true,
+        },
+        ModelChunk {
+            id: 4,
+            name: &quot;layer_2&quot;.to_string(),
+            size_kb: 150,
+            required: true,
+        },
+        ModelChunk {
+            id: 5,
+            name: &quot;output&quot;.to_string(),
+            size_kb: 50,
+            required: true,
+        },
+        ModelChunk {
+            id: 6,
+            name: &quot;cache&quot;.to_string(),
+            size_kb: 100,
+            required: false,
+        },
+    ];
+
+    let total_size: u32 = chunks.iter().map(|c| c.size_kb).sum();
+    ctx.record_metric(&quot;total_chunks&quot;, chunks.len() as i64);
+    ctx.record_metric(&quot;total_size_kb&quot;, i64::from(total_size));
+
+    println!(&quot;Model chunks:&quot;);
+    for chunk in &amp;chunks {
+        let required = if chunk.required {
+            &quot;[required]&quot;
+        } else {
+            &quot;[optional]&quot;
+        };
+        println!(&quot;  {} ({}KB) {}&quot;, chunk.name, chunk.size_kb, required);
+    }
+    println!(&quot;  Total: {}KB&quot;, total_size);
+    println!();
+
+    // Progressive loading simulation
+    let mut loader = ProgressiveLoader::new(chunks.clone());
+
+    println!(&quot;Loading progress:&quot;);
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+
+    while !loader.is_complete() {
+        let progress = loader.load_next()?;
+        let bar = create_progress_bar(progress.percent, 30);
+        println!(
+            &quot;  {} {:&gt;3}% [{}] {}&quot;,
+            progress.chunk_name, progress.percent, bar, progress.status
+        );
+    }
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+
+    // Loading statistics
+    let stats = loader.get_stats();
+    ctx.record_metric(&quot;load_time_ms&quot;, i64::from(stats.total_time_ms));
+    ctx.record_float_metric(&quot;throughput_kbps&quot;, stats.throughput_kbps);
+
+    println!();
+    println!(&quot;Loading complete:&quot;);
+    println!(&quot;  Total time: {}ms&quot;, stats.total_time_ms);
+    println!(&quot;  Throughput: {:.1}KB/s&quot;, stats.throughput_kbps);
+    println!(
+        &quot;  Chunks loaded: {}/{}&quot;,
+        stats.chunks_loaded, stats.chunks_total
+    );
+
+    // Demonstrate early inference capability
+    println!();
+    println!(&quot;Early inference capability:&quot;);
+    let min_required = loader.get_minimum_usable_chunks();
+    println!(&quot;  Minimum chunks for inference: {}&quot;, min_required);
+    println!(
+        &quot;  Can run basic inference after {}KB loaded&quot;,
+        chunks
+            .iter()
+            .take(min_required)
+            .map(|c| c.size_kb)
+            .sum::&lt;u32&gt;()
+    );
+
+    // Save loading log
+    let log_path = ctx.path(&quot;loading_log.json&quot;);
+    loader.save_log(&amp;log_path)?;
+    println!();
+    println!(&quot;Loading log saved to: {:?}&quot;, log_path);
+
+    Ok(())
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ModelChunk {
+    id: u32,
+    name: String,
+    size_kb: u32,
+    required: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct LoadProgress {
+    chunk_name: String,
+    percent: u32,
+    bytes_loaded: u32,
+    bytes_total: u32,
+    status: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct LoadStats {
+    total_time_ms: u32,
+    throughput_kbps: f64,
+    chunks_loaded: usize,
+    chunks_total: usize,
+}
+
+#[derive(Debug)]
+struct ProgressiveLoader {
+    chunks: Vec&lt;ModelChunk&gt;,
+    loaded: Vec&lt;bool&gt;,
+    bytes_loaded: u32,
+    bytes_total: u32,
+    current_idx: usize,
+    log: Vec&lt;LoadProgress&gt;,
+}
+
+impl ProgressiveLoader {
+    fn new(chunks: Vec&lt;ModelChunk&gt;) -&gt; Self {
+        let bytes_total: u32 = chunks.iter().map(|c| c.size_kb * 1024).sum();
+        let loaded = vec![false; chunks.len()];
+
+        Self {
+            chunks,
+            loaded,
+            bytes_loaded: 0,
+            bytes_total,
+            current_idx: 0,
+            log: Vec::new(),
+        }
+    }
+
+    fn load_next(&amp;mut self) -&gt; Result&lt;LoadProgress&gt; {
+        if self.current_idx &gt;= self.chunks.len() {
+            return Err(CookbookError::invalid_format(
+                &quot;All chunks already loaded&quot;.to_string(),
+            ));
+        }
+
+        let chunk = &amp;self.chunks[self.current_idx];
+        self.bytes_loaded += chunk.size_kb * 1024;
+        self.loaded[self.current_idx] = true;
+
+        let percent = ((f64::from(self.bytes_loaded) / f64::from(self.bytes_total)) * 100.0) as u32;
+
+        let progress = LoadProgress {
+            chunk_name: chunk.name.clone(),
+            percent,
+            bytes_loaded: self.bytes_loaded,
+            bytes_total: self.bytes_total,
+            status: &quot;loaded&quot;.to_string(),
+        };
+
+        self.log.push(progress.clone());
+        self.current_idx += 1;
+
+        Ok(progress)
+    }
+
+    fn is_complete(&amp;self) -&gt; bool {
+        self.current_idx &gt;= self.chunks.len()
+    }
+
+    fn get_stats(&amp;self) -&gt; LoadStats {
+        // Deterministic simulated time: 1ms per KB
+        let total_time = self.bytes_loaded / 1024;
+        let throughput = if total_time &gt; 0 {
+            (f64::from(self.bytes_loaded) / 1024.0) / (f64::from(total_time) / 1000.0)
+        } else {
+            0.0
+        };
+
+        LoadStats {
+            total_time_ms: total_time,
+            throughput_kbps: throughput,
+            chunks_loaded: self.loaded.iter().filter(|&amp;&amp;l| l).count(),
+            chunks_total: self.chunks.len(),
+        }
+    }
+
+    fn get_minimum_usable_chunks(&amp;self) -&gt; usize {
+        self.chunks.iter().take_while(|c| c.required).count() + 1
+    }
+
+    fn save_log(&amp;self, path: &amp;std::path::Path) -&gt; Result&lt;()&gt; {
+        let json = serde_json::to_string_pretty(&amp;self.log)
+            .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+        std::fs::write(path, json)?;
+        Ok(())
+    }
+}
+
+fn create_progress_bar(percent: u32, width: usize) -&gt; String {
+    let filled = (percent as usize * width) / 100;
+    let empty = width - filled;
+    format!(&quot;{}{}&quot;, &quot;=&quot;.repeat(filled), &quot; &quot;.repeat(empty))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_loader_creation() {
+        let chunks = vec![ModelChunk {
+            id: 0,
+            name: &quot;test&quot;.to_string(),
+            size_kb: 100,
+            required: true,
+        }];
+
+        let loader = ProgressiveLoader::new(chunks);
+
+        assert!(!loader.is_complete());
+        assert_eq!(loader.bytes_loaded, 0);
+    }
+
+    #[test]
+    fn test_load_next() {
+        let chunks = vec![ModelChunk {
+            id: 0,
+            name: &quot;chunk1&quot;.to_string(),
+            size_kb: 100,
+            required: true,
+        }];
+
+        let mut loader = ProgressiveLoader::new(chunks);
+        let progress = loader.load_next().unwrap();
+
+        assert_eq!(progress.chunk_name, &quot;chunk1&quot;);
+        assert_eq!(progress.percent, 100);
+        assert!(loader.is_complete());
+    }
+
+    #[test]
+    fn test_progressive_percent() {
+        let chunks = vec![
+            ModelChunk {
+                id: 0,
+                name: &quot;c1&quot;.to_string(),
+                size_kb: 50,
+                required: true,
+            },
+            ModelChunk {
+                id: 1,
+                name: &quot;c2&quot;.to_string(),
+                size_kb: 50,
+                required: true,
+            },
+        ];
+
+        let mut loader = ProgressiveLoader::new(chunks);
+
+        let p1 = loader.load_next().unwrap();
+        assert_eq!(p1.percent, 50);
+
+        let p2 = loader.load_next().unwrap();
+        assert_eq!(p2.percent, 100);
+    }
+
+    #[test]
+    fn test_load_complete_error() {
+        let chunks = vec![ModelChunk {
+            id: 0,
+            name: &quot;test&quot;.to_string(),
+            size_kb: 100,
+            required: true,
+        }];
+
+        let mut loader = ProgressiveLoader::new(chunks);
+        loader.load_next().unwrap();
+
+        let result = loader.load_next();
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_get_stats() {
+        let chunks = vec![ModelChunk {
+            id: 0,
+            name: &quot;test&quot;.to_string(),
+            size_kb: 100,
+            required: true,
+        }];
+
+        let mut loader = ProgressiveLoader::new(chunks);
+        loader.load_next().unwrap();
+
+        let stats = loader.get_stats();
+        assert_eq!(stats.chunks_loaded, 1);
+        assert_eq!(stats.chunks_total, 1);
+    }
+
+    #[test]
+    fn test_progress_bar() {
+        assert_eq!(create_progress_bar(50, 10), &quot;=====     &quot;);
+        assert_eq!(create_progress_bar(100, 10), &quot;==========&quot;);
+        assert_eq!(create_progress_bar(0, 10), &quot;          &quot;);
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_final_percent_is_100(sizes in proptest::collection::vec(1u32..100, 1..10)) {
+            let chunks: Vec&lt;_&gt; = sizes.iter().enumerate().map(|(i, &amp;size)| {
+                ModelChunk {
+                    id: i as u32,
+                    name: format!(&quot;chunk{}&quot;, i),
+                    size_kb: size,
+                    required: true,
+                }
+            }).collect();
+
+            let mut loader = ProgressiveLoader::new(chunks);
+            let mut last_progress = None;
+
+            while !loader.is_complete() {
+                last_progress = Some(loader.load_next().unwrap());
+            }
+
+            if let Some(progress) = last_progress {
+                prop_assert_eq!(progress.percent, 100);
+            }
+        }
+
+        #[test]
+        fn prop_percent_monotonic(sizes in proptest::collection::vec(1u32..50, 2..5)) {
+            let chunks: Vec&lt;_&gt; = sizes.iter().enumerate().map(|(i, &amp;size)| {
+                ModelChunk {
+                    id: i as u32,
+                    name: format!(&quot;chunk{}&quot;, i),
+                    size_kb: size,
+                    required: true,
+                }
+            }).collect();
+
+            let mut loader = ProgressiveLoader::new(chunks);
+            let mut last_percent = 0u32;
+
+            while !loader.is_complete() {
+                let progress = loader.load_next().unwrap();
+                prop_assert!(progress.percent &gt;= last_percent);
+                last_percent = progress.percent;
+            }
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/h-wasm/web-worker.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/h-wasm/webgpu-acceleration.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/h-wasm/web-worker.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/h-wasm/webgpu-acceleration.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

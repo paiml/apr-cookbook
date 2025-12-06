@@ -1,0 +1,676 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>apr-serve - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">14.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">15.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">16.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">17.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">18.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">19.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">20.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">21.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Continuous Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">22.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">23.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">24.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">25.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">26.</strong> Curriculum Learning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">27.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">28.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">29.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">30.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">31.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">32.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">33.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">34.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">35.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">36.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">37.</strong> Model Rollback</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">38.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">39.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">40.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">41.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">42.</strong> Health Check</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">43.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">44.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">45.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">46.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">47.</strong> Container Image</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">48.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">49.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">50.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">51.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">52.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">53.</strong> Streaming Compilation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">54.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">55.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">56.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">57.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">58.</strong> Memory Management</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">60.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">61.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">62.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">63.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">64.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">65.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">66.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">67.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">68.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">69.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">70.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">71.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">72.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html" class="active"><strong aria-hidden="true">73.</strong> apr-serve</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">74.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">75.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">76.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">77.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">78.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/l-cli/apr-serve.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="apr-serve"><a class="header" href="#apr-serve">apr-serve</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<p>Serve APR model via HTTP API.</p>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example cli_apr_serve -- --demo
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: APR Model Server CLI
+//!
+//! **Category**: CLI Tools
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (N/A)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Serve APR model via HTTP API (simulated).
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example cli_apr_serve
+//! cargo run --example cli_apr_serve -- --demo
+//! ```
+
+use apr_cookbook::prelude::*;
+use serde::{Deserialize, Serialize};
+use std::env;
+
+fn main() -&gt; Result&lt;()&gt; {
+    let args: Vec&lt;String&gt; = env::args().collect();
+    let config = parse_args(&amp;args)?;
+
+    if config.help {
+        print_help();
+        return Ok(());
+    }
+
+    run_server(&amp;config)
+}
+
+#[derive(Debug, Clone)]
+struct ServerConfig {
+    model_path: Option&lt;String&gt;,
+    host: String,
+    port: u16,
+    workers: usize,
+    demo: bool,
+    help: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ServerStatus {
+    status: String,
+    model: String,
+    host: String,
+    port: u16,
+    workers: usize,
+    endpoints: Vec&lt;EndpointInfo&gt;,
+    metrics: ServerMetrics,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct EndpointInfo {
+    path: String,
+    method: String,
+    description: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct ServerMetrics {
+    requests_total: u64,
+    requests_per_sec: f64,
+    avg_latency_ms: f64,
+    uptime_seconds: u64,
+}
+
+fn parse_args(args: &amp;[String]) -&gt; Result&lt;ServerConfig&gt; {
+    let mut config = ServerConfig {
+        model_path: None,
+        host: &quot;127.0.0.1&quot;.to_string(),
+        port: 8080,
+        workers: 4,
+        demo: false,
+        help: false,
+    };
+
+    let mut i = 1;
+    while i &lt; args.len() {
+        match args[i].as_str() {
+            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
+            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
+            &quot;--host&quot; =&gt; {
+                i += 1;
+                if i &lt; args.len() {
+                    config.host = args[i].clone();
+                }
+            }
+            &quot;--port&quot; | &quot;-p&quot; =&gt; {
+                i += 1;
+                if i &lt; args.len() {
+                    config.port = args[i].parse().unwrap_or(8080);
+                }
+            }
+            &quot;--workers&quot; | &quot;-w&quot; =&gt; {
+                i += 1;
+                if i &lt; args.len() {
+                    config.workers = args[i].parse().unwrap_or(4);
+                }
+            }
+            path if !path.starts_with('-') =&gt; {
+                config.model_path = Some(path.to_string());
+            }
+            _ =&gt; {}
+        }
+        i += 1;
+    }
+
+    Ok(config)
+}
+
+fn print_help() {
+    println!(&quot;apr-serve - Serve APR model via HTTP API&quot;);
+    println!();
+    println!(&quot;USAGE:&quot;);
+    println!(&quot;    apr-serve [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
+    println!();
+    println!(&quot;OPTIONS:&quot;);
+    println!(&quot;    -h, --help          Print help information&quot;);
+    println!(&quot;    -d, --demo          Run with demo model&quot;);
+    println!(&quot;    --host HOST         Host address (default: 127.0.0.1)&quot;);
+    println!(&quot;    -p, --port PORT     Port number (default: 8080)&quot;);
+    println!(&quot;    -w, --workers N     Number of workers (default: 4)&quot;);
+    println!();
+    println!(&quot;EXAMPLES:&quot;);
+    println!(&quot;    apr-serve model.apr&quot;);
+    println!(&quot;    apr-serve --demo --port 9000&quot;);
+    println!(&quot;    apr-serve -p 8080 -w 8 model.apr&quot;);
+}
+
+fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new(&quot;cli_apr_serve&quot;)?;
+
+    // Get model name
+    let model_name = if config.demo {
+        &quot;demo-model&quot;.to_string()
+    } else if let Some(path) = &amp;config.model_path {
+        std::path::Path::new(path)
+            .file_stem().map_or_else(|| &quot;model&quot;.to_string(), |s| s.to_string_lossy().to_string())
+    } else {
+        print_help();
+        return Ok(());
+    };
+
+    ctx.record_metric(&quot;port&quot;, i64::from(config.port));
+    ctx.record_metric(&quot;workers&quot;, config.workers as i64);
+
+    // Print startup banner
+    println!(&quot;╔══════════════════════════════════════════════════════╗&quot;);
+    println!(&quot;║              APR Model Server                        ║&quot;);
+    println!(&quot;╚══════════════════════════════════════════════════════╝&quot;);
+    println!();
+
+    // Simulated server startup
+    let status = simulate_server_startup(config, &amp;model_name)?;
+
+    println!(&quot;Model: {}&quot;, status.model);
+    println!(&quot;Server: http://{}:{}&quot;, status.host, status.port);
+    println!(&quot;Workers: {}&quot;, status.workers);
+    println!();
+
+    println!(&quot;Endpoints:&quot;);
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+    for endpoint in &amp;status.endpoints {
+        println!(
+            &quot;  {} {:&lt;20} {}&quot;,
+            endpoint.method, endpoint.path, endpoint.description
+        );
+    }
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+    println!();
+
+    // Simulate some requests
+    println!(&quot;Simulating requests...&quot;);
+    println!();
+
+    let requests = vec![
+        (&quot;POST&quot;, &quot;/v1/infer&quot;, r#&quot;{&quot;inputs&quot;: [0.5, 0.3]}&quot;#),
+        (&quot;GET&quot;, &quot;/v1/health&quot;, &quot;&quot;),
+        (&quot;GET&quot;, &quot;/v1/metrics&quot;, &quot;&quot;),
+        (&quot;POST&quot;, &quot;/v1/infer&quot;, r#&quot;{&quot;inputs&quot;: [0.1, 0.9]}&quot;#),
+        (&quot;POST&quot;, &quot;/v1/infer&quot;, r#&quot;{&quot;inputs&quot;: [0.7, 0.2]}&quot;#),
+    ];
+
+    for (method, path, body) in &amp;requests {
+        let response = simulate_request(method, path, body)?;
+        println!(
+            &quot;  {} {} -&gt; {} ({:.1}ms)&quot;,
+            method, path, response.status, response.latency_ms
+        );
+    }
+    println!();
+
+    // Final metrics
+    let metrics = simulate_metrics(requests.len())?;
+    ctx.record_float_metric(&quot;requests_per_sec&quot;, metrics.requests_per_sec);
+    ctx.record_float_metric(&quot;avg_latency_ms&quot;, metrics.avg_latency_ms);
+
+    println!(&quot;Metrics:&quot;);
+    println!(&quot;  Total requests: {}&quot;, metrics.requests_total);
+    println!(&quot;  Requests/sec: {:.1}&quot;, metrics.requests_per_sec);
+    println!(&quot;  Avg latency: {:.2}ms&quot;, metrics.avg_latency_ms);
+    println!();
+
+    println!(&quot;Server simulation complete.&quot;);
+    println!(&quot;(In production, use: apr-serve model.apr --port 8080)&quot;);
+
+    Ok(())
+}
+
+fn simulate_server_startup(
+    config: &amp;ServerConfig,
+    model_name: &amp;str,
+) -&gt; Result&lt;ServerStatus&gt; {
+    let endpoints = vec![
+        EndpointInfo {
+            path: &quot;/v1/infer&quot;.to_string(),
+            method: &quot;POST&quot;.to_string(),
+            description: &quot;Run inference&quot;.to_string(),
+        },
+        EndpointInfo {
+            path: &quot;/v1/health&quot;.to_string(),
+            method: &quot;GET&quot;.to_string(),
+            description: &quot;Health check&quot;.to_string(),
+        },
+        EndpointInfo {
+            path: &quot;/v1/metrics&quot;.to_string(),
+            method: &quot;GET&quot;.to_string(),
+            description: &quot;Server metrics&quot;.to_string(),
+        },
+        EndpointInfo {
+            path: &quot;/v1/model&quot;.to_string(),
+            method: &quot;GET&quot;.to_string(),
+            description: &quot;Model info&quot;.to_string(),
+        },
+    ];
+
+    Ok(ServerStatus {
+        status: &quot;running&quot;.to_string(),
+        model: model_name.to_string(),
+        host: config.host.clone(),
+        port: config.port,
+        workers: config.workers,
+        endpoints,
+        metrics: ServerMetrics {
+            requests_total: 0,
+            requests_per_sec: 0.0,
+            avg_latency_ms: 0.0,
+            uptime_seconds: 0,
+        },
+    })
+}
+
+#[derive(Debug)]
+struct SimulatedResponse {
+    status: u16,
+    latency_ms: f64,
+}
+
+fn simulate_request(
+    method: &amp;str,
+    path: &amp;str,
+    _body: &amp;str,
+) -&gt; Result&lt;SimulatedResponse&gt; {
+    // Deterministic response based on path
+    let seed = hash_name_to_seed(path);
+    let latency = 1.0 + (seed % 10) as f64 * 0.5;
+
+    let status = match (method, path) {
+        (&quot;GET&quot;, &quot;/v1/health&quot;) =&gt; 200,
+        (&quot;GET&quot;, &quot;/v1/metrics&quot;) =&gt; 200,
+        (&quot;POST&quot;, &quot;/v1/infer&quot;) =&gt; 200,
+        (&quot;GET&quot;, &quot;/v1/model&quot;) =&gt; 200,
+        _ =&gt; 404,
+    };
+
+    Ok(SimulatedResponse {
+        status,
+        latency_ms: latency,
+    })
+}
+
+fn simulate_metrics(request_count: usize) -&gt; Result&lt;ServerMetrics&gt; {
+    Ok(ServerMetrics {
+        requests_total: request_count as u64,
+        requests_per_sec: request_count as f64 * 100.0, // Simulated high throughput
+        avg_latency_ms: 2.5,
+        uptime_seconds: 10,
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_args_demo() {
+        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;--demo&quot;.to_string()];
+        let config = parse_args(&amp;args).unwrap();
+
+        assert!(config.demo);
+    }
+
+    #[test]
+    fn test_parse_args_port() {
+        let args = vec![
+            &quot;apr-serve&quot;.to_string(),
+            &quot;-p&quot;.to_string(),
+            &quot;9000&quot;.to_string(),
+        ];
+        let config = parse_args(&amp;args).unwrap();
+
+        assert_eq!(config.port, 9000);
+    }
+
+    #[test]
+    fn test_parse_args_workers() {
+        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;-w&quot;.to_string(), &quot;8&quot;.to_string()];
+        let config = parse_args(&amp;args).unwrap();
+
+        assert_eq!(config.workers, 8);
+    }
+
+    #[test]
+    fn test_server_startup() {
+        let config = ServerConfig {
+            model_path: None,
+            host: &quot;127.0.0.1&quot;.to_string(),
+            port: 8080,
+            workers: 4,
+            demo: true,
+            help: false,
+        };
+
+        let status = simulate_server_startup(&amp;config, &quot;test-model&quot;).unwrap();
+
+        assert_eq!(status.status, &quot;running&quot;);
+        assert_eq!(status.port, 8080);
+        assert!(!status.endpoints.is_empty());
+    }
+
+    #[test]
+    fn test_simulate_request_infer() {
+        let response = simulate_request(&quot;POST&quot;, &quot;/v1/infer&quot;, &quot;{}&quot;).unwrap();
+
+        assert_eq!(response.status, 200);
+        assert!(response.latency_ms &gt; 0.0);
+    }
+
+    #[test]
+    fn test_simulate_request_health() {
+        let response = simulate_request(&quot;GET&quot;, &quot;/v1/health&quot;, &quot;&quot;).unwrap();
+
+        assert_eq!(response.status, 200);
+    }
+
+    #[test]
+    fn test_simulate_request_404() {
+        let response = simulate_request(&quot;GET&quot;, &quot;/v1/unknown&quot;, &quot;&quot;).unwrap();
+
+        assert_eq!(response.status, 404);
+    }
+
+    #[test]
+    fn test_deterministic_latency() {
+        let r1 = simulate_request(&quot;POST&quot;, &quot;/v1/infer&quot;, &quot;{}&quot;).unwrap();
+        let r2 = simulate_request(&quot;POST&quot;, &quot;/v1/infer&quot;, &quot;{}&quot;).unwrap();
+
+        assert_eq!(r1.latency_ms, r2.latency_ms);
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_port_in_range(port in 1u16..65535) {
+            let args = vec![
+                &quot;apr-serve&quot;.to_string(),
+                &quot;-p&quot;.to_string(),
+                port.to_string(),
+            ];
+            let config = parse_args(&amp;args).unwrap();
+
+            prop_assert!(config.port &gt; 0);
+        }
+
+        #[test]
+        fn prop_workers_positive(workers in 1usize..32) {
+            let args = vec![
+                &quot;apr-serve&quot;.to_string(),
+                &quot;-w&quot;.to_string(),
+                workers.to_string(),
+            ];
+            let config = parse_args(&amp;args).unwrap();
+
+            prop_assert!(config.workers &gt; 0);
+        }
+
+        #[test]
+        fn prop_latency_positive(path in &quot;/v1/[a-z]{1,10}&quot;) {
+            let response = simulate_request(&quot;GET&quot;, &amp;path, &quot;&quot;).unwrap();
+            prop_assert!(response.latency_ms &gt; 0.0);
+        }
+    }
+}</code></pre>
+<h2 id="usage"><a class="header" href="#usage">Usage</a></h2>
+<pre><code class="language-bash">apr-serve model.apr                    # Serve on :8080
+apr-serve --port 9000 model.apr        # Custom port
+apr-serve --workers 8 model.apr        # 8 worker threads
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/l-cli/apr-convert.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../reference/api.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/l-cli/apr-convert.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../reference/api.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
