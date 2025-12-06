@@ -29,39 +29,23 @@ use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 
-fn main() -> Result<()> {
-    let mut ctx = RecipeContext::new("gpu_memory_management")?;
-
-    println!("=== Recipe: {} ===", ctx.name());
-    println!("GPU memory management strategies");
-    println!();
-
-    // GPU memory info
-    let gpu = GpuMemoryInfo {
-        total_mb: 24 * 1024, // 24GB
-        reserved_mb: 512,    // Driver/system
-    };
-
-    let available = gpu.total_mb - gpu.reserved_mb;
-    ctx.record_metric("gpu_total_mb", i64::from(gpu.total_mb));
-    ctx.record_metric("gpu_available_mb", i64::from(available));
-
+/// Print GPU memory info
+fn print_gpu_info(gpu: &GpuMemoryInfo, available: u32) {
     println!("GPU Memory:");
     println!("  Total: {}MB ({}GB)", gpu.total_mb, gpu.total_mb / 1024);
     println!("  Reserved: {}MB", gpu.reserved_mb);
     println!("  Available: {}MB", available);
     println!();
+}
 
-    // Create memory pool
-    let mut pool = GpuMemoryPool::new(available);
-
-    // Simulate model loading
-    let allocations = vec![
-        ("model_weights", 8 * 1024),   // 8GB
-        ("optimizer_state", 4 * 1024), // 4GB
-        ("activations", 2 * 1024),     // 2GB
-        ("gradients", 4 * 1024),       // 4GB
-        ("kv_cache", 4 * 1024),        // 4GB
+/// Allocate memory for all model components
+fn allocate_model_memory(pool: &mut GpuMemoryPool) {
+    let allocations = [
+        ("model_weights", 8 * 1024),
+        ("optimizer_state", 4 * 1024),
+        ("activations", 2 * 1024),
+        ("gradients", 4 * 1024),
+        ("kv_cache", 4 * 1024),
     ];
 
     println!("Memory Allocations:");
@@ -69,63 +53,77 @@ fn main() -> Result<()> {
 
     for (name, size_mb) in &allocations {
         match pool.allocate(name, *size_mb) {
-            Ok(handle) => {
-                println!("  ✓ {} ({}MB) -> handle {}", name, size_mb, handle);
-            }
-            Err(e) => {
-                println!("  ✗ {} ({}MB) -> {}", name, size_mb, e);
-            }
+            Ok(handle) => println!("  ✓ {} ({}MB) -> handle {}", name, size_mb, handle),
+            Err(e) => println!("  ✗ {} ({}MB) -> {}", name, size_mb, e),
         }
     }
     println!("{:-<50}", "");
+}
 
-    // Memory status
-    let status = pool.status();
+/// Print memory status
+fn print_status(label: &str, status: &MemoryStatus) {
     println!();
-    println!("Memory Status:");
+    println!("{}:", label);
     println!(
         "  Used: {}MB ({:.1}%)",
         status.used_mb,
         status.utilization * 100.0
     );
     println!("  Free: {}MB", status.free_mb);
-    println!("  Allocations: {}", status.num_allocations);
-    println!("  Fragmentation: {:.1}%", status.fragmentation * 100.0);
+    if label == "Memory Status" {
+        println!("  Allocations: {}", status.num_allocations);
+        println!("  Fragmentation: {:.1}%", status.fragmentation * 100.0);
+    }
+}
 
-    ctx.record_float_metric("memory_utilization", status.utilization);
-
-    // Demonstrate memory optimization
+/// Demonstrate memory optimization techniques
+fn optimize_memory(pool: &mut GpuMemoryPool) -> Result<()> {
     println!();
     println!("Memory Optimization:");
 
-    // Free some memory
     if let Some(handle) = pool.find_allocation("optimizer_state") {
         pool.free(handle)?;
         println!("  Freed optimizer_state (4GB)");
     }
 
-    // Try gradient checkpointing (trade compute for memory)
-    let checkpoint_savings = 2 * 1024; // Save 2GB
-    println!("  Gradient checkpointing: saves {}MB", checkpoint_savings);
+    println!("  Gradient checkpointing: saves {}MB", 2 * 1024);
 
-    // Try activation offloading
     if let Some(handle) = pool.find_allocation("activations") {
         pool.offload_to_cpu(handle)?;
         println!("  Offloaded activations to CPU");
     }
 
-    // Final status
-    let final_status = pool.status();
-    println!();
-    println!("Final Memory Status:");
-    println!(
-        "  Used: {}MB ({:.1}%)",
-        final_status.used_mb,
-        final_status.utilization * 100.0
-    );
-    println!("  Free: {}MB", final_status.free_mb);
+    Ok(())
+}
 
-    // Save memory log
+fn main() -> Result<()> {
+    let mut ctx = RecipeContext::new("gpu_memory_management")?;
+
+    println!("=== Recipe: {} ===", ctx.name());
+    println!("GPU memory management strategies");
+    println!();
+
+    let gpu = GpuMemoryInfo {
+        total_mb: 24 * 1024,
+        reserved_mb: 512,
+    };
+    let available = gpu.total_mb - gpu.reserved_mb;
+    ctx.record_metric("gpu_total_mb", i64::from(gpu.total_mb));
+    ctx.record_metric("gpu_available_mb", i64::from(available));
+    print_gpu_info(&gpu, available);
+
+    let mut pool = GpuMemoryPool::new(available);
+    allocate_model_memory(&mut pool);
+
+    let status = pool.status();
+    print_status("Memory Status", &status);
+    ctx.record_float_metric("memory_utilization", status.utilization);
+
+    optimize_memory(&mut pool)?;
+
+    let final_status = pool.status();
+    print_status("Final Memory Status", &final_status);
+
     let log_path = ctx.path("memory_log.json");
     pool.save_log(&log_path)?;
     println!();
