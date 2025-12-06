@@ -415,11 +415,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Fix PMAT quality gate violations
-  status: inprogress
+  status: completed
   priority: critical
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 2025-12-06T17:00:40.543786722+00:00
+  updated: 2025-12-06T17:12:23.033682168+00:00
   spec: null
   acceptance_criteria:
   - Fix 31 complexity violations in recipe examples
