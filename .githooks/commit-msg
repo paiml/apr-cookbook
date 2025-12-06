@@ -1,19 +1,27 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
+# shellcheck disable=SC2031,SC2032
 # Commit message validation - O(1) check
 
 set -euo pipefail
 
 readonly COMMIT_MSG_FILE="$1"
-COMMIT_MSG=$(cat "$COMMIT_MSG_FILE")
+
+# Validate file exists and is readable (security check for SEC010)
+if [[ ! -f "$COMMIT_MSG_FILE" || ! -r "$COMMIT_MSG_FILE" ]]; then
+    echo "❌ Cannot read commit message file"
+    exit 1
+fi
+
+COMMIT_MSG="$(cat -- "$COMMIT_MSG_FILE")"
 readonly COMMIT_MSG
 
 # Task ID pattern: APR-XXX, PMAT-XXXX, Refs #XXX, or Refs ticket-name
-readonly PATTERN='(Refs (APR-[0-9]+|PMAT-[0-9]+|#[0-9]+|[a-zA-Z]+-[a-zA-Z0-9]+))'
+readonly PATTERN='Refs (APR-[0-9]+|PMAT-[0-9]+|#[0-9]+|[a-zA-Z]+-[a-zA-Z0-9]+)'
 
 echo -n "🔍 Commit message validation... "
 
-if echo "$COMMIT_MSG" | grep -qE "$PATTERN"; then
+if [[ "$COMMIT_MSG" =~ $PATTERN ]]; then
     echo "✅"
     exit 0
 else

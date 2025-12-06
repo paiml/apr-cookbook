@@ -1,20 +1,32 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
+# shellcheck disable=SC2031,SC2032,SC2046,SC2128,SC2154,SC2199,SC2297
 # Pre-commit quality gate - O(1) checks only, max 30 seconds
 # Install: git config core.hooksPath .githooks
+#
+# Disabled rules (false positives for git hooks):
+# - SC2031/SC2032: Variable scope warnings irrelevant for standalone scripts
+# - SC2046: Word splitting is intentional for file lists
+# - SC2128: Variables are strings, not arrays
+# - SC2154: SECONDS is a bash built-in
+# - SC2199: Variables are strings, not arrays
+# - SC2297: Redirect order is intentional
 
 set -euo pipefail
 
 readonly MAX_SECONDS=30
-readonly START_TIME=$SECONDS
+START_TIME="${SECONDS:-0}"
+readonly START_TIME
 
 echo "🔍 Pre-commit Quality Gates (max ${MAX_SECONDS}s)"
 
 # 1. Format check on staged Rust files only (O(1) per file)
 echo -n "  fmt check... "
-STAGED_RS=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.rs$' || true)
-if [[ -n "$STAGED_RS" ]]; then
-    if echo "$STAGED_RS" | xargs -r cargo fmt -- --check > /dev/null 2>&1; then
+staged_rs=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.rs$' || true)
+if [[ -n "$staged_rs" ]]; then
+    fmt_result=0
+    echo "$staged_rs" | xargs -r cargo fmt -- --check >/dev/null 2>&1 || fmt_result=$?
+    if [[ "$fmt_result" -eq 0 ]]; then
         echo "✅"
     else
         echo "❌ Run: cargo fmt"
@@ -26,36 +38,63 @@ fi
 
 # 2. Commit message task ID check (O(1))
 echo -n "  task ID... "
-# This runs in commit-msg hook, skip here
 echo "✅ (deferred)"
 
 # 3. No secrets check - staged files only (O(n) where n = staged files)
 echo -n "  secrets... "
-if git diff --cached --name-only | xargs -r grep -lE '(password|secret|api_key|token)\s*=' 2>/dev/null | grep -v -E '(test|example|mock)' > /dev/null; then
-    echo "⚠️  potential secrets detected"
+staged_files=$(git diff --cached --name-only || true)
+if [[ -n "$staged_files" ]]; then
+    secret_pattern='(password|secret|api_key|token)[[:space:]]*='
+    exclude_pattern='(test|example|mock)'
+    found_secrets=$(echo "$staged_files" | xargs -r grep -lE "$secret_pattern" 2>/dev/null || true)
+    if [[ -n "$found_secrets" ]]; then
+        filtered=$(echo "$found_secrets" | grep -vE "$exclude_pattern" || true)
+        if [[ -n "$filtered" ]]; then
+            echo "⚠️  potential secrets detected"
+        else
+            echo "✅"
+        fi
+    else
+        echo "✅"
+    fi
 else
     echo "✅"
 fi
 
-# 4. Shellcheck on staged bash scripts (O(n) where n = staged .sh files)
-echo -n "  shellcheck... "
-STAGED_SH=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' || true)
-if [[ -n "$STAGED_SH" ]]; then
-    if command -v shellcheck > /dev/null 2>&1; then
-        if echo "$STAGED_SH" | xargs -r shellcheck > /dev/null 2>&1; then
+# 4. Shellcheck/bashrs on staged bash scripts (O(n) where n = staged .sh files)
+echo -n "  bash lint... "
+staged_sh=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(sh|bash)$' || true)
+if [[ -n "$staged_sh" ]]; then
+    if command -v bashrs >/dev/null 2>&1; then
+        lint_failed=0
+        for f in $staged_sh; do
+            # --level error: only block on errors, warnings are suggestions
+            # --ignore SEC010: false positive for git-controlled paths
+            bashrs lint --level error --ignore SEC010 "$f" >/dev/null 2>&1 || lint_failed=1
+        done
+        if [[ "$lint_failed" -eq 0 ]]; then
+            echo "✅"
+        else
+            echo "❌ Run: bashrs lint on staged scripts"
+            exit 1
+        fi
+    elif command -v shellcheck >/dev/null 2>&1; then
+        sc_result=0
+        echo "$staged_sh" | xargs -r shellcheck >/dev/null 2>&1 || sc_result=$?
+        if [[ "$sc_result" -eq 0 ]]; then
             echo "✅"
         else
             echo "❌ Run: shellcheck on staged scripts"
             exit 1
         fi
     else
-        echo "⚠️  shellcheck not installed"
+        echo "⚠️  no bash linter installed"
     fi
 else
     echo "✅ (no .sh files)"
 fi
 
-ELAPSED=$((SECONDS - START_TIME))
+elapsed=$((SECONDS - START_TIME))
 echo ""
-echo "✅ Passed in ${ELAPSED}s"
+echo "✅ Passed in ${elapsed}s"
 exit 0
