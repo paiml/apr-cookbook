@@ -2,252 +2,436 @@ roadmap_version: '1.0'
 github_enabled: false
 github_repo: null
 roadmap:
-  # Phase 1: Foundation (COMPLETED)
-  - id: APR-001
-    title: "Core library with bundle and convert modules"
-    status: done
-    priority: critical
-    labels: [foundation, tdd]
-    description: |
-      Implement core error types, bundle module for model embedding,
-      and convert module for format transformation.
-    acceptance_criteria:
-      - Error types with Display impl
-      - BundledModel from bytes with validation
-      - ModelBundle builder pattern
-      - AprConverter with tensor management
-      - 28+ unit tests passing
-
-  - id: APR-002
-    title: "Bundling examples (static, quantized)"
-    status: done
-    priority: high
-    labels: [examples, bundling]
-    description: |
-      Examples demonstrating include_bytes!() embedding and
-      quantization levels (Q4_0, Q8_0).
-    acceptance_criteria:
-      - bundle_static_model example
-      - bundle_quantized_model example
-      - Tests for each example
-
-  - id: APR-003
-    title: "Conversion examples (SafeTensors, GGUF)"
-    status: done
-    priority: high
-    labels: [examples, conversion]
-    description: |
-      Examples for format conversion between SafeTensors, APR, and GGUF.
-    acceptance_criteria:
-      - convert_safetensors_to_apr example
-      - convert_apr_to_gguf example
-      - Tests for each example
-
-  - id: APR-004
-    title: "SIMD acceleration example"
-    status: done
-    priority: high
-    labels: [examples, acceleration]
-    description: |
-      Example demonstrating SIMD detection and matrix operations
-      with automatic fallback.
-    acceptance_criteria:
-      - simd_matrix_operations example
-      - Platform detection (AVX2, NEON, WASM)
-      - Benchmark output
-
-  - id: APR-005
-    title: "CLI tools (apr_info, apr_bench)"
-    status: done
-    priority: high
-    labels: [examples, cli]
-    description: |
-      Production-ready CLI tools for model inspection and benchmarking.
-    acceptance_criteria:
-      - apr_info with --demo and --verbose flags
-      - apr_bench with latency percentiles
-      - clap-based argument parsing
-
-  # Phase 2: Enhanced Features (IN PROGRESS)
-  - id: APR-006
-    title: "Integration with aprender format module"
-    status: done
-    priority: critical
-    labels: [integration, aprender]
-    description: |
-      Connect cookbook bundle/convert to actual aprender format
-      operations for real model loading.
-    acceptance_criteria:
-      - Load real .apr files via aprender::format
-      - Verify header parsing matches aprender spec
-      - Property tests for roundtrip
-
-  - id: APR-007
-    title: "Encrypted model example"
-    status: done
-    priority: high
-    labels: [examples, security]
-    description: |
-      Example demonstrating AES-256-GCM encrypted model loading
-      with Argon2id key derivation.
-    acceptance_criteria:
-      - bundle_encrypted_model example
-      - Password-based decryption
-      - Error handling for wrong password
-
-  - id: APR-008
-    title: "GGUF import example"
-    status: done
-    priority: high
-    labels: [examples, conversion]
-    description: |
-      Example for importing GGUF models into APR format.
-    acceptance_criteria:
-      - convert_gguf_to_apr example
-      - GGUF header parsing
-      - Tensor extraction
-
-  - id: APR-009
-    title: "Training integration with entrenar"
-    status: todo
-    priority: medium
-    labels: [examples, training]
-    description: |
-      Example showing training loop with entrenar and saving to .apr.
-    acceptance_criteria:
-      - train_and_export example
-      - Optimizer and loss usage
-      - Model serialization
-
-  - id: APR-010
-    title: "Property-based testing suite"
-    status: done
-    priority: high
-    labels: [testing, quality]
-    description: |
-      Comprehensive proptest suite for all modules.
-    acceptance_criteria:
-      - Proptest for bundle roundtrip
-      - Proptest for conversion invariants
-      - 95%+ coverage target
-
-  # Phase 3: Browser/WASM
-  - id: APR-011
-    title: "WASM compilation target"
-    status: todo
-    priority: medium
-    labels: [wasm, browser]
-    description: |
-      Ensure library compiles to wasm32-unknown-unknown.
-    acceptance_criteria:
-      - cargo build --target wasm32-unknown-unknown
-      - No std::fs usage in core
-      - Feature-gated native-only code
-
-  - id: APR-012
-    title: "Browser inference example"
-    status: todo
-    priority: medium
-    labels: [examples, wasm]
-    description: |
-      WASM example running inference in browser.
-    acceptance_criteria:
-      - wasm_inference example
-      - JavaScript bindings
-      - Performance metrics
-
-  - id: APR-013
-    title: "Documentation and mdBook"
-    status: done
-    priority: high
-    labels: [docs, book]
-    description: |
-      Complete mdBook documentation with recipes, concepts, and API reference.
-      GitHub Pages deployment via CI/CD.
-    acceptance_criteria:
-      - mdBook with 20+ chapters
-      - Getting started guide
-      - Recipe-based tutorials
-      - GitHub Pages deployment
-      - Hero SVG branding
-
-  # Phase 4: Advanced Integrations
-  - id: APR-014
-    title: "Custom Model Architecture example"
-    status: todo
-    priority: medium
-    labels: [examples, advanced]
-    description: |
-      Step-by-step example of defining a complex custom struct, implementing
-      Serde and aprender traits, and manually bundling with metadata.
-    acceptance_criteria:
-      - Custom struct implementation
-      - Manual bundling process
-      - Validation logic
-
-  - id: APR-015
-    title: "HTTP Inference Server example"
-    status: todo
-    priority: medium
-    labels: [examples, server, realizar]
-    description: |
-      Real-world backend example using `realizar` (../realizar) to load a
-      model at startup and serve predictions via a REST API endpoint.
-    acceptance_criteria:
-      - Server setup with realizar
-      - State management for model
-      - API endpoint implementation
-
-  - id: APR-016
-    title: "RAG/Pipeline Workflow example"
-    status: todo
-    priority: medium
-    labels: [examples, rag, trueno-rag]
-    description: |
-      Chaining demo using `trueno-rag` (../trueno-rag) for embedding,
-      similarity search, and generation context.
-    acceptance_criteria:
-      - Embedding model usage
-      - Vector search with trueno-rag
-      - Context injection to generation model
-
-  - id: APR-017
-    title: "Knowledge Distillation example"
-    status: todo
-    priority: medium
-    labels: [examples, training, advanced]
-    description: |
-      Example demonstrating knowledge distillation: training a smaller
-      student model to mimic a larger teacher model using entrenar.
-    acceptance_criteria:
-      - Teacher model loading
-      - Student model initialization
-      - Distillation loss function
-      - Training loop with entrenar
-
-  - id: APR-018
-    title: "Computer Vision example with presentar"
-    status: todo
-    priority: medium
-    labels: [examples, vision, presentar]
-    description: |
-      Example demonstrating CV tasks like classification using the
-      `presentar` library (../presentar).
-    acceptance_criteria:
-      - Image loading/preprocessing
-      - Classification inference
-      - Use of `presentar` crate
-
-  - id: APR-019
-    title: "Single-shot Defect Finder example"
-    status: todo
-    priority: medium
-    labels: [examples, analysis, organization-intelligence]
-    description: |
-      Example demonstrating a "single shot" defect finder for a code base
-      (e.g. a Rust project) using `organization-intelligence`
-      (../organization-intelligence).
-    acceptance_criteria:
-      - Codebase traversal/analysis
-      - Defect identification logic
-      - Integration with organization-intelligence
+- id: APR-001
+  github_issue: null
+  item_type: task
+  title: Core library with bundle and convert modules
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Error types with Display impl
+  - BundledModel from bytes with validation
+  - ModelBundle builder pattern
+  - AprConverter with tensor management
+  - 28+ unit tests passing
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - foundation
+  - tdd
+  notes: null
+- id: APR-002
+  github_issue: null
+  item_type: task
+  title: Bundling examples (static, quantized)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - bundle_static_model example
+  - bundle_quantized_model example
+  - Tests for each example
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - bundling
+  notes: null
+- id: APR-003
+  github_issue: null
+  item_type: task
+  title: Conversion examples (SafeTensors, GGUF)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - convert_safetensors_to_apr example
+  - convert_apr_to_gguf example
+  - Tests for each example
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - conversion
+  notes: null
+- id: APR-004
+  github_issue: null
+  item_type: task
+  title: SIMD acceleration example
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - simd_matrix_operations example
+  - Platform detection (AVX2, NEON, WASM)
+  - Benchmark output
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - acceleration
+  notes: null
+- id: APR-005
+  github_issue: null
+  item_type: task
+  title: CLI tools (apr_info, apr_bench)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - apr_info with --demo and --verbose flags
+  - apr_bench with latency percentiles
+  - clap-based argument parsing
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - cli
+  notes: null
+- id: APR-006
+  github_issue: null
+  item_type: task
+  title: Integration with aprender format module
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Load real .apr files via aprender::format
+  - Verify header parsing matches aprender spec
+  - Property tests for roundtrip
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - integration
+  - aprender
+  notes: null
+- id: APR-007
+  github_issue: null
+  item_type: task
+  title: Encrypted model example
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - bundle_encrypted_model example
+  - Password-based decryption
+  - Error handling for wrong password
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - security
+  notes: null
+- id: APR-008
+  github_issue: null
+  item_type: task
+  title: GGUF import example
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - convert_gguf_to_apr example
+  - GGUF header parsing
+  - Tensor extraction
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - conversion
+  notes: null
+- id: APR-009
+  github_issue: null
+  item_type: task
+  title: Training integration with entrenar
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - train_and_export example
+  - Optimizer and loss usage
+  - Model serialization
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - training
+  notes: null
+- id: APR-010
+  github_issue: null
+  item_type: task
+  title: Property-based testing suite
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Proptest for bundle roundtrip
+  - Proptest for conversion invariants
+  - 95%+ coverage target
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - testing
+  - quality
+  notes: null
+- id: APR-011
+  github_issue: null
+  item_type: task
+  title: WASM compilation target
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - cargo build --target wasm32-unknown-unknown
+  - No std::fs usage in core
+  - Feature-gated native-only code
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - wasm
+  - browser
+  notes: null
+- id: APR-012
+  github_issue: null
+  item_type: task
+  title: Browser inference example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - wasm_inference example
+  - JavaScript bindings
+  - Performance metrics
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - wasm
+  notes: null
+- id: APR-013
+  github_issue: null
+  item_type: task
+  title: Documentation and mdBook
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - mdBook with 20+ chapters
+  - Getting started guide
+  - Recipe-based tutorials
+  - GitHub Pages deployment
+  - Hero SVG branding
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - docs
+  - book
+  notes: null
+- id: APR-014
+  github_issue: null
+  item_type: task
+  title: Custom Model Architecture example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Custom struct implementation
+  - Manual bundling process
+  - Validation logic
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - advanced
+  notes: null
+- id: APR-015
+  github_issue: null
+  item_type: task
+  title: HTTP Inference Server example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Server setup with realizar
+  - State management for model
+  - API endpoint implementation
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - server
+  - realizar
+  notes: null
+- id: APR-016
+  github_issue: null
+  item_type: task
+  title: RAG/Pipeline Workflow example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Embedding model usage
+  - Vector search with trueno-rag
+  - Context injection to generation model
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - rag
+  - trueno-rag
+  notes: null
+- id: APR-017
+  github_issue: null
+  item_type: task
+  title: Knowledge Distillation example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Teacher model loading
+  - Student model initialization
+  - Distillation loss function
+  - Training loop with entrenar
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - training
+  - advanced
+  notes: null
+- id: APR-018
+  github_issue: null
+  item_type: task
+  title: Computer Vision example with presentar
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Image loading/preprocessing
+  - Classification inference
+  - Use of `presentar` crate
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - vision
+  - presentar
+  notes: null
+- id: APR-019
+  github_issue: null
+  item_type: task
+  title: Single-shot Defect Finder example
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 1970-01-01T00:00:00Z
+  spec: null
+  acceptance_criteria:
+  - Codebase traversal/analysis
+  - Defect identification logic
+  - Integration with organization-intelligence
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - analysis
+  - organization-intelligence
+  notes: null
+- id: APR-020
+  github_issue: null
+  item_type: task
+  title: Fix PMAT quality gate violations
+  status: inprogress
+  priority: critical
+  assigned_to: null
+  created: 1970-01-01T00:00:00Z
+  updated: 2025-12-06T17:00:40.543786722+00:00
+  spec: null
+  acceptance_criteria:
+  - Fix 31 complexity violations in recipe examples
+  - Fix 2 dead code violations
+  - Fix 2 documentation violations
+  - pmat analyze tdg --path . passes with Grade A
+  - pmat quality-gate passes without violations
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - quality
+  - tdd
+  - tech-debt
+  notes: null

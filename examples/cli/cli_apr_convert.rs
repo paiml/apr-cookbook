@@ -60,6 +60,20 @@ enum OutputFormat {
     SafeTensors,
 }
 
+impl OutputFormat {
+    fn as_str(self) -> &'static str {
+        match self {
+            Self::Apr => "apr",
+            Self::Gguf => "gguf",
+            Self::SafeTensors => "safetensors",
+        }
+    }
+
+    fn extension(self) -> &'static str {
+        self.as_str()
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[allow(dead_code)]
 struct ConversionResult {
@@ -153,22 +167,54 @@ fn print_help() {
     println!("    apr-convert --demo -f gguf");
 }
 
-fn run_convert(config: &ConvertConfig) -> Result<()> {
-    let mut ctx = RecipeContext::new("cli_apr_convert")?;
-
-    // Get input
-    let (input_path, input_bytes) = if config.demo {
+/// Load input bytes from config (demo mode or file)
+fn load_input(config: &ConvertConfig) -> Option<(String, Vec<u8>)> {
+    if config.demo {
         let payload = generate_model_payload(42, 2048);
         let bytes = ModelBundle::new()
             .with_name("demo")
             .with_compression(true)
             .with_payload(payload)
             .build();
-        ("demo.apr".to_string(), bytes)
-    } else if let Some(path) = &config.input_path {
-        let bytes = std::fs::read(path)?;
-        (path.clone(), bytes)
+        Some(("demo.apr".to_string(), bytes))
     } else {
+        config
+            .input_path
+            .as_ref()
+            .and_then(|path| std::fs::read(path).ok().map(|bytes| (path.clone(), bytes)))
+    }
+}
+
+/// Generate output path from input path and format
+fn generate_output_path(input_path: &str, format: OutputFormat) -> String {
+    let stem = std::path::Path::new(input_path)
+        .file_stem()
+        .map_or_else(|| "output".to_string(), |s| s.to_string_lossy().to_string());
+    format!("{}.{}", stem, format.extension())
+}
+
+/// Write output and return the actual path written
+fn write_output(
+    ctx: &mut RecipeContext,
+    output_path: &str,
+    output_bytes: &[u8],
+    demo: bool,
+) -> Result<String> {
+    if demo {
+        let temp_path = ctx.path(output_path);
+        std::fs::write(&temp_path, output_bytes)?;
+        Ok(temp_path.to_string_lossy().to_string())
+    } else {
+        std::fs::write(output_path, output_bytes)?;
+        Ok(output_path.to_string())
+    }
+}
+
+fn run_convert(config: &ConvertConfig) -> Result<()> {
+    let mut ctx = RecipeContext::new("cli_apr_convert")?;
+
+    // Load input
+    let Some((input_path, input_bytes)) = load_input(config) else {
         print_help();
         return Ok(());
     };
@@ -191,61 +237,58 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
         config.quantize.as_deref(),
     )?;
 
-    let output_format_str = match config.output_format {
-        OutputFormat::Apr => "apr",
-        OutputFormat::Gguf => "gguf",
-        OutputFormat::SafeTensors => "safetensors",
-    };
+    // Determine and write output
+    let output_path = config
+        .output_path
+        .clone()
+        .unwrap_or_else(|| generate_output_path(&input_path, config.output_format));
+    let actual_output_path = write_output(&mut ctx, &output_path, &output_bytes, config.demo)?;
 
-    // Determine output path
-    let output_path = config.output_path.clone().unwrap_or_else(|| {
-        let stem = std::path::Path::new(&input_path)
-            .file_stem()
-            .map_or_else(|| "output".to_string(), |s| s.to_string_lossy().to_string());
-
-        let ext = match config.output_format {
-            OutputFormat::Apr => "apr",
-            OutputFormat::Gguf => "gguf",
-            OutputFormat::SafeTensors => "safetensors",
-        };
-
-        format!("{}.{}", stem, ext)
-    });
-
-    // Write output (in demo mode, write to temp dir)
-    let actual_output_path = if config.demo {
-        let temp_path = ctx.path(&output_path);
-        std::fs::write(&temp_path, &output_bytes)?;
-        temp_path.to_string_lossy().to_string()
-    } else {
-        std::fs::write(&output_path, &output_bytes)?;
-        output_path.clone()
-    };
-
+    // Record metrics
     let compression_ratio = input_bytes.len() as f64 / output_bytes.len() as f64;
-
     ctx.record_metric("input_size", input_bytes.len() as i64);
     ctx.record_metric("output_size", output_bytes.len() as i64);
     ctx.record_float_metric("compression_ratio", compression_ratio);
 
     // Print result
+    print_result(
+        &input_path,
+        &input_format,
+        &actual_output_path,
+        config,
+        &input_bytes,
+        &output_bytes,
+        compression_ratio,
+    );
+
+    Ok(())
+}
+
+fn print_result(
+    input_path: &str,
+    input_format: &str,
+    output_path: &str,
+    config: &ConvertConfig,
+    input_bytes: &[u8],
+    output_bytes: &[u8],
+    compression_ratio: f64,
+) {
     println!("Conversion complete!");
     println!();
     println!("Input:  {} ({})", input_path, input_format);
-    println!("Output: {} ({})", actual_output_path, output_format_str);
+    println!(
+        "Output: {} ({})",
+        output_path,
+        config.output_format.as_str()
+    );
     println!();
     println!("Input size:  {} bytes", input_bytes.len());
     println!("Output size: {} bytes", output_bytes.len());
     println!("Ratio: {:.2}x", compression_ratio);
 
-    if config.quantize.is_some() {
-        println!(
-            "Quantization: {}",
-            config.quantize.as_ref().unwrap_or(&"none".to_string())
-        );
+    if let Some(q) = &config.quantize {
+        println!("Quantization: {}", q);
     }
-
-    Ok(())
 }
 
 fn detect_format(bytes: &[u8]) -> String {
