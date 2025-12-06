@@ -149,10 +149,7 @@ struct BenchmarkResult {
     accuracy_status: String,
 }
 
-fn benchmark_dot_product(
-    mode: PrecisionMode,
-    size: usize,
-) -> Result<BenchmarkResult> {
+fn benchmark_dot_product(mode: PrecisionMode, size: usize) -> Result<BenchmarkResult> {
     // Ops: 2*N (multiply + add)
     let ops = 2.0 * size as f64;
 

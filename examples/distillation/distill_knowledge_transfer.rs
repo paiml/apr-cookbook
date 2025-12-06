@@ -162,10 +162,7 @@ struct EpochResult {
     distillation_loss: f64,
 }
 
-fn simulate_distillation_epoch(
-    epoch: u32,
-    config: &DistillationConfig,
-) -> Result<EpochResult> {
+fn simulate_distillation_epoch(epoch: u32, config: &DistillationConfig) -> Result<EpochResult> {
     // Simulated learning curve (deterministic)
     let progress = f64::from(epoch) / f64::from(config.epochs);
 

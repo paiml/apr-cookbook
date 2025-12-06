@@ -133,10 +133,7 @@ struct TradeoffResult {
     size_reduction: f64,
 }
 
-fn apply_pruning_distillation(
-    original: &ModelStats,
-    sparsity: f64,
-) -> Result<ModelStats> {
+fn apply_pruning_distillation(original: &ModelStats, sparsity: f64) -> Result<ModelStats> {
     // Effective parameters after pruning
     let remaining_ratio = 1.0 - sparsity;
     let params = original.params_millions * remaining_ratio;
@@ -162,10 +159,7 @@ fn apply_pruning_distillation(
     })
 }
 
-fn find_best_tradeoff(
-    results: &[ModelStats],
-    original: &ModelStats,
-) -> Result<TradeoffResult> {
+fn find_best_tradeoff(results: &[ModelStats], original: &ModelStats) -> Result<TradeoffResult> {
     let mut best_idx = 0;
     let mut best_efficiency = 0.0f64;
 
@@ -193,10 +187,7 @@ fn find_best_tradeoff(
     })
 }
 
-fn generate_pruning_schedule(
-    target_sparsity: f64,
-    epochs: usize,
-) -> Result<Vec<f64>> {
+fn generate_pruning_schedule(target_sparsity: f64, epochs: usize) -> Result<Vec<f64>> {
     // Gradual cubic pruning schedule
     let schedule: Vec<f64> = (1..=epochs)
         .map(|e| {

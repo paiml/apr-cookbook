@@ -124,7 +124,8 @@ fn main() -> Result<()> {
     println!("{:-<65}", "");
 
     // Calculate improvements
-    let stream_improvement = ((f64::from(sync_result.total_ms) - f64::from(stream_result.total_ms))
+    let stream_improvement = ((f64::from(sync_result.total_ms)
+        - f64::from(stream_result.total_ms))
         / f64::from(sync_result.total_ms))
         * 100.0;
     let cache_improvement = ((f64::from(sync_result.total_ms) - f64::from(cached_result.total_ms))

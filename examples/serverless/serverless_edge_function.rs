@@ -188,11 +188,12 @@ impl EdgeDeployment {
     }
 
     fn route_request(&self, _client: &str, region: &str) -> Result<RouteResult> {
-        let location = self.locations.get(region).ok_or_else(|| {
-            CookbookError::ModelNotFound {
+        let location = self
+            .locations
+            .get(region)
+            .ok_or_else(|| CookbookError::ModelNotFound {
                 path: std::path::PathBuf::from(region),
-            }
-        })?;
+            })?;
 
         Ok(RouteResult {
             edge_location: location.id.clone(),
@@ -202,9 +203,7 @@ impl EdgeDeployment {
     }
 
     fn get_edge_latency(&self, region: &str) -> u32 {
-        self.locations
-            .get(region)
-            .map_or(50, |l| l.latency_ms)
+        self.locations.get(region).map_or(50, |l| l.latency_ms)
     }
 
     fn save(&self, path: &std::path::Path) -> Result<()> {

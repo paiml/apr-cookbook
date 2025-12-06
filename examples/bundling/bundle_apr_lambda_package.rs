@@ -145,11 +145,7 @@ fn create_lambda_package(model_bytes: &[u8], handler_code: &[u8]) -> Result<Vec<
     encoder.finish().map_err(CookbookError::from)
 }
 
-fn write_package_entry(
-    encoder: &mut GzEncoder<Vec<u8>>,
-    name: &str,
-    data: &[u8],
-) -> Result<()> {
+fn write_package_entry(encoder: &mut GzEncoder<Vec<u8>>, name: &str, data: &[u8]) -> Result<()> {
     // Write name length and name
     let name_bytes = name.as_bytes();
     encoder.write_all(&(name_bytes.len() as u32).to_le_bytes())?;

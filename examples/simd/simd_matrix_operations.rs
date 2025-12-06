@@ -198,10 +198,7 @@ fn benchmark_matmul(size: u32, caps: &SimdCapabilities) -> Result<BenchmarkResul
     })
 }
 
-fn benchmark_dot_product(
-    size: u32,
-    caps: &SimdCapabilities,
-) -> Result<BenchmarkResult> {
+fn benchmark_dot_product(size: u32, caps: &SimdCapabilities) -> Result<BenchmarkResult> {
     // FLOPs: 2*N (multiply + add)
     let flops = 2.0 * f64::from(size);
 
@@ -221,10 +218,7 @@ fn benchmark_dot_product(
     })
 }
 
-fn benchmark_element_mul(
-    size: u32,
-    caps: &SimdCapabilities,
-) -> Result<BenchmarkResult> {
+fn benchmark_element_mul(size: u32, caps: &SimdCapabilities) -> Result<BenchmarkResult> {
     // FLOPs: N
     let flops = f64::from(size);
 

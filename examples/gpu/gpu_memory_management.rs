@@ -213,9 +213,7 @@ impl GpuMemoryPool {
             .blocks
             .iter()
             .position(|b| b.handle == handle)
-            .ok_or_else(|| {
-                CookbookError::invalid_format(format!("Invalid handle: {}", handle))
-            })?;
+            .ok_or_else(|| CookbookError::invalid_format(format!("Invalid handle: {}", handle)))?;
 
         let block = self.blocks.remove(idx);
         self.log
@@ -229,9 +227,7 @@ impl GpuMemoryPool {
             .blocks
             .iter_mut()
             .find(|b| b.handle == handle)
-            .ok_or_else(|| {
-                CookbookError::invalid_format(format!("Invalid handle: {}", handle))
-            })?;
+            .ok_or_else(|| CookbookError::invalid_format(format!("Invalid handle: {}", handle)))?;
 
         block.offloaded = true;
         self.log.push_back(format!(
