@@ -435,3 +435,28 @@ roadmap:
   - tdd
   - tech-debt
   notes: null
+- id: APR-021
+  github_issue: null
+  item_type: task
+  title: Zero quality-gate violations
+  status: inprogress
+  priority: critical
+  assigned_to: null
+  created: 2025-12-06T00:00:00Z
+  updated: 2025-12-06T17:25:00Z
+  spec: null
+  acceptance_criteria:
+  - "[DONE] Fix 2 complexity violations (bundle_apr_quantized_q4.rs, cli_apr_convert.rs)"
+  - "[DONE] Fix 2 documentation violations (Usage, Contributing sections)"
+  - Fix 2 dead code violations (pmat heuristic in aprender_integration.rs)
+  - Address 6 entropy violations (intentional cookbook patterns)
+  - Fix 1 provability violation (score 0.65 vs 0.70 threshold)
+  - pmat quality-gate passes with 0 violations
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - quality
+  - tdd
+  - zero-defects
+  notes: "Progress: 14 -> 9 violations. TDG Grade A 94.1/100. Remaining violations are cookbook-specific patterns."

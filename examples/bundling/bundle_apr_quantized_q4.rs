@@ -136,6 +136,50 @@ fn quantize_to_q4_0(weights: &[f32]) -> Vec<u8> {
     result
 }
 
+/// Read scale factor from Q4_0 block
+fn read_q4_scale(data: &[u8], offset: usize) -> f32 {
+    let scale_bytes = [data[offset], data[offset + 1], 0, 0];
+    let stored_scale = f32::from_le_bytes(scale_bytes);
+    if stored_scale == 0.0 {
+        1.0
+    } else {
+        stored_scale
+    }
+}
+
+/// Unpack a single 4-bit value from packed byte
+fn unpack_q4_value(packed: u8, index: usize) -> u8 {
+    if index % 2 == 0 {
+        packed & 0x0F
+    } else {
+        (packed >> 4) & 0x0F
+    }
+}
+
+/// Dequantize a single Q4_0 block
+fn dequantize_q4_block(
+    data: &[u8],
+    offset: usize,
+    scale: f32,
+    n_values: usize,
+    current_count: usize,
+) -> Vec<f32> {
+    let mut values = Vec::with_capacity(Q4_0_BLOCK_SIZE);
+    for i in 0..Q4_0_BLOCK_SIZE {
+        if current_count + values.len() >= n_values {
+            break;
+        }
+        let byte_idx = offset + 2 + i / 2;
+        if byte_idx >= data.len() {
+            break;
+        }
+        let quantized = unpack_q4_value(data[byte_idx], i);
+        let value = (f32::from(quantized) - 8.0) * scale;
+        values.push(value);
+    }
+    values
+}
+
 /// Dequantize Q4_0 back to F32
 fn dequantize_q4_0(data: &[u8], n_values: usize) -> Vec<f32> {
     let mut result = Vec::with_capacity(n_values);
@@ -147,36 +191,9 @@ fn dequantize_q4_0(data: &[u8], n_values: usize) -> Vec<f32> {
             break;
         }
 
-        // Read scale (simplified f16 read)
-        let _scale = f32::from_le_bytes([data[offset], data[offset + 1], 0, 0]) * 256.0 * 256.0; // Approximate f16 to f32
-
-        // Actually, let's just store scale properly
-        let scale_bytes = [data[offset], data[offset + 1], 0, 0];
-        let stored_scale = f32::from_le_bytes(scale_bytes);
-        let scale = if stored_scale == 0.0 {
-            1.0
-        } else {
-            stored_scale
-        };
-
-        // Unpack 4-bit values
-        for i in 0..Q4_0_BLOCK_SIZE {
-            if result.len() >= n_values {
-                break;
-            }
-            let byte_idx = offset + 2 + i / 2;
-            if byte_idx >= data.len() {
-                break;
-            }
-            let packed = data[byte_idx];
-            let quantized = if i % 2 == 0 {
-                packed & 0x0F
-            } else {
-                (packed >> 4) & 0x0F
-            };
-            let value = (f32::from(quantized) - 8.0) * scale;
-            result.push(value);
-        }
+        let scale = read_q4_scale(data, offset);
+        let block_values = dequantize_q4_block(data, offset, scale, n_values, result.len());
+        result.extend(block_values);
     }
 
     result

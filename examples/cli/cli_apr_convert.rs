@@ -87,6 +87,20 @@ struct ConversionResult {
     quantized: bool,
 }
 
+/// Parse output format from string
+fn parse_output_format(s: &str) -> OutputFormat {
+    match s {
+        "gguf" => OutputFormat::Gguf,
+        "safetensors" | "st" => OutputFormat::SafeTensors,
+        _ => OutputFormat::Apr,
+    }
+}
+
+/// Get the next argument value safely
+fn get_next_arg(args: &[String], i: usize) -> Option<String> {
+    args.get(i + 1).cloned()
+}
+
 fn parse_args(args: &[String]) -> Result<ConvertConfig> {
     let mut config = ConvertConfig {
         input_path: None,
@@ -98,41 +112,33 @@ fn parse_args(args: &[String]) -> Result<ConvertConfig> {
         help: false,
     };
 
-    let mut positional = 0;
     let mut i = 1;
     while i < args.len() {
-        match args[i].as_str() {
+        let arg = args[i].as_str();
+        match arg {
             "--help" | "-h" => config.help = true,
             "--demo" | "-d" => config.demo = true,
             "--verbose" | "-v" => config.verbose = true,
             "--format" | "-f" => {
-                i += 1;
-                if i < args.len() {
-                    config.output_format = match args[i].as_str() {
-                        "apr" => OutputFormat::Apr,
-                        "gguf" => OutputFormat::Gguf,
-                        "safetensors" | "st" => OutputFormat::SafeTensors,
-                        _ => OutputFormat::Apr,
-                    };
+                if let Some(val) = get_next_arg(args, i) {
+                    config.output_format = parse_output_format(&val);
+                    i += 1;
                 }
             }
             "--quantize" | "-q" => {
-                i += 1;
-                if i < args.len() {
-                    config.quantize = Some(args[i].clone());
+                config.quantize = get_next_arg(args, i);
+                if config.quantize.is_some() {
+                    i += 1;
                 }
             }
             "--output" | "-o" => {
-                i += 1;
-                if i < args.len() {
-                    config.output_path = Some(args[i].clone());
+                config.output_path = get_next_arg(args, i);
+                if config.output_path.is_some() {
+                    i += 1;
                 }
             }
-            path if !path.starts_with('-') => {
-                if positional == 0 {
-                    config.input_path = Some(path.to_string());
-                    positional += 1;
-                }
+            _ if !arg.starts_with('-') && config.input_path.is_none() => {
+                config.input_path = Some(arg.to_string());
             }
             _ => {}
         }
