@@ -188,8 +188,9 @@ struct ImageAnalysis {
 
 fn generate_dockerfile(image: &ContainerImage) -> String {
     let base_layer = image.layers.first();
-    let base_image = base_layer
-        .map_or("public.ecr.aws/lambda/provided:al2", |l| l.base_image.as_str());
+    let base_image = base_layer.map_or("public.ecr.aws/lambda/provided:al2", |l| {
+        l.base_image.as_str()
+    });
 
     let mut dockerfile = String::new();
     dockerfile.push_str(&format!("FROM {}\n\n", base_image));

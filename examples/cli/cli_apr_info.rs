@@ -200,8 +200,10 @@ fn read_model_info(path: &str) -> Result<ModelInfo> {
     Ok(ModelInfo {
         path: path.to_string(),
         format_version: "1.0.0".to_string(),
-        model_name: std::path::Path::new(path)
-            .file_stem().map_or_else(|| "unknown".to_string(), |s| s.to_string_lossy().to_string()),
+        model_name: std::path::Path::new(path).file_stem().map_or_else(
+            || "unknown".to_string(),
+            |s| s.to_string_lossy().to_string(),
+        ),
         model_type: "unknown".to_string(),
         size_bytes: bytes.len(),
         compressed,

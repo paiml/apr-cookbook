@@ -112,10 +112,7 @@ struct InferenceResponse {
 }
 
 /// Mock API call (simulates network request)
-fn mock_api_call(
-    _config: &ApiConfig,
-    request: &InferenceRequest,
-) -> Result<InferenceResponse> {
+fn mock_api_call(_config: &ApiConfig, request: &InferenceRequest) -> Result<InferenceResponse> {
     // Simulate processing
     let outputs: Vec<f32> = request.inputs.iter().map(|x| (x * 2.0).tanh()).collect();
 

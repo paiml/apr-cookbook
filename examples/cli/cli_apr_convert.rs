@@ -200,7 +200,8 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
     // Determine output path
     let output_path = config.output_path.clone().unwrap_or_else(|| {
         let stem = std::path::Path::new(&input_path)
-            .file_stem().map_or_else(|| "output".to_string(), |s| s.to_string_lossy().to_string());
+            .file_stem()
+            .map_or_else(|| "output".to_string(), |s| s.to_string_lossy().to_string());
 
         let ext = match config.output_format {
             OutputFormat::Apr => "apr",
@@ -261,11 +262,7 @@ fn detect_format(bytes: &[u8]) -> String {
     "unknown".to_string()
 }
 
-fn convert(
-    input: &[u8],
-    output_format: OutputFormat,
-    quantize: Option<&str>,
-) -> Result<Vec<u8>> {
+fn convert(input: &[u8], output_format: OutputFormat, quantize: Option<&str>) -> Result<Vec<u8>> {
     // Simulated conversion
     let base_output = match output_format {
         OutputFormat::Apr => ModelBundle::new()

@@ -220,11 +220,7 @@ fn simulate_inference(iteration: usize, batch_size: usize) -> f64 {
     base_time * batch_factor + variation
 }
 
-fn calculate_results(
-    model: &str,
-    times: &[f64],
-    config: &BenchConfig,
-) -> Result<BenchResults> {
+fn calculate_results(model: &str, times: &[f64], config: &BenchConfig) -> Result<BenchResults> {
     let n = times.len() as f64;
 
     let mean = times.iter().sum::<f64>() / n;

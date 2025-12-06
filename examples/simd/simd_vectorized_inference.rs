@@ -211,10 +211,7 @@ fn benchmark_batch(
     })
 }
 
-fn layer_breakdown(
-    model: &VectorizedModel,
-    batch_size: usize,
-) -> Result<Vec<(String, f64)>> {
+fn layer_breakdown(model: &VectorizedModel, batch_size: usize) -> Result<Vec<(String, f64)>> {
     let _total_ops = model.param_count() as f64 * 2.0 * batch_size as f64;
 
     // Breakdown by layer (simplified)
