@@ -370,7 +370,8 @@ impl DeploymentHistory {
 
     fn current_version(&amp;self) -&gt; String {
         self.current_index
-            .and_then(|i| self.history.get(i)).map_or_else(|| &quot;none&quot;.to_string(), |e| e.version.clone())
+            .and_then(|i| self.history.get(i))
+            .map_or_else(|| &quot;none&quot;.to_string(), |e| e.version.clone())
     }
 
     fn save(&amp;self, path: &amp;std::path::Path) -&gt; Result&lt;()&gt; {

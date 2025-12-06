@@ -327,8 +327,8 @@ fn handler(ctx: &amp;LambdaContext, event: &amp;LambdaEvent) -&gt; Result&lt;Lam
         model_version: &quot;1.0.0&quot;.to_string(),
     };
 
-    let body = serde_json::to_string(&amp;output)
-        .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+    let body =
+        serde_json::to_string(&amp;output).map_err(|e| CookbookError::Serialization(e.to_string()))?;
 
     // Deterministic billing calculation
     let billed_duration = 10 + event.body.inputs.len() as u32 * 5;

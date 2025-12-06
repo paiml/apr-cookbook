@@ -390,8 +390,10 @@ fn read_model_info(path: &amp;str) -&gt; Result&lt;ModelInfo&gt; {
     Ok(ModelInfo {
         path: path.to_string(),
         format_version: &quot;1.0.0&quot;.to_string(),
-        model_name: std::path::Path::new(path)
-            .file_stem().map_or_else(|| &quot;unknown&quot;.to_string(), |s| s.to_string_lossy().to_string()),
+        model_name: std::path::Path::new(path).file_stem().map_or_else(
+            || &quot;unknown&quot;.to_string(),
+            |s| s.to_string_lossy().to_string(),
+        ),
         model_type: &quot;unknown&quot;.to_string(),
         size_bytes: bytes.len(),
         compressed,

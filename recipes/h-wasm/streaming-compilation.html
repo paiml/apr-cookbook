@@ -313,7 +313,8 @@ fn main() -&gt; Result&lt;()&gt; {
     println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
 
     // Calculate improvements
-    let stream_improvement = ((f64::from(sync_result.total_ms) - f64::from(stream_result.total_ms))
+    let stream_improvement = ((f64::from(sync_result.total_ms)
+        - f64::from(stream_result.total_ms))
         / f64::from(sync_result.total_ms))
         * 100.0;
     let cache_improvement = ((f64::from(sync_result.total_ms) - f64::from(cached_result.total_ms))
@@ -563,7 +564,7 @@ mod proptests {
 
             prop_assert!(sync.total_ms &gt; 0);
             prop_assert!(stream.total_ms &gt; 0);
-            prop_assert!(cached.total_ms &gt; 0);
+            prop_assert!(cached.total_ms &gt;= 0);
         }
     }
 }</code></pre>

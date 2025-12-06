@@ -339,7 +339,8 @@ fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
         &quot;demo-model&quot;.to_string()
     } else if let Some(path) = &amp;config.model_path {
         std::path::Path::new(path)
-            .file_stem().map_or_else(|| &quot;model&quot;.to_string(), |s| s.to_string_lossy().to_string())
+            .file_stem()
+            .map_or_else(|| &quot;model&quot;.to_string(), |s| s.to_string_lossy().to_string())
     } else {
         print_help();
         return Ok(());
@@ -411,10 +412,7 @@ fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
     Ok(())
 }
 
-fn simulate_server_startup(
-    config: &amp;ServerConfig,
-    model_name: &amp;str,
-) -&gt; Result&lt;ServerStatus&gt; {
+fn simulate_server_startup(config: &amp;ServerConfig, model_name: &amp;str) -&gt; Result&lt;ServerStatus&gt; {
     let endpoints = vec![
         EndpointInfo {
             path: &quot;/v1/infer&quot;.to_string(),
@@ -460,11 +458,7 @@ struct SimulatedResponse {
     latency_ms: f64,
 }
 
-fn simulate_request(
-    method: &amp;str,
-    path: &amp;str,
-    _body: &amp;str,
-) -&gt; Result&lt;SimulatedResponse&gt; {
+fn simulate_request(method: &amp;str, path: &amp;str, _body: &amp;str) -&gt; Result&lt;SimulatedResponse&gt; {
     // Deterministic response based on path
     let seed = hash_name_to_seed(path);
     let latency = 1.0 + (seed % 10) as f64 * 0.5;

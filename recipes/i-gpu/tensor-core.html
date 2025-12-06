@@ -301,7 +301,9 @@ fn main() -&gt; Result&lt;()&gt; {
         .map_or(1, |r| r.memory_mb);
 
     for result in &amp;results {
-        let savings = ((f64::from(fp32_memory) - f64::from(result.memory_mb)) / f64::from(fp32_memory)) * 100.0;
+        let savings = ((f64::from(fp32_memory) - f64::from(result.memory_mb))
+            / f64::from(fp32_memory))
+            * 100.0;
         if savings &gt; 0.0 {
             println!(&quot;  {:?}: {:.0}% reduction&quot;, result.precision, savings);
         }

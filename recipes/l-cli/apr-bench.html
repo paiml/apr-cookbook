@@ -410,11 +410,7 @@ fn simulate_inference(iteration: usize, batch_size: usize) -&gt; f64 {
     base_time * batch_factor + variation
 }
 
-fn calculate_results(
-    model: &amp;str,
-    times: &amp;[f64],
-    config: &amp;BenchConfig,
-) -&gt; Result&lt;BenchResults&gt; {
+fn calculate_results(model: &amp;str, times: &amp;[f64], config: &amp;BenchConfig) -&gt; Result&lt;BenchResults&gt; {
     let n = times.len() as f64;
 
     let mean = times.iter().sum::&lt;f64&gt;() / n;
@@ -597,9 +593,10 @@ mod proptests {
 
         #[test]
         fn prop_statistics_valid(iterations in 10usize..100) {
-            let times: Vec&lt;f64&gt; = (0..iterations)
+            let mut times: Vec&lt;f64&gt; = (0..iterations)
                 .map(|i| simulate_inference(i, 1))
                 .collect();
+            times.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
             let config = BenchConfig {
                 model_path: None,

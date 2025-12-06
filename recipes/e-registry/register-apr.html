@@ -218,6 +218,50 @@ use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
+/// Create model card for v1.0.0
+fn v1_model_card() -&gt; ModelCard {
+    ModelCard {
+        description: &quot;Fraud detection classifier for transactions&quot;.to_string(),
+        metrics: [
+            (&quot;accuracy&quot;.to_string(), &quot;0.95&quot;.to_string()),
+            (&quot;f1_score&quot;.to_string(), &quot;0.92&quot;.to_string()),
+        ]
+        .into_iter()
+        .collect(),
+        tags: vec![&quot;fraud&quot;.to_string(), &quot;classification&quot;.to_string()],
+    }
+}
+
+/// Create model card for v1.1.0
+fn v1_1_model_card() -&gt; ModelCard {
+    ModelCard {
+        description: &quot;Fraud detection v1.1 with improved recall&quot;.to_string(),
+        metrics: [
+            (&quot;accuracy&quot;.to_string(), &quot;0.96&quot;.to_string()),
+            (&quot;f1_score&quot;.to_string(), &quot;0.94&quot;.to_string()),
+            (&quot;recall&quot;.to_string(), &quot;0.91&quot;.to_string()),
+        ]
+        .into_iter()
+        .collect(),
+        tags: vec![
+            &quot;fraud&quot;.to_string(),
+            &quot;classification&quot;.to_string(),
+            &quot;v1.1&quot;.to_string(),
+        ],
+    }
+}
+
+/// Print registry contents
+fn print_registry(models: &amp;[ModelEntry], registry_path: &amp;std::path::Path) {
+    println!();
+    println!(&quot;Registry contents:&quot;);
+    for model in models {
+        println!(&quot;  {} v{} [{}]&quot;, model.name, model.version, model.stage);
+    }
+    println!();
+    println!(&quot;Registry saved to: {:?}&quot;, registry_path);
+}
+
 fn main() -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;registry_register_apr&quot;)?;
 
@@ -225,11 +269,10 @@ fn main() -&gt; Result&lt;()&gt; {
     println!(&quot;Registering .apr model in mock registry&quot;);
     println!();
 
-    // Create mock registry in temp directory
     let registry_path = ctx.path(&quot;registry.json&quot;);
     let mut registry = MockRegistry::new(&amp;registry_path);
 
-    // Create model to register
+    // Create and save model
     let model_seed = hash_name_to_seed(&quot;fraud_detector&quot;);
     let payload = generate_model_payload(model_seed, 512);
     let model_bytes = ModelBundle::new()
@@ -237,27 +280,16 @@ fn main() -&gt; Result&lt;()&gt; {
         .with_compression(true)
         .with_payload(payload)
         .build();
-
     let model_path = ctx.path(&quot;fraud_detector.apr&quot;);
     std::fs::write(&amp;model_path, &amp;model_bytes)?;
 
-    // Register model v1.0.0
+    // Register v1.0.0
     let model_id = registry.register(
         &quot;fraud-detector&quot;,
         &amp;model_path,
         SemVer::new(1, 0, 0),
-        ModelCard {
-            description: &quot;Fraud detection classifier for transactions&quot;.to_string(),
-            metrics: [
-                (&quot;accuracy&quot;.to_string(), &quot;0.95&quot;.to_string()),
-                (&quot;f1_score&quot;.to_string(), &quot;0.92&quot;.to_string()),
-            ]
-            .into_iter()
-            .collect(),
-            tags: vec![&quot;fraud&quot;.to_string(), &quot;classification&quot;.to_string()],
-        },
+        v1_model_card(),
     )?;
-
     ctx.record_string_metric(&quot;model_id&quot;, model_id.clone());
     println!(&quot;Registered model: {}&quot;, model_id);
 
@@ -265,45 +297,21 @@ fn main() -&gt; Result&lt;()&gt; {
     registry.stage(&amp;model_id, Stage::Production)?;
     println!(&quot;Staged to production&quot;);
 
-    // Register model v1.1.0 (update)
+    // Register v1.1.0
     let model_id_v2 = registry.register(
         &quot;fraud-detector&quot;,
         &amp;model_path,
         SemVer::new(1, 1, 0),
-        ModelCard {
-            description: &quot;Fraud detection v1.1 with improved recall&quot;.to_string(),
-            metrics: [
-                (&quot;accuracy&quot;.to_string(), &quot;0.96&quot;.to_string()),
-                (&quot;f1_score&quot;.to_string(), &quot;0.94&quot;.to_string()),
-                (&quot;recall&quot;.to_string(), &quot;0.91&quot;.to_string()),
-            ]
-            .into_iter()
-            .collect(),
-            tags: vec![
-                &quot;fraud&quot;.to_string(),
-                &quot;classification&quot;.to_string(),
-                &quot;v1.1&quot;.to_string(),
-            ],
-        },
+        v1_1_model_card(),
     )?;
-
     ctx.record_string_metric(&quot;model_id_v2&quot;, model_id_v2.clone());
     println!(&quot;Registered model v1.1.0: {}&quot;, model_id_v2);
 
-    // List models
+    // List and save
     let models = registry.list()?;
     ctx.record_metric(&quot;model_count&quot;, models.len() as i64);
-
-    // Save registry
     registry.save()?;
-
-    println!();
-    println!(&quot;Registry contents:&quot;);
-    for model in &amp;models {
-        println!(&quot;  {} v{} [{}]&quot;, model.name, model.version, model.stage);
-    }
-    println!();
-    println!(&quot;Registry saved to: {:?}&quot;, registry_path);
+    print_registry(&amp;models, &amp;registry_path);
 
     Ok(())
 }
