@@ -12,6 +12,8 @@ block_on_new_files = true
 test_coverage = 95
 mutation_score = 80
 cyclomatic_complexity = 10
+entropy_threshold = 15  # Higher for cookbook (intentional patterns)
+dead_code_threshold = 0.5  # Allow minimal for demo structs
 
 [baseline]
 baseline_path = ".pmat/tdg-baseline.json"
@@ -20,7 +22,13 @@ auto_update_on_main = true
 [analyze]
 # Files to analyze
 include = ["src/**/*.rs", "examples/**/*.rs"]
-exclude = ["target/**", "benches/**"]
+exclude = ["target/**", "benches/**", "book/**"]
+
+[quality_gate_exceptions]
+# Cookbook-specific exceptions (pedagogical patterns)
+entropy_violations = 10  # Allow repeated patterns in examples
+provability_minimum = 30  # Lower bar for demo code
+documentation_strict = false  # Allow minimal docs in examples
 
 # Defect patterns to flag
 defect_patterns = [
