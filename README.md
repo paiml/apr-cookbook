@@ -1,3 +1,5 @@
+<div align="center">
+
 # APR Cookbook
 
 > Production recipes for ML model deployment — bundling, conversion, and acceleration in pure Rust
@@ -8,7 +10,22 @@
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
 [![Book](https://img.shields.io/badge/book-online-blue)](https://paiml.github.io/apr-cookbook/)
 
+</div>
+
 ![](.github/apr-cookbook-hero.svg)
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Recipe Categories](#recipe-categories)
+- [Examples](#examples)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [Documentation](#documentation)
+- [Development](#development)
+- [License](#license)
 
 ## Overview
 
@@ -21,6 +38,15 @@ APR Cookbook provides **52 production-ready recipes** across 12 categories for d
 - **Binary Bundling**: Single-file deployments with optional encryption
 - **Acceleration**: SIMD, GPU, and WebGPU backends via trueno
 - **Serverless**: Lambda, Edge Functions, and WASM deployment patterns
+
+### Live Demos
+
+See APR models in action with GPU/SIMD-accelerated WebAssembly:
+
+| Demo | Description | Link |
+|------|-------------|------|
+| 📈 **Monte Carlo S&P 500** | GPU/SIMD-accelerated portfolio simulation with 100K+ paths/sec. Real-time risk metrics (VaR, CVaR, Sharpe) using `.apr` model for historical data. | [Launch →](https://interactive.paiml.com/monte-carlo-sp500/) |
+| 🐚 **Shell ML Autocomplete** | N-gram Markov Model shell autocomplete. Statistical language model bundled as `.apr` for instant browser loading. | [Launch →](https://interactive.paiml.com/shell-ml/) |
 
 ## Installation
 
