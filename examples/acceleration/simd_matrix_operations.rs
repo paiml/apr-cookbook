@@ -79,24 +79,31 @@ fn detect_simd_level() -> &'static str {
     #[cfg(target_arch = "x86_64")]
     {
         if is_x86_feature_detected!("avx512f") {
-            return "AVX-512";
-        }
-        if is_x86_feature_detected!("avx2") {
-            return "AVX2";
-        }
-        if is_x86_feature_detected!("sse4.1") {
-            return "SSE4.1";
+            "AVX-512"
+        } else if is_x86_feature_detected!("avx2") {
+            "AVX2"
+        } else if is_x86_feature_detected!("sse4.1") {
+            "SSE4.1"
+        } else {
+            "Scalar"
         }
     }
     #[cfg(target_arch = "aarch64")]
     {
-        return "NEON";
+        "NEON"
     }
     #[cfg(target_arch = "wasm32")]
     {
-        return "WASM SIMD";
+        "WASM SIMD"
     }
-    "Scalar"
+    #[cfg(not(any(
+        target_arch = "x86_64",
+        target_arch = "aarch64",
+        target_arch = "wasm32"
+    )))]
+    {
+        "Scalar"
+    }
 }
 
 fn main() -> Result<()> {
