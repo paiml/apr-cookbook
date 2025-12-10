@@ -14,6 +14,9 @@
 
 ![](.github/apr-cookbook-hero.svg)
 
+[![APR Format Vision](https://img.youtube.com/vi/MoQ-kiOm57Q/maxresdefault.jpg)](https://www.youtube.com/live/MoQ-kiOm57Q?si=KGhHRY42YDV-_iRB)
+> **Watch:** Vision for the `.apr` ML model format
+
 ## Table of Contents
 
 - [Overview](#overview)
@@ -47,6 +50,7 @@ See APR models in action with GPU/SIMD-accelerated WebAssembly:
 |------|-------------|------|
 | 📈 **Monte Carlo S&P 500** | GPU/SIMD-accelerated portfolio simulation with 100K+ paths/sec. Real-time risk metrics (VaR, CVaR, Sharpe) using `.apr` model for historical data. | [Launch →](https://interactive.paiml.com/monte-carlo-sp500/) |
 | 🐚 **Shell ML Autocomplete** | N-gram Markov Model shell autocomplete. Statistical language model bundled as `.apr` for instant browser loading. | [Launch →](https://interactive.paiml.com/shell-ml/) |
+| 🎮 **Pong** | Classic Pong game powered by [jugar](https://github.com/paiml/jugar) game engine with `.apr` model integration for WASM deployment. | [Launch →](https://interactive.paiml.com/pong/index.html) |
 
 ## Installation
 
