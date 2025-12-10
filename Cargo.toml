@@ -54,9 +54,9 @@ no_effect_underscore_binding = "allow"
 
 [dependencies]
 # Sovereign Stack - crates.io published versions
-aprender = { version = "0.14.0", features = ["format-compression"] }
-trueno = "0.7.3"
-entrenar = { version = "0.2.3", optional = true }
+aprender = { version = "0.17", features = ["format-compression", "inference-monitoring"] }
+trueno = "0.8"
+entrenar = "0.2.7"  # Required for inference monitoring
 
 # CLI
 clap = { version = "4", features = ["derive"] }
@@ -90,9 +90,8 @@ tempfile = "3"
 
 [features]
 default = []
-training = ["entrenar"]
 encryption = ["aprender/format-encryption"]
-full = ["training", "encryption"]
+full = ["encryption"]
 
 # --- Examples ---
 
@@ -342,3 +341,78 @@ path = "examples/cli/cli_apr_serve.rs"
 [[bench]]
 name = "inference"
 harness = false
+
+# Category: Advanced Demos
+[[example]]
+name = "model_inspection_scoring"
+path = "examples/advanced/model_inspection_scoring.rs"
+
+[[example]]
+name = "quantization_quality_tradeoff"
+path = "examples/advanced/quantization_quality_tradeoff.rs"
+
+[[example]]
+name = "hierarchical_cache_benchmark"
+path = "examples/advanced/hierarchical_cache_benchmark.rs"
+
+[[example]]
+name = "handwriting_recognition"
+path = "examples/advanced/handwriting_recognition.rs"
+
+[[example]]
+name = "image_classification"
+path = "examples/advanced/image_classification.rs"
+
+[[example]]
+name = "rag_pipeline"
+path = "examples/advanced/rag_pipeline.rs"
+
+[[example]]
+name = "edge_anomaly_detection"
+path = "examples/advanced/edge_anomaly_detection.rs"
+
+[[example]]
+name = "online_training_defect"
+path = "examples/advanced/online_training_defect.rs"
+
+[[example]]
+name = "embedding_visualization"
+path = "examples/advanced/embedding_visualization.rs"
+
+[[example]]
+name = "wasm_summarizer"
+path = "examples/advanced/wasm_summarizer.rs"
+
+[[example]]
+name = "voice_recognition"
+path = "examples/advanced/voice_recognition.rs"
+
+[[example]]
+name = "style_transfer"
+path = "examples/advanced/style_transfer.rs"
+
+[[example]]
+name = "streaming_sentiment"
+path = "examples/advanced/streaming_sentiment.rs"
+
+[[example]]
+name = "clip_search"
+path = "examples/advanced/clip_search.rs"
+
+[[example]]
+name = "spanish_tutor"
+path = "examples/advanced/spanish_tutor.rs"
+
+[[example]]
+name = "code_defect_oracle"
+path = "examples/advanced/code_defect_oracle.rs"
+
+# --- Category M: Inference Monitoring ---
+
+[[example]]
+name = "inference_explainability"
+path = "examples/monitoring/inference_explainability.rs"
+
+[[example]]
+name = "hash_chain_audit"
+path = "examples/monitoring/hash_chain_audit.rs"
