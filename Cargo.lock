@@ -181,6 +181,7 @@ dependencies = [
  "entrenar",
  "flate2",
  "lz4_flex",
+ "ndarray",
  "proptest",
  "rand 0.8.5",
  "serde",
