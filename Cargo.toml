@@ -422,3 +422,13 @@ path = "examples/monitoring/inference_explainability.rs"
 [[example]]
 name = "hash_chain_audit"
 path = "examples/monitoring/hash_chain_audit.rs"
+
+# --- Category N: Speech Recognition ---
+
+[[example]]
+name = "whisper_transcribe"
+path = "examples/speech/whisper_transcribe.rs"
+
+[[example]]
+name = "whisper_streaming"
+path = "examples/speech/whisper_streaming.rs"

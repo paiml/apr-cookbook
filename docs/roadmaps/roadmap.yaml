@@ -492,11 +492,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: whisper.apr speech recognition examples
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2025-01-04T00:00:00Z
-  updated: 2025-01-04T00:00:00Z
+  updated: 2026-01-04T18:03:46.837581452+00:00
   spec: docs/specifications/cookbook-spec.md
   acceptance_criteria:
   - examples/speech/whisper_transcribe.rs
