@@ -1,0 +1,9 @@
+{
+  "commit_sha": null,
+  "work_item_id": "APR-026",
+  "prompt": "CI workflow for falsification tests",
+  "tdg_score": 0.0,
+  "repo_score": 0.0,
+  "rust_project_score": 0.0,
+  "timestamp": "2026-01-04T17:45:27.985662748Z"
+}

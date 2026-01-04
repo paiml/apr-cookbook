@@ -57,6 +57,7 @@ no_effect_underscore_binding = "allow"
 aprender = { version = "0.21", features = ["format-compression", "inference-monitoring"] }
 trueno = "0.11"
 entrenar = "0.3"  # Must match aprender's entrenar dependency
+ndarray = "0.16"  # For entrenar Tensor gradients
 
 # CLI
 clap = { version = "4", features = ["derive"] }
@@ -192,6 +193,10 @@ path = "examples/training/continuous_train_federated_simulation.rs"
 [[example]]
 name = "continuous_train_curriculum"
 path = "examples/training/continuous_train_curriculum.rs"
+
+[[example]]
+name = "entrenar_autograd_training"
+path = "examples/training/entrenar_autograd_training.rs"
 
 # Category D: Format Conversion (additional)
 [[example]]

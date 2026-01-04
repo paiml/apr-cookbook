@@ -1,0 +1,4 @@
+# ZRAM build acceleration
+[build]
+target-dir = "/mnt/zram/targets/apr-cookbook"
+jobs = 4  # Limit parallel jobs to avoid OOM with 60+ examples

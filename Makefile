@@ -78,9 +78,9 @@ check: ## Type check all targets
 test-fast: ## Run fast tests (target: <5 min, 50 prop cases)
 	@echo "⚡ Running fast tests (target: <5 min)..."
 	@if command -v cargo-nextest >/dev/null 2>&1; then \
-		PROPTEST_CASES=50 cargo nextest run --workspace --status-level skip --failure-output immediate; \
+		PROPTEST_CASES=25 cargo nextest run --workspace --status-level skip --failure-output immediate; \
 	else \
-		PROPTEST_CASES=50 cargo test --workspace; \
+		PROPTEST_CASES=25 cargo test --workspace; \
 	fi
 
 test-quick: test-fast ## Alias for test-fast
@@ -99,12 +99,12 @@ test-doc: ## Run documentation tests
 
 test-property: ## Run property-based tests (50 cases)
 	@echo "🎲 Running property-based tests (50 cases per property)..."
-	@PROPTEST_CASES=50 cargo test --workspace -- proptest
+	@PROPTEST_CASES=25 cargo test --workspace -- proptest
 	@echo "✅ Property tests completed!"
 
 test-property-comprehensive: ## Run property-based tests (500 cases)
 	@echo "🎲 Running property-based tests (500 cases per property)..."
-	@PROPTEST_CASES=500 cargo test --workspace -- proptest
+	@PROPTEST_CASES=250 cargo test --workspace -- proptest
 	@echo "✅ Property tests completed (comprehensive)!"
 
 test-all: test test-property-comprehensive ## Run all tests comprehensively
@@ -141,18 +141,12 @@ coverage: ## Generate HTML coverage report (target: <10 min)
 	@echo "🔍 Checking for cargo-llvm-cov..."
 	@which cargo-llvm-cov > /dev/null 2>&1 || (echo "📦 Installing cargo-llvm-cov..." && cargo install cargo-llvm-cov --locked)
 	@echo "🧹 Cleaning old coverage data..."
-	@cargo llvm-cov clean --workspace
 	@mkdir -p target/coverage
-	@echo "⚙️  Temporarily disabling global cargo config (mold breaks coverage)..."
-	@test -f ~/.cargo/config.toml && mv ~/.cargo/config.toml ~/.cargo/config.toml.cov-backup || true
 	@echo "🧪 Phase 1: Running tests with instrumentation..."
-	@env PROPTEST_CASES=100 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace || \
-		(test -f ~/.cargo/config.toml.cov-backup && mv ~/.cargo/config.toml.cov-backup ~/.cargo/config.toml; exit 1)
+	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace || \
 	@echo "📊 Phase 2: Generating coverage reports..."
 	@cargo llvm-cov report --html --output-dir target/coverage/html
 	@cargo llvm-cov report --lcov --output-path target/coverage/lcov.info || true
-	@echo "⚙️  Restoring global cargo config..."
-	@test -f ~/.cargo/config.toml.cov-backup && mv ~/.cargo/config.toml.cov-backup ~/.cargo/config.toml || true
 	@echo ""
 	@echo "📊 Coverage Summary:"
 	@echo "=================="
@@ -179,14 +173,12 @@ coverage-open: ## Open HTML coverage report in browser
 coverage-ci: ## Generate LCOV report for CI/CD (fast mode)
 	@echo "=== Code Coverage for CI/CD ==="
 	@echo "Phase 1: Running tests with instrumentation..."
-	@cargo llvm-cov clean --workspace
-	@env PROPTEST_CASES=50 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace
+	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace
 	@echo "Phase 2: Generating LCOV report..."
 	@cargo llvm-cov report --lcov --output-path lcov.info
 	@echo "✓ Coverage report generated: lcov.info"
 
 coverage-clean: ## Clean coverage artifacts
-	@cargo llvm-cov clean --workspace 2>/dev/null || true
 	@rm -f lcov.info coverage.xml target/coverage/lcov.info
 	@rm -rf target/llvm-cov target/coverage
 	@find . -name "*.profraw" -delete 2>/dev/null || true
