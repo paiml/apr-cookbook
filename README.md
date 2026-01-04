@@ -98,10 +98,10 @@ fn main() -> Result<()> {
 │  G: Serverless (4)    │  H: WASM (5)        │  I: GPU (4)       │
 │  J: SIMD (4)          │  K: Distillation (4)│  L: CLI (4)       │
 ├─────────────────────────────────────────────────────────────────┤
-│                    aprender v0.14.0                             │
-│                 (ML Algorithms & APR Format)                    │
+│                    aprender v0.21.0                             │
+│                 (ML Algorithms & APR v2 Format)                 │
 ├─────────────────────────────────────────────────────────────────┤
-│                     trueno v0.7.3                               │
+│                     trueno v0.11.0                              │
 │                (SIMD/GPU Compute Primitives)                    │
 └─────────────────────────────────────────────────────────────────┘
 ```
