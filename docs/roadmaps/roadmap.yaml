@@ -446,8 +446,8 @@ roadmap:
   updated: 2025-12-06T17:25:00Z
   spec: null
   acceptance_criteria:
-  - "[DONE] Fix 2 complexity violations (bundle_apr_quantized_q4.rs, cli_apr_convert.rs)"
-  - "[DONE] Fix 2 documentation violations (Usage, Contributing sections)"
+  - '[DONE] Fix 2 complexity violations (bundle_apr_quantized_q4.rs, cli_apr_convert.rs)'
+  - '[DONE] Fix 2 documentation violations (Usage, Contributing sections)'
   - Fix 2 dead code violations (pmat heuristic in aprender_integration.rs)
   - Address 6 entropy violations (intentional cookbook patterns)
   - Fix 1 provability violation (score 0.65 vs 0.70 threshold)
@@ -459,4 +459,147 @@ roadmap:
   - quality
   - tdd
   - zero-defects
-  notes: "Progress: 14 -> 9 violations. TDG Grade A 94.1/100. Remaining violations are cookbook-specific patterns."
+  notes: 'Progress: 14 -> 9 violations. TDG Grade A 94.1/100. Remaining violations are cookbook-specific patterns.'
+- id: APR-022
+  github_issue: null
+  item_type: task
+  title: Popperian Falsification Test Suite (F1-F7)
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2026-01-04T17:45:17.237727135+00:00
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - 'F1: LZ4 decompression ≥3 GB/s test'
+  - 'F2: Zero-copy mmap <1ms latency test'
+  - 'F3: Int4 quantization <2% accuracy loss test'
+  - 'F4: AES-256-GCM <5ms decryption test'
+  - 'F5: whisper.apr WER <10% test'
+  - 'F6: FlashAttention ≥2x speedup test'
+  - 'F7: AVX-512 matmul ≥80 GFLOPS test'
+  - tests/falsification.rs with all F-code tests
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - testing
+  - falsification
+  - popper
+  - quality
+  notes: Implements Popper's criterion of demarcation - all claims must be testable and refutable
+- id: APR-023
+  github_issue: null
+  item_type: task
+  title: whisper.apr speech recognition examples
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2025-01-04T00:00:00Z
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - examples/speech/whisper_transcribe.rs
+  - examples/speech/whisper_streaming.rs
+  - APR v2 model loading integration
+  - Language detection support
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - speech
+  - whisper-apr
+  notes: null
+- id: APR-024
+  github_issue: null
+  item_type: task
+  title: GPU inference with realizar examples
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2025-01-04T00:00:00Z
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - examples/gpu/gpu_inference.rs with FlashAttention
+  - examples/gpu/simd_matrix_operations.rs with trueno 0.11
+  - Automatic GPU/SIMD/Scalar fallback
+  - Benchmark output with GFLOPS
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - gpu
+  - realizar
+  notes: null
+- id: APR-025
+  github_issue: null
+  item_type: task
+  title: Distributed computing with repartir examples
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2025-01-04T00:00:00Z
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - examples/distributed/distributed_inference.rs
+  - Work-stealing scheduler integration
+  - Multi-shard model loading
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - examples
+  - distributed
+  - repartir
+  notes: null
+- id: APR-026
+  github_issue: null
+  item_type: task
+  title: CI workflow for falsification tests
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2026-01-04T17:45:27.983482316+00:00
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - .github/workflows/falsification.yml
+  - Run falsification tests on push/PR
+  - Benchmark with Criterion
+  - Upload benchmark artifacts
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - ci
+  - falsification
+  - automation
+  notes: null
+- id: APR-027
+  github_issue: null
+  item_type: task
+  title: APR v2 format migration
+  status: planned
+  priority: critical
+  assigned_to: null
+  created: 2025-01-04T00:00:00Z
+  updated: 2025-01-04T00:00:00Z
+  spec: docs/specifications/cookbook-spec.md
+  acceptance_criteria:
+  - Update all examples to APR v2 format
+  - Add Compression::Lz4/Zstd support
+  - Add quantization Int4/Int8/FP16 support
+  - Binary tensor index (O(1) lookup)
+  - Ed25519 signature verification
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - migration
+  - apr-v2
+  - format
+  notes: null

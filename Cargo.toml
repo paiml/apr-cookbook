@@ -87,6 +87,7 @@ web-sys = { version = "0.3", features = ["Performance", "Window", "console"] }
 proptest = "1"
 criterion = { version = "0.5", features = ["html_reports"] }
 tempfile = "3"
+lz4_flex = "0.11.3"
 
 [features]
 default = []
