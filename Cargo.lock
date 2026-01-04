@@ -177,6 +177,7 @@ dependencies = [
  "clap",
  "console_error_panic_hook",
  "criterion",
+ "ed25519-dalek",
  "entrenar",
  "flate2",
  "lz4_flex",
@@ -189,6 +190,7 @@ dependencies = [
  "trueno 0.11.0",
  "wasm-bindgen",
  "web-sys",
+ "zstd",
 ]
 
 [[package]]

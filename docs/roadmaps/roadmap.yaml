@@ -583,11 +583,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: APR v2 format migration
-  status: planned
+  status: completed
   priority: critical
   assigned_to: null
   created: 2025-01-04T00:00:00Z
-  updated: 2025-01-04T00:00:00Z
+  updated: 2026-01-04T17:57:18.927792469+00:00
   spec: docs/specifications/cookbook-spec.md
   acceptance_criteria:
   - Update all examples to APR v2 format
