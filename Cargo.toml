@@ -440,3 +440,9 @@ path = "examples/speech/whisper_transcribe.rs"
 [[example]]
 name = "whisper_streaming"
 path = "examples/speech/whisper_streaming.rs"
+
+# --- Category O: Distributed Computing ---
+
+[[example]]
+name = "distributed_inference"
+path = "examples/distributed/distributed_inference.rs"
