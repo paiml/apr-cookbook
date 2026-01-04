@@ -276,6 +276,10 @@ path = "examples/wasm/wasm_streaming_compilation.rs"
 
 # Category I: GPU Acceleration
 [[example]]
+name = "flash_attention_inference"
+path = "examples/gpu/flash_attention_inference.rs"
+
+[[example]]
 name = "gpu_cuda_inference"
 path = "examples/gpu/gpu_cuda_inference.rs"
 
@@ -292,6 +296,10 @@ name = "gpu_memory_management"
 path = "examples/gpu/gpu_memory_management.rs"
 
 # Category J: SIMD Acceleration (additional)
+[[example]]
+name = "trueno_simd_ops"
+path = "examples/simd/trueno_simd_ops.rs"
+
 [[example]]
 name = "simd_matrix_ops"
 path = "examples/simd/simd_matrix_operations.rs"
