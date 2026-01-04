@@ -483,4 +483,58 @@ mod tests {
         let elapsed = ctx.elapsed();
         assert!(elapsed >= Duration::from_millis(10));
     }
+
+    #[test]
+    fn test_with_metadata() {
+        let metadata = RecipeMetadata::from_name("meta_test")
+            .with_category("testing")
+            .with_objective("Test metadata");
+
+        let ctx = RecipeContext::with_metadata("meta_test", metadata).unwrap();
+        assert_eq!(ctx.metadata().name, "meta_test");
+        assert_eq!(ctx.metadata().category, Some("testing".to_string()));
+        assert_eq!(ctx.metadata().objective, Some("Test metadata".to_string()));
+    }
+
+    #[test]
+    fn test_report() {
+        let mut ctx = RecipeContext::new("report_test").unwrap();
+        ctx.record_metric("count", 42);
+        ctx.record_float_metric("ratio", 3.14);
+        ctx.record_duration("elapsed", Duration::from_millis(100));
+        ctx.record_string_metric("status", "ok");
+
+        // Report should not error
+        let result = ctx.report();
+        assert!(result.is_ok());
+    }
+
+    #[test]
+    fn test_get_metric_missing() {
+        let ctx = RecipeContext::new("missing_metric_test").unwrap();
+        assert!(ctx.get_metric("nonexistent").is_none());
+    }
+
+    #[test]
+    fn test_duration_metric() {
+        let mut ctx = RecipeContext::new("duration_test").unwrap();
+        let duration = Duration::from_secs(1);
+        ctx.record_duration("time", duration);
+
+        match ctx.get_metric("time") {
+            Some(MetricValue::Duration(d)) => assert_eq!(*d, duration),
+            _ => panic!("Expected Duration metric"),
+        }
+    }
+
+    #[test]
+    fn test_string_metric() {
+        let mut ctx = RecipeContext::new("string_test").unwrap();
+        ctx.record_string_metric("name", "test-value");
+
+        match ctx.get_metric("name") {
+            Some(MetricValue::String(s)) => assert_eq!(s, "test-value"),
+            _ => panic!("Expected String metric"),
+        }
+    }
 }
