@@ -119,6 +119,23 @@
 - [apr-convert](./recipes/l-cli/apr-convert.md)
 - [apr-serve](./recipes/l-cli/apr-serve.md)
 
+# Category M: Inference Monitoring
+
+- [Overview](./recipes/m-monitoring/index.md)
+- [Inference Explainability](./recipes/m-monitoring/explainability.md)
+- [Hash Chain Audit](./recipes/m-monitoring/hash-chain-audit.md)
+
+# Category N: Speech Recognition
+
+- [Overview](./recipes/n-speech/index.md)
+- [Whisper Transcription](./recipes/n-speech/whisper-transcribe.md)
+- [Streaming ASR](./recipes/n-speech/whisper-streaming.md)
+
+# Category O: Distributed Computing
+
+- [Overview](./recipes/o-distributed/index.md)
+- [Distributed Inference](./recipes/o-distributed/distributed-inference.md)
+
 ---
 
 # Reference
