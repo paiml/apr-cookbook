@@ -45,7 +45,18 @@ pub mod prelude {
     pub use crate::aprender_integration::{
         load_model, load_model_from_bytes, save_model, AprModelInfo, SimpleModel,
     };
-    pub use crate::bundle::{BundledModel, ModelBundle, ModelMetadata};
+    pub use crate::bundle::{
+        BundledModel,
+        // APR v2 types
+        BundledModelV2,
+        Compression,
+        ModelBundle,
+        ModelBundleV2,
+        ModelMetadata,
+        ModelSignature,
+        Quantization,
+        TensorEntry,
+    };
     pub use crate::convert::{
         AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
     };
