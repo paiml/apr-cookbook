@@ -56,7 +56,7 @@ no_effect_underscore_binding = "allow"
 # Sovereign Stack - crates.io published versions (2025)
 aprender = { version = "0.21", features = ["format-compression", "inference-monitoring"] }
 trueno = "0.11"
-entrenar = "0.2.7"  # Required for inference monitoring
+entrenar = "0.3"  # Must match aprender's entrenar dependency
 
 # CLI
 clap = { version = "4", features = ["derive"] }
