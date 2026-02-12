@@ -223,6 +223,10 @@ path = "examples/training/hyperparameter_sweep.rs"
 name = "entrenar_qlora_finetune"
 path = "examples/training/entrenar_qlora_finetune.rs"
 
+[[example]]
+name = "checkpoint_resume"
+path = "examples/training/checkpoint_resume.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -496,6 +500,14 @@ path = "examples/inference/simple_inference.rs"
 [[example]]
 name = "chat_multiturn"
 path = "examples/inference/chat_multiturn.rs"
+
+[[example]]
+name = "model_pipeline"
+path = "examples/inference/model_pipeline.rs"
+
+[[example]]
+name = "quantized_inference_comparison"
+path = "examples/inference/quantized_inference_comparison.rs"
 
 # --- Category Q: Model Serving ---
 
