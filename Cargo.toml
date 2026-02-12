@@ -8,6 +8,7 @@ description = "Idiomatic Rust examples for the APR ML format - Toyota Way princi
 repository = "https://github.com/paiml/apr-cookbook"
 keywords = ["machine-learning", "wasm", "apr", "ml-models", "rust"]
 categories = ["science", "wasm", "development-tools"]
+exclude = ["book/", "docs/", ".github/", ".pmat/", "tests/", "benches/", "target/", "proptest-regressions/", ".vscode/", ".idea/"]
 
 [lints.rust]
 unsafe_code = "deny"
