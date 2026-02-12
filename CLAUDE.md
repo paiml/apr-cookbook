@@ -12,15 +12,6 @@ APR Cookbook is a collection of idiomatic Rust examples demonstrating the `.apr`
 # Build all examples
 cargo build --examples
 
-# Build with browser features
-cargo build --examples --features browser
-
-# Build with GPU features
-cargo build --examples --features gpu
-
-# Build for WASM
-cargo build --target wasm32-unknown-unknown --features browser
-
 # Run a specific example
 cargo run --example bundle_static_model
 cargo run --example apr_info -- model.apr
@@ -51,50 +42,66 @@ cargo llvm-cov --min-coverage 95
 
 Minimum grade: **A**. Coverage target: **95%**.
 
+## Code Search Policy
+
+**NEVER use grep/glob for code search. ALWAYS prefer `pmat query`.**
+
+`pmat query` returns quality-annotated, semantically ranked results with TDG grades, complexity, fault patterns, and call graphs.
+
+| Task | Command |
+|------|---------|
+| Find functions by intent | `pmat query "error handling" --limit 10` |
+| Find high-quality examples | `pmat query "serialize" --min-grade A` |
+| Find with fault patterns | `pmat query "unwrap" --faults --exclude-tests` |
+| Include source code | `pmat query "tokenize" --include-source` |
+| Regex search | `pmat query --regex "fn\s+handle_\w+" --limit 10` |
+| Literal string search | `pmat query --literal "unwrap()" --limit 10` |
+
+When grep IS acceptable: Searching non-code files (TOML, YAML, Markdown).
+
 ## Architecture
 
 ```
 Examples Layer (this repo)
     ↓
 Framework Layer (dependencies)
-├── aprender: ML algorithms, .apr format, quantization
-├── presentar: WASM UI, widgets, YAML config
-└── trueno: SIMD/GPU tensor operations
+├── aprender 0.25: ML algorithms, .apr format, quantization
+├── trueno 0.14: SIMD/GPU tensor operations
+└── entrenar 0.5: Training, monitoring, autograd
 ```
 
 ### Example Categories
 
 | Category | Path | Purpose |
 |----------|------|---------|
+| creation | `examples/creation/` | Build models from scratch |
 | bundling | `examples/bundling/` | Static model embedding via `include_bytes!()` |
-| conversion | `examples/conversion/` | SafeTensors ↔ .apr ↔ GGUF |
-| browser | `examples/browser/` | WASM apps with presentar widgets |
-| acceleration | `examples/acceleration/` | SIMD/GPU with automatic fallback |
-| cli | `examples/cli/` | Production CLI tools |
+| training | `examples/training/` | Incremental, online, federated, autograd |
+| conversion | `examples/conversion/` | SafeTensors ↔ .apr ↔ GGUF ↔ ONNX |
+| registry | `examples/registry/` | Model registry and lineage |
+| api | `examples/api/` | Inference API patterns |
+| serverless | `examples/serverless/` | Lambda, edge, container deployment |
+| wasm | `examples/wasm/` | Browser inference, WebGPU |
+| gpu | `examples/gpu/` | FlashAttention, CUDA, multi-GPU |
+| simd | `examples/simd/` | trueno SIMD ops, vectorized inference |
+| distillation | `examples/distillation/` | Knowledge transfer, pruning |
+| cli | `examples/cli/` | apr-info, apr-bench, apr-convert, apr-serve |
+| monitoring | `examples/monitoring/` | Inference explainability, hash chain audit |
+| speech | `examples/speech/` | whisper.apr transcription |
+| distributed | `examples/distributed/` | repartir multi-node inference |
+| advanced | `examples/advanced/` | End-to-end demo applications |
 
 ### Key Dependencies
 
 - `aprender`: Core ML library with `.apr` format (features: `format-compression`)
-- `entrenar`: Training infrastructure (optional, feature: `training`)
+- `entrenar`: Training and inference monitoring (autograd, LoRA, collectors)
 - `trueno`: SIMD tensor backend (always required)
 - `clap`: CLI argument parsing
 
 ### Feature Flags
 
-- `training`: Enable entrenar for training examples
+- `encryption`: Enable AES-256-GCM model encryption
 - `full`: All features
-
-### Available Examples
-
-```bash
-cargo run --example bundle_static_model      # Static model embedding
-cargo run --example bundle_quantized_model   # Quantized model loading
-cargo run --example convert_safetensors_to_apr  # Format conversion
-cargo run --example convert_apr_to_gguf      # GGUF export
-cargo run --example simd_matrix_operations   # SIMD benchmark
-cargo run --example apr_info -- --demo       # Model inspection CLI
-cargo run --example apr_bench -- --demo      # Inference benchmark
-```
 
 ## Philosophy
 

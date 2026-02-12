@@ -1,6 +1,10 @@
 # Use bash for shell commands to support advanced features
 SHELL := /bin/bash
 
+# bashrs: Disable built-in implicit rules (MAKE013) and ensure clean error handling
+.SUFFIXES:
+.DELETE_ON_ERROR:
+
 # PERFORMANCE TARGETS (Toyota Way: Zero Defects, Fast Feedback)
 # - make test-fast: < 5 minutes (50 property test cases)
 # - make coverage:  < 10 minutes (100 property test cases)
