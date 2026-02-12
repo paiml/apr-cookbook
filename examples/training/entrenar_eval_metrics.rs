@@ -96,8 +96,8 @@ fn main() {
     let matrix = cm.matrix();
     for (i, name) in class_names.iter().enumerate() {
         print!("   {:>8}", name);
-        for j in 0..n_classes {
-            print!("{:>8}", matrix[i][j]);
+        for &count in &matrix[i][..n_classes] {
+            print!("{:>8}", count);
         }
         println!();
     }
