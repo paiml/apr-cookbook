@@ -65,7 +65,7 @@ fn main() -> Result<()> {
         name: "weights_q4".to_string(),
         shape: vec![n_params],
         dtype: DataType::Q4_0,
-        data: quantized.clone(),
+        data: quantized,
     });
 
     let apr_path = ctx.path("quantized_model.apr");
