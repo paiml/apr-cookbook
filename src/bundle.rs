@@ -89,10 +89,10 @@ impl BundledModel {
         }
 
         // Validate magic bytes
-        if &bytes[0..4] != APR_MAGIC {
+        let magic = bytes.get(0..4).unwrap_or_default();
+        if magic != APR_MAGIC {
             return Err(CookbookError::invalid_format(format!(
-                "invalid magic bytes: expected APRN, got {:?}",
-                &bytes[0..4]
+                "invalid magic bytes: expected APRN, got {magic:?}",
             )));
         }
 
@@ -579,7 +579,7 @@ impl BundledModelV2 {
             return Err(CookbookError::invalid_format("APR v2 header too short"));
         }
 
-        if &bytes[0..4] != b"APR2" {
+        if bytes.get(0..4) != Some(b"APR2".as_slice()) {
             return Err(CookbookError::invalid_format("Not an APR v2 file"));
         }
 

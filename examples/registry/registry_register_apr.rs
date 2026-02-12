@@ -101,7 +101,7 @@ fn main() -> Result<()> {
         SemVer::new(1, 0, 0),
         v1_model_card(),
     )?;
-    ctx.record_string_metric("model_id", model_id.clone());
+    ctx.record_string_metric("model_id", &*model_id);
     println!("Registered model: {}", model_id);
 
     // Stage to production
@@ -115,7 +115,7 @@ fn main() -> Result<()> {
         SemVer::new(1, 1, 0),
         v1_1_model_card(),
     )?;
-    ctx.record_string_metric("model_id_v2", model_id_v2.clone());
+    ctx.record_string_metric("model_id_v2", &*model_id_v2);
     println!("Registered model v1.1.0: {}", model_id_v2);
 
     // List and save

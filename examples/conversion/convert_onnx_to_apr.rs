@@ -56,12 +56,13 @@ fn main() -> Result<()> {
     });
 
     // Convert initializers (weights) to tensors
-    for initializer in &mock_onnx.initializers {
+    let n_initializers = mock_onnx.initializers.len();
+    for initializer in mock_onnx.initializers {
         converter.add_tensor(TensorData {
-            name: initializer.name.clone(),
-            shape: initializer.dims.clone(),
+            name: initializer.name,
+            shape: initializer.dims,
             dtype: DataType::F32,
-            data: initializer.data.clone(),
+            data: initializer.data,
         });
     }
 
@@ -82,7 +83,7 @@ fn main() -> Result<()> {
     println!("  Nodes: {}", mock_onnx.nodes.len());
     println!("  Inputs: {}", mock_onnx.inputs.len());
     println!("  Outputs: {}", mock_onnx.outputs.len());
-    println!("  Initializers: {}", mock_onnx.initializers.len());
+    println!("  Initializers: {}", n_initializers);
     println!();
     println!("Conversion result:");
     println!("  Parameters: {}", total_params);
@@ -236,12 +237,12 @@ mod tests {
         let model = create_mock_onnx_model();
 
         let mut converter = AprConverter::new();
-        for init in &model.initializers {
+        for init in model.initializers {
             converter.add_tensor(TensorData {
-                name: init.name.clone(),
-                shape: init.dims.clone(),
+                name: init.name,
+                shape: init.dims,
                 dtype: DataType::F32,
-                data: init.data.clone(),
+                data: init.data,
             });
         }
 
@@ -254,12 +255,12 @@ mod tests {
         let model = create_mock_onnx_model();
 
         let mut converter = AprConverter::new();
-        for init in &model.initializers {
+        for init in model.initializers {
             converter.add_tensor(TensorData {
-                name: init.name.clone(),
-                shape: init.dims.clone(),
+                name: init.name,
+                shape: init.dims,
                 dtype: DataType::F32,
-                data: init.data.clone(),
+                data: init.data,
             });
         }
 
