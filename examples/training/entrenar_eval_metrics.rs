@@ -204,14 +204,8 @@ fn main() {
         let f1_poor = metrics_poor.f1[i];
         let bar_good = "█".repeat((f1_good * 20.0) as usize);
         let bar_poor = "░".repeat((f1_poor * 20.0) as usize);
-        println!(
-            "   {:>6} A: {:<20} F1={:.3}",
-            name, bar_good, f1_good
-        );
-        println!(
-            "   {:>6} B: {:<20} F1={:.3}",
-            "", bar_poor, f1_poor
-        );
+        println!("   {:>6} A: {:<20} F1={:.3}", name, bar_good, f1_good);
+        println!("   {:>6} B: {:<20} F1={:.3}", "", bar_poor, f1_poor);
     }
     println!();
 
