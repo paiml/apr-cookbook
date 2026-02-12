@@ -459,6 +459,24 @@ path = "examples/speech/whisper_transcribe.rs"
 name = "whisper_streaming"
 path = "examples/speech/whisper_streaming.rs"
 
+# --- Category P: Inference Patterns ---
+
+[[example]]
+name = "speculative_decode"
+path = "examples/inference/speculative_decode.rs"
+
+[[example]]
+name = "streaming_token_generator"
+path = "examples/inference/streaming_token_generator.rs"
+
+[[example]]
+name = "adaptive_batch_inference"
+path = "examples/inference/adaptive_batch_inference.rs"
+
+[[example]]
+name = "chat_kv_cache"
+path = "examples/inference/chat_kv_cache.rs"
+
 # --- Category O: Distributed Computing ---
 
 [[example]]
