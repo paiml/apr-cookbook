@@ -1,0 +1,15 @@
+# PMAT Quality Metrics Configuration
+# See: pmat comply check
+
+[thresholds]
+min_coverage = 95.0
+min_mutation_coverage = 80.0
+max_complexity = 15
+max_dead_code_percent = 5.0
+
+[hooks]
+cache_enabled = true
+
+[project]
+name = "apr-cookbook"
+type = "demo"
