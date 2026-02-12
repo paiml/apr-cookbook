@@ -169,6 +169,35 @@ fn generate_requests(n_requests: usize, seed: u64) -> Vec<(usize, InferenceReque
     requests
 }
 
+/// Compute latency statistics from results
+fn compute_latency_stats(results: &[InferenceResult]) -> (f64, usize) {
+    let latencies: Vec<usize> = results.iter().map(|r| r.latency_steps).collect();
+    if latencies.is_empty() {
+        return (0.0, 0);
+    }
+    let avg = latencies.iter().sum::<usize>() as f64 / latencies.len() as f64;
+    let mut sorted = latencies;
+    sorted.sort_unstable();
+    let p99 = sorted[sorted.len() * 99 / 100];
+    (avg, p99)
+}
+
+/// Process a single batch: run forward pass and record results
+fn process_batch(
+    model: &BatchModel,
+    batch: Vec<InferenceRequest>,
+    step: usize,
+    results: &mut Vec<InferenceResult>,
+) {
+    let inputs: Vec<Vec<f32>> = batch.iter().map(|r| r.input.clone()).collect();
+    let _ = model.forward_batch(&inputs);
+    for req in batch {
+        results.push(InferenceResult {
+            latency_steps: step - req.arrival_step,
+        });
+    }
+}
+
 /// Run simulation with given batch configuration
 fn run_simulation(
     model: &BatchModel,
@@ -182,7 +211,6 @@ fn run_simulation(
     let mut step = 0;
     let mut n_batches = 0;
     let mut total_batch_size = 0;
-    let mut total_forward_calls = 0;
 
     loop {
         // Add any arriving requests at this step
@@ -200,20 +228,9 @@ fn run_simulation(
             || (request_iter.peek().is_none() && !accumulator.is_empty())
         {
             let batch = accumulator.flush();
-            let batch_size = batch.len();
-            let inputs: Vec<Vec<f32>> = batch.iter().map(|r| r.input.clone()).collect();
-            let outputs = model.forward_batch(&inputs);
-
-            total_forward_calls += 1;
-            total_batch_size += batch_size;
+            total_batch_size += batch.len();
             n_batches += 1;
-
-            let _ = outputs; // Outputs consumed by caller in production
-            for req in batch {
-                results.push(InferenceResult {
-                    latency_steps: step - req.arrival_step,
-                });
-            }
+            process_batch(model, batch, step, &mut results);
         }
 
         if request_iter.peek().is_none() && accumulator.is_empty() {
@@ -222,19 +239,7 @@ fn run_simulation(
         step += 1;
     }
 
-    let latencies: Vec<usize> = results.iter().map(|r| r.latency_steps).collect();
-    let avg_latency = if latencies.is_empty() {
-        0.0
-    } else {
-        latencies.iter().sum::<usize>() as f64 / latencies.len() as f64
-    };
-    let p99_latency = if latencies.is_empty() {
-        0
-    } else {
-        let mut sorted = latencies.clone();
-        sorted.sort_unstable();
-        sorted[sorted.len() * 99 / 100]
-    };
+    let (avg_latency, p99_latency) = compute_latency_stats(&results);
 
     SimulationStats {
         n_requests: results.len(),
@@ -244,7 +249,7 @@ fn run_simulation(
         } else {
             0.0
         },
-        forward_calls: total_forward_calls,
+        forward_calls: n_batches,
         avg_latency,
         p99_latency,
         throughput: if step > 0 {
