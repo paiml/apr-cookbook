@@ -116,9 +116,11 @@ fn generate_task_data(
                 (h, "target", k).hash(&mut h2);
                 let noise = (h2.finish() as f32 / u64::MAX as f32 - 0.5) * 0.1;
                 // Target = sum of weighted inputs for this output dim
-                let signal: f32 = x.iter().enumerate().map(|(j, &v)| {
-                    v * ((j + k) as f32 * 0.01).sin()
-                }).sum();
+                let signal: f32 = x
+                    .iter()
+                    .enumerate()
+                    .map(|(j, &v)| v * ((j + k) as f32 * 0.01).sin())
+                    .sum();
                 signal + noise
             })
             .collect();
@@ -212,7 +214,10 @@ fn main() {
     let efficiency = lora_params as f32 / base_params as f32 * 100.0;
 
     println!("   Base params:   {}", base_params);
-    println!("   LoRA params:   {} ({:.1}% of base)", lora_params, efficiency);
+    println!(
+        "   LoRA params:   {} ({:.1}% of base)",
+        lora_params, efficiency
+    );
     println!();
 
     // =========================================================================
@@ -221,13 +226,9 @@ fn main() {
     println!("2. LoRA Module Targeting");
     println!("   ─────────────────────────────────────────");
 
-    let lora_config = LoRAConfig::new(config.rank, config.alpha)
-        .target_qv_projections();
+    let lora_config = LoRAConfig::new(config.rank, config.alpha).target_qv_projections();
 
-    println!(
-        "   Target modules: {:?}",
-        lora_config.get_target_modules()
-    );
+    println!("   Target modules: {:?}", lora_config.get_target_modules());
     println!(
         "   Would apply to 'q_proj': {}",
         lora_config.should_apply("q_proj", None)
@@ -245,12 +246,26 @@ fn main() {
     println!("   ─────────────────────────────────────────");
 
     let base_weight = create_pretrained_weight(config.d_out, config.d_in, 42);
-    let mut lora_layer =
-        LoRALayer::new(base_weight, config.d_out, config.d_in, config.rank, config.alpha);
+    let mut lora_layer = LoRALayer::new(
+        base_weight,
+        config.d_out,
+        config.d_in,
+        config.rank,
+        config.alpha,
+    );
 
-    println!("   Base weight:  {} elements (frozen)", config.d_out * config.d_in);
-    println!("   LoRA A:       {} elements (trainable)", lora_layer.lora_a().len());
-    println!("   LoRA B:       {} elements (trainable)", lora_layer.lora_b().len());
+    println!(
+        "   Base weight:  {} elements (frozen)",
+        config.d_out * config.d_in
+    );
+    println!(
+        "   LoRA A:       {} elements (trainable)",
+        lora_layer.lora_a().len()
+    );
+    println!(
+        "   LoRA B:       {} elements (trainable)",
+        lora_layer.lora_b().len()
+    );
     println!("   Merged:       {}", lora_layer.is_merged());
     println!();
 
@@ -260,12 +275,7 @@ fn main() {
     println!("4. Fine-Tuning with AdamW Optimizer");
     println!("   ─────────────────────────────────────────");
 
-    let (inputs, targets) = generate_task_data(
-        config.n_samples,
-        config.d_in,
-        config.d_out,
-        42,
-    );
+    let (inputs, targets) = generate_task_data(config.n_samples, config.d_in, config.d_out, 42);
 
     let mut optimizer = AdamW::default_params(config.learning_rate);
     let mut losses = Vec::with_capacity(config.epochs);
@@ -310,13 +320,16 @@ fn main() {
     // =========================================================================
     println!("5. Fine-Tuning Results");
     println!("   ─────────────────────────────────────────");
-    println!("   Initial loss:  {:.6}", losses.first().copied().unwrap_or(0.0));
-    println!("   Final loss:    {:.6}", losses.last().copied().unwrap_or(0.0));
-    println!("   Time:          {:.2}ms", elapsed.as_secs_f64() * 1000.0);
     println!(
-        "   Param efficiency: {:.2}% of base model",
-        efficiency
+        "   Initial loss:  {:.6}",
+        losses.first().copied().unwrap_or(0.0)
     );
+    println!(
+        "   Final loss:    {:.6}",
+        losses.last().copied().unwrap_or(0.0)
+    );
+    println!("   Time:          {:.2}ms", elapsed.as_secs_f64() * 1000.0);
+    println!("   Param efficiency: {:.2}% of base model", efficiency);
     println!();
 
     // =========================================================================
@@ -364,7 +377,10 @@ fn main() {
 
     // Unmerge to show we can recover the adapter
     lora_layer.unmerge();
-    println!("   Unmerged: {} (adapter recoverable)", !lora_layer.is_merged());
+    println!(
+        "   Unmerged: {} (adapter recoverable)",
+        !lora_layer.is_merged()
+    );
     println!();
 
     println!("=== Example Complete ===");

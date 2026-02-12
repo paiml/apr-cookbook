@@ -20,9 +20,7 @@
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;
-use entrenar::merge::{
-    dare_merge, slerp_merge, ties_merge, DareConfig, SlerpConfig, TiesConfig,
-};
+use entrenar::merge::{dare_merge, slerp_merge, ties_merge, DareConfig, SlerpConfig, TiesConfig};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
@@ -197,10 +195,7 @@ fn main() {
                 println!("   Merged params: {}", param_count(&merged));
                 println!("   Distance from task A:  {:.4}", dist_from_a);
                 println!("   Distance from task B:  {:.4}", dist_from_b);
-                println!(
-                    "   Ratio A/B: {:.2}",
-                    dist_from_a / dist_from_b.max(1e-10)
-                );
+                println!("   Ratio A/B: {:.2}", dist_from_a / dist_from_b.max(1e-10));
                 println!("   SLERP interpolates along the hypersphere");
             }
             Err(e) => println!("   Error: {}", e),
