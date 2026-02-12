@@ -30,22 +30,25 @@ Cryptographic hash chains provide:
 ## Stack Integration
 
 ```rust
-use aprender::monitoring::{ExplainabilityReport, AuditChain};
-use aprender::apr::AprModel;
+use apr_cookbook::explainable::IntoExplainable;
+use aprender::linear_model::LinearRegression;
+use entrenar::monitor::inference::{
+    path::LinearPath, InferenceMonitor, RingCollector,
+};
 
-// Load model with monitoring enabled
-let model = AprModel::load("model.apr")?
-    .with_explainability(true)
-    .with_audit_chain(true);
+// Train and wrap with explainability
+let model = LinearRegression::new();
+// ... fit model ...
+let explainable = model.into_explainable();
 
-// Get explanation with prediction
-let (prediction, explanation) = model.predict_with_explanation(&input)?;
-println!("Prediction: {:?}", prediction);
-println!("Top features: {:?}", explanation.top_features(5));
+// Create monitored inference
+let collector: RingCollector<LinearPath, 64> = RingCollector::new();
+let mut monitor = InferenceMonitor::new(explainable, collector);
 
-// Audit chain entry is automatically recorded
-let audit = model.audit_chain();
-println!("Audit entries: {}", audit.len());
+// Predictions are now traced
+let output = monitor.predict(&features, 1);
+let trace = monitor.collector().recent(1)[0];
+println!("{}", trace.path.explain());
 ```
 
 ## Toyota Way Principles

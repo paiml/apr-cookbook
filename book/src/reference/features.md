@@ -8,7 +8,6 @@ Configure apr-cookbook capabilities via Cargo features.
 |---------|-------------|---------|
 | `default` | Core bundling and conversion | ✅ |
 | `encryption` | AES-256-GCM encryption | ❌ |
-| `training` | entrenar integration | ❌ |
 | `full` | All features | ❌ |
 
 ## Usage
@@ -18,13 +17,6 @@ Configure apr-cookbook capabilities via Cargo features.
 ```toml
 [dependencies]
 apr-cookbook = { version = "0.1", features = ["encryption"] }
-```
-
-### Multiple Features
-
-```toml
-[dependencies]
-apr-cookbook = { version = "0.1", features = ["encryption", "training"] }
 ```
 
 ### All Features
@@ -47,18 +39,6 @@ use aprender::format::{save_encrypted, load_encrypted};
 
 Adds dependencies:
 - `aprender/format-encryption`
-
-### `training`
-
-Enables training integration with entrenar:
-
-```rust
-#[cfg(feature = "training")]
-use entrenar::Trainer;
-```
-
-Adds dependencies:
-- `entrenar`
 
 ## Checking Features at Runtime
 

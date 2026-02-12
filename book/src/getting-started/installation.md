@@ -25,7 +25,6 @@ apr-cookbook = { version = "0.1", features = ["encryption"] }
 |---------|-------------|
 | `default` | Core bundling and conversion |
 | `encryption` | AES-256-GCM model encryption |
-| `training` | Integration with entrenar |
 | `full` | All features enabled |
 
 ## Verify Installation

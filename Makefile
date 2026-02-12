@@ -94,12 +94,12 @@ test: test-fast test-doc test-property ## Run core test suite
 
 test-doc: ## Run documentation tests
 	@echo "📚 Running documentation tests..."
-	@cargo test --doc --workspace
+	@PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo test --doc --workspace
 	@echo "✅ Documentation tests completed!"
 
 test-property: ## Run property-based tests (50 cases)
 	@echo "🎲 Running property-based tests (50 cases per property)..."
-	@PROPTEST_CASES=25 cargo test --workspace -- proptest
+	@PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo test --workspace -- proptest
 	@echo "✅ Property tests completed!"
 
 test-property-comprehensive: ## Run property-based tests (500 cases)
@@ -143,7 +143,7 @@ coverage: ## Generate HTML coverage report (target: <10 min)
 	@echo "🧹 Cleaning old coverage data..."
 	@mkdir -p target/coverage
 	@echo "🧪 Phase 1: Running tests with instrumentation..."
-	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace || \
+	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov test --lib --no-report --all-features --workspace
 	@echo "📊 Phase 2: Generating coverage reports..."
 	@cargo llvm-cov report --html --output-dir target/coverage/html
 	@cargo llvm-cov report --lcov --output-path target/coverage/lcov.info || true
@@ -173,7 +173,7 @@ coverage-open: ## Open HTML coverage report in browser
 coverage-ci: ## Generate LCOV report for CI/CD (fast mode)
 	@echo "=== Code Coverage for CI/CD ==="
 	@echo "Phase 1: Running tests with instrumentation..."
-	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov --no-report nextest --no-tests=warn --all-features --workspace
+	@env PROPTEST_CASES=25 QUICKCHECK_TESTS=25 cargo llvm-cov test --lib --no-report --all-features --workspace
 	@echo "Phase 2: Generating LCOV report..."
 	@cargo llvm-cov report --lcov --output-path lcov.info
 	@echo "✓ Coverage report generated: lcov.info"

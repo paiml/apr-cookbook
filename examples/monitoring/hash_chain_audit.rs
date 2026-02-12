@@ -29,8 +29,8 @@
 //! cargo run --example hash_chain_audit
 //! ```
 
+use apr_cookbook::explainable::IntoExplainable;
 use apr_cookbook::prelude::*;
-use aprender::explainable::IntoExplainable;
 use aprender::linear_model::LinearRegression;
 use aprender::primitives::{Matrix, Vector};
 use aprender::Estimator;

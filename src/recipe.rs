@@ -500,7 +500,7 @@ mod tests {
     fn test_report() {
         let mut ctx = RecipeContext::new("report_test").unwrap();
         ctx.record_metric("count", 42);
-        ctx.record_float_metric("ratio", 3.14);
+        ctx.record_float_metric("ratio", 3.125);
         ctx.record_duration("elapsed", Duration::from_millis(100));
         ctx.record_string_metric("status", "ok");
 

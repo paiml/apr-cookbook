@@ -9,6 +9,7 @@ apr-cookbook/
 │   ├── bundle.rs              # Model bundling (ModelBundle, BundledModel)
 │   ├── convert.rs             # Format conversion (AprConverter)
 │   ├── aprender_integration.rs # aprender format integration
+│   ├── explainable.rs         # Inference explainability wrappers
 │   └── error.rs               # Error types
 ├── examples/
 │   ├── bundling/              # Bundling recipes
