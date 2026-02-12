@@ -36,7 +36,7 @@
 
 ## Overview
 
-APR Cookbook provides **60+ production-ready recipes** across 15 categories for deploying ML models using the APR v2 format. Each recipe is isolated, idempotent, and verified with Popperian falsification tests following Toyota Way quality principles.
+APR Cookbook provides **95+ production-ready recipes** across 20 categories for deploying ML models using the APR v2 format. Each recipe is isolated, idempotent, and verified with Popperian falsification tests following Toyota Way quality principles.
 
 ### Key Capabilities
 
@@ -46,7 +46,9 @@ APR Cookbook provides **60+ production-ready recipes** across 15 categories for 
 - **Speech Recognition**: whisper.apr integration for pure Rust ASR
 - **GPU Acceleration**: FlashAttention, fused kernels via realizar
 - **Distributed Computing**: Multi-node inference with repartir work-stealing
-- **Training**: Autograd with entrenar (tape-based autodiff, SGD/Adam)
+- **Training**: Autograd, LoRA/QLoRA, distillation, model merge with entrenar
+- **Inference Patterns**: Speculative decoding, KV-cache, streaming, batching
+- **Model Serving**: HTTP REST API with metrics, batching, health checks
 
 ### Sovereign AI Stack
 
@@ -132,13 +134,14 @@ fn main() -> Result<()> {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    APR Cookbook (60+ Recipes)                   │
+│                    APR Cookbook (95+ Recipes)                   │
 ├─────────────────────────────────────────────────────────────────┤
-│  A: Creation (5)      │  B: Bundling (7)    │  C: Training (5)  │
+│  A: Creation (5)      │  B: Bundling (7)    │  C: Training (14) │
 │  D: Conversion (5)    │  E: Registry (4)    │  F: API (4)       │
 │  G: Serverless (4)    │  H: WASM (5)        │  I: GPU (5)       │
 │  J: SIMD (5)          │  K: Distillation (4)│  L: CLI (4)       │
 │  M: Monitoring (2)    │  N: Speech (2)      │  O: Distributed(1)│
+│  P: Inference (9)     │  Q: Serving (1)     │  Advanced (17)    │
 ├─────────────────────────────────────────────────────────────────┤
 │  Falsification Tests: F1-F7 (Popperian methodology)            │
 │  Test Coverage: 95%+ │ Quality Gate: Zero violations           │
@@ -151,7 +154,7 @@ fn main() -> Result<()> {
 |----------|---------|-------------|
 | **A: Model Creation** | 5 | Build models from scratch: regression, trees, clustering, n-grams |
 | **B: Binary Bundling** | 7 | Embed models: static, quantized, encrypted, signed, Lambda |
-| **C: Continuous Training** | 5 | Incremental, online, federated, curriculum, **entrenar autograd** |
+| **C: Training** | 14 | Autograd, LoRA, QLoRA, distillation, model merge, eval, sweep, checkpoint |
 | **D: Format Conversion** | 5 | SafeTensors, GGUF, ONNX, Phi model conversion |
 | **E: Model Registry** | 4 | Register, lineage, comparison, rollback |
 | **F: API Integration** | 4 | Inference, streaming, batch, health checks |
@@ -164,6 +167,8 @@ fn main() -> Result<()> {
 | **M: Monitoring** | 2 | Inference explainability, hash chain audit |
 | **N: Speech Recognition** | 2 | **whisper.apr** transcription, streaming ASR |
 | **O: Distributed** | 1 | **repartir** multi-node inference |
+| **P: Inference Patterns** | 9 | Speculative decode, KV-cache, streaming, batching, pipeline, quantized |
+| **Q: Model Serving** | 1 | HTTP REST API with routing, batching, metrics |
 
 ## Falsification Testing
 
@@ -197,8 +202,13 @@ cargo run --example bundle_static_model
 cargo run --example bundle_quantized_model
 cargo run --example bundle_encrypted_model --features encryption
 
-# Category C: Training (NEW)
+# Category C: Training
 cargo run --example entrenar_autograd_training
+cargo run --example entrenar_lora_finetune
+cargo run --example entrenar_qlora_finetune
+cargo run --example entrenar_distillation
+cargo run --example hyperparameter_sweep
+cargo run --example checkpoint_resume
 
 # Category D: Format Conversion
 cargo run --example convert_safetensors_to_apr
@@ -216,6 +226,18 @@ cargo run --example whisper_streaming
 
 # Category O: Distributed (NEW)
 cargo run --example distributed_inference
+
+# Category P: Inference Patterns (NEW)
+cargo run --example simple_inference
+cargo run --example speculative_decode
+cargo run --example chat_kv_cache
+cargo run --example streaming_token_generator
+cargo run --example adaptive_batch_inference
+cargo run --example model_pipeline
+cargo run --example quantized_inference_comparison
+
+# Category Q: Model Serving (NEW)
+cargo run --example http_model_server
 
 # Category L: CLI Tools
 cargo run --example cli_apr_info -- --demo
@@ -314,7 +336,7 @@ test: Improve coverage for W
 
 ## Documentation
 
-- **[The APR Cookbook](https://paiml.github.io/apr-cookbook/)** — Online book with all 60+ recipes
+- **[The APR Cookbook](https://paiml.github.io/apr-cookbook/)** — Online book with all 95+ recipes
 - **[API Documentation](https://docs.rs/apr-cookbook)** — Rust API reference
 - **[Sovereign AI Stack](https://paiml.github.io/sovereign-ai-stack-book/)** — Complete stack tutorial
 - **[Specification](docs/specifications/cookbook-spec.md)** — APR v2 format specification
@@ -389,7 +411,7 @@ apr-cookbook/
 ├── examples/
 │   ├── creation/                 # Category A: 5 recipes
 │   ├── bundling/                 # Category B: 7 recipes
-│   ├── training/                 # Category C: 5 recipes (incl. entrenar)
+│   ├── training/                 # Category C: 14 recipes (entrenar, LoRA, QLoRA)
 │   ├── conversion/               # Category D: 5 recipes
 │   ├── registry/                 # Category E: 4 recipes
 │   ├── api/                      # Category F: 4 recipes
@@ -401,7 +423,9 @@ apr-cookbook/
 │   ├── cli/                      # Category L: 4 recipes
 │   ├── monitoring/               # Category M: 2 recipes
 │   ├── speech/                   # Category N: 2 recipes (whisper.apr)
-│   └── distributed/              # Category O: 1 recipe (repartir)
+│   ├── distributed/              # Category O: 1 recipe (repartir)
+│   ├── inference/                # Category P: 9 recipes (speculative, KV-cache, streaming)
+│   └── serve/                    # Category Q: 1 recipe (HTTP model server)
 ├── tests/
 │   └── falsification.rs          # Popperian falsification tests (F1-F7)
 ├── book/                         # mdbook documentation
