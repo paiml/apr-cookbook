@@ -54,12 +54,12 @@ APR Cookbook provides **60+ production-ready recipes** across 15 categories for 
 ┌─────────────────────────────────────────────────────────────────┐
 │                   APR Cookbook v2.0                             │
 ├─────────────────────────────────────────────────────────────────┤
-│  aprender 0.21 (APR v2, LZ4/ZSTD, Int4/Int8 quantization)      │
-│  trueno 0.11 (SIMD/GPU, AVX-512/NEON, LZ4 tensors)             │
+│  aprender 0.25 (APR v2, LZ4/ZSTD, Int4/Int8 quantization)      │
+│  trueno 0.14 (SIMD/GPU, AVX-512/NEON, LZ4 tensors)             │
 │  realizar 0.4 (FlashAttention, Q4K/Q5K/Q6K kernels)            │
 │  whisper-apr 0.1 (WASM-first ASR, streaming)                   │
 │  repartir 1.1 (distributed compute, work-stealing)             │
-│  entrenar 0.3 (autograd, LoRA/QLoRA, model merge)              │
+│  entrenar 0.5 (autograd, LoRA/QLoRA, model merge)              │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -384,6 +384,7 @@ apr-cookbook/
 │   ├── convert.rs                # Format conversion
 │   ├── recipe.rs                 # Recipe infrastructure
 │   ├── aprender_integration.rs   # APR format integration
+│   ├── explainable.rs            # Inference explainability wrappers
 │   └── error.rs                  # Error types
 ├── examples/
 │   ├── creation/                 # Category A: 5 recipes

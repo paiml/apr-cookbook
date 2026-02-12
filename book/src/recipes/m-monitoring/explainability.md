@@ -1,6 +1,7 @@
 # Inference Explainability
 
-Add explainability to model predictions for transparency and debugging.
+Add explainability to model predictions using entrenar's inference monitoring
+and apr-cookbook's `LinearExplainable` adapter.
 
 ## Example
 
@@ -11,34 +12,41 @@ cargo run --example inference_explainability
 ## Code
 
 ```rust
-//! Inference Explainability Example
-//!
-//! Demonstrates adding explainability to model predictions.
-
+use apr_cookbook::explainable::IntoExplainable;
 use apr_cookbook::prelude::*;
+use aprender::linear_model::LinearRegression;
+use aprender::primitives::{Matrix, Vector};
+use aprender::Estimator;
+use entrenar::monitor::inference::{
+    path::LinearPath, InferenceMonitor, RingCollector, TraceCollector,
+};
 
 fn main() -> Result<()> {
     let mut ctx = RecipeContext::new("inference_explainability")?;
 
-    // Create a model with feature importance tracking
-    let model = ExplainableModel::new(ExplainableConfig {
-        track_features: true,
-        compute_shap: false, // SHAP values (expensive)
-        top_k_features: 5,
-    });
+    // Train a linear regression model
+    let mut model = LinearRegression::new();
+    // ... fit model with training data ...
 
-    // Run inference with explanation
-    let input = vec![0.5, 0.3, 0.8, 0.2];
-    let (prediction, explanation) = model.predict_with_explanation(&input)?;
+    // Wrap with explainability
+    let explainable = model.into_explainable();
 
-    println!("Prediction: {:.4}", prediction);
-    println!("\nTop Contributing Features:");
-    for (idx, importance) in explanation.top_features(5) {
-        println!("  Feature {}: {:.4}", idx, importance);
+    // Create monitored inference with ring buffer collector
+    let collector: RingCollector<LinearPath, 64> = RingCollector::new();
+    let mut monitor = InferenceMonitor::new(explainable, collector);
+
+    // Predictions are now traced with feature contributions
+    let sample = &[35.0, 80000.0, 4.0];
+    let output = monitor.predict(sample, 1);
+
+    // Retrieve explanation
+    let traces = monitor.collector().recent(1);
+    if let Some(trace) = traces.first() {
+        println!("Confidence: {:.1}%", trace.path.confidence() * 100.0);
+        for (j, &contrib) in trace.path.feature_contributions().iter().enumerate() {
+            println!("  Feature {}: {:+.4}", j, contrib);
+        }
     }
-
-    ctx.record_float_metric("prediction", prediction as f64);
-    ctx.report()?;
 
     Ok(())
 }
@@ -46,48 +54,32 @@ fn main() -> Result<()> {
 
 ## Key Concepts
 
-### Feature Importance
+### Feature Contributions
 
-Track which input features most influenced the prediction:
+The `LinearExplainable` wrapper decomposes each prediction into per-feature
+contributions (coefficient * input), making it clear which features drive
+the output.
+
+### Monitored Inference
+
+`InferenceMonitor` from entrenar wraps any `Explainable` model and records
+every prediction with its decision path into a collector (ring buffer or
+hash chain).
+
+### Audit Trail
+
+Save the collected traces as JSON for compliance and debugging:
 
 ```rust
-let explanation = model.explain(&input)?;
-
-// Get top 5 most important features
-for (feature_idx, importance) in explanation.top_features(5) {
-    println!("Feature {}: importance = {:.4}", feature_idx, importance);
-}
+let entries = monitor.collector().recent(monitor.collector().len());
+let json = serde_json::to_string_pretty(&entries)?;
+std::fs::write("audit.json", json)?;
 ```
-
-### Attention Visualization
-
-For transformer models, visualize attention patterns:
-
-```rust
-let attention = model.attention_weights(&input)?;
-
-// Attention matrix: [num_heads, seq_len, seq_len]
-println!("Attention shape: {:?}", attention.shape());
-```
-
-## Falsifiable Claims
-
-This recipe supports claim verification for:
-- Feature importance computation accuracy
-- Attention weight extraction correctness
-- Explanation consistency across runs
 
 ## Tests
 
-```rust
-#[test]
-fn test_explainability_deterministic() {
-    let model = ExplainableModel::new(Default::default());
-    let input = vec![0.5, 0.3, 0.8, 0.2];
-
-    let exp1 = model.explain(&input).unwrap();
-    let exp2 = model.explain(&input).unwrap();
-
-    assert_eq!(exp1.top_features(5), exp2.top_features(5));
-}
-```
+The example includes unit tests, integration tests, and property-based tests
+verifying:
+- Feature contributions sum to logit minus intercept
+- Confidence is bounded [0, 1]
+- Predictions are deterministic

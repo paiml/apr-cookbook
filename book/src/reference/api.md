@@ -24,6 +24,15 @@ pub enum ConversionFormat { ... }
 pub enum DataType { ... }
 ```
 
+### `apr_cookbook::explainable`
+
+Inference explainability wrappers bridging aprender models with entrenar monitoring.
+
+```rust
+pub struct LinearExplainable { ... }
+pub trait IntoExplainable { ... }
+```
+
 ### `apr_cookbook::error`
 
 Error types.
@@ -51,5 +60,6 @@ cargo doc --all-features --open
 |-----|-----------|
 | `bundle::*` | Stable |
 | `convert::*` | Stable |
+| `explainable::*` | Stable |
 | `error::*` | Stable |
 | `aprender_integration::*` | Experimental |

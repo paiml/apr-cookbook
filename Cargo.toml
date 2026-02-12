@@ -53,10 +53,10 @@ enum_variant_names = "allow"
 no_effect_underscore_binding = "allow"
 
 [dependencies]
-# Sovereign Stack - crates.io published versions (2025)
-aprender = { version = "0.21", features = ["format-compression", "inference-monitoring"] }
-trueno = "0.11"
-entrenar = "0.3"  # Must match aprender's entrenar dependency
+# Sovereign Stack - crates.io published versions (2026)
+aprender = { version = "0.25", features = ["format-compression"] }
+trueno = "0.14"
+entrenar = "0.5"  # Must match aprender's entrenar dependency
 ndarray = "0.16"  # For entrenar Tensor gradients
 
 # CLI

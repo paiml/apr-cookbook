@@ -33,6 +33,7 @@ pub mod aprender_integration;
 pub mod bundle;
 pub mod convert;
 pub mod error;
+pub mod explainable;
 pub mod recipe;
 
 pub use error::{CookbookError, Result};

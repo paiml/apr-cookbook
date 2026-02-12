@@ -26,17 +26,17 @@ APR (Aprender Portable Runtime) is a native Rust ML model format designed for:
 APR Cookbook integrates with the Sovereign AI Stack:
 
 ```
-┌─────────────────────────────────────────┐
-│           Your Application              │
-├─────────────────────────────────────────┤
-│  apr-cookbook  │  Recipes & patterns    │
-├────────────────┼────────────────────────┤
-│    aprender    │  ML algorithms         │
-├────────────────┼────────────────────────┤
-│     trueno     │  SIMD compute          │
-├────────────────┼────────────────────────┤
-│    entrenar    │  Training & optim      │
-└─────────────────────────────────────────┘
+┌──────────────────────────────────────────────────┐
+│              Your Application                    │
+├──────────────────────────────────────────────────┤
+│  apr-cookbook    │  Recipes & patterns            │
+├─────────────────┼────────────────────────────────┤
+│  aprender 0.25  │  ML algorithms, APR v2 format  │
+├─────────────────┼────────────────────────────────┤
+│  trueno 0.14    │  SIMD/GPU compute              │
+├─────────────────┼────────────────────────────────┤
+│  entrenar 0.5   │  Training, monitoring & optim  │
+└──────────────────────────────────────────────────┘
 ```
 
 ## Quick Example
