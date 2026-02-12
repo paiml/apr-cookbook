@@ -199,6 +199,18 @@ path = "examples/training/continuous_train_curriculum.rs"
 name = "entrenar_autograd_training"
 path = "examples/training/entrenar_autograd_training.rs"
 
+[[example]]
+name = "entrenar_lora_finetune"
+path = "examples/training/entrenar_lora_finetune.rs"
+
+[[example]]
+name = "entrenar_model_merge"
+path = "examples/training/entrenar_model_merge.rs"
+
+[[example]]
+name = "entrenar_eval_metrics"
+path = "examples/training/entrenar_eval_metrics.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
