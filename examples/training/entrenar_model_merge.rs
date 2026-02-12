@@ -30,11 +30,11 @@ type Model = HashMap<String, Tensor>;
 /// Create a synthetic base model with random weights
 fn create_base_model(layers: &[(&str, usize)], seed: u64) -> Model {
     let mut model = HashMap::new();
-    for (name, size) in layers {
-        let data: Vec<f32> = (0..*size)
+    for &(name, size) in layers {
+        let data: Vec<f32> = (0..size)
             .map(|i| {
                 let mut hasher = DefaultHasher::new();
-                (seed, *name, i).hash(&mut hasher);
+                (seed, name, i).hash(&mut hasher);
                 (hasher.finish() as f32 / u64::MAX as f32 - 0.5) * 0.1
             })
             .collect();
@@ -84,7 +84,7 @@ fn model_distance(m1: &Model, m2: &Model) -> f32 {
 
 /// Count total parameters in a model
 fn param_count(model: &Model) -> usize {
-    model.values().map(|t| t.len()).sum()
+    model.values().map(Tensor::len).sum()
 }
 
 fn main() {
