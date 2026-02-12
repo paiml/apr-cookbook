@@ -215,6 +215,10 @@ path = "examples/training/entrenar_eval_metrics.rs"
 name = "entrenar_distillation"
 path = "examples/training/entrenar_distillation.rs"
 
+[[example]]
+name = "hyperparameter_sweep"
+path = "examples/training/hyperparameter_sweep.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -480,6 +484,20 @@ path = "examples/inference/adaptive_batch_inference.rs"
 [[example]]
 name = "chat_kv_cache"
 path = "examples/inference/chat_kv_cache.rs"
+
+[[example]]
+name = "simple_inference"
+path = "examples/inference/simple_inference.rs"
+
+[[example]]
+name = "chat_multiturn"
+path = "examples/inference/chat_multiturn.rs"
+
+# --- Category Q: Model Serving ---
+
+[[example]]
+name = "http_model_server"
+path = "examples/serve/http_model_server.rs"
 
 # --- Category O: Distributed Computing ---
 
