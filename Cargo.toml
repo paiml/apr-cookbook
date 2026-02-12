@@ -211,6 +211,10 @@ path = "examples/training/entrenar_model_merge.rs"
 name = "entrenar_eval_metrics"
 path = "examples/training/entrenar_eval_metrics.rs"
 
+[[example]]
+name = "entrenar_distillation"
+path = "examples/training/entrenar_distillation.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
