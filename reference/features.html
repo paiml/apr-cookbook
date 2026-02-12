@@ -185,7 +185,6 @@
 <div class="table-wrapper"><table><thead><tr><th>Feature</th><th>Description</th><th>Default</th></tr></thead><tbody>
 <tr><td><code>default</code></td><td>Core bundling and conversion</td><td>✅</td></tr>
 <tr><td><code>encryption</code></td><td>AES-256-GCM encryption</td><td>❌</td></tr>
-<tr><td><code>training</code></td><td>entrenar integration</td><td>❌</td></tr>
 <tr><td><code>full</code></td><td>All features</td><td>❌</td></tr>
 </tbody></table>
 </div>
@@ -193,10 +192,6 @@
 <h3 id="single-feature"><a class="header" href="#single-feature">Single Feature</a></h3>
 <pre><code class="language-toml">[dependencies]
 apr-cookbook = { version = &quot;0.1&quot;, features = [&quot;encryption&quot;] }
-</code></pre>
-<h3 id="multiple-features"><a class="header" href="#multiple-features">Multiple Features</a></h3>
-<pre><code class="language-toml">[dependencies]
-apr-cookbook = { version = &quot;0.1&quot;, features = [&quot;encryption&quot;, &quot;training&quot;] }
 </code></pre>
 <h3 id="all-features"><a class="header" href="#all-features">All Features</a></h3>
 <pre><code class="language-toml">[dependencies]
@@ -210,14 +205,6 @@ use aprender::format::{save_encrypted, load_encrypted};</code></pre>
 <p>Adds dependencies:</p>
 <ul>
 <li><code>aprender/format-encryption</code></li>
-</ul>
-<h3 id="training"><a class="header" href="#training"><code>training</code></a></h3>
-<p>Enables training integration with entrenar:</p>
-<pre><code class="language-rust">#[cfg(feature = &quot;training&quot;)]
-use entrenar::Trainer;</code></pre>
-<p>Adds dependencies:</p>
-<ul>
-<li><code>entrenar</code></li>
 </ul>
 <h2 id="checking-features-at-runtime"><a class="header" href="#checking-features-at-runtime">Checking Features at Runtime</a></h2>
 <pre><code class="language-rust">#[cfg(feature = &quot;encryption&quot;)]

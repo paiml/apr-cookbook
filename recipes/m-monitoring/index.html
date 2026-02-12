@@ -205,22 +205,25 @@
 <li>Data lineage tracking</li>
 </ul>
 <h2 id="stack-integration"><a class="header" href="#stack-integration">Stack Integration</a></h2>
-<pre><code class="language-rust">use aprender::monitoring::{ExplainabilityReport, AuditChain};
-use aprender::apr::AprModel;
+<pre><code class="language-rust">use apr_cookbook::explainable::IntoExplainable;
+use aprender::linear_model::LinearRegression;
+use entrenar::monitor::inference::{
+    path::LinearPath, InferenceMonitor, RingCollector,
+};
 
-// Load model with monitoring enabled
-let model = AprModel::load(&quot;model.apr&quot;)?
-    .with_explainability(true)
-    .with_audit_chain(true);
+// Train and wrap with explainability
+let model = LinearRegression::new();
+// ... fit model ...
+let explainable = model.into_explainable();
 
-// Get explanation with prediction
-let (prediction, explanation) = model.predict_with_explanation(&amp;input)?;
-println!(&quot;Prediction: {:?}&quot;, prediction);
-println!(&quot;Top features: {:?}&quot;, explanation.top_features(5));
+// Create monitored inference
+let collector: RingCollector&lt;LinearPath, 64&gt; = RingCollector::new();
+let mut monitor = InferenceMonitor::new(explainable, collector);
 
-// Audit chain entry is automatically recorded
-let audit = model.audit_chain();
-println!(&quot;Audit entries: {}&quot;, audit.len());</code></pre>
+// Predictions are now traced
+let output = monitor.predict(&amp;features, 1);
+let trace = monitor.collector().recent(1)[0];
+println!(&quot;{}&quot;, trace.path.explain());</code></pre>
 <h2 id="toyota-way-principles"><a class="header" href="#toyota-way-principles">Toyota Way Principles</a></h2>
 <ul>
 <li><strong>Jidoka</strong>: Built-in quality through explainability</li>
