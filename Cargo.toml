@@ -219,6 +219,10 @@ path = "examples/training/entrenar_distillation.rs"
 name = "hyperparameter_sweep"
 path = "examples/training/hyperparameter_sweep.rs"
 
+[[example]]
+name = "entrenar_qlora_finetune"
+path = "examples/training/entrenar_qlora_finetune.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
