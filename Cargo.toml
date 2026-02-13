@@ -235,6 +235,10 @@ path = "examples/training/mixed_precision_training.rs"
 name = "few_shot_finetune"
 path = "examples/training/few_shot_finetune.rs"
 
+[[example]]
+name = "data_preprocessing"
+path = "examples/training/data_preprocessing.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -512,6 +516,10 @@ path = "examples/inference/chat_multiturn.rs"
 [[example]]
 name = "model_pipeline"
 path = "examples/inference/model_pipeline.rs"
+
+[[example]]
+name = "ensemble_inference"
+path = "examples/inference/ensemble_inference.rs"
 
 [[example]]
 name = "quantized_inference_comparison"
