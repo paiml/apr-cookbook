@@ -200,6 +200,45 @@ fn generate_class_data(class: usize, n: usize, seed: u64) -> Vec<Vec<f32>> {
         .collect()
 }
 
+/// Build support set with K examples per class
+fn build_support_set(k: usize, seed: u64) -> Vec<(Vec<f32>, usize)> {
+    let mut support = Vec::new();
+    for class in 0..NUM_CLASSES {
+        for ex in generate_class_data(class, k, seed) {
+            support.push((ex, class));
+        }
+    }
+    support
+}
+
+/// Evaluate average confidence on generated test data
+fn evaluate_avg_confidence(net: &PrototypicalNetwork, n_per_class: usize, seed: u64) -> f32 {
+    let mut total_conf = 0.0f32;
+    let mut count = 0usize;
+    for class in 0..NUM_CLASSES {
+        for query in generate_class_data(class, n_per_class, seed) {
+            total_conf += net.predict(&query).1;
+            count += 1;
+        }
+    }
+    total_conf / count.max(1) as f32
+}
+
+/// Evaluate network accuracy on generated test data
+fn evaluate_accuracy(net: &PrototypicalNetwork, n_per_class: usize, seed: u64) -> (usize, usize) {
+    let mut hit = 0usize;
+    let mut count = 0usize;
+    for class in 0..NUM_CLASSES {
+        for query in generate_class_data(class, n_per_class, seed) {
+            if net.predict(&query).0 == class {
+                hit += 1;
+            }
+            count += 1;
+        }
+    }
+    (hit, count)
+}
+
 fn main() {
     println!("=== Few-Shot Fine-Tuning Example ===\n");
 
@@ -212,13 +251,7 @@ fn main() {
     println!("   ─────────────────────────────────────────");
 
     let shots = 5;
-    let mut support_set: Vec<(Vec<f32>, usize)> = Vec::new();
-    for class in 0..NUM_CLASSES {
-        let examples = generate_class_data(class, shots, seed);
-        for ex in examples {
-            support_set.push((ex, class));
-        }
-    }
+    let support_set = build_support_set(shots, seed);
 
     println!("   K-shot: {} examples per class", shots);
     println!("   Classes: {}", NUM_CLASSES);
@@ -309,27 +342,14 @@ fn main() {
         let mut net = PrototypicalNetwork::new(Encoder::new(seed), metric);
         net.fit(&support_set);
 
-        let mut hit = 0usize;
-        let mut total_conf = 0.0f32;
-        let mut count = 0usize;
-
-        for class in 0..NUM_CLASSES {
-            let queries = generate_class_data(class, 10, seed + 2000);
-            for query in &queries {
-                let (pred, conf) = net.predict(query);
-                if pred == class {
-                    hit += 1;
-                }
-                total_conf += conf;
-                count += 1;
-            }
-        }
+        let (hit, count) = evaluate_accuracy(&net, 10, seed + 2000);
+        let avg_conf = evaluate_avg_confidence(&net, 10, seed + 2000);
 
         println!(
             "   {:>12} {:>9.1}% {:>11.2}%",
             metric.name(),
             hit as f64 / count as f64 * 100.0,
-            total_conf / count as f32 * 100.0
+            avg_conf * 100.0
         );
     }
     println!();
@@ -343,27 +363,13 @@ fn main() {
     println!("   {}", "─".repeat(30));
 
     for k in [1, 2, 5, 10, 20] {
-        let mut support: Vec<(Vec<f32>, usize)> = Vec::new();
-        for class in 0..NUM_CLASSES {
-            for ex in generate_class_data(class, k, seed) {
-                support.push((ex, class));
-            }
-        }
+        let support = build_support_set(k, seed);
 
         let start = Instant::now();
         let mut net = PrototypicalNetwork::new(Encoder::new(seed), DistanceMetric::Euclidean);
         net.fit(&support);
 
-        let mut hit = 0usize;
-        let mut count = 0usize;
-        for class in 0..NUM_CLASSES {
-            for query in generate_class_data(class, 10, seed + 3000) {
-                if net.predict(&query).0 == class {
-                    hit += 1;
-                }
-                count += 1;
-            }
-        }
+        let (hit, count) = evaluate_accuracy(&net, 10, seed + 3000);
         let elapsed = start.elapsed().as_micros();
 
         println!(
@@ -412,10 +418,6 @@ fn main() {
     }
 
     // Compare before/after adaptation
-    let mut before_correct = 0usize;
-    let mut after_correct = 0usize;
-    let test_n = 50usize;
-
     let original_net = {
         let mut n = PrototypicalNetwork::new(Encoder::new(seed), DistanceMetric::Euclidean);
         n.fit(&support_set);
@@ -427,24 +429,16 @@ fn main() {
         n
     };
 
-    for class in 0..NUM_CLASSES {
-        for query in generate_class_data(class, test_n / NUM_CLASSES, seed + 5000) {
-            if original_net.predict(&query).0 == class {
-                before_correct += 1;
-            }
-            if adapted_net.predict(&query).0 == class {
-                after_correct += 1;
-            }
-        }
-    }
+    let (before_hit, before_count) = evaluate_accuracy(&original_net, 10, seed + 5000);
+    let (after_hit, after_count) = evaluate_accuracy(&adapted_net, 10, seed + 5000);
 
     println!(
         "   Before adaptation: {:.1}%",
-        before_correct as f64 / test_n as f64 * 100.0
+        before_hit as f64 / before_count as f64 * 100.0
     );
     println!(
         "   After adaptation:  {:.1}%",
-        after_correct as f64 / test_n as f64 * 100.0
+        after_hit as f64 / after_count as f64 * 100.0
     );
     println!();
 
