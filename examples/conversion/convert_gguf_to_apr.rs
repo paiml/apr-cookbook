@@ -26,7 +26,6 @@ use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
 };
 use apr_cookbook::Result;
-use std::io::Cursor;
 
 /// GGUF magic number: "GGUF" in little-endian
 const GGUF_MAGIC: u32 = 0x4655_4747;
@@ -35,6 +34,7 @@ const GGUF_MAGIC: u32 = 0x4655_4747;
 const GGUF_VERSION: u32 = 3;
 
 /// GGML tensor type to APR DataType mapping
+/// GGML quantization types (full spec - not all used in mock)
 #[derive(Debug, Clone, Copy)]
 #[repr(u32)]
 #[allow(dead_code)]
@@ -101,22 +101,23 @@ struct GgufReader {
     tensors: Vec<GgufTensorInfo>,
 }
 
-/// Tensor metadata from GGUF
+/// Tensor metadata from GGUF (mirrors GGUF spec fields)
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct GgufTensorInfo {
     name: String,
+    #[allow(dead_code)]
     n_dims: u32,
     dims: Vec<u64>,
     dtype: GgmlType,
+    #[allow(dead_code)]
     offset: u64,
 }
 
 impl GgufReader {
-    /// Create a GGUF reader from mock data (demonstration purposes)
-    #[allow(dead_code)]
+    /// Create a GGUF reader from binary data (used in tests for GGUF parsing validation)
+    #[cfg(test)]
     fn from_mock_bytes(data: &[u8]) -> Result<Self> {
-        use std::io::Read;
+        use std::io::{Cursor, Read};
 
         let mut cursor = Cursor::new(data);
         let mut buf4 = [0u8; 4];

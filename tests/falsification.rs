@@ -391,6 +391,112 @@ fn f5_speech_recognition_wer() {
 // F6: FlashAttention Speedup
 // =============================================================================
 
+/// Naive attention: O(n^2) space for full attention matrix
+fn naive_attention(q: &[f32], k: &[f32], v: &[f32], seq_len: usize, head_dim: usize) -> Vec<f32> {
+    let mut attention = vec![0.0f32; seq_len * seq_len];
+    let scale = (head_dim as f32).sqrt();
+
+    // Q @ K^T
+    for i in 0..seq_len {
+        for j in 0..seq_len {
+            let mut dot = 0.0;
+            for d in 0..head_dim {
+                dot += q[i * head_dim + d] * k[j * head_dim + d];
+            }
+            attention[i * seq_len + j] = dot / scale;
+        }
+    }
+
+    // Row-wise softmax with numerical stability
+    for i in 0..seq_len {
+        let row = &mut attention[i * seq_len..(i + 1) * seq_len];
+        let max = row.iter().fold(f32::NEG_INFINITY, |a, &b| a.max(b));
+        let mut sum = 0.0;
+        for val in row.iter_mut() {
+            *val = (*val - max).exp();
+            sum += *val;
+        }
+        for val in row.iter_mut() {
+            *val /= sum;
+        }
+    }
+
+    // Attention @ V
+    let mut output = vec![0.0f32; seq_len * head_dim];
+    for i in 0..seq_len {
+        for d in 0..head_dim {
+            let mut sum = 0.0;
+            for j in 0..seq_len {
+                sum += attention[i * seq_len + j] * v[j * head_dim + d];
+            }
+            output[i * head_dim + d] = sum;
+        }
+    }
+
+    output
+}
+
+/// Tiled attention: O(block_size^2) space (simulates FlashAttention's memory efficiency)
+fn tiled_attention(q: &[f32], k: &[f32], v: &[f32], seq_len: usize, head_dim: usize) -> Vec<f32> {
+    let block_size = 64;
+    let scale = (head_dim as f32).sqrt();
+    let mut output = vec![0.0f32; seq_len * head_dim];
+    let mut row_max = vec![f32::NEG_INFINITY; seq_len];
+    let mut row_sum = vec![0.0f32; seq_len];
+
+    for block_start in (0..seq_len).step_by(block_size) {
+        let block_end = (block_start + block_size).min(seq_len);
+        let block_len = block_end - block_start;
+        let mut block_attn = vec![0.0f32; block_len * seq_len];
+
+        // Compute scaled dot-product for this block
+        for i in block_start..block_end {
+            for j in 0..seq_len {
+                let mut dot = 0.0;
+                for d in 0..head_dim {
+                    dot += q[i * head_dim + d] * k[j * head_dim + d];
+                }
+                block_attn[(i - block_start) * seq_len + j] = dot / scale;
+            }
+        }
+
+        // Online softmax + output accumulation (FlashAttention algorithm)
+        for i in block_start..block_end {
+            let bi = i - block_start;
+            let old_max = row_max[i];
+            let new_max = block_attn[bi * seq_len..(bi + 1) * seq_len]
+                .iter()
+                .fold(old_max, |a, &b| a.max(b));
+
+            if new_max > old_max {
+                let correction = (old_max - new_max).exp();
+                row_sum[i] *= correction;
+                for d in 0..head_dim {
+                    output[i * head_dim + d] *= correction;
+                }
+                row_max[i] = new_max;
+            }
+
+            for j in 0..seq_len {
+                let exp = (block_attn[bi * seq_len + j] - row_max[i]).exp();
+                row_sum[i] += exp;
+                for d in 0..head_dim {
+                    output[i * head_dim + d] += exp * v[j * head_dim + d];
+                }
+            }
+        }
+    }
+
+    // Final normalization
+    for i in 0..seq_len {
+        for d in 0..head_dim {
+            output[i * head_dim + d] /= row_sum[i];
+        }
+    }
+
+    output
+}
+
 /// F6: FlashAttention kernel achieves ≥2x speedup over naive attention for seq_len ≥ 1024
 ///
 /// **Claim**: FlashAttention provides ≥2x speedup for long sequences.
@@ -402,11 +508,10 @@ fn f5_speech_recognition_wer() {
 /// Full FlashAttention requires GPU kernels from realizar.
 #[test]
 fn f6_flash_attention_speedup() {
-    // Simulate attention computation (naive vs optimized tiling)
     let seq_len = 1024;
     let head_dim = 64;
 
-    // Generate random Q, K, V matrices
+    // Generate deterministic Q, K, V matrices
     let q: Vec<f32> = (0..seq_len * head_dim)
         .map(|i| ((i * 17) % 1000) as f32 / 1000.0 - 0.5)
         .collect();
@@ -416,124 +521,6 @@ fn f6_flash_attention_speedup() {
     let v: Vec<f32> = (0..seq_len * head_dim)
         .map(|i| ((i * 47) % 1000) as f32 / 1000.0 - 0.5)
         .collect();
-
-    // Naive attention: O(n^2) space for attention matrix
-    fn naive_attention(
-        q: &[f32],
-        k: &[f32],
-        v: &[f32],
-        seq_len: usize,
-        head_dim: usize,
-    ) -> Vec<f32> {
-        let mut attention = vec![0.0f32; seq_len * seq_len];
-
-        // Q @ K^T
-        for i in 0..seq_len {
-            for j in 0..seq_len {
-                let mut dot = 0.0;
-                for d in 0..head_dim {
-                    dot += q[i * head_dim + d] * k[j * head_dim + d];
-                }
-                attention[i * seq_len + j] = dot / (head_dim as f32).sqrt();
-            }
-        }
-
-        // Softmax (simplified - row-wise max subtraction for numerical stability)
-        for i in 0..seq_len {
-            let max = attention[i * seq_len..(i + 1) * seq_len]
-                .iter()
-                .fold(f32::NEG_INFINITY, |a, &b| a.max(b));
-            let mut sum = 0.0;
-            for j in 0..seq_len {
-                let exp = (attention[i * seq_len + j] - max).exp();
-                attention[i * seq_len + j] = exp;
-                sum += exp;
-            }
-            for j in 0..seq_len {
-                attention[i * seq_len + j] /= sum;
-            }
-        }
-
-        // Attention @ V
-        let mut output = vec![0.0f32; seq_len * head_dim];
-        for i in 0..seq_len {
-            for d in 0..head_dim {
-                let mut sum = 0.0;
-                for j in 0..seq_len {
-                    sum += attention[i * seq_len + j] * v[j * head_dim + d];
-                }
-                output[i * head_dim + d] = sum;
-            }
-        }
-
-        output
-    }
-
-    // Tiled attention: O(block_size^2) space (simulates FlashAttention's memory efficiency)
-    fn tiled_attention(
-        q: &[f32],
-        k: &[f32],
-        v: &[f32],
-        seq_len: usize,
-        head_dim: usize,
-    ) -> Vec<f32> {
-        let block_size = 64; // Tile size for cache efficiency
-        let mut output = vec![0.0f32; seq_len * head_dim];
-        let mut row_max = vec![f32::NEG_INFINITY; seq_len];
-        let mut row_sum = vec![0.0f32; seq_len];
-
-        for block_start in (0..seq_len).step_by(block_size) {
-            let block_end = (block_start + block_size).min(seq_len);
-            let mut block_attention = vec![0.0f32; (block_end - block_start) * seq_len];
-
-            // Process block
-            for i in block_start..block_end {
-                for j in 0..seq_len {
-                    let mut dot = 0.0;
-                    for d in 0..head_dim {
-                        dot += q[i * head_dim + d] * k[j * head_dim + d];
-                    }
-                    block_attention[(i - block_start) * seq_len + j] =
-                        dot / (head_dim as f32).sqrt();
-                }
-            }
-
-            // Online softmax + output accumulation (simulating FlashAttention's algorithm)
-            for i in block_start..block_end {
-                let block_i = i - block_start;
-                let old_max = row_max[i];
-                let new_max = block_attention[block_i * seq_len..(block_i + 1) * seq_len]
-                    .iter()
-                    .fold(old_max, |a, &b| a.max(b));
-
-                if new_max > old_max {
-                    let correction = (old_max - new_max).exp();
-                    row_sum[i] *= correction;
-                    for d in 0..head_dim {
-                        output[i * head_dim + d] *= correction;
-                    }
-                    row_max[i] = new_max;
-                }
-
-                for j in 0..seq_len {
-                    let exp = (block_attention[block_i * seq_len + j] - row_max[i]).exp();
-                    row_sum[i] += exp;
-                    for d in 0..head_dim {
-                        output[i * head_dim + d] += exp * v[j * head_dim + d];
-                    }
-                }
-            }
-        }
-
-        // Final normalization
-        for i in 0..seq_len {
-            for d in 0..head_dim {
-                output[i * head_dim + d] /= row_sum[i];
-            }
-        }
-
-        output
-    }
 
     // Warmup
     for _ in 0..3 {
@@ -545,37 +532,31 @@ fn f6_flash_attention_speedup() {
     let iterations = 5;
     let start = Instant::now();
     for _ in 0..iterations {
-        let output = naive_attention(&q, &k, &v, seq_len, head_dim);
-        std::hint::black_box(output);
+        std::hint::black_box(naive_attention(&q, &k, &v, seq_len, head_dim));
     }
     let naive_time = start.elapsed() / iterations as u32;
 
     // Benchmark tiled
     let start = Instant::now();
     for _ in 0..iterations {
-        let output = tiled_attention(&q, &k, &v, seq_len, head_dim);
-        std::hint::black_box(output);
+        std::hint::black_box(tiled_attention(&q, &k, &v, seq_len, head_dim));
     }
     let tiled_time = start.elapsed() / iterations as u32;
 
     let speedup = naive_time.as_secs_f64() / tiled_time.as_secs_f64();
 
-    println!("F6: Attention benchmark (seq_len={}):", seq_len);
-    println!("F6:   Naive time:  {:?}", naive_time);
-    println!("F6:   Tiled time:  {:?}", tiled_time);
-    println!("F6:   Speedup: {:.2}x", speedup);
+    println!("F6: Attention benchmark (seq_len={seq_len}):");
+    println!("F6:   Naive time:  {naive_time:?}");
+    println!("F6:   Tiled time:  {tiled_time:?}");
+    println!("F6:   Speedup: {speedup:.2}x");
 
-    // Note: Tiled attention in pure Rust may not show speedup due to cache effects.
-    // Real FlashAttention speedup comes from GPU memory bandwidth optimization.
-    // This test validates the algorithm pattern; actual speedup requires GPU kernels.
+    // CPU tiled attention validates algorithm; GPU required for 2x+ speedup
     println!("F6: Note: CPU tiled attention validates algorithm; GPU required for 2x+ speedup");
 
     // Relaxed threshold for CPU: speedup > 0.5x (tiled should not be significantly slower)
-    // Full FlashAttention claim requires GPU benchmarking
     assert!(
         speedup > 0.5,
-        "FALSIFIED: Tiled attention significantly slower ({:.2}x)",
-        speedup
+        "FALSIFIED: Tiled attention significantly slower ({speedup:.2}x)",
     );
 }
 
