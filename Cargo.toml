@@ -273,6 +273,10 @@ path = "examples/registry/registry_model_comparison.rs"
 name = "registry_model_rollback"
 path = "examples/registry/registry_model_rollback.rs"
 
+[[example]]
+name = "registry_model_versioning"
+path = "examples/registry/registry_model_versioning.rs"
+
 # Category F: API
 [[example]]
 name = "api_call_model_inference"
@@ -307,6 +311,10 @@ path = "examples/serverless/serverless_edge_function.rs"
 name = "serverless_container_image"
 path = "examples/serverless/serverless_container_image.rs"
 
+[[example]]
+name = "serverless_model_warmup"
+path = "examples/serverless/serverless_model_warmup.rs"
+
 # Category H: WASM/Browser
 [[example]]
 name = "wasm_browser_inference"
@@ -327,6 +335,10 @@ path = "examples/wasm/wasm_webgpu_acceleration.rs"
 [[example]]
 name = "wasm_streaming_compilation"
 path = "examples/wasm/wasm_streaming_compilation.rs"
+
+[[example]]
+name = "wasm_model_loader"
+path = "examples/wasm/wasm_model_loader.rs"
 
 # Category I: GPU Acceleration
 [[example]]
@@ -386,6 +398,10 @@ path = "examples/distillation/distill_pruning_aware.rs"
 [[example]]
 name = "distill_quantization_aware"
 path = "examples/distillation/distill_quantization_aware.rs"
+
+[[example]]
+name = "distill_structured_pruning"
+path = "examples/distillation/distill_structured_pruning.rs"
 
 # Category L: CLI Tools (additional)
 [[example]]
