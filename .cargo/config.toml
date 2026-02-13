@@ -1,4 +1,7 @@
-# ZRAM build acceleration
+# ZRAM build acceleration (local only, CI overrides via env)
 [build]
-target-dir = "/mnt/zram/targets/apr-cookbook"
 jobs = 4  # Limit parallel jobs to avoid OOM with 60+ examples
+
+[env]
+# Use CARGO_TARGET_DIR env var for local override instead of hardcoded path
+# Set CARGO_TARGET_DIR=/mnt/zram/targets/apr-cookbook in your shell profile
