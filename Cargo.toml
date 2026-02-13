@@ -493,6 +493,10 @@ path = "examples/monitoring/model_drift_detection.rs"
 name = "latency_histogram"
 path = "examples/monitoring/latency_histogram.rs"
 
+[[example]]
+name = "inference_cost_tracking"
+path = "examples/monitoring/inference_cost_tracking.rs"
+
 # --- Category N: Speech Recognition ---
 
 [[example]]
@@ -545,6 +549,10 @@ path = "examples/inference/ensemble_inference.rs"
 name = "quantized_inference_comparison"
 path = "examples/inference/quantized_inference_comparison.rs"
 
+[[example]]
+name = "dynamic_batch_with_sla"
+path = "examples/inference/dynamic_batch_with_sla.rs"
+
 # --- Category Q: Model Serving ---
 
 [[example]]
@@ -563,8 +571,16 @@ path = "examples/serve/model_canary_deploy.rs"
 name = "model_rate_limiter"
 path = "examples/serve/model_rate_limiter.rs"
 
+[[example]]
+name = "model_selection_router"
+path = "examples/serve/model_selection_router.rs"
+
 # --- Category O: Distributed Computing ---
 
 [[example]]
 name = "distributed_inference"
 path = "examples/distributed/distributed_inference.rs"
+
+[[example]]
+name = "distributed_model_sharding"
+path = "examples/distributed/distributed_model_sharding.rs"
