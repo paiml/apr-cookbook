@@ -36,7 +36,7 @@
 
 ## Overview
 
-APR Cookbook provides **95+ production-ready recipes** across 20 categories for deploying ML models using the APR v2 format. Each recipe is isolated, idempotent, and verified with Popperian falsification tests following Toyota Way quality principles.
+APR Cookbook provides **121 production-ready recipes** across 20 categories for deploying ML models using the APR v2 format. Each recipe is isolated, idempotent, and verified with Popperian falsification tests following Toyota Way quality principles.
 
 ### Key Capabilities
 
@@ -134,14 +134,14 @@ fn main() -> Result<()> {
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    APR Cookbook (95+ Recipes)                   │
+│                    APR Cookbook (121 Recipes)                    │
 ├─────────────────────────────────────────────────────────────────┤
-│  A: Creation (5)      │  B: Bundling (7)    │  C: Training (14) │
-│  D: Conversion (5)    │  E: Registry (4)    │  F: API (4)       │
-│  G: Serverless (4)    │  H: WASM (5)        │  I: GPU (5)       │
-│  J: SIMD (5)          │  K: Distillation (4)│  L: CLI (4)       │
-│  M: Monitoring (2)    │  N: Speech (2)      │  O: Distributed(1)│
-│  P: Inference (9)     │  Q: Serving (1)     │  Advanced (17)    │
+│  A: Creation (6)      │  B: Bundling (7)    │  C: Training (17) │
+│  D: Conversion (5)    │  E: Registry (5)    │  F: API (5)       │
+│  G: Serverless (5)    │  H: WASM (6)        │  I: GPU (6)       │
+│  J: SIMD (5)          │  K: Distillation (5)│  L: CLI (7)       │
+│  M: Monitoring (5)    │  N: Speech (2)      │  O: Distributed(2)│
+│  P: Inference (11)    │  Q: Serving (5)     │  Advanced (16)    │
 ├─────────────────────────────────────────────────────────────────┤
 │  Falsification Tests: F1-F7 (Popperian methodology)            │
 │  Test Coverage: 95%+ │ Quality Gate: Zero violations           │
@@ -152,23 +152,23 @@ fn main() -> Result<()> {
 
 | Category | Recipes | Description |
 |----------|---------|-------------|
-| **A: Model Creation** | 5 | Build models from scratch: regression, trees, clustering, n-grams |
+| **A: Model Creation** | 6 | Build models from scratch: regression, trees, clustering, n-grams, neural networks |
 | **B: Binary Bundling** | 7 | Embed models: static, quantized, encrypted, signed, Lambda |
-| **C: Training** | 14 | Autograd, LoRA, QLoRA, distillation, model merge, eval, sweep, checkpoint |
+| **C: Training** | 17 | Autograd, LoRA, QLoRA, distillation, model merge, eval, sweep, checkpoint, mixed-precision, few-shot, gradient accumulation, LR schedules |
 | **D: Format Conversion** | 5 | SafeTensors, GGUF, ONNX, Phi model conversion |
-| **E: Model Registry** | 4 | Register, lineage, comparison, rollback |
-| **F: API Integration** | 4 | Inference, streaming, batch, health checks |
-| **G: Serverless** | 4 | Lambda, cold start, edge functions, containers |
-| **H: WASM/Browser** | 5 | Browser inference, workers, progressive loading, WebGPU |
-| **I: GPU Acceleration** | 5 | **FlashAttention**, CUDA, tensor cores, multi-GPU, memory |
+| **E: Model Registry** | 5 | Register, lineage, comparison, rollback, versioning |
+| **F: API Integration** | 5 | Inference, streaming, batch, health checks, auth middleware |
+| **G: Serverless** | 5 | Lambda, cold start, edge functions, containers, model warmup |
+| **H: WASM/Browser** | 6 | Browser inference, workers, progressive loading, WebGPU, model loader |
+| **I: GPU Acceleration** | 6 | **FlashAttention**, CUDA, tensor cores, multi-GPU, memory management, memory pool |
 | **J: SIMD Acceleration** | 5 | **trueno ops**, matrix ops, vectorized, quantized SIMD |
-| **K: Model Distillation** | 4 | Knowledge transfer, layer matching, pruning-aware |
-| **L: CLI Tools** | 4 | apr-info, apr-bench, apr-convert, apr-serve |
-| **M: Monitoring** | 2 | Inference explainability, hash chain audit |
+| **K: Model Distillation** | 5 | Knowledge transfer, layer matching, pruning-aware, quantization-aware, structured pruning |
+| **L: CLI Tools** | 7 | apr-info, apr-bench, apr-convert, apr-serve, apr-diff |
+| **M: Monitoring** | 5 | Inference explainability, hash chain audit, cost tracking, latency histograms, drift detection |
 | **N: Speech Recognition** | 2 | **whisper.apr** transcription, streaming ASR |
-| **O: Distributed** | 1 | **repartir** multi-node inference |
-| **P: Inference Patterns** | 9 | Speculative decode, KV-cache, streaming, batching, pipeline, quantized |
-| **Q: Model Serving** | 1 | HTTP REST API with routing, batching, metrics |
+| **O: Distributed** | 2 | **repartir** multi-node inference, model sharding |
+| **P: Inference Patterns** | 11 | Speculative decode, KV-cache, streaming, batching, pipeline, quantized, tool use, ensemble, dynamic SLA |
+| **Q: Model Serving** | 5 | HTTP REST API, A/B testing, canary deploy, rate limiting, model selection router |
 
 ## Falsification Testing
 
@@ -196,52 +196,134 @@ cargo test --test falsification --release -- --nocapture
 # Category A: Model Creation
 cargo run --example create_apr_from_scratch
 cargo run --example create_apr_linear_regression
+cargo run --example create_apr_decision_tree
+cargo run --example create_apr_kmeans_clustering
+cargo run --example create_apr_ngram_language_model
+cargo run --example create_apr_neural_network
 
 # Category B: Binary Bundling
 cargo run --example bundle_static_model
 cargo run --example bundle_quantized_model
 cargo run --example bundle_encrypted_model --features encryption
+cargo run --example bundle_apr_static_binary
+cargo run --example bundle_apr_quantized_q4
+cargo run --example bundle_apr_signed
+cargo run --example bundle_apr_lambda_package
 
 # Category C: Training
 cargo run --example entrenar_autograd_training
 cargo run --example entrenar_lora_finetune
 cargo run --example entrenar_qlora_finetune
 cargo run --example entrenar_distillation
+cargo run --example entrenar_model_merge
+cargo run --example entrenar_eval_metrics
 cargo run --example hyperparameter_sweep
 cargo run --example checkpoint_resume
+cargo run --example mixed_precision_training
+cargo run --example few_shot_finetune
+cargo run --example gradient_accumulation
+cargo run --example learning_rate_schedule
+cargo run --example data_preprocessing
 
 # Category D: Format Conversion
 cargo run --example convert_safetensors_to_apr
 cargo run --example convert_gguf_to_apr
+cargo run --example convert_apr_to_gguf
+cargo run --example convert_phi_to_apr
+cargo run --example convert_onnx_to_apr
 
-# Category I: GPU Acceleration (NEW)
+# Category E: Model Registry
+cargo run --example registry_register_apr
+cargo run --example registry_model_lineage
+cargo run --example registry_model_comparison
+cargo run --example registry_model_rollback
+cargo run --example registry_model_versioning
+
+# Category F: API Integration
+cargo run --example api_call_model_inference
+cargo run --example api_streaming_inference
+cargo run --example api_batch_inference
+cargo run --example api_model_health_check
+cargo run --example api_auth_middleware
+
+# Category G: Serverless
+cargo run --example serverless_lambda_inference
+cargo run --example serverless_cold_start_optimization
+cargo run --example serverless_edge_function
+cargo run --example serverless_container_image
+cargo run --example serverless_model_warmup
+
+# Category H: WASM/Browser
+cargo run --example wasm_browser_inference
+cargo run --example wasm_web_worker
+cargo run --example wasm_progressive_loading
+cargo run --example wasm_webgpu_acceleration
+cargo run --example wasm_streaming_compilation
+cargo run --example wasm_model_loader
+
+# Category I: GPU Acceleration
 cargo run --example flash_attention_inference
+cargo run --example gpu_cuda_inference
+cargo run --example gpu_tensor_core_optimization
+cargo run --example gpu_multi_gpu_inference
+cargo run --example gpu_memory_management
+cargo run --example gpu_memory_pool
 
-# Category J: SIMD (NEW)
+# Category J: SIMD Acceleration
 cargo run --example trueno_simd_ops
+cargo run --example simd_matrix_operations
+cargo run --example simd_vectorized_inference
+cargo run --example simd_quantized_operations
+cargo run --example simd_auto_vectorization
 
-# Category N: Speech Recognition (NEW)
-cargo run --example whisper_transcribe
-cargo run --example whisper_streaming
-
-# Category O: Distributed (NEW)
-cargo run --example distributed_inference
-
-# Category P: Inference Patterns (NEW)
-cargo run --example simple_inference
-cargo run --example speculative_decode
-cargo run --example chat_kv_cache
-cargo run --example streaming_token_generator
-cargo run --example adaptive_batch_inference
-cargo run --example model_pipeline
-cargo run --example quantized_inference_comparison
-
-# Category Q: Model Serving (NEW)
-cargo run --example http_model_server
+# Category K: Model Distillation
+cargo run --example distill_knowledge_transfer
+cargo run --example distill_layer_matching
+cargo run --example distill_pruning_aware
+cargo run --example distill_quantization_aware
+cargo run --example distill_structured_pruning
 
 # Category L: CLI Tools
 cargo run --example cli_apr_info -- --demo
 cargo run --example cli_apr_bench -- --demo
+cargo run --example cli_apr_convert
+cargo run --example cli_apr_serve
+cargo run --example cli_apr_diff
+
+# Category M: Monitoring
+cargo run --example inference_explainability
+cargo run --example hash_chain_audit
+cargo run --example inference_cost_tracking
+cargo run --example latency_histogram
+cargo run --example model_drift_detection
+
+# Category N: Speech Recognition
+cargo run --example whisper_transcribe
+cargo run --example whisper_streaming
+
+# Category O: Distributed
+cargo run --example distributed_inference
+cargo run --example distributed_model_sharding
+
+# Category P: Inference Patterns
+cargo run --example simple_inference
+cargo run --example speculative_decode
+cargo run --example chat_kv_cache
+cargo run --example chat_multiturn
+cargo run --example chat_tool_use
+cargo run --example streaming_token_generator
+cargo run --example adaptive_batch_inference
+cargo run --example dynamic_batch_with_sla
+cargo run --example ensemble_inference
+cargo run --example model_pipeline
+cargo run --example quantized_inference_comparison
+
+# Category Q: Model Serving
+cargo run --example http_model_server
+cargo run --example model_ab_testing
+cargo run --example model_canary_deploy
+cargo run --example model_rate_limiter
+cargo run --example model_selection_router
 ```
 
 ## Usage
@@ -336,7 +418,7 @@ test: Improve coverage for W
 
 ## Documentation
 
-- **[The APR Cookbook](https://paiml.github.io/apr-cookbook/)** — Online book with all 95+ recipes
+- **[The APR Cookbook](https://paiml.github.io/apr-cookbook/)** — Online book with all 121 recipes
 - **[API Documentation](https://docs.rs/apr-cookbook)** — Rust API reference
 - **[Sovereign AI Stack](https://paiml.github.io/sovereign-ai-stack-book/)** — Complete stack tutorial
 - **[Specification](docs/specifications/cookbook-spec.md)** — APR v2 format specification
@@ -409,23 +491,23 @@ apr-cookbook/
 │   ├── explainable.rs            # Inference explainability wrappers
 │   └── error.rs                  # Error types
 ├── examples/
-│   ├── creation/                 # Category A: 5 recipes
+│   ├── creation/                 # Category A: 6 recipes
 │   ├── bundling/                 # Category B: 7 recipes
-│   ├── training/                 # Category C: 14 recipes (entrenar, LoRA, QLoRA)
+│   ├── training/                 # Category C: 17 recipes (entrenar, LoRA, QLoRA, mixed-precision)
 │   ├── conversion/               # Category D: 5 recipes
-│   ├── registry/                 # Category E: 4 recipes
-│   ├── api/                      # Category F: 4 recipes
-│   ├── serverless/               # Category G: 4 recipes
-│   ├── wasm/                     # Category H: 5 recipes
-│   ├── gpu/                      # Category I: 5 recipes (incl. FlashAttention)
+│   ├── registry/                 # Category E: 5 recipes
+│   ├── api/                      # Category F: 5 recipes
+│   ├── serverless/               # Category G: 5 recipes
+│   ├── wasm/                     # Category H: 6 recipes
+│   ├── gpu/                      # Category I: 6 recipes (incl. FlashAttention)
 │   ├── simd/                     # Category J: 5 recipes (incl. trueno)
-│   ├── distillation/             # Category K: 4 recipes
-│   ├── cli/                      # Category L: 4 recipes
-│   ├── monitoring/               # Category M: 2 recipes
+│   ├── distillation/             # Category K: 5 recipes
+│   ├── cli/                      # Category L: 7 recipes
+│   ├── monitoring/               # Category M: 5 recipes
 │   ├── speech/                   # Category N: 2 recipes (whisper.apr)
-│   ├── distributed/              # Category O: 1 recipe (repartir)
-│   ├── inference/                # Category P: 9 recipes (speculative, KV-cache, streaming)
-│   └── serve/                    # Category Q: 1 recipe (HTTP model server)
+│   ├── distributed/              # Category O: 2 recipes (repartir, sharding)
+│   ├── inference/                # Category P: 11 recipes (speculative, KV-cache, streaming, ensemble)
+│   └── serve/                    # Category Q: 5 recipes (HTTP, A/B, canary, rate limit, router)
 ├── tests/
 │   └── falsification.rs          # Popperian falsification tests (F1-F7)
 ├── book/                         # mdbook documentation

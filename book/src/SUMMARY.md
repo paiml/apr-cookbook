@@ -25,6 +25,7 @@
 - [Decision Tree Model](./recipes/a-creation/decision-tree.md)
 - [K-Means Clustering](./recipes/a-creation/kmeans-clustering.md)
 - [N-gram Language Model](./recipes/a-creation/ngram-language-model.md)
+- [Neural Network](./recipes/a-creation/neural-network.md)
 
 # Category B: Binary Bundling
 
@@ -37,13 +38,26 @@
 - [Signed Models](./recipes/b-bundling/signed.md)
 - [Lambda Package](./recipes/b-bundling/lambda-package.md)
 
-# Category C: Continuous Training
+# Category C: Training
 
 - [Overview](./recipes/c-training/index.md)
 - [Incremental Training](./recipes/c-training/incremental.md)
 - [Online Learning](./recipes/c-training/online-learning.md)
 - [Federated Simulation](./recipes/c-training/federated-simulation.md)
 - [Curriculum Learning](./recipes/c-training/curriculum.md)
+- [Autograd Training](./recipes/c-training/autograd.md)
+- [LoRA Fine-tuning](./recipes/c-training/lora.md)
+- [QLoRA Fine-tuning](./recipes/c-training/qlora.md)
+- [Knowledge Distillation](./recipes/c-training/distillation.md)
+- [Model Merge](./recipes/c-training/model-merge.md)
+- [Evaluation Metrics](./recipes/c-training/eval-metrics.md)
+- [Hyperparameter Sweep](./recipes/c-training/hyperparameter-sweep.md)
+- [Checkpoint Resume](./recipes/c-training/checkpoint-resume.md)
+- [Mixed-Precision Training](./recipes/c-training/mixed-precision.md)
+- [Few-Shot Fine-tuning](./recipes/c-training/few-shot.md)
+- [Gradient Accumulation](./recipes/c-training/gradient-accumulation.md)
+- [Learning Rate Schedules](./recipes/c-training/lr-schedule.md)
+- [Data Preprocessing](./recipes/c-training/data-preprocessing.md)
 
 # Category D: Format Conversion
 
@@ -61,6 +75,7 @@
 - [Model Lineage](./recipes/e-registry/model-lineage.md)
 - [Model Comparison](./recipes/e-registry/model-comparison.md)
 - [Model Rollback](./recipes/e-registry/model-rollback.md)
+- [Model Versioning](./recipes/e-registry/model-versioning.md)
 
 # Category F: API Integration
 
@@ -69,6 +84,7 @@
 - [Streaming Inference](./recipes/f-api/streaming-inference.md)
 - [Batch Inference](./recipes/f-api/batch-inference.md)
 - [Health Check](./recipes/f-api/health-check.md)
+- [Auth Middleware](./recipes/f-api/auth-middleware.md)
 
 # Category G: Serverless
 
@@ -77,6 +93,7 @@
 - [Cold Start Optimization](./recipes/g-serverless/cold-start.md)
 - [Edge Functions](./recipes/g-serverless/edge-function.md)
 - [Container Image](./recipes/g-serverless/container-image.md)
+- [Model Warmup](./recipes/g-serverless/model-warmup.md)
 
 # Category H: WASM/Browser
 
@@ -86,14 +103,17 @@
 - [Progressive Loading](./recipes/h-wasm/progressive-loading.md)
 - [WebGPU Acceleration](./recipes/h-wasm/webgpu-acceleration.md)
 - [Streaming Compilation](./recipes/h-wasm/streaming-compilation.md)
+- [Model Loader](./recipes/h-wasm/model-loader.md)
 
 # Category I: GPU Acceleration
 
 - [Overview](./recipes/i-gpu/index.md)
+- [FlashAttention](./recipes/i-gpu/flash-attention.md)
 - [CUDA Inference](./recipes/i-gpu/cuda-inference.md)
 - [Tensor Core Optimization](./recipes/i-gpu/tensor-core.md)
 - [Multi-GPU Inference](./recipes/i-gpu/multi-gpu.md)
 - [Memory Management](./recipes/i-gpu/memory-management.md)
+- [Memory Pool](./recipes/i-gpu/memory-pool.md)
 
 # Category J: SIMD Acceleration
 
@@ -110,6 +130,7 @@
 - [Layer Matching](./recipes/k-distillation/layer-matching.md)
 - [Pruning-Aware Distillation](./recipes/k-distillation/pruning-aware.md)
 - [Quantization-Aware Distillation](./recipes/k-distillation/quantization-aware.md)
+- [Structured Pruning](./recipes/k-distillation/structured-pruning.md)
 
 # Category L: CLI Tools
 
@@ -118,12 +139,16 @@
 - [apr-bench](./recipes/l-cli/apr-bench.md)
 - [apr-convert](./recipes/l-cli/apr-convert.md)
 - [apr-serve](./recipes/l-cli/apr-serve.md)
+- [apr-diff](./recipes/l-cli/apr-diff.md)
 
 # Category M: Inference Monitoring
 
 - [Overview](./recipes/m-monitoring/index.md)
 - [Inference Explainability](./recipes/m-monitoring/explainability.md)
 - [Hash Chain Audit](./recipes/m-monitoring/hash-chain-audit.md)
+- [Cost Tracking](./recipes/m-monitoring/cost-tracking.md)
+- [Latency Histogram](./recipes/m-monitoring/latency-histogram.md)
+- [Drift Detection](./recipes/m-monitoring/drift-detection.md)
 
 # Category N: Speech Recognition
 
@@ -135,6 +160,31 @@
 
 - [Overview](./recipes/o-distributed/index.md)
 - [Distributed Inference](./recipes/o-distributed/distributed-inference.md)
+- [Model Sharding](./recipes/o-distributed/model-sharding.md)
+
+# Category P: Inference Patterns
+
+- [Overview](./recipes/p-inference/index.md)
+- [Simple Inference](./recipes/p-inference/simple.md)
+- [Speculative Decoding](./recipes/p-inference/speculative-decode.md)
+- [KV-Cache Chat](./recipes/p-inference/kv-cache.md)
+- [Multi-turn Chat](./recipes/p-inference/multi-turn.md)
+- [Tool Use](./recipes/p-inference/tool-use.md)
+- [Streaming Tokens](./recipes/p-inference/streaming.md)
+- [Adaptive Batching](./recipes/p-inference/adaptive-batch.md)
+- [Dynamic Batch SLA](./recipes/p-inference/dynamic-batch-sla.md)
+- [Ensemble Inference](./recipes/p-inference/ensemble.md)
+- [Model Pipeline](./recipes/p-inference/pipeline.md)
+- [Quantized Comparison](./recipes/p-inference/quantized-comparison.md)
+
+# Category Q: Model Serving
+
+- [Overview](./recipes/q-serving/index.md)
+- [HTTP Model Server](./recipes/q-serving/http-server.md)
+- [A/B Testing](./recipes/q-serving/ab-testing.md)
+- [Canary Deploy](./recipes/q-serving/canary-deploy.md)
+- [Rate Limiter](./recipes/q-serving/rate-limiter.md)
+- [Selection Router](./recipes/q-serving/selection-router.md)
 
 ---
 
