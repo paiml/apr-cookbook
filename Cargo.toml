@@ -227,6 +227,14 @@ path = "examples/training/entrenar_qlora_finetune.rs"
 name = "checkpoint_resume"
 path = "examples/training/checkpoint_resume.rs"
 
+[[example]]
+name = "mixed_precision_training"
+path = "examples/training/mixed_precision_training.rs"
+
+[[example]]
+name = "few_shot_finetune"
+path = "examples/training/few_shot_finetune.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -514,6 +522,10 @@ path = "examples/inference/quantized_inference_comparison.rs"
 [[example]]
 name = "http_model_server"
 path = "examples/serve/http_model_server.rs"
+
+[[example]]
+name = "model_ab_testing"
+path = "examples/serve/model_ab_testing.rs"
 
 # --- Category O: Distributed Computing ---
 

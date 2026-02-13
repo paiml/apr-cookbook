@@ -41,11 +41,12 @@ use std::time::Instant;
 
 /// Simulated model shard for distributed inference
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct ModelShard {
-    /// Shard index (0-based)
+    /// Shard index (used in tests for verification)
+    #[allow(dead_code)]
     shard_id: usize,
-    /// Total number of shards
+    /// Total number of shards (used in tests for verification)
+    #[allow(dead_code)]
     total_shards: usize,
     /// Shard weight data (simulated)
     weights: Vec<f32>,
@@ -119,22 +120,19 @@ impl Default for InferenceConfig {
 }
 
 /// Distributed inference engine (simulated repartir integration)
-#[allow(dead_code)]
 struct DistributedInference {
     /// Model shards
     shards: Vec<ModelShard>,
-    /// Configuration
-    config: InferenceConfig,
 }
 
 impl DistributedInference {
     /// Create a new distributed inference engine
-    fn new(config: InferenceConfig) -> Self {
+    fn new(config: &InferenceConfig) -> Self {
         let shards: Vec<_> = (0..config.num_shards)
             .map(|i| ModelShard::new(i, config.num_shards, config.embed_dim))
             .collect();
 
-        Self { shards, config }
+        Self { shards }
     }
 
     /// Run distributed inference (simulated work-stealing)
@@ -163,9 +161,9 @@ impl DistributedInference {
 
 /// Benchmark result
 #[derive(Debug)]
-#[allow(dead_code)]
 struct BenchmarkResult {
-    /// Total samples processed
+    /// Total samples processed (used in tests)
+    #[allow(dead_code)]
     samples: usize,
     /// Total time in milliseconds
     time_ms: f64,
@@ -177,7 +175,7 @@ struct BenchmarkResult {
 
 /// Run distributed inference benchmark
 fn run_benchmark(config: &InferenceConfig, num_iterations: usize) -> BenchmarkResult {
-    let engine = DistributedInference::new(config.clone());
+    let engine = DistributedInference::new(config);
 
     // Generate batch of inputs
     let inputs: Vec<Vec<f32>> = (0..config.batch_size)
@@ -234,7 +232,7 @@ fn main() {
     println!("2. Model Sharding");
     println!("   ─────────────────────────────────────────");
 
-    let engine = DistributedInference::new(config.clone());
+    let engine = DistributedInference::new(&config);
     println!(
         "   Created {} shards with {} weights each",
         engine.shards.len(),
@@ -369,7 +367,7 @@ mod tests {
     #[test]
     fn test_distributed_inference_creation() {
         let config = InferenceConfig::default();
-        let engine = DistributedInference::new(config.clone());
+        let engine = DistributedInference::new(&config);
         assert_eq!(engine.shards.len(), config.num_shards);
     }
 
@@ -380,7 +378,7 @@ mod tests {
             embed_dim: 64,
             ..Default::default()
         };
-        let engine = DistributedInference::new(config.clone());
+        let engine = DistributedInference::new(&config);
         let inputs = vec![vec![1.0f32; 64]; 4];
         let outputs = engine.infer(&inputs);
         assert_eq!(outputs.len(), 4);
@@ -396,7 +394,7 @@ mod tests {
             embed_dim: 768,
             ..Default::default()
         };
-        let engine = DistributedInference::new(config);
+        let engine = DistributedInference::new(&config);
         let total_flops = engine.total_flops();
         assert!(total_flops > 0);
     }
