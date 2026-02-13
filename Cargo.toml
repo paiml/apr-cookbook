@@ -239,6 +239,10 @@ path = "examples/training/few_shot_finetune.rs"
 name = "data_preprocessing"
 path = "examples/training/data_preprocessing.rs"
 
+[[example]]
+name = "learning_rate_schedule"
+path = "examples/training/learning_rate_schedule.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -477,6 +481,10 @@ path = "examples/monitoring/inference_explainability.rs"
 name = "hash_chain_audit"
 path = "examples/monitoring/hash_chain_audit.rs"
 
+[[example]]
+name = "model_drift_detection"
+path = "examples/monitoring/model_drift_detection.rs"
+
 # --- Category N: Speech Recognition ---
 
 [[example]]
@@ -518,6 +526,10 @@ name = "model_pipeline"
 path = "examples/inference/model_pipeline.rs"
 
 [[example]]
+name = "chat_tool_use"
+path = "examples/inference/chat_tool_use.rs"
+
+[[example]]
 name = "ensemble_inference"
 path = "examples/inference/ensemble_inference.rs"
 
@@ -534,6 +546,10 @@ path = "examples/serve/http_model_server.rs"
 [[example]]
 name = "model_ab_testing"
 path = "examples/serve/model_ab_testing.rs"
+
+[[example]]
+name = "model_canary_deploy"
+path = "examples/serve/model_canary_deploy.rs"
 
 # --- Category O: Distributed Computing ---
 
