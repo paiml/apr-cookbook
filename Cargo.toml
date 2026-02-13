@@ -243,6 +243,10 @@ path = "examples/training/data_preprocessing.rs"
 name = "learning_rate_schedule"
 path = "examples/training/learning_rate_schedule.rs"
 
+[[example]]
+name = "gradient_accumulation"
+path = "examples/training/gradient_accumulation.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
@@ -485,6 +489,10 @@ path = "examples/monitoring/hash_chain_audit.rs"
 name = "model_drift_detection"
 path = "examples/monitoring/model_drift_detection.rs"
 
+[[example]]
+name = "latency_histogram"
+path = "examples/monitoring/latency_histogram.rs"
+
 # --- Category N: Speech Recognition ---
 
 [[example]]
@@ -550,6 +558,10 @@ path = "examples/serve/model_ab_testing.rs"
 [[example]]
 name = "model_canary_deploy"
 path = "examples/serve/model_canary_deploy.rs"
+
+[[example]]
+name = "model_rate_limiter"
+path = "examples/serve/model_rate_limiter.rs"
 
 # --- Category O: Distributed Computing ---
 
