@@ -70,6 +70,73 @@ fn format_system_block(system_content: &str) -> String {
     format!("{SYS_START}\n{system_content}\n{SYS_END}\n\n")
 }
 
+/// Extract the leading system message (if any) and return the remaining
+/// conversation messages.  LLaMA 2 embeds the system prompt inside the
+/// first `[INST]` block via `<<SYS>>` delimiters.
+fn extract_system_prefix(messages: &[ChatMessage]) -> (Option<&str>, Vec<&ChatMessage>) {
+    let mut system_prompt: Option<&str> = None;
+    let mut conversation: Vec<&ChatMessage> = Vec::new();
+
+    for msg in messages {
+        if msg.role == "system" && system_prompt.is_none() && conversation.is_empty() {
+            system_prompt = Some(&msg.content);
+        } else {
+            conversation.push(msg);
+        }
+    }
+
+    (system_prompt, conversation)
+}
+
+/// Format a single `<s>[INST] ... [/INST]` user-assistant turn.
+///
+/// When `system_block` is `Some`, the `<<SYS>>` block is injected before the
+/// user content (first turn only).  Returns the number of conversation
+/// messages consumed (1 for a trailing user message, 2 for a user+assistant
+/// pair).
+fn format_llama2_turn(
+    output: &mut String,
+    conversation: &[&ChatMessage],
+    index: usize,
+    system_block: Option<&str>,
+    add_generation_prompt: bool,
+) -> usize {
+    let user_msg = &conversation[index];
+    assert_eq!(
+        user_msg.role, "user",
+        "Expected user message at position {index}"
+    );
+
+    output.push_str(BOS);
+    output.push_str(INST_START);
+    output.push(' ');
+
+    if let Some(sys) = system_block {
+        output.push_str(&format_system_block(sys));
+    }
+
+    output.push_str(&user_msg.content);
+    output.push(' ');
+    output.push_str(INST_END);
+
+    // Pair with the following assistant response when present
+    let next_is_assistant =
+        index + 1 < conversation.len() && conversation[index + 1].role == "assistant";
+
+    if next_is_assistant {
+        output.push(' ');
+        output.push_str(&conversation[index + 1].content);
+        output.push(' ');
+        output.push_str(EOS);
+        2
+    } else {
+        if add_generation_prompt {
+            output.push(' ');
+        }
+        1
+    }
+}
+
 /// Format a sequence of chat messages in LLaMA 2 chat format.
 ///
 /// Rules:
@@ -82,57 +149,20 @@ fn format_llama2(messages: &[ChatMessage], add_generation_prompt: bool) -> Strin
         return String::new();
     }
 
+    let (system_prompt, conversation) = extract_system_prefix(messages);
+
     let mut output = String::new();
-    let mut system_prompt: Option<&str> = None;
-    let mut conversation: Vec<&ChatMessage> = Vec::new();
-
-    // Separate system prompt from conversation messages
-    for msg in messages {
-        if msg.role == "system" && system_prompt.is_none() {
-            system_prompt = Some(&msg.content);
-        } else {
-            conversation.push(msg);
-        }
-    }
-
-    // Process user/assistant pairs
     let mut i = 0;
     while i < conversation.len() {
-        let user_msg = &conversation[i];
-        assert_eq!(
-            user_msg.role, "user",
-            "Expected user message at position {i}"
+        // Only inject the system block on the very first turn
+        let sys_block = if i == 0 { system_prompt } else { None };
+        i += format_llama2_turn(
+            &mut output,
+            &conversation,
+            i,
+            sys_block,
+            add_generation_prompt,
         );
-
-        output.push_str(BOS);
-        output.push_str(INST_START);
-        output.push(' ');
-
-        // Include system prompt in the first turn only
-        if i == 0 {
-            if let Some(sys) = system_prompt {
-                output.push_str(&format_system_block(sys));
-            }
-        }
-
-        output.push_str(&user_msg.content);
-        output.push(' ');
-        output.push_str(INST_END);
-
-        // Check for assistant response
-        if i + 1 < conversation.len() && conversation[i + 1].role == "assistant" {
-            output.push(' ');
-            output.push_str(&conversation[i + 1].content);
-            output.push(' ');
-            output.push_str(EOS);
-            i += 2;
-        } else {
-            // Last message is user-only
-            if add_generation_prompt {
-                output.push(' ');
-            }
-            i += 1;
-        }
     }
 
     output

@@ -56,76 +56,78 @@ fn read_u32_le(data: &[u8], offset: usize) -> Option<u32> {
     ]))
 }
 
-/// Produce annotated hex dump of APR v2 format data.
-fn annotated_hex_dump(data: &[u8], max_bytes: usize) -> Vec<HexAnnotation> {
+/// Header field descriptor for fixed-width u32 fields.
+struct HeaderField {
+    offset: usize,
+    label: &'static str,
+    format_value: fn(u32) -> String,
+}
+
+/// Format a u32 value as a version string (e.g., "v2").
+fn fmt_version(v: u32) -> String {
+    format!("v{v}")
+}
+
+/// Format a u32 value as a byte offset (e.g., "byte 64").
+fn fmt_byte_offset(v: u32) -> String {
+    format!("byte {v}")
+}
+
+/// List of fixed-width u32 header fields in the APR v2 format.
+const HEADER_FIELDS: &[HeaderField] = &[
+    HeaderField {
+        offset: 4,
+        label: "format version",
+        format_value: fmt_version,
+    },
+    HeaderField {
+        offset: 8,
+        label: "metadata offset",
+        format_value: fmt_byte_offset,
+    },
+    HeaderField {
+        offset: 12,
+        label: "tensor data offset",
+        format_value: fmt_byte_offset,
+    },
+];
+
+/// Annotate fixed-width u32 header fields at known offsets.
+fn annotate_header_fields(data: &[u8], limit: usize) -> Vec<HexAnnotation> {
+    HEADER_FIELDS
+        .iter()
+        .filter(|f| limit >= f.offset + 4)
+        .filter_map(|f| {
+            read_u32_le(data, f.offset).map(|v| HexAnnotation {
+                offset: f.offset,
+                length: 4,
+                label: f.label.to_string(),
+                value: format!(
+                    "{} ({})",
+                    bytes_to_hex(&data[f.offset..f.offset + 4]),
+                    (f.format_value)(v)
+                ),
+            })
+        })
+        .collect()
+}
+
+/// Annotate variable-length regions: header/reserved, metadata, and tensor data.
+fn annotate_variable_regions(data: &[u8], limit: usize) -> Vec<HexAnnotation> {
     let mut annotations = Vec::new();
-    let limit = data.len().min(max_bytes);
-
-    if limit < 4 {
-        if !data.is_empty() {
-            annotations.push(HexAnnotation {
-                offset: 0,
-                length: limit,
-                label: "incomplete data".to_string(),
-                value: bytes_to_hex(&data[..limit]),
-            });
-        }
-        return annotations;
-    }
-
-    // Magic bytes (offset 0-3)
-    let magic = &data[0..4];
-    let magic_str = String::from_utf8_lossy(magic).to_string();
-    annotations.push(HexAnnotation {
-        offset: 0,
-        length: 4,
-        label: "magic bytes".to_string(),
-        value: format!("{} ({})", bytes_to_hex(magic), magic_str),
-    });
-
-    // Version (offset 4-7)
-    if limit >= 8 {
-        if let Some(version) = read_u32_le(data, 4) {
-            annotations.push(HexAnnotation {
-                offset: 4,
-                length: 4,
-                label: "format version".to_string(),
-                value: format!("{} (v{})", bytes_to_hex(&data[4..8]), version),
-            });
-        }
-    }
-
-    // Metadata offset (offset 8-11)
-    if limit >= 12 {
-        if let Some(meta_off) = read_u32_le(data, 8) {
-            annotations.push(HexAnnotation {
-                offset: 8,
-                length: 4,
-                label: "metadata offset".to_string(),
-                value: format!("{} (byte {})", bytes_to_hex(&data[8..12]), meta_off),
-            });
-        }
-    }
-
-    // Tensor data offset (offset 12-15)
-    if limit >= 16 {
-        if let Some(tensor_off) = read_u32_le(data, 12) {
-            annotations.push(HexAnnotation {
-                offset: 12,
-                length: 4,
-                label: "tensor data offset".to_string(),
-                value: format!("{} (byte {})", bytes_to_hex(&data[12..16]), tensor_off),
-            });
-        }
-    }
-
-    // Header region (16..metadata_offset or 16..64)
-    let header_end = if limit >= 12 {
-        read_u32_le(data, 8).map_or(limit.min(64), |v| (v as usize).min(limit))
+    let meta_off = if limit >= 12 {
+        read_u32_le(data, 8)
     } else {
-        limit.min(64)
+        None
+    };
+    let tensor_off = if limit >= 16 {
+        read_u32_le(data, 12)
+    } else {
+        None
     };
 
+    // Header region (16..metadata_offset or 16..64)
+    let header_end = meta_off.map_or(limit.min(64), |v| (v as usize).min(limit));
     if header_end > 16 && limit > 16 {
         let region_end = header_end.min(limit);
         annotations.push(HexAnnotation {
@@ -137,36 +139,64 @@ fn annotated_hex_dump(data: &[u8], max_bytes: usize) -> Vec<HexAnnotation> {
     }
 
     // Metadata region
-    if limit >= 12 {
-        if let (Some(meta_off), tensor_off_opt) = (read_u32_le(data, 8), read_u32_le(data, 12)) {
-            let meta_start = meta_off as usize;
-            let meta_end = tensor_off_opt.map_or(limit, |v| (v as usize).min(limit));
-            if meta_start < limit && meta_start < meta_end {
-                annotations.push(HexAnnotation {
-                    offset: meta_start,
-                    length: meta_end.min(limit) - meta_start,
-                    label: "metadata region".to_string(),
-                    value: format!("{} bytes", meta_end.min(limit) - meta_start),
-                });
-            }
+    if let Some(mo) = meta_off {
+        let meta_start = mo as usize;
+        let meta_end = tensor_off.map_or(limit, |v| (v as usize).min(limit));
+        if meta_start < limit && meta_start < meta_end {
+            annotations.push(HexAnnotation {
+                offset: meta_start,
+                length: meta_end.min(limit) - meta_start,
+                label: "metadata region".to_string(),
+                value: format!("{} bytes", meta_end.min(limit) - meta_start),
+            });
         }
     }
 
     // Tensor data region
-    if limit >= 16 {
-        if let Some(tensor_off) = read_u32_le(data, 12) {
-            let tensor_start = tensor_off as usize;
-            if tensor_start < limit {
-                annotations.push(HexAnnotation {
-                    offset: tensor_start,
-                    length: limit - tensor_start,
-                    label: "tensor data region".to_string(),
-                    value: format!("{} bytes", limit - tensor_start),
-                });
-            }
+    if let Some(to) = tensor_off {
+        let tensor_start = to as usize;
+        if tensor_start < limit {
+            annotations.push(HexAnnotation {
+                offset: tensor_start,
+                length: limit - tensor_start,
+                label: "tensor data region".to_string(),
+                value: format!("{} bytes", limit - tensor_start),
+            });
         }
     }
 
+    annotations
+}
+
+/// Produce annotated hex dump of APR v2 format data.
+fn annotated_hex_dump(data: &[u8], max_bytes: usize) -> Vec<HexAnnotation> {
+    let limit = data.len().min(max_bytes);
+
+    if limit < 4 {
+        return if data.is_empty() {
+            Vec::new()
+        } else {
+            vec![HexAnnotation {
+                offset: 0,
+                length: limit,
+                label: "incomplete data".to_string(),
+                value: bytes_to_hex(&data[..limit]),
+            }]
+        };
+    }
+
+    // Magic bytes (offset 0-3)
+    let magic = &data[0..4];
+    let magic_str = String::from_utf8_lossy(magic).to_string();
+    let mut annotations = vec![HexAnnotation {
+        offset: 0,
+        length: 4,
+        label: "magic bytes".to_string(),
+        value: format!("{} ({})", bytes_to_hex(magic), magic_str),
+    }];
+
+    annotations.extend(annotate_header_fields(data, limit));
+    annotations.extend(annotate_variable_regions(data, limit));
     annotations
 }
 
