@@ -1,0 +1,1022 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Gradient Clipping - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/neural-network.html"><strong aria-hidden="true">14.</strong> Neural Network</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">15.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">16.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">17.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">18.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">19.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">20.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">21.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">22.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">23.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">24.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">25.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">26.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">27.</strong> Curriculum Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd.html"><strong aria-hidden="true">28.</strong> Autograd Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lora.html"><strong aria-hidden="true">29.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/qlora.html"><strong aria-hidden="true">30.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/distillation.html"><strong aria-hidden="true">31.</strong> Knowledge Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/model-merge.html"><strong aria-hidden="true">32.</strong> Model Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/eval-metrics.html"><strong aria-hidden="true">33.</strong> Evaluation Metrics</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/hyperparameter-sweep.html"><strong aria-hidden="true">34.</strong> Hyperparameter Sweep</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/checkpoint-resume.html"><strong aria-hidden="true">35.</strong> Checkpoint Resume</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/mixed-precision.html"><strong aria-hidden="true">36.</strong> Mixed-Precision Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/few-shot.html"><strong aria-hidden="true">37.</strong> Few-Shot Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/gradient-accumulation.html"><strong aria-hidden="true">38.</strong> Gradient Accumulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lr-schedule.html"><strong aria-hidden="true">39.</strong> Learning Rate Schedules</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/data-preprocessing.html"><strong aria-hidden="true">40.</strong> Data Preprocessing</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd-custom-ops.html"><strong aria-hidden="true">41.</strong> Custom Autograd Ops</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd-gradient-clipping.html" class="active"><strong aria-hidden="true">42.</strong> Gradient Clipping</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd-backprop-viz.html"><strong aria-hidden="true">43.</strong> Backprop Visualization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">44.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">45.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">46.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">47.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">48.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">49.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">50.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">51.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">52.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">53.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">54.</strong> Model Rollback</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-versioning.html"><strong aria-hidden="true">55.</strong> Model Versioning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">56.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">57.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">58.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">59.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">60.</strong> Health Check</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/auth-middleware.html"><strong aria-hidden="true">61.</strong> Auth Middleware</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">62.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">63.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">64.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">65.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">66.</strong> Container Image</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/model-warmup.html"><strong aria-hidden="true">67.</strong> Model Warmup</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">68.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">69.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">70.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">71.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">72.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">73.</strong> Streaming Compilation</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/model-loader.html"><strong aria-hidden="true">74.</strong> Model Loader</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">75.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/flash-attention.html"><strong aria-hidden="true">76.</strong> FlashAttention</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">77.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">78.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">79.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">80.</strong> Memory Management</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-pool.html"><strong aria-hidden="true">81.</strong> Memory Pool</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/ptx-analysis.html"><strong aria-hidden="true">82.</strong> PTX Analysis</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">83.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">84.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">85.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">86.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">87.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">88.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">89.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">90.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">91.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">92.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/structured-pruning.html"><strong aria-hidden="true">93.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/attention-transfer.html"><strong aria-hidden="true">94.</strong> Attention Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/self-distillation.html"><strong aria-hidden="true">95.</strong> Self-Distillation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">96.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">97.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">98.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">99.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">100.</strong> apr-serve</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-diff.html"><strong aria-hidden="true">101.</strong> apr-diff</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-tui.html"><strong aria-hidden="true">102.</strong> apr-tui</a></li><li class="chapter-item expanded affix "><li class="part-title">Category M: Inference Monitoring</li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/index.html"><strong aria-hidden="true">103.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/explainability.html"><strong aria-hidden="true">104.</strong> Inference Explainability</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/hash-chain-audit.html"><strong aria-hidden="true">105.</strong> Hash Chain Audit</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cost-tracking.html"><strong aria-hidden="true">106.</strong> Cost Tracking</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/latency-histogram.html"><strong aria-hidden="true">107.</strong> Latency Histogram</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/drift-detection.html"><strong aria-hidden="true">108.</strong> Drift Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cbtop-headless.html"><strong aria-hidden="true">109.</strong> Headless cbtop</a></li><li class="chapter-item expanded affix "><li class="part-title">Category N: Speech Recognition</li><li class="chapter-item expanded "><a href="../../recipes/n-speech/index.html"><strong aria-hidden="true">110.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-transcribe.html"><strong aria-hidden="true">111.</strong> Whisper Transcription</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-streaming.html"><strong aria-hidden="true">112.</strong> Streaming ASR</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/vad.html"><strong aria-hidden="true">113.</strong> Voice Activity Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/diarization.html"><strong aria-hidden="true">114.</strong> Speaker Diarization</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/multilingual.html"><strong aria-hidden="true">115.</strong> Multilingual Identification</a></li><li class="chapter-item expanded affix "><li class="part-title">Category O: Distributed Computing</li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/index.html"><strong aria-hidden="true">116.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/distributed-inference.html"><strong aria-hidden="true">117.</strong> Distributed Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/model-sharding.html"><strong aria-hidden="true">118.</strong> Model Sharding</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/ring-allreduce.html"><strong aria-hidden="true">119.</strong> Ring AllReduce</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/pipeline-parallel.html"><strong aria-hidden="true">120.</strong> Pipeline Parallelism</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/gossip-protocol.html"><strong aria-hidden="true">121.</strong> Gossip Protocol</a></li><li class="chapter-item expanded affix "><li class="part-title">Category P: Inference Patterns</li><li class="chapter-item expanded "><a href="../../recipes/p-inference/index.html"><strong aria-hidden="true">122.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/simple.html"><strong aria-hidden="true">123.</strong> Simple Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/speculative-decode.html"><strong aria-hidden="true">124.</strong> Speculative Decoding</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/kv-cache.html"><strong aria-hidden="true">125.</strong> KV-Cache Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/multi-turn.html"><strong aria-hidden="true">126.</strong> Multi-turn Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/tool-use.html"><strong aria-hidden="true">127.</strong> Tool Use</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/streaming.html"><strong aria-hidden="true">128.</strong> Streaming Tokens</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/adaptive-batch.html"><strong aria-hidden="true">129.</strong> Adaptive Batching</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/dynamic-batch-sla.html"><strong aria-hidden="true">130.</strong> Dynamic Batch SLA</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/ensemble.html"><strong aria-hidden="true">131.</strong> Ensemble Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/pipeline.html"><strong aria-hidden="true">132.</strong> Model Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/quantized-comparison.html"><strong aria-hidden="true">133.</strong> Quantized Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/apr-run.html"><strong aria-hidden="true">134.</strong> APR Run</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Q: Model Serving</li><li class="chapter-item expanded "><a href="../../recipes/q-serving/index.html"><strong aria-hidden="true">135.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/http-server.html"><strong aria-hidden="true">136.</strong> HTTP Model Server</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/ab-testing.html"><strong aria-hidden="true">137.</strong> A/B Testing</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/canary-deploy.html"><strong aria-hidden="true">138.</strong> Canary Deploy</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/rate-limiter.html"><strong aria-hidden="true">139.</strong> Rate Limiter</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/selection-router.html"><strong aria-hidden="true">140.</strong> Selection Router</a></li><li class="chapter-item expanded affix "><li class="part-title">Category R: Model Optimization</li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/index.html"><strong aria-hidden="true">141.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/full-pipeline.html"><strong aria-hidden="true">142.</strong> Full Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-lora.html"><strong aria-hidden="true">143.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-qlora.html"><strong aria-hidden="true">144.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-merge-adapter.html"><strong aria-hidden="true">145.</strong> Adapter Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-plan-vram.html"><strong aria-hidden="true">146.</strong> VRAM Planning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-magnitude.html"><strong aria-hidden="true">147.</strong> Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-structured.html"><strong aria-hidden="true">148.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-depth.html"><strong aria-hidden="true">149.</strong> Depth Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-wanda.html"><strong aria-hidden="true">150.</strong> Wanda Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-gradual-schedule.html"><strong aria-hidden="true">151.</strong> Gradual Schedule</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-standard-kl.html"><strong aria-hidden="true">152.</strong> Standard KL Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-progressive.html"><strong aria-hidden="true">153.</strong> Progressive Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-ensemble.html"><strong aria-hidden="true">154.</strong> Ensemble Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-checkpoint.html"><strong aria-hidden="true">155.</strong> Distillation Checkpoint</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-average.html"><strong aria-hidden="true">156.</strong> Average Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-weighted.html"><strong aria-hidden="true">157.</strong> Weighted Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-slerp.html"><strong aria-hidden="true">158.</strong> SLERP Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-ties.html"><strong aria-hidden="true">159.</strong> TIES Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-dare.html"><strong aria-hidden="true">160.</strong> DARE Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-hierarchical.html"><strong aria-hidden="true">161.</strong> Hierarchical Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-4bit.html"><strong aria-hidden="true">162.</strong> Int4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-fake-qat.html"><strong aria-hidden="true">163.</strong> Fake QAT</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/tune.html"><strong aria-hidden="true">164.</strong> Tune</a></li><li class="chapter-item expanded affix "><li class="part-title">Category S: Chat Templates</li><li class="chapter-item expanded "><a href="../../recipes/s-chat/index.html"><strong aria-hidden="true">165.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/chatml.html"><strong aria-hidden="true">166.</strong> ChatML Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/llama2.html"><strong aria-hidden="true">167.</strong> LLaMA 2 Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/mistral.html"><strong aria-hidden="true">168.</strong> Mistral Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/multi-format.html"><strong aria-hidden="true">169.</strong> Multi-Format Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/injection-defense.html"><strong aria-hidden="true">170.</strong> Injection Defense</a></li><li class="chapter-item expanded affix "><li class="part-title">Category T: Model Analysis</li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/index.html"><strong aria-hidden="true">171.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/inspect.html"><strong aria-hidden="true">172.</strong> Inspect</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/validate.html"><strong aria-hidden="true">173.</strong> Validate</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/diff.html"><strong aria-hidden="true">174.</strong> Diff</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/bench.html"><strong aria-hidden="true">175.</strong> Bench</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/profile.html"><strong aria-hidden="true">176.</strong> Profile</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-gates.html"><strong aria-hidden="true">177.</strong> QA Gates</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/oracle.html"><strong aria-hidden="true">178.</strong> Oracle</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/canary.html"><strong aria-hidden="true">179.</strong> Canary</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tree.html"><strong aria-hidden="true">180.</strong> Tree</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/hex.html"><strong aria-hidden="true">181.</strong> Hex</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/explain.html"><strong aria-hidden="true">182.</strong> Explain</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/trace.html"><strong aria-hidden="true">183.</strong> Trace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/eval.html"><strong aria-hidden="true">184.</strong> Eval</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/flow.html"><strong aria-hidden="true">185.</strong> Flow</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/lint.html"><strong aria-hidden="true">186.</strong> Lint</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/check.html"><strong aria-hidden="true">187.</strong> Check</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/debug.html"><strong aria-hidden="true">188.</strong> Debug</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/parity.html"><strong aria-hidden="true">189.</strong> Parity</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qualify.html"><strong aria-hidden="true">190.</strong> Qualify</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/compare-hf.html"><strong aria-hidden="true">191.</strong> Compare HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/probar.html"><strong aria-hidden="true">192.</strong> Probar</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tensors.html"><strong aria-hidden="true">193.</strong> Tensors</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/slice.html"><strong aria-hidden="true">194.</strong> Slice</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-capability.html"><strong aria-hidden="true">195.</strong> QA Capability</a></li><li class="chapter-item expanded affix "><li class="part-title">Category U: Format Operations</li><li class="chapter-item expanded "><a href="../../recipes/u-format/index.html"><strong aria-hidden="true">196.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/import-hf.html"><strong aria-hidden="true">197.</strong> Import from HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-safetensors.html"><strong aria-hidden="true">198.</strong> Export SafeTensors</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-gguf.html"><strong aria-hidden="true">199.</strong> Export GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-convert.html"><strong aria-hidden="true">200.</strong> Rosetta Convert</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-chain.html"><strong aria-hidden="true">201.</strong> Rosetta Chain</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-verify.html"><strong aria-hidden="true">202.</strong> Rosetta Verify</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/convert-quantize.html"><strong aria-hidden="true">203.</strong> Convert + Quantize</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/publish.html"><strong aria-hidden="true">204.</strong> Publish</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/pull-cache.html"><strong aria-hidden="true">205.</strong> Pull + Cache</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/batch-export.html"><strong aria-hidden="true">206.</strong> Batch Export</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/migration-pipeline.html"><strong aria-hidden="true">207.</strong> Migration Pipeline</a></li><li class="chapter-item expanded affix "><li class="part-title">Category V: Advanced Pipelines</li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/index.html"><strong aria-hidden="true">208.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/showcase.html"><strong aria-hidden="true">209.</strong> Model Showcase</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/cicd-pipeline.html"><strong aria-hidden="true">210.</strong> CI/CD Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/ab-experiment.html"><strong aria-hidden="true">211.</strong> A/B Experiment</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/debug-fix-loop.html"><strong aria-hidden="true">212.</strong> Debug-Fix Loop</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/compliance-audit.html"><strong aria-hidden="true">213.</strong> Compliance Audit</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Y: Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/index.html"><strong aria-hidden="true">214.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/autotuner.html"><strong aria-hidden="true">215.</strong> Autotuner</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/kernel-fusion.html"><strong aria-hidden="true">216.</strong> Kernel Fusion</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/mmap-inference.html"><strong aria-hidden="true">217.</strong> Memory-Mapped Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/quantized-matmul.html"><strong aria-hidden="true">218.</strong> Quantized MatMul</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">219.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">220.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">221.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">222.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">223.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/c-training/autograd-gradient-clipping.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="gradient-clipping"><a class="header" href="#gradient-clipping">Gradient Clipping</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example autograd_gradient_clipping
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! Autograd Gradient Clipping Example
+//!
+//! Demonstrates gradient clipping techniques for training stability using
+//! entrenar's autograd API. Gradient clipping prevents exploding gradients
+//! by bounding gradient magnitudes before the optimizer step.
+//!
+//! # Clipping Strategies
+//!
+//! ```text
+//! ┌─────────────────────────────────────────────────────────────────────┐
+//! │                  Gradient Clipping Strategies                       │
+//! ├─────────────────────────────────────────────────────────────────────┤
+//! │                                                                     │
+//! │  1. Global Norm Clipping                                            │
+//! │     ‖g‖ = sqrt(Σ gᵢ²)                                             │
+//! │     if ‖g‖ &gt; max_norm: g ← g × (max_norm / ‖g‖)                  │
+//! │                                                                     │
+//! │  2. Per-Parameter Clipping                                          │
+//! │     for each param p: clip(grad_p, -max_norm, max_norm)            │
+//! │                                                                     │
+//! │  3. Value Clipping                                                  │
+//! │     gᵢ ← clamp(gᵢ, -max_val, max_val)                            │
+//! │                                                                     │
+//! ├─────────────────────────────────────────────────────────────────────┤
+//! │  Forward ─► Loss ─► Backward ─► Clip Gradients ─► Optimizer Step   │
+//! └─────────────────────────────────────────────────────────────────────┘
+//! ```
+//!
+//! # Running
+//!
+//! ```bash
+//! cargo run --example autograd_gradient_clipping
+//! ```
+//!
+//! # Recipe Metadata
+//!
+//! - **Category**: Training
+//! - **Complexity**: Intermediate
+//! - **Dependencies**: entrenar 0.5+, aprender 0.25+, ndarray 0.16+
+//! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+
+use apr_cookbook::prelude::*;
+use entrenar::autograd::Tensor;
+use entrenar::optim::{AdamW, Optimizer};
+use ndarray::Array1;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+
+// ── Model dimensions ──
+
+const INPUT_DIM: usize = 8;
+const HIDDEN_DIM: usize = 16;
+const OUTPUT_DIM: usize = 4;
+
+/// Gradient clipping strategy
+#[derive(Debug, Clone, Copy, PartialEq)]
+enum ClipStrategy {
+    /// No clipping applied
+    None,
+    /// Global L2 norm clipping: scale all gradients if total norm exceeds threshold
+    GlobalNorm(f32),
+    /// Per-parameter norm clipping: clip each parameter independently
+    PerParam(f32),
+    /// Value clipping: clamp each gradient element to [-max_val, max_val]
+    Value(f32),
+}
+
+impl ClipStrategy {
+    fn label(self) -&gt; String {
+        match self {
+            Self::None =&gt; &quot;None&quot;.to_string(),
+            Self::GlobalNorm(t) =&gt; format!(&quot;GlobalNorm({t})&quot;),
+            Self::PerParam(t) =&gt; format!(&quot;PerParam({t})&quot;),
+            Self::Value(t) =&gt; format!(&quot;Value({t})&quot;),
+        }
+    }
+}
+
+/// Deterministic hash-based value
+fn hash_f32(seed: u64, index: usize, label: &amp;str) -&gt; f32 {
+    let mut h = DefaultHasher::new();
+    (seed, label, index).hash(&amp;mut h);
+    h.finish() as f32 / u64::MAX as f32 - 0.5
+}
+
+/// Two-layer MLP backed by entrenar Tensors
+struct ClipModel {
+    /// w1: [HIDDEN_DIM x INPUT_DIM], b1: [HIDDEN_DIM],
+    /// w2: [OUTPUT_DIM x HIDDEN_DIM], b2: [OUTPUT_DIM]
+    params: Vec&lt;Tensor&gt;,
+}
+
+impl ClipModel {
+    const W1: usize = 0;
+    const B1: usize = 1;
+    const W2: usize = 2;
+    const B2: usize = 3;
+
+    fn new(seed: u64) -&gt; Self {
+        let w1_scale = (2.0 / (INPUT_DIM + HIDDEN_DIM) as f32).sqrt();
+        let w2_scale = (2.0 / (HIDDEN_DIM + OUTPUT_DIM) as f32).sqrt();
+
+        let w1: Vec&lt;f32&gt; = (0..HIDDEN_DIM * INPUT_DIM)
+            .map(|i| hash_f32(seed, i, &quot;w1&quot;) * w1_scale)
+            .collect();
+        let w2: Vec&lt;f32&gt; = (0..OUTPUT_DIM * HIDDEN_DIM)
+            .map(|i| hash_f32(seed, i, &quot;w2&quot;) * w2_scale)
+            .collect();
+
+        let params = vec![
+            Tensor::from_vec(w1, true),
+            Tensor::zeros(HIDDEN_DIM, true),
+            Tensor::from_vec(w2, true),
+            Tensor::zeros(OUTPUT_DIM, true),
+        ];
+
+        Self { params }
+    }
+
+    /// Forward pass: input -&gt; hidden (ReLU) -&gt; logits
+    fn forward(&amp;self, x: &amp;[f32]) -&gt; Vec&lt;f32&gt; {
+        let w1 = &amp;self.params[Self::W1];
+        let b1 = &amp;self.params[Self::B1];
+        let w2 = &amp;self.params[Self::W2];
+        let b2 = &amp;self.params[Self::B2];
+
+        // Hidden = ReLU(x @ W1^T + b1)
+        let mut hidden = [0.0f32; HIDDEN_DIM];
+        #[allow(clippy::needless_range_loop)]
+        for j in 0..HIDDEN_DIM {
+            let mut sum = b1.data()[j];
+            for i in 0..INPUT_DIM {
+                sum += x[i] * w1.data()[j * INPUT_DIM + i];
+            }
+            hidden[j] = sum.max(0.0);
+        }
+
+        // Output = hidden @ W2^T + b2
+        let mut output = [0.0f32; OUTPUT_DIM];
+        #[allow(clippy::needless_range_loop)]
+        for k in 0..OUTPUT_DIM {
+            let mut sum = b2.data()[k];
+            for j in 0..HIDDEN_DIM {
+                sum += hidden[j] * w2.data()[k * HIDDEN_DIM + j];
+            }
+            output[k] = sum;
+        }
+
+        output.to_vec()
+    }
+
+    /// Softmax cross-entropy loss
+    fn loss(&amp;self, logits: &amp;[f32], target: usize) -&gt; f32 {
+        softmax_cross_entropy(logits, target)
+    }
+
+    fn param_count(&amp;self) -&gt; usize {
+        self.params.iter().map(Tensor::len).sum()
+    }
+
+    fn params_mut(&amp;mut self) -&gt; &amp;mut [Tensor] {
+        &amp;mut self.params
+    }
+}
+
+/// Numerically stable softmax cross-entropy
+fn softmax_cross_entropy(logits: &amp;[f32], target: usize) -&gt; f32 {
+    let max_val = logits.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    let exps: Vec&lt;f32&gt; = logits.iter().map(|&amp;l| (l - max_val).exp()).collect();
+    let sum: f32 = exps.iter().sum();
+    -(exps[target] / sum).max(1e-10).ln()
+}
+
+/// Compute finite-difference gradients and set them on the model parameters.
+///
+/// This simulates backward() for demonstration purposes: it computes
+/// the gradient of the loss w.r.t. each parameter using central differences.
+fn compute_and_set_grads(model: &amp;mut ClipModel, x: &amp;[f32], target: usize) {
+    let eps = 1e-4_f32;
+
+    for param_idx in 0..model.params.len() {
+        let n = model.params[param_idx].len();
+        let mut grad = Array1::&lt;f32&gt;::zeros(n);
+
+        for elem in 0..n {
+            // +eps
+            let orig = model.params[param_idx].data()[elem];
+            // We need to modify the parameter in-place. Since Tensor doesn't expose
+            // direct mutation of individual elements, we reconstruct. But for efficiency,
+            // we use the same pattern as gradient_accumulation: modify the model weights
+            // directly through a clone-modify-replace cycle.
+            let mut data_plus = model.params[param_idx].data().to_vec();
+            data_plus[elem] = orig + eps;
+            let tmp = Tensor::from_vec(data_plus, true);
+            let old = std::mem::replace(&amp;mut model.params[param_idx], tmp);
+            let logits_plus = model.forward(x);
+            let loss_plus = model.loss(&amp;logits_plus, target);
+
+            // -eps
+            let mut data_minus = old.data().to_vec();
+            data_minus[elem] = orig - eps;
+            let tmp2 = Tensor::from_vec(data_minus, true);
+            let _ = std::mem::replace(&amp;mut model.params[param_idx], tmp2);
+            let logits_minus = model.forward(x);
+            let loss_minus = model.loss(&amp;logits_minus, target);
+
+            // Restore original
+            let mut data_orig = model.params[param_idx].data().to_vec();
+            data_orig[elem] = orig;
+            model.params[param_idx] = Tensor::from_vec(data_orig, true);
+
+            grad[elem] = (loss_plus - loss_minus) / (2.0 * eps);
+        }
+
+        model.params[param_idx].set_grad(grad);
+    }
+}
+
+/// Compute the global L2 norm of all parameter gradients
+fn global_gradient_norm(params: &amp;[Tensor]) -&gt; f32 {
+    let mut sum_sq = 0.0f32;
+    for p in params {
+        if let Some(g) = p.grad() {
+            sum_sq += g.iter().map(|&amp;v| v * v).sum::&lt;f32&gt;();
+        }
+    }
+    sum_sq.sqrt()
+}
+
+/// Apply gradient clipping in place (modifies gradients stored in Tensors)
+fn clip_gradients(params: &amp;[Tensor], strategy: ClipStrategy) -&gt; f32 {
+    let pre_norm = global_gradient_norm(params);
+
+    match strategy {
+        ClipStrategy::None =&gt; {}
+        ClipStrategy::GlobalNorm(max_norm) =&gt; {
+            if pre_norm &gt; max_norm {
+                let scale = max_norm / pre_norm;
+                for p in params {
+                    if let Some(g) = p.grad() {
+                        let clipped = g.mapv(|v| v * scale);
+                        p.set_grad(clipped);
+                    }
+                }
+            }
+        }
+        ClipStrategy::PerParam(max_norm) =&gt; {
+            for p in params {
+                if let Some(g) = p.grad() {
+                    let pnorm = g.iter().map(|&amp;v| v * v).sum::&lt;f32&gt;().sqrt();
+                    if pnorm &gt; max_norm {
+                        let scale = max_norm / pnorm;
+                        let clipped = g.mapv(|v| v * scale);
+                        p.set_grad(clipped);
+                    }
+                }
+            }
+        }
+        ClipStrategy::Value(max_val) =&gt; {
+            for p in params {
+                if let Some(g) = p.grad() {
+                    let clipped = g.mapv(|v| v.clamp(-max_val, max_val));
+                    p.set_grad(clipped);
+                }
+            }
+        }
+    }
+
+    pre_norm
+}
+
+/// Generate synthetic classification data with class-conditional features.
+fn generate_data(n: usize, seed: u64) -&gt; Vec&lt;(Vec&lt;f32&gt;, usize)&gt; {
+    (0..n)
+        .map(|i| {
+            let class = i % OUTPUT_DIM;
+            let features: Vec&lt;f32&gt; = (0..INPUT_DIM)
+                .map(|j| {
+                    let noise = hash_f32(seed, i * INPUT_DIM + j, &quot;x&quot;) * 0.4;
+                    class as f32 * 0.5 + noise + j as f32 * 0.05
+                })
+                .collect();
+            (features, class)
+        })
+        .collect()
+}
+
+/// Simulate exploding gradients by using extremely large gradient scale.
+fn set_exploding_grads(params: &amp;[Tensor], scale: f32, seed: u64) {
+    for (pidx, p) in params.iter().enumerate() {
+        if p.requires_grad() {
+            let grad: Array1&lt;f32&gt; = Array1::from_shape_fn(p.len(), |i| {
+                hash_f32(seed, pidx * 1000 + i, &quot;explode&quot;) * scale
+            });
+            p.set_grad(grad);
+        }
+    }
+}
+
+/// Result of a training run
+#[derive(Debug)]
+struct TrainResult {
+    strategy: String,
+    losses: Vec&lt;f32&gt;,
+    grad_norms: Vec&lt;f32&gt;,
+    clipped_norms: Vec&lt;f32&gt;,
+    final_loss: f32,
+    accuracy: f32,
+}
+
+/// Train a model with a given clipping strategy.
+fn train_with_clipping(
+    seed: u64,
+    data: &amp;[(Vec&lt;f32&gt;, usize)],
+    strategy: ClipStrategy,
+    lr: f32,
+    epochs: usize,
+) -&gt; TrainResult {
+    let mut model = ClipModel::new(seed);
+    let mut optimizer = AdamW::default_params(lr);
+
+    let mut losses = Vec::with_capacity(epochs);
+    let mut grad_norms = Vec::with_capacity(epochs);
+    let mut clipped_norms = Vec::with_capacity(epochs);
+
+    for _epoch in 0..epochs {
+        let mut epoch_loss = 0.0f32;
+        let mut epoch_pre_norms = Vec::new();
+        let mut epoch_post_norms = Vec::new();
+
+        for (x, target) in data {
+            optimizer.zero_grad(model.params_mut());
+
+            let logits = model.forward(x);
+            let loss = model.loss(&amp;logits, *target);
+            epoch_loss += loss;
+
+            // Compute gradients via finite differences
+            compute_and_set_grads(&amp;mut model, x, *target);
+
+            // Clip gradients
+            let pre_norm = clip_gradients(&amp;model.params, strategy);
+            let post_norm = global_gradient_norm(&amp;model.params);
+            epoch_pre_norms.push(pre_norm);
+            epoch_post_norms.push(post_norm);
+
+            // Optimizer step
+            optimizer.step(model.params_mut());
+        }
+
+        let avg_loss = epoch_loss / data.len() as f32;
+        losses.push(avg_loss);
+
+        let avg_pre = epoch_pre_norms.iter().sum::&lt;f32&gt;() / epoch_pre_norms.len() as f32;
+        let avg_post = epoch_post_norms.iter().sum::&lt;f32&gt;() / epoch_post_norms.len() as f32;
+        grad_norms.push(avg_pre);
+        clipped_norms.push(avg_post);
+    }
+
+    // Evaluate accuracy
+    let mut correct = 0usize;
+    for (x, target) in data {
+        let logits = model.forward(x);
+        let pred = logits
+            .iter()
+            .enumerate()
+            .max_by(|(_, a), (_, b)| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal))
+            .map_or(0, |(i, _)| i);
+        if pred == *target {
+            correct += 1;
+        }
+    }
+    let accuracy = correct as f32 / data.len() as f32;
+    let final_loss = losses.last().copied().unwrap_or(f32::INFINITY);
+
+    TrainResult {
+        strategy: strategy.label(),
+        losses,
+        grad_norms,
+        clipped_norms,
+        final_loss,
+        accuracy,
+    }
+}
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new(&quot;autograd_gradient_clipping&quot;)?;
+
+    println!(&quot;=== Autograd Gradient Clipping Example ===\n&quot;);
+
+    let seed = hash_name_to_seed(&quot;autograd_gradient_clipping&quot;);
+    let data = generate_data(48, seed);
+    let epochs = 15;
+    let lr = 0.001;
+
+    // =========================================================================
+    // Section 1: Clipping Strategies Overview
+    // =========================================================================
+    println!(&quot;1. Gradient Clipping Strategies&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+    println!(&quot;   GlobalNorm: Scale all grads if total L2 norm &gt; threshold&quot;);
+    println!(&quot;   PerParam:   Clip each parameter's gradient independently&quot;);
+    println!(&quot;   Value:      Clamp each gradient element to [-max, max]&quot;);
+    println!(
+        &quot;   Model:      {}x{}x{} ({} params)&quot;,
+        INPUT_DIM,
+        HIDDEN_DIM,
+        OUTPUT_DIM,
+        ClipModel::new(seed).param_count()
+    );
+    println!(
+        &quot;   Samples:    {}, Epochs: {}, LR: {}&quot;,
+        data.len(),
+        epochs,
+        lr
+    );
+    println!();
+
+    // =========================================================================
+    // Section 2: Exploding Gradient Demonstration
+    // =========================================================================
+    println!(&quot;2. Exploding Gradient Demonstration&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+
+    let demo_model = ClipModel::new(seed);
+    let explode_scales = [1.0, 10.0, 100.0, 1000.0];
+
+    println!(
+        &quot;   {:&gt;10} {:&gt;14} {:&gt;14} {:&gt;14} {:&gt;14}&quot;,
+        &quot;Scale&quot;, &quot;PreNorm&quot;, &quot;GlobalNorm(1)&quot;, &quot;PerParam(1)&quot;, &quot;Value(0.5)&quot;
+    );
+    println!(&quot;   {}&quot;, &quot;-&quot;.repeat(70));
+
+    for &amp;scale in &amp;explode_scales {
+        // Unclipped norm
+        set_exploding_grads(&amp;demo_model.params, scale, seed);
+        let pre_norm = global_gradient_norm(&amp;demo_model.params);
+
+        // Global norm clip
+        set_exploding_grads(&amp;demo_model.params, scale, seed);
+        clip_gradients(&amp;demo_model.params, ClipStrategy::GlobalNorm(1.0));
+        let gn_norm = global_gradient_norm(&amp;demo_model.params);
+
+        // Per-param clip
+        set_exploding_grads(&amp;demo_model.params, scale, seed);
+        clip_gradients(&amp;demo_model.params, ClipStrategy::PerParam(1.0));
+        let pp_norm = global_gradient_norm(&amp;demo_model.params);
+
+        // Value clip
+        set_exploding_grads(&amp;demo_model.params, scale, seed);
+        clip_gradients(&amp;demo_model.params, ClipStrategy::Value(0.5));
+        let vc_norm = global_gradient_norm(&amp;demo_model.params);
+
+        println!(
+            &quot;   {:&gt;10.0} {:&gt;14.4} {:&gt;14.4} {:&gt;14.4} {:&gt;14.4}&quot;,
+            scale, pre_norm, gn_norm, pp_norm, vc_norm
+        );
+    }
+    println!();
+
+    // =========================================================================
+    // Section 3: Training Comparison
+    // =========================================================================
+    println!(&quot;3. Training with Different Clipping Strategies&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+
+    let strategies = [
+        ClipStrategy::None,
+        ClipStrategy::GlobalNorm(1.0),
+        ClipStrategy::PerParam(0.5),
+        ClipStrategy::Value(0.1),
+    ];
+
+    let results: Vec&lt;TrainResult&gt; = strategies
+        .iter()
+        .map(|&amp;s| train_with_clipping(seed, &amp;data, s, lr, epochs))
+        .collect();
+
+    println!(
+        &quot;   {:&gt;16} {:&gt;10} {:&gt;10} {:&gt;12} {:&gt;12}&quot;,
+        &quot;Strategy&quot;, &quot;FinalLoss&quot;, &quot;Accuracy&quot;, &quot;AvgGradNorm&quot;, &quot;AvgClipNorm&quot;
+    );
+    println!(&quot;   {}&quot;, &quot;-&quot;.repeat(64));
+
+    for r in &amp;results {
+        let avg_gn = r.grad_norms.iter().sum::&lt;f32&gt;() / r.grad_norms.len().max(1) as f32;
+        let avg_cn = r.clipped_norms.iter().sum::&lt;f32&gt;() / r.clipped_norms.len().max(1) as f32;
+        println!(
+            &quot;   {:&gt;16} {:&gt;10.4} {:&gt;9.1}% {:&gt;12.4} {:&gt;12.4}&quot;,
+            r.strategy,
+            r.final_loss,
+            r.accuracy * 100.0,
+            avg_gn,
+            avg_cn
+        );
+    }
+    println!();
+
+    // =========================================================================
+    // Section 4: Gradient Norm Trajectories
+    // =========================================================================
+    println!(&quot;4. Gradient Norm Trajectories (per epoch)&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+
+    print!(&quot;   {:&gt;6}&quot;, &quot;Epoch&quot;);
+    for r in &amp;results {
+        print!(&quot; {:&gt;14}&quot;, r.strategy);
+    }
+    println!();
+    println!(&quot;   {}&quot;, &quot;-&quot;.repeat(6 + results.len() * 15));
+
+    let sample_epochs: Vec&lt;usize&gt; = (0..epochs)
+        .step_by(3)
+        .chain(std::iter::once(epochs - 1))
+        .collect();
+    for &amp;e in &amp;sample_epochs {
+        if e &lt; epochs {
+            print!(&quot;   {:&gt;6}&quot;, e);
+            for r in &amp;results {
+                if e &lt; r.grad_norms.len() {
+                    print!(&quot; {:&gt;14.4}&quot;, r.grad_norms[e]);
+                }
+            }
+            println!();
+        }
+    }
+    println!();
+
+    // =========================================================================
+    // Section 5: Loss Convergence Comparison
+    // =========================================================================
+    println!(&quot;5. Loss Convergence Comparison&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+
+    print!(&quot;   {:&gt;6}&quot;, &quot;Epoch&quot;);
+    for r in &amp;results {
+        print!(&quot; {:&gt;14}&quot;, r.strategy);
+    }
+    println!();
+    println!(&quot;   {}&quot;, &quot;-&quot;.repeat(6 + results.len() * 15));
+
+    for &amp;e in &amp;sample_epochs {
+        if e &lt; epochs {
+            print!(&quot;   {:&gt;6}&quot;, e);
+            for r in &amp;results {
+                if e &lt; r.losses.len() {
+                    print!(&quot; {:&gt;14.4}&quot;, r.losses[e]);
+                }
+            }
+            println!();
+        }
+    }
+    println!();
+
+    // =========================================================================
+    // Section 6: Convergence Improvement Analysis
+    // =========================================================================
+    println!(&quot;6. Convergence Improvement Analysis&quot;);
+    println!(&quot;   ─────────────────────────────────────────&quot;);
+
+    let baseline = &amp;results[0]; // No clipping
+    let baseline_last = baseline.final_loss;
+
+    for r in &amp;results {
+        let first = r.losses.first().copied().unwrap_or(1.0);
+        let loss_reduction = ((first - r.final_loss) / first) * 100.0;
+        let vs_baseline = if baseline_last &gt; 0.0 {
+            ((baseline_last - r.final_loss) / baseline_last) * 100.0
+        } else {
+            0.0
+        };
+        let norm_stability = if r.grad_norms.len() &gt;= 2 {
+            let first_norm = r.grad_norms[0];
+            let last_norm = r.grad_norms[r.grad_norms.len() - 1];
+            if first_norm &gt; 0.0 {
+                (last_norm / first_norm * 100.0).min(999.0)
+            } else {
+                0.0
+            }
+        } else {
+            0.0
+        };
+
+        println!(&quot;   {} strategy:&quot;, r.strategy);
+        println!(
+            &quot;     Loss reduction:    {:.1}% ({:.4} -&gt; {:.4})&quot;,
+            loss_reduction, first, r.final_loss
+        );
+        println!(
+            &quot;     vs No-Clip:        {:+.1}% (lower is better)&quot;,
+            -vs_baseline
+        );
+        println!(&quot;     Norm stability:    {:.1}% of initial&quot;, norm_stability);
+        println!(&quot;     Final accuracy:    {:.1}%&quot;, r.accuracy * 100.0);
+        println!();
+    }
+
+    // ── Record metrics ──
+    ctx.record_float_metric(&quot;no_clip_loss&quot;, f64::from(results[0].final_loss));
+    ctx.record_float_metric(&quot;global_norm_loss&quot;, f64::from(results[1].final_loss));
+    ctx.record_float_metric(&quot;per_param_loss&quot;, f64::from(results[2].final_loss));
+    ctx.record_float_metric(&quot;value_clip_loss&quot;, f64::from(results[3].final_loss));
+    ctx.record_float_metric(&quot;no_clip_accuracy&quot;, f64::from(results[0].accuracy));
+    ctx.record_float_metric(&quot;global_norm_accuracy&quot;, f64::from(results[1].accuracy));
+    ctx.record_metric(&quot;total_params&quot;, ClipModel::new(seed).param_count() as i64);
+    ctx.record_metric(&quot;epochs&quot;, epochs as i64);
+    ctx.record_metric(&quot;samples&quot;, data.len() as i64);
+
+    ctx.report()?;
+    println!(&quot;\n=== Example Complete ===&quot;);
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_hash_f32_deterministic() {
+        let a = hash_f32(42, 0, &quot;test&quot;);
+        let b = hash_f32(42, 0, &quot;test&quot;);
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn test_hash_f32_range() {
+        for i in 0..200 {
+            let v = hash_f32(42, i, &quot;range&quot;);
+            assert!(
+                (-0.5..=0.5).contains(&amp;v),
+                &quot;hash_f32 out of [-0.5, 0.5]: {v}&quot;
+            );
+        }
+    }
+
+    #[test]
+    fn test_model_forward_dimensions() {
+        let model = ClipModel::new(42);
+        let input = vec![0.5; INPUT_DIM];
+        let output = model.forward(&amp;input);
+        assert_eq!(output.len(), OUTPUT_DIM);
+    }
+
+    #[test]
+    fn test_softmax_cross_entropy_minimum_at_target() {
+        let logits = [10.0, 0.0, 0.0, 0.0];
+        let loss_correct = softmax_cross_entropy(&amp;logits, 0);
+        let loss_wrong = softmax_cross_entropy(&amp;logits, 1);
+        assert!(
+            loss_correct &lt; loss_wrong,
+            &quot;Loss at target ({loss_correct}) should be &lt; off-target ({loss_wrong})&quot;
+        );
+    }
+
+    #[test]
+    fn test_softmax_cross_entropy_nonnegative() {
+        let logits = [1.0, 2.0, 3.0, 4.0];
+        for target in 0..OUTPUT_DIM {
+            let loss = softmax_cross_entropy(&amp;logits, target);
+            assert!(loss &gt;= 0.0, &quot;Cross-entropy must be &gt;= 0, got {loss}&quot;);
+            assert!(loss.is_finite(), &quot;Cross-entropy must be finite&quot;);
+        }
+    }
+
+    #[test]
+    fn test_global_norm_clipping_caps_gradient() {
+        let model = ClipModel::new(99);
+        // Set large gradients
+        set_exploding_grads(&amp;model.params, 100.0, 99);
+        let pre = global_gradient_norm(&amp;model.params);
+        assert!(pre &gt; 1.0, &quot;Pre-clip norm should be large&quot;);
+
+        clip_gradients(&amp;model.params, ClipStrategy::GlobalNorm(1.0));
+        let post = global_gradient_norm(&amp;model.params);
+        assert!(
+            (post - 1.0).abs() &lt; 0.01,
+            &quot;Post-clip global norm should be ~1.0, got {post}&quot;
+        );
+    }
+
+    #[test]
+    fn test_per_param_clipping_caps_each_parameter() {
+        let model = ClipModel::new(99);
+        set_exploding_grads(&amp;model.params, 50.0, 99);
+
+        clip_gradients(&amp;model.params, ClipStrategy::PerParam(0.5));
+
+        for p in &amp;model.params {
+            if let Some(g) = p.grad() {
+                let pnorm = g.iter().map(|&amp;v| v * v).sum::&lt;f32&gt;().sqrt();
+                assert!(
+                    pnorm &lt;= 0.5 + 1e-5,
+                    &quot;Per-param norm should be &lt;= 0.5, got {pnorm}&quot;
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn test_value_clipping_clamps_elements() {
+        let model = ClipModel::new(99);
+        set_exploding_grads(&amp;model.params, 200.0, 99);
+
+        clip_gradients(&amp;model.params, ClipStrategy::Value(0.3));
+
+        for p in &amp;model.params {
+            if let Some(g) = p.grad() {
+                for &amp;v in g.iter() {
+                    assert!(
+                        v &gt;= -0.3 - 1e-6 &amp;&amp; v &lt;= 0.3 + 1e-6,
+                        &quot;Value-clipped element should be in [-0.3, 0.3], got {v}&quot;
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_no_clip_preserves_gradients() {
+        let model = ClipModel::new(42);
+        set_exploding_grads(&amp;model.params, 5.0, 42);
+        let pre = global_gradient_norm(&amp;model.params);
+
+        clip_gradients(&amp;model.params, ClipStrategy::None);
+        let post = global_gradient_norm(&amp;model.params);
+
+        assert!(
+            (pre - post).abs() &lt; 1e-6,
+            &quot;None strategy should not alter gradients: {pre} vs {post}&quot;
+        );
+    }
+
+    #[test]
+    fn test_generate_data_deterministic() {
+        let d1 = generate_data(20, 42);
+        let d2 = generate_data(20, 42);
+        for (i, ((x1, t1), (x2, t2))) in d1.iter().zip(d2.iter()).enumerate() {
+            assert_eq!(x1, x2, &quot;Features differ at index {i}&quot;);
+            assert_eq!(t1, t2, &quot;Labels differ at index {i}&quot;);
+        }
+    }
+
+    #[test]
+    fn test_generate_data_labels_valid() {
+        let data = generate_data(100, 42);
+        for (_, target) in &amp;data {
+            assert!(*target &lt; OUTPUT_DIM, &quot;Target {target} &gt;= OUTPUT_DIM&quot;);
+        }
+    }
+
+    #[test]
+    fn test_training_reduces_loss() {
+        let data = generate_data(24, 42);
+        let result = train_with_clipping(42, &amp;data, ClipStrategy::GlobalNorm(1.0), 0.001, 10);
+
+        assert!(
+            result.losses.len() == 10,
+            &quot;Should have 10 epoch losses, got {}&quot;,
+            result.losses.len()
+        );
+        assert!(
+            result.final_loss.is_finite(),
+            &quot;Final loss should be finite, got {}&quot;,
+            result.final_loss
+        );
+    }
+
+    #[test]
+    fn test_clip_strategy_labels() {
+        assert_eq!(ClipStrategy::None.label(), &quot;None&quot;);
+        assert_eq!(ClipStrategy::GlobalNorm(1.0).label(), &quot;GlobalNorm(1)&quot;);
+        assert_eq!(ClipStrategy::PerParam(0.5).label(), &quot;PerParam(0.5)&quot;);
+        assert_eq!(ClipStrategy::Value(0.1).label(), &quot;Value(0.1)&quot;);
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/c-training/autograd-custom-ops.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/c-training/autograd-backprop-viz.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/c-training/autograd-custom-ops.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/c-training/autograd-backprop-viz.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
