@@ -774,6 +774,22 @@ mod tests {
     }
 
     #[test]
+    fn test_style_preset_pencil_sketch() {
+        let params = StylePreset::PencilSketch.params();
+        assert_eq!(StylePreset::PencilSketch.name(), "Pencil Sketch");
+        assert!(params.edge_strength > 0.0);
+        assert!(params.blur_amount >= 0.0);
+    }
+
+    #[test]
+    fn test_style_preset_impressionist() {
+        let params = StylePreset::Impressionist.params();
+        assert_eq!(StylePreset::Impressionist.name(), "Impressionist");
+        assert!(params.blur_amount > 0.0);
+        assert!(params.color_boost > 0.0);
+    }
+
+    #[test]
     fn test_style_transfer_new() {
         let engine = StyleTransfer::new();
         // Verify kernels are set
