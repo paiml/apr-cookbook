@@ -53,6 +53,11 @@ too_many_lines = "allow"
 enum_variant_names = "allow"
 no_effect_underscore_binding = "allow"
 
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = "symbols"
+
 [dependencies]
 # Sovereign Stack - crates.io published versions (2026)
 aprender = { version = "0.25", features = ["format-compression"] }
