@@ -524,6 +524,22 @@ path = "examples/advanced/code_defect_oracle.rs"
 name = "model_showcase"
 path = "examples/advanced/model_showcase.rs"
 
+[[example]]
+name = "ab_experiment"
+path = "examples/advanced/ab_experiment.rs"
+
+[[example]]
+name = "cicd_model_pipeline"
+path = "examples/advanced/cicd_model_pipeline.rs"
+
+[[example]]
+name = "debug_fix_loop"
+path = "examples/advanced/debug_fix_loop.rs"
+
+[[example]]
+name = "compliance_audit"
+path = "examples/advanced/compliance_audit.rs"
+
 # --- Category M: Inference Monitoring ---
 
 [[example]]
@@ -893,3 +909,7 @@ path = "examples/format/format_pull_cache.rs"
 [[example]]
 name = "format_batch_export"
 path = "examples/format/format_batch_export.rs"
+
+[[example]]
+name = "format_migration_pipeline"
+path = "examples/format/format_migration_pipeline.rs"
