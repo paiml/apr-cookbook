@@ -194,15 +194,9 @@ fn find_optimal_config(model: &ModelConfig, gpu_vram_gb: f64) -> OptimalConfig {
     }
 }
 
-fn main() -> Result<()> {
-    let mut ctx = RecipeContext::new("finetune_plan_vram")?;
-
-    println!("=== VRAM Planning for Fine-Tuning ===");
-    println!("Mirrors: apr finetune --plan");
-    println!();
-
-    // ── Model Specifications ──
-    let models = vec![
+/// Build the suite of model configurations used for VRAM planning
+fn build_model_specs() -> Vec<ModelConfig> {
+    vec![
         ModelConfig {
             name: "TinyLM-125M".to_string(),
             params: 125_000_000,
@@ -231,11 +225,14 @@ fn main() -> Result<()> {
             num_layers: 80,
             dtype_bytes: 2, // FP16 base
         },
-    ];
+    ]
+}
 
+/// Print model specification summary table
+fn section_model_specs(models: &[ModelConfig]) {
     println!("Model Specifications");
     println!("   ─────────────────────────────────────────");
-    for m in &models {
+    for m in models {
         let size_gb = (m.params * m.dtype_bytes) as f64 / (1024.0 * 1024.0 * 1024.0);
         println!(
             "   {:<15}: {:>5.1}B params, hidden={}, layers={}, base={:.1} GB",
@@ -247,9 +244,10 @@ fn main() -> Result<()> {
         );
     }
     println!();
+}
 
-    // ── VRAM Breakdown for Reference Model ──
-    let ref_model = &models[1]; // 1B model
+/// Print detailed VRAM breakdown for the reference model across all methods
+fn section_vram_breakdown(ref_model: &ModelConfig) {
     println!("VRAM Breakdown: {} (batch=4, seq=512)", ref_model.name);
     println!("   ─────────────────────────────────────────");
 
@@ -288,8 +286,10 @@ fn main() -> Result<()> {
         println!("      TOTAL:            {:>8.2} GB", est.total_gb());
         println!();
     }
+}
 
-    // ── Method Comparison Table ──
+/// Print method comparison table (Full vs LoRA vs QLoRA) for all models
+fn section_method_comparison(models: &[ModelConfig]) {
     println!("Method Comparison (batch=4, seq=512, rank=16)");
     println!("   ─────────────────────────────────────────");
     println!(
@@ -298,7 +298,7 @@ fn main() -> Result<()> {
     );
     println!("   {}", "-".repeat(55));
 
-    for m in &models {
+    for m in models {
         let full = estimate_vram(m, FinetuneMethod::Full, 0, 4, 512);
         let lora = estimate_vram(m, FinetuneMethod::LoRA, 16, 4, 512);
         let qlora = estimate_vram(m, FinetuneMethod::QLoRA, 16, 4, 512);
@@ -311,8 +311,10 @@ fn main() -> Result<()> {
         );
     }
     println!();
+}
 
-    // ── GPU Recommendations ──
+/// Print GPU recommendations for each model across common GPU configurations
+fn section_gpu_recommendations(models: &[ModelConfig]) {
     println!("GPU Recommendations");
     println!("   ─────────────────────────────────────────");
 
@@ -325,7 +327,7 @@ fn main() -> Result<()> {
         ("H100 80GB", 80.0),
     ];
 
-    for m in &models {
+    for m in models {
         println!("   {}:", m.name);
         for &(gpu_name, vram) in &gpus {
             let opt = find_optimal_config(m, vram);
@@ -345,8 +347,10 @@ fn main() -> Result<()> {
         }
         println!();
     }
+}
 
-    // ── Record Metrics ──
+/// Record VRAM estimate metrics for the reference model into the recipe context
+fn section_record_metrics(ctx: &mut RecipeContext, ref_model: &ModelConfig) {
     let ref_full = estimate_vram(ref_model, FinetuneMethod::Full, 0, 4, 512);
     let ref_lora = estimate_vram(ref_model, FinetuneMethod::LoRA, 16, 4, 512);
     let ref_qlora = estimate_vram(ref_model, FinetuneMethod::QLoRA, 16, 4, 512);
@@ -365,6 +369,21 @@ fn main() -> Result<()> {
             (1.0 - ref_qlora.total_gb() / ref_full.total_gb()) * 100.0,
         );
     }
+}
+
+fn main() -> Result<()> {
+    let mut ctx = RecipeContext::new("finetune_plan_vram")?;
+
+    println!("=== VRAM Planning for Fine-Tuning ===");
+    println!("Mirrors: apr finetune --plan");
+    println!();
+
+    let models = build_model_specs();
+    section_model_specs(&models);
+    section_vram_breakdown(&models[1]); // 1B reference model
+    section_method_comparison(&models);
+    section_gpu_recommendations(&models);
+    section_record_metrics(&mut ctx, &models[1]);
 
     println!();
     ctx.report()?;

@@ -111,42 +111,94 @@ fn format_chatml(messages: &[ChatMessage], add_gen: bool) -> String {
     out
 }
 
-/// Format messages in LLaMA 2 format.
-fn format_llama2(messages: &[ChatMessage], add_gen: bool) -> String {
-    if messages.is_empty() {
-        return String::new();
-    }
-    let mut out = String::new();
+/// Extract the first system message from a conversation, returning
+/// its content and the remaining non-system-leading messages.
+fn extract_system_prefix(messages: &[ChatMessage]) -> (Option<&str>, Vec<&ChatMessage>) {
     let mut system: Option<&str> = None;
     let mut conv: Vec<&ChatMessage> = Vec::new();
     for msg in messages {
-        if msg.role == "system" && system.is_none() {
+        if msg.role == "system" && system.is_none() && conv.is_empty() {
             system = Some(&msg.content);
         } else {
             conv.push(msg);
         }
     }
-    let mut i = 0;
-    while i < conv.len() {
-        out.push_str("<s>[INST] ");
-        if i == 0 {
-            if let Some(sys) = system {
-                out.push_str(&format!("<<SYS>>\n{sys}\n<</SYS>>\n\n"));
-            }
-        }
-        out.push_str(&conv[i].content);
-        out.push_str(" [/INST]");
-        if i + 1 < conv.len() && conv[i + 1].role == "assistant" {
-            out.push_str(&format!(" {} </s>", conv[i + 1].content));
-            i += 2;
-        } else {
-            if add_gen {
-                out.push(' ');
-            }
-            i += 1;
+    (system, conv)
+}
+
+/// Format a single LLaMA 2 turn (one user message and optional assistant response).
+/// Returns the number of messages consumed (1 or 2).
+fn format_llama2_turn(
+    out: &mut String,
+    conv: &[&ChatMessage],
+    index: usize,
+    system: Option<&str>,
+    add_gen: bool,
+) -> usize {
+    out.push_str("<s>[INST] ");
+    if index == 0 {
+        if let Some(sys) = system {
+            out.push_str(&format!("<<SYS>>\n{sys}\n<</SYS>>\n\n"));
         }
     }
+    out.push_str(&conv[index].content);
+    out.push_str(" [/INST]");
+    if index + 1 < conv.len() && conv[index + 1].role == "assistant" {
+        out.push_str(&format!(" {} </s>", conv[index + 1].content));
+        2
+    } else {
+        if add_gen {
+            out.push(' ');
+        }
+        1
+    }
+}
+
+/// Format messages in LLaMA 2 format.
+fn format_llama2(messages: &[ChatMessage], add_gen: bool) -> String {
+    if messages.is_empty() {
+        return String::new();
+    }
+    let (system, conv) = extract_system_prefix(messages);
+    let mut out = String::new();
+    let mut i = 0;
+    while i < conv.len() {
+        i += format_llama2_turn(&mut out, &conv, i, system, add_gen);
+    }
     out
+}
+
+/// Format a single Mistral turn (one `[INST]...[/INST]` block).
+/// Returns the number of messages consumed (1 or 2), or 0 if
+/// the current message is not a user message (skip it).
+fn format_mistral_turn(
+    out: &mut String,
+    conv: &[&ChatMessage],
+    index: usize,
+    sys_prefix: Option<&str>,
+    add_gen: bool,
+) -> usize {
+    if conv[index].role != "user" {
+        return 1;
+    }
+    out.push_str("[INST] ");
+    if index == 0 {
+        if let Some(prefix) = sys_prefix {
+            out.push_str(prefix);
+            out.push_str("\n\n");
+        }
+    }
+    out.push_str(&conv[index].content);
+    out.push_str(" [/INST]");
+    if index + 1 < conv.len() && conv[index + 1].role == "assistant" {
+        out.push_str(&format!(" {}</s>", conv[index + 1].content));
+        2
+    } else {
+        if add_gen {
+            out.push(' ');
+        }
+        1
+    }
 }
 
 /// Format messages in Mistral format.
@@ -154,38 +206,12 @@ fn format_mistral(messages: &[ChatMessage], add_gen: bool) -> String {
     if messages.is_empty() {
         return String::new();
     }
+    let (system, conv) = extract_system_prefix(messages);
+    let sys_prefix = system.filter(|s| !s.is_empty());
     let mut out = String::from("<s>");
-    let mut sys_prefix = String::new();
-    let mut conv: Vec<&ChatMessage> = Vec::new();
-    for msg in messages {
-        if msg.role == "system" && conv.is_empty() && sys_prefix.is_empty() {
-            sys_prefix = msg.content.clone();
-        } else {
-            conv.push(msg);
-        }
-    }
     let mut i = 0;
     while i < conv.len() {
-        if conv[i].role == "user" {
-            out.push_str("[INST] ");
-            if i == 0 && !sys_prefix.is_empty() {
-                out.push_str(&sys_prefix);
-                out.push_str("\n\n");
-            }
-            out.push_str(&conv[i].content);
-            out.push_str(" [/INST]");
-            if i + 1 < conv.len() && conv[i + 1].role == "assistant" {
-                out.push_str(&format!(" {}</s>", conv[i + 1].content));
-                i += 2;
-            } else {
-                if add_gen {
-                    out.push(' ');
-                }
-                i += 1;
-            }
-        } else {
-            i += 1;
-        }
+        i += format_mistral_turn(&mut out, &conv, i, sys_prefix, add_gen);
     }
     out
 }

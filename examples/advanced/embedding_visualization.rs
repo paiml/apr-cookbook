@@ -334,6 +334,42 @@ impl TSNE {
     }
 }
 
+/// Compute unnormalized conditional probabilities for row `i` given `sigma`,
+/// then normalize so the row sums to 1.
+#[allow(clippy::needless_range_loop)]
+fn compute_row_probabilities(row: &mut [f32], data: &[Vec<f32>], i: usize, sigma: f32) {
+    let n = data.len();
+    let mut sum = 0.0_f32;
+    for j in 0..n {
+        if i == j {
+            row[j] = 0.0;
+            continue;
+        }
+        let dist = euclidean_dist(&data[i], &data[j]);
+        row[j] = (-dist * dist / (2.0 * sigma * sigma)).exp();
+        sum += row[j];
+    }
+    if sum > 0.0 {
+        for j in 0..n {
+            row[j] /= sum;
+        }
+    }
+}
+
+/// Compute Shannon entropy of a probability row, skipping near-zero entries.
+fn row_entropy(row: &[f32]) -> f32 {
+    row.iter().fold(
+        0.0_f32,
+        |acc, &p| {
+            if p > 1e-10 {
+                acc - p * p.ln()
+            } else {
+                acc
+            }
+        },
+    )
+}
+
 #[allow(clippy::needless_range_loop)]
 fn compute_pairwise_affinities(data: &[Vec<f32>], perplexity: f32) -> Vec<Vec<f32>> {
     let n = data.len();
@@ -341,35 +377,13 @@ fn compute_pairwise_affinities(data: &[Vec<f32>], perplexity: f32) -> Vec<Vec<f3
     let mut p = vec![vec![0.0_f32; n]; n];
 
     for i in 0..n {
-        // Binary search for sigma
         let mut sigma = 1.0_f32;
         let mut lo = 0.0_f32;
         let mut hi = 1000.0_f32;
 
         for _ in 0..50 {
-            let mut sum = 0.0_f32;
-            for j in 0..n {
-                if i == j {
-                    continue;
-                }
-                let dist = euclidean_dist(&data[i], &data[j]);
-                p[i][j] = (-dist * dist / (2.0 * sigma * sigma)).exp();
-                sum += p[i][j];
-            }
-
-            if sum > 0.0 {
-                for j in 0..n {
-                    p[i][j] /= sum;
-                }
-            }
-
-            // Calculate entropy
-            let mut entropy = 0.0_f32;
-            for j in 0..n {
-                if p[i][j] > 1e-10 {
-                    entropy -= p[i][j] * p[i][j].ln();
-                }
-            }
+            compute_row_probabilities(&mut p[i], data, i, sigma);
+            let entropy = row_entropy(&p[i]);
 
             if (entropy - target_entropy).abs() < 0.01 {
                 break;
