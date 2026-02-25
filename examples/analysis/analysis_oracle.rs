@@ -103,40 +103,56 @@ const MLP_PATTERNS: &[&str] = &[
     "mlp_head",
 ];
 
+/// Returns the first matching pattern for a tensor name, or `None`.
+fn first_pattern_match<'a>(name_lower: &str, patterns: &[&'a str]) -> Option<&'a str> {
+    patterns
+        .iter()
+        .copied()
+        .find(|&pat| name_lower.contains(pat))
+}
+
+/// Counts name-based pattern hits and collects evidence strings.
+fn collect_name_hits(tensor_names: &[String], patterns: &[&str]) -> (usize, Vec<String>) {
+    let mut hits = 0usize;
+    let mut evidence = Vec::new();
+
+    for name in tensor_names {
+        if let Some(pat) = first_pattern_match(&name.to_lowercase(), patterns) {
+            hits += 1;
+            evidence.push(format!("tensor '{}' matches pattern '{}'", name, pat));
+        }
+    }
+
+    (hits, evidence)
+}
+
+/// Adds evidence for square projection matrices whose names match a pattern.
+fn collect_shape_evidence(
+    shapes: &[(String, Vec<usize>)],
+    patterns: &[&str],
+    evidence: &mut Vec<String>,
+) {
+    for (name, shape) in shapes {
+        let is_square_projection = shape.len() == 2 && shape[0] == shape[1] && shape[0] >= 64;
+        if !is_square_projection {
+            continue;
+        }
+        if first_pattern_match(&name.to_lowercase(), patterns).is_some() {
+            evidence.push(format!(
+                "tensor '{}' has square shape {}x{} (projection matrix)",
+                name, shape[0], shape[1]
+            ));
+        }
+    }
+}
+
 fn score_family(
     tensor_names: &[String],
     shapes: &[(String, Vec<usize>)],
     patterns: &[&str],
 ) -> (f64, Vec<String>) {
-    let mut hits = 0usize;
-    let mut evidence = Vec::new();
-
-    for name in tensor_names {
-        let lower = name.to_lowercase();
-        for &pat in patterns {
-            if lower.contains(pat) {
-                hits += 1;
-                evidence.push(format!("tensor '{}' matches pattern '{}'", name, pat));
-                break; // one hit per tensor
-            }
-        }
-    }
-
-    // Shape-based bonus: square matrices hint at attention projections
-    for (name, shape) in shapes {
-        if shape.len() == 2 && shape[0] == shape[1] && shape[0] >= 64 {
-            let lower = name.to_lowercase();
-            for &pat in patterns {
-                if lower.contains(pat) {
-                    evidence.push(format!(
-                        "tensor '{}' has square shape {}x{} (projection matrix)",
-                        name, shape[0], shape[1]
-                    ));
-                    break;
-                }
-            }
-        }
-    }
+    let (hits, mut evidence) = collect_name_hits(tensor_names, patterns);
+    collect_shape_evidence(shapes, patterns, &mut evidence);
 
     let total = tensor_names.len().max(1) as f64;
     let confidence = (hits as f64 / total).clamp(0.0, 1.0);
@@ -145,30 +161,31 @@ fn score_family(
 }
 
 fn identify_family(tensor_names: &[String], shapes: &[(String, Vec<usize>)]) -> OracleResult {
-    let families = [
+    let candidates: Vec<_> = [
         (ModelFamily::Transformer, TRANSFORMER_PATTERNS),
         (ModelFamily::CNN, CNN_PATTERNS),
         (ModelFamily::RNN, RNN_PATTERNS),
         (ModelFamily::MLP, MLP_PATTERNS),
-    ];
-
-    let mut best_family = ModelFamily::Unknown;
-    let mut best_confidence = 0.0_f64;
-    let mut best_evidence = Vec::new();
-
-    for (family, patterns) in &families {
+    ]
+    .iter()
+    .map(|(family, patterns)| {
         let (conf, ev) = score_family(tensor_names, shapes, patterns);
-        if conf > best_confidence {
-            best_confidence = conf;
-            best_family = family.clone();
-            best_evidence = ev;
-        }
-    }
+        (family.clone(), conf, ev)
+    })
+    .collect();
+
+    let (best_family, best_confidence, best_evidence) = candidates
+        .into_iter()
+        .max_by(|a, b| a.1.partial_cmp(&b.1).unwrap_or(std::cmp::Ordering::Equal))
+        .unwrap_or_else(|| (ModelFamily::Unknown, 0.0, Vec::new()));
 
     // Require minimum confidence threshold
     if best_confidence < 0.1 {
-        best_family = ModelFamily::Unknown;
-        best_evidence = vec!["no strong pattern matches found".to_string()];
+        return OracleResult {
+            family: ModelFamily::Unknown,
+            confidence: best_confidence,
+            evidence: vec!["no strong pattern matches found".to_string()],
+        };
     }
 
     OracleResult {
