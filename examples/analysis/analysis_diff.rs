@@ -58,9 +58,12 @@ struct DiffResult {
 // Diff logic
 // ---------------------------------------------------------------------------
 
-fn extract_float_payload(bytes: &[u8], offset: usize) -> Vec<f32> {
-    let payload = &bytes[offset..];
-    payload
+/// A named collection of weight tensors for diffing.
+/// Operates on raw float data — avoids parsing compressed APR bundles.
+type ModelWeights = Vec<(String, Vec<f32>)>;
+
+fn bytes_to_floats(bytes: &[u8]) -> Vec<f32> {
+    bytes
         .chunks_exact(4)
         .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
         .collect()
@@ -122,54 +125,13 @@ fn mean_abs_diff(a: &[f32], b: &[f32]) -> f64 {
     sum / n as f64
 }
 
-/// Simulated tensor directory: returns (name, start_offset, num_floats) triples.
-/// In a real implementation, this parses the APR v2 tensor directory.
-fn get_tensor_entries(bytes: &[u8]) -> Vec<(String, usize, usize)> {
-    // For bundle-generated files, treat entire payload after 64-byte header
-    // as a single weight tensor. Multiple tensors are concatenated sequentially.
-    let header_size = 64.min(bytes.len());
-    let payload_len = bytes.len() - header_size;
-    let num_floats = payload_len / 4;
-
-    if num_floats == 0 {
-        return Vec::new();
-    }
-
-    // Split payload into named segments based on bundle size heuristic
-    let segment_size = num_floats / 3; // assume ~3 tensors
-    let remainder = num_floats - segment_size * 2;
-
-    let mut entries = Vec::new();
-    if segment_size > 0 {
-        entries.push(("weight.0".to_string(), header_size, segment_size));
-        entries.push((
-            "weight.1".to_string(),
-            header_size + segment_size * 4,
-            segment_size,
-        ));
-        entries.push((
-            "weight.2".to_string(),
-            header_size + segment_size * 2 * 4,
-            remainder,
-        ));
-    } else {
-        entries.push(("weight".to_string(), header_size, num_floats));
-    }
-    entries
-}
-
-fn diff_models(a: &[u8], b: &[u8]) -> DiffResult {
-    let entries_a = get_tensor_entries(a);
-    let entries_b = get_tensor_entries(b);
-
+fn diff_weights(a: &ModelWeights, b: &ModelWeights) -> DiffResult {
     let mut structural_changes = Vec::new();
     let mut weight_diffs = Vec::new();
 
-    // Build name sets
-    let names_a: Vec<&str> = entries_a.iter().map(|(n, _, _)| n.as_str()).collect();
-    let names_b: Vec<&str> = entries_b.iter().map(|(n, _, _)| n.as_str()).collect();
+    let names_a: Vec<&str> = a.iter().map(|(n, _)| n.as_str()).collect();
+    let names_b: Vec<&str> = b.iter().map(|(n, _)| n.as_str()).collect();
 
-    // Check for removed tensors
     for name in &names_a {
         if !names_b.contains(name) {
             structural_changes.push(StructuralChange {
@@ -180,7 +142,6 @@ fn diff_models(a: &[u8], b: &[u8]) -> DiffResult {
         }
     }
 
-    // Check for added tensors
     for name in &names_b {
         if !names_a.contains(name) {
             structural_changes.push(StructuralChange {
@@ -191,26 +152,22 @@ fn diff_models(a: &[u8], b: &[u8]) -> DiffResult {
         }
     }
 
-    // Compare common tensors
-    for (name_a, offset_a, count_a) in &entries_a {
-        if let Some((_, offset_b, count_b)) = entries_b.iter().find(|(n, _, _)| n == name_a) {
-            if count_a == count_b {
+    for (name_a, floats_a) in a {
+        if let Some((_, floats_b)) = b.iter().find(|(n, _)| n == name_a) {
+            if floats_a.len() == floats_b.len() {
                 structural_changes.push(StructuralChange {
                     kind: ChangeKind::Unchanged,
                     tensor_name: name_a.clone(),
-                    detail: format!("{count_a} params"),
+                    detail: format!("{} params", floats_a.len()),
                 });
             } else {
                 structural_changes.push(StructuralChange {
                     kind: ChangeKind::ShapeChanged,
                     tensor_name: name_a.clone(),
-                    detail: format!("{count_a} params -> {count_b} params"),
+                    detail: format!("{} params -> {} params", floats_a.len(), floats_b.len()),
                 });
             }
 
-            // Weight comparison
-            let floats_a = extract_float_payload(a, *offset_a);
-            let floats_b = extract_float_payload(b, *offset_b);
             let n = floats_a.len().min(floats_b.len());
             if n > 0 {
                 let fa = &floats_a[..n];
@@ -252,14 +209,15 @@ fn main() -> Result<()> {
     let base_w2 = generate_model_payload(seed_base + 1, dim * 32);
     let base_w3 = generate_model_payload(seed_base + 2, 32);
 
+    // Build APR v2 bundles for file I/O demonstration
     let bundle_a = ModelBundleV2::new()
         .with_name("base-model")
         .with_description("Base model before fine-tuning")
         .with_compression(Compression::Lz4)
         .with_quantization(Quantization::FP32)
-        .add_tensor("encoder.weight", vec![dim, dim], base_w1)
-        .add_tensor("decoder.weight", vec![dim, 32], base_w2)
-        .add_tensor("decoder.bias", vec![32], base_w3)
+        .add_tensor("encoder.weight", vec![dim, dim], base_w1.clone())
+        .add_tensor("decoder.weight", vec![dim, 32], base_w2.clone())
+        .add_tensor("decoder.bias", vec![32], base_w3.clone())
         .build();
 
     // Fine-tuned model: same structure, slightly different weights
@@ -272,9 +230,9 @@ fn main() -> Result<()> {
         .with_description("Model after LoRA fine-tuning")
         .with_compression(Compression::Lz4)
         .with_quantization(Quantization::FP32)
-        .add_tensor("encoder.weight", vec![dim, dim], ft_w1)
-        .add_tensor("decoder.weight", vec![dim, 32], ft_w2)
-        .add_tensor("decoder.bias", vec![32], ft_w3)
+        .add_tensor("encoder.weight", vec![dim, dim], ft_w1.clone())
+        .add_tensor("decoder.weight", vec![dim, 32], ft_w2.clone())
+        .add_tensor("decoder.bias", vec![32], ft_w3.clone())
         .build();
 
     std::fs::write(ctx.path("base-model.apr"), &bundle_a)?;
@@ -282,9 +240,21 @@ fn main() -> Result<()> {
     println!("Base model:       {} bytes", bundle_a.len());
     println!("Fine-tuned model: {} bytes\n", bundle_b.len());
 
+    // Build weight maps from raw data (not compressed bundles) for accurate diff
+    let weights_a: ModelWeights = vec![
+        ("encoder.weight".into(), bytes_to_floats(&base_w1)),
+        ("decoder.weight".into(), bytes_to_floats(&base_w2)),
+        ("decoder.bias".into(), bytes_to_floats(&base_w3)),
+    ];
+    let weights_b: ModelWeights = vec![
+        ("encoder.weight".into(), bytes_to_floats(&ft_w1)),
+        ("decoder.weight".into(), bytes_to_floats(&ft_w2)),
+        ("decoder.bias".into(), bytes_to_floats(&ft_w3)),
+    ];
+
     // --- Section 2: Structural comparison ---
     println!("--- Structural Comparison ---");
-    let diff = diff_models(&bundle_a, &bundle_b);
+    let diff = diff_weights(&weights_a, &weights_b);
 
     println!("\n{:<20} {:<15} Detail", "Tensor", "Status");
     println!("{}", "-".repeat(60));
@@ -346,7 +316,7 @@ fn main() -> Result<()> {
 
     // --- Section 5: Identical model diff ---
     println!("\n--- Self-Diff (identical models) ---");
-    let self_diff = diff_models(&bundle_a, &bundle_a);
+    let self_diff = diff_weights(&weights_a, &weights_a);
     for wd in &self_diff.weight_diffs {
         println!(
             "  {}: L2={:.6}, cosine={:.6}",
@@ -375,21 +345,15 @@ fn main() -> Result<()> {
 mod tests {
     use super::*;
 
-    fn make_bundle(name: &str, seed: u64, dim: usize) -> Vec<u8> {
+    fn make_weights(seed: u64, dim: usize) -> ModelWeights {
         let payload = generate_model_payload(seed, dim * dim);
-        ModelBundleV2::new()
-            .with_name(name)
-            .with_description("test")
-            .with_compression(Compression::Lz4)
-            .with_quantization(Quantization::FP32)
-            .add_tensor("weight", vec![dim, dim], payload)
-            .build()
+        vec![("weight".into(), bytes_to_floats(&payload))]
     }
 
     #[test]
     fn test_identical_models_zero_diff() {
-        let bundle = make_bundle("same", 42, 16);
-        let diff = diff_models(&bundle, &bundle);
+        let weights = make_weights(42, 16);
+        let diff = diff_weights(&weights, &weights);
         for wd in &diff.weight_diffs {
             assert!(wd.l2_distance < 1e-10);
             assert!(wd.max_abs_diff < 1e-10);
@@ -399,8 +363,8 @@ mod tests {
 
     #[test]
     fn test_identical_models_cosine_one() {
-        let bundle = make_bundle("cos", 42, 16);
-        let diff = diff_models(&bundle, &bundle);
+        let weights = make_weights(42, 16);
+        let diff = diff_weights(&weights, &weights);
         for wd in &diff.weight_diffs {
             assert!((wd.cosine_similarity - 1.0).abs() < 1e-6);
         }
@@ -408,9 +372,9 @@ mod tests {
 
     #[test]
     fn test_different_models_nonzero_diff() {
-        let a = make_bundle("a", 42, 16);
-        let b = make_bundle("b", 99, 16);
-        let diff = diff_models(&a, &b);
+        let a = make_weights(42, 16);
+        let b = make_weights(99, 16);
+        let diff = diff_weights(&a, &b);
         let has_nonzero = diff.weight_diffs.iter().any(|d| d.l2_distance > 1e-6);
         assert!(has_nonzero, "Different models should have non-zero diff");
     }
@@ -472,9 +436,9 @@ mod tests {
 
     #[test]
     fn test_structural_unchanged() {
-        let a = make_bundle("s", 42, 16);
-        let b = make_bundle("s", 99, 16);
-        let diff = diff_models(&a, &b);
+        let a = make_weights(42, 16);
+        let b = make_weights(99, 16);
+        let diff = diff_weights(&a, &b);
         let has_unchanged = diff
             .structural_changes
             .iter()
