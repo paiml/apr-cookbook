@@ -186,6 +186,70 @@
 - [Rate Limiter](./recipes/q-serving/rate-limiter.md)
 - [Selection Router](./recipes/q-serving/selection-router.md)
 
+# Category R: Model Optimization
+
+- [Overview](./recipes/r-optimize/index.md)
+- [Full Pipeline](./recipes/r-optimize/full-pipeline.md)
+- [LoRA Fine-tuning](./recipes/r-optimize/finetune-lora.md)
+- [QLoRA Fine-tuning](./recipes/r-optimize/finetune-qlora.md)
+- [Adapter Merge](./recipes/r-optimize/finetune-merge-adapter.md)
+- [VRAM Planning](./recipes/r-optimize/finetune-plan-vram.md)
+- [Magnitude Pruning](./recipes/r-optimize/prune-magnitude.md)
+- [Structured Pruning](./recipes/r-optimize/prune-structured.md)
+- [Depth Pruning](./recipes/r-optimize/prune-depth.md)
+- [Wanda Pruning](./recipes/r-optimize/prune-wanda.md)
+- [Gradual Schedule](./recipes/r-optimize/prune-gradual-schedule.md)
+- [Standard KL Distillation](./recipes/r-optimize/distill-standard-kl.md)
+- [Progressive Distillation](./recipes/r-optimize/distill-progressive.md)
+- [Ensemble Distillation](./recipes/r-optimize/distill-ensemble.md)
+- [Distillation Checkpoint](./recipes/r-optimize/distill-checkpoint.md)
+- [Average Merge](./recipes/r-optimize/merge-average.md)
+- [Weighted Merge](./recipes/r-optimize/merge-weighted.md)
+- [SLERP Merge](./recipes/r-optimize/merge-slerp.md)
+- [TIES Merge](./recipes/r-optimize/merge-ties.md)
+- [DARE Merge](./recipes/r-optimize/merge-dare.md)
+- [Hierarchical Merge](./recipes/r-optimize/merge-hierarchical.md)
+- [Int4 Quantization](./recipes/r-optimize/quantize-4bit.md)
+- [Fake QAT](./recipes/r-optimize/quantize-fake-qat.md)
+
+# Category S: Chat Templates
+
+- [Overview](./recipes/s-chat/index.md)
+- [ChatML Format](./recipes/s-chat/chatml.md)
+- [LLaMA 2 Format](./recipes/s-chat/llama2.md)
+- [Mistral Format](./recipes/s-chat/mistral.md)
+- [Multi-Format Detection](./recipes/s-chat/multi-format.md)
+- [Injection Defense](./recipes/s-chat/injection-defense.md)
+
+# Category T: Model Analysis
+
+- [Overview](./recipes/t-analysis/index.md)
+- [Inspect](./recipes/t-analysis/inspect.md)
+- [Validate](./recipes/t-analysis/validate.md)
+- [Diff](./recipes/t-analysis/diff.md)
+- [Bench](./recipes/t-analysis/bench.md)
+- [Profile](./recipes/t-analysis/profile.md)
+- [QA Gates](./recipes/t-analysis/qa-gates.md)
+- [Oracle](./recipes/t-analysis/oracle.md)
+- [Canary](./recipes/t-analysis/canary.md)
+- [Tree](./recipes/t-analysis/tree.md)
+- [Hex](./recipes/t-analysis/hex.md)
+- [Explain](./recipes/t-analysis/explain.md)
+
+# Category U: Format Operations
+
+- [Overview](./recipes/u-format/index.md)
+- [Import from HuggingFace](./recipes/u-format/import-hf.md)
+- [Export SafeTensors](./recipes/u-format/export-safetensors.md)
+- [Export GGUF](./recipes/u-format/export-gguf.md)
+- [Rosetta Convert](./recipes/u-format/rosetta-convert.md)
+- [Rosetta Chain](./recipes/u-format/rosetta-chain.md)
+- [Rosetta Verify](./recipes/u-format/rosetta-verify.md)
+- [Convert + Quantize](./recipes/u-format/convert-quantize.md)
+- [Publish](./recipes/u-format/publish.md)
+- [Pull + Cache](./recipes/u-format/pull-cache.md)
+- [Batch Export](./recipes/u-format/batch-export.md)
+
 ---
 
 # Reference
