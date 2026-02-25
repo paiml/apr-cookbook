@@ -37,12 +37,36 @@ fn main() -> Result<()> {
     println!("WASM model loading pipeline simulation");
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 1: Define WASM memory constraints and model metadata
-    // ---------------------------------------------------------------
+    let (mut budget, model_meta) = section_memory_constraints(&mut ctx);
+
+    let chunk_size = 64 * 1024; // 64 KB chunks (typical fetch API)
+    let (mut loader, chunks) = section_chunked_download(&model_meta, chunk_size, &mut ctx)?;
+
+    let parsed = section_header_parsing(&chunks, &model_meta, &mut loader)?;
+
+    let loaded_tensors =
+        section_budgeted_tensor_loading(&parsed, &mut budget, &mut loader, &mut ctx);
+
+    let final_loaded_count =
+        section_lazy_materialization(&parsed, &loaded_tensors, &mut budget, &mut ctx);
+
+    section_performance_summary(&loader, &budget, chunk_size, final_loaded_count, &mut ctx);
+
+    println!();
+    println!("=== Recipe complete ===");
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Section helpers — one per logical block of main()
+// ---------------------------------------------------------------------------
+
+/// Section 1: Define WASM memory constraints and model metadata.
+fn section_memory_constraints(ctx: &mut RecipeContext) -> (WasmMemoryBudget, ModelMetadataInfo) {
     println!("--- Section 1: WASM Memory Constraints & Model Metadata ---");
 
-    let mut budget = WasmMemoryBudget::new(4 * 1024 * 1024); // 4 MB heap
+    let budget = WasmMemoryBudget::new(4 * 1024 * 1024); // 4 MB heap
     let model_meta = ModelMetadataInfo {
         name: "tiny-classifier".to_string(),
         version: 1,
@@ -62,13 +86,18 @@ fn main() -> Result<()> {
     ctx.record_metric("tensor_count", model_meta.tensor_count as i64);
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 2: Chunked streaming download simulation
-    // ---------------------------------------------------------------
+    (budget, model_meta)
+}
+
+/// Section 2: Chunked streaming download simulation.
+fn section_chunked_download(
+    model_meta: &ModelMetadataInfo,
+    chunk_size: usize,
+    ctx: &mut RecipeContext,
+) -> Result<(StreamingLoader, Vec<ModelChunk>)> {
     println!("--- Section 2: Chunked Streaming Download ---");
 
-    let chunk_size = 64 * 1024; // 64 KB chunks (typical fetch API)
-    let chunks = generate_chunks(&model_meta, chunk_size);
+    let chunks = generate_chunks(model_meta, chunk_size);
 
     println!("  Chunk size: {} bytes", chunk_size);
     println!("  Total chunks: {}", chunks.len());
@@ -111,13 +140,19 @@ fn main() -> Result<()> {
     println!("  Download complete: {}%", loader.progress_pct);
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 3: Progressive header parsing
-    // ---------------------------------------------------------------
+    Ok((loader, chunks))
+}
+
+/// Section 3: Progressive header parsing.
+fn section_header_parsing(
+    chunks: &[ModelChunk],
+    model_meta: &ModelMetadataInfo,
+    loader: &mut StreamingLoader,
+) -> Result<ParsedHeader> {
     println!("--- Section 3: Progressive Header Parsing ---");
 
-    let header_data = extract_header_bytes(&chunks, model_meta.header_size);
-    let parsed = parse_header(&header_data, &model_meta)?;
+    let header_data = extract_header_bytes(chunks, model_meta.header_size);
+    let parsed = parse_header(&header_data, model_meta)?;
     loader.header_parsed = true;
 
     println!("  Header magic: 0x{:08X}", parsed.magic);
@@ -135,9 +170,16 @@ fn main() -> Result<()> {
     println!("  Header checksum valid: {valid}");
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 4: Memory-budgeted tensor loading
-    // ---------------------------------------------------------------
+    Ok(parsed)
+}
+
+/// Section 4: Memory-budgeted tensor loading.
+fn section_budgeted_tensor_loading(
+    parsed: &ParsedHeader,
+    budget: &mut WasmMemoryBudget,
+    loader: &mut StreamingLoader,
+    ctx: &mut RecipeContext,
+) -> Vec<String> {
     println!("--- Section 4: Memory-Budgeted Tensor Loading ---");
 
     let mut loaded_tensors: Vec<String> = Vec::new();
@@ -164,9 +206,16 @@ fn main() -> Result<()> {
     ctx.record_metric("memory_used_bytes", budget.used_bytes as i64);
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 5: Lazy tensor materialization
-    // ---------------------------------------------------------------
+    loaded_tensors
+}
+
+/// Section 5: Lazy tensor materialization.
+fn section_lazy_materialization(
+    parsed: &ParsedHeader,
+    loaded_tensors: &[String],
+    budget: &mut WasmMemoryBudget,
+    ctx: &mut RecipeContext,
+) -> usize {
     println!("--- Section 5: Lazy Tensor Materialization ---");
 
     let mut tensor_refs: Vec<TensorRef> = parsed
@@ -192,7 +241,7 @@ fn main() -> Result<()> {
     // Simulate on-demand materialization: free one tensor, load a deferred one
     let freed_name = if let Some(first_loaded) = loaded_tensors.first() {
         let freed = first_loaded.clone();
-        if let Some(tref) = tensor_refs.iter().find(|t| t.name == freed) {
+        if let Some(tref) = tensor_refs.iter().find(|t| t.name == *freed) {
             budget.free(tref.size);
             println!(
                 "  Freed '{}': {} bytes returned to budget",
@@ -222,22 +271,31 @@ fn main() -> Result<()> {
 
     // Mark the freed tensor as no longer loaded
     if let Some(freed_name) = freed_name {
-        if let Some(tref) = tensor_refs.iter_mut().find(|t| t.name == freed_name) {
+        if let Some(tref) = tensor_refs.iter_mut().find(|t| t.name == *freed_name) {
             tref.loaded = false;
         }
     }
 
     let final_loaded: Vec<_> = tensor_refs.iter().filter(|t| t.loaded).collect();
-    ctx.record_metric("final_tensors_loaded", final_loaded.len() as i64);
-    println!("  Final loaded tensors: {}", final_loaded.len());
+    let final_count = final_loaded.len();
+    ctx.record_metric("final_tensors_loaded", final_count as i64);
+    println!("  Final loaded tensors: {}", final_count);
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 6: Loading performance summary
-    // ---------------------------------------------------------------
+    final_count
+}
+
+/// Section 6: Loading performance summary.
+fn section_performance_summary(
+    loader: &StreamingLoader,
+    budget: &WasmMemoryBudget,
+    chunk_size: usize,
+    _final_loaded_count: usize,
+    ctx: &mut RecipeContext,
+) {
     println!("--- Section 6: Loading Performance Summary ---");
 
-    let stats = LoadingStats::compute(&loader, chunk_size);
+    let stats = LoadingStats::compute(loader, chunk_size);
 
     println!("  Total bytes: {}", stats.total_bytes);
     println!("  Chunks received: {}", stats.chunks_received);
@@ -250,11 +308,6 @@ fn main() -> Result<()> {
 
     ctx.record_metric("total_bytes", stats.total_bytes as i64);
     ctx.record_float_metric("throughput_mbps", stats.throughput_mbps);
-
-    println!();
-    println!("=== Recipe complete ===");
-
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------

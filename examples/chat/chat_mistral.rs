@@ -57,6 +57,66 @@ const EOS: &str = "</s>";
 const INST_START: &str = "[INST]";
 const INST_END: &str = "[/INST]";
 
+/// Extract the leading system message (if any) and return the remaining
+/// conversation messages.  Mistral has no native `<<SYS>>` block, so the
+/// system content is later prepended to the first user turn.
+fn extract_system_prefix(messages: &[ChatMessage]) -> (String, Vec<&ChatMessage>) {
+    let mut system_prefix = String::new();
+    let mut conversation: Vec<&ChatMessage> = Vec::new();
+
+    for msg in messages {
+        if msg.role == "system" && conversation.is_empty() && system_prefix.is_empty() {
+            system_prefix = msg.content.clone();
+        } else {
+            conversation.push(msg);
+        }
+    }
+
+    (system_prefix, conversation)
+}
+
+/// Format a single `[INST] ... [/INST]` user turn, optionally prepending a
+/// system prefix.  Returns the number of messages consumed (1 if user-only,
+/// 2 if followed by an assistant response).
+fn format_turn(
+    output: &mut String,
+    conversation: &[&ChatMessage],
+    index: usize,
+    system_prefix: &str,
+    add_generation_prompt: bool,
+) -> usize {
+    let msg = &conversation[index];
+
+    output.push_str(INST_START);
+    output.push(' ');
+
+    // Prepend system instructions to the very first user message
+    if index == 0 && !system_prefix.is_empty() {
+        output.push_str(system_prefix);
+        output.push_str("\n\n");
+    }
+
+    output.push_str(&msg.content);
+    output.push(' ');
+    output.push_str(INST_END);
+
+    // Pair with the following assistant response when present
+    let next_is_assistant =
+        index + 1 < conversation.len() && conversation[index + 1].role == "assistant";
+
+    if next_is_assistant {
+        output.push(' ');
+        output.push_str(&conversation[index + 1].content);
+        output.push_str(EOS);
+        2
+    } else {
+        if add_generation_prompt {
+            output.push(' ');
+        }
+        1
+    }
+}
+
 /// Format a sequence of chat messages in Mistral Instruct format.
 ///
 /// Key differences from LLaMA 2:
@@ -69,52 +129,21 @@ fn format_mistral(messages: &[ChatMessage], add_generation_prompt: bool) -> Stri
         return String::new();
     }
 
+    let (system_prefix, conversation) = extract_system_prefix(messages);
+
     let mut output = String::new();
-    let mut system_prefix = String::new();
-    let mut conversation: Vec<&ChatMessage> = Vec::new();
-
-    // Extract system messages and prepend to first user message
-    for msg in messages {
-        if msg.role == "system" && conversation.is_empty() && system_prefix.is_empty() {
-            system_prefix = msg.content.clone();
-        } else {
-            conversation.push(msg);
-        }
-    }
-
-    // BOS token at the start
     output.push_str(BOS);
 
     let mut i = 0;
     while i < conversation.len() {
-        let msg = &conversation[i];
-
-        if msg.role == "user" {
-            output.push_str(INST_START);
-            output.push(' ');
-
-            // Prepend system instructions to first user message
-            if i == 0 && !system_prefix.is_empty() {
-                output.push_str(&system_prefix);
-                output.push_str("\n\n");
-            }
-
-            output.push_str(&msg.content);
-            output.push(' ');
-            output.push_str(INST_END);
-
-            // Check for following assistant message
-            if i + 1 < conversation.len() && conversation[i + 1].role == "assistant" {
-                output.push(' ');
-                output.push_str(&conversation[i + 1].content);
-                output.push_str(EOS);
-                i += 2;
-            } else {
-                if add_generation_prompt {
-                    output.push(' ');
-                }
-                i += 1;
-            }
+        if conversation[i].role == "user" {
+            i += format_turn(
+                &mut output,
+                &conversation,
+                i,
+                &system_prefix,
+                add_generation_prompt,
+            );
         } else {
             i += 1;
         }
