@@ -743,13 +743,8 @@ impl SimpleRng {
 // Main
 // ============================================================================
 
-fn main() {
-    println!("=== Demo N: Streaming Sentiment Analysis ===\n");
-
-    let mut analyzer = StreamingAnalyzer::new().with_batch_size(8);
-    let mut generator = TextGenerator::new(42);
-    let mut window = TimeWindow::new(20);
-
+/// Run single-text sentiment analysis on a set of example texts.
+fn run_single_analysis(analyzer: &StreamingAnalyzer) {
     println!("--- Single Analysis ---");
     let examples = [
         "This movie is absolutely amazing and wonderful!",
@@ -768,26 +763,37 @@ fn main() {
             text
         );
     }
+}
 
+/// Stream texts through the batch analyzer and collect results into the time window.
+fn process_streaming_batches(
+    analyzer: &mut StreamingAnalyzer,
+    texts: &[String],
+    window: &mut TimeWindow,
+) {
     println!("\n--- Streaming Batch Processing ---");
-    let batch_texts = generator.generate_batch(50, 0.0);
 
-    for text in &batch_texts {
+    for text in texts {
         if let Some(results) = analyzer.submit(text) {
             println!("Processed batch of {} items", results.len());
-            for result in results {
-                window.add(result);
-            }
+            add_results_to_window(window, results);
         }
     }
 
-    // Flush remaining
     let remaining = analyzer.flush();
     println!("Flushed remaining {} items", remaining.len());
-    for result in remaining {
+    add_results_to_window(window, remaining);
+}
+
+/// Add a batch of sentiment results into the sliding time window.
+fn add_results_to_window(window: &mut TimeWindow, results: Vec<SentimentResult>) {
+    for result in results {
         window.add(result);
     }
+}
 
+/// Print the aggregated window statistics.
+fn print_window_aggregate(window: &TimeWindow) {
     println!("\n--- Window Aggregate ---");
     let agg = window.aggregate();
     println!("Items in window: {}", agg.count);
@@ -796,14 +802,32 @@ fn main() {
     if let Some(dominant) = agg.dominant_sentiment {
         println!("Dominant sentiment: {} {:?}", dominant.emoji(), dominant);
     }
+}
 
+/// Print throughput and latency statistics.
+fn print_statistics(stats: &StreamStats) {
     println!("\n--- Statistics ---");
-    let stats = analyzer.stats();
     println!("Total submitted: {}", stats.total_submitted);
     println!("Total processed: {}", stats.total_processed);
     println!("Batches: {}", stats.batches_processed);
     println!("Avg batch latency: {:.1} µs", stats.avg_batch_latency_us());
     println!("Throughput: {:.0} items/sec", stats.throughput());
+}
+
+fn main() {
+    println!("=== Demo N: Streaming Sentiment Analysis ===\n");
+
+    let mut analyzer = StreamingAnalyzer::new().with_batch_size(8);
+    let mut generator = TextGenerator::new(42);
+    let mut window = TimeWindow::new(20);
+
+    run_single_analysis(&analyzer);
+
+    let batch_texts = generator.generate_batch(50, 0.0);
+    process_streaming_batches(&mut analyzer, &batch_texts, &mut window);
+
+    print_window_aggregate(&window);
+    print_statistics(analyzer.stats());
 
     println!("\n=== Demo N Complete ===");
 }

@@ -162,6 +162,58 @@ pub struct AttentionResult {
     pub memory_bytes: usize,
 }
 
+/// Compute dot product between row `a_row` of `a` and row `b_row` of `b`,
+/// each with stride `d_head`.
+fn dot_product(a: &[f32], a_row: usize, b: &[f32], b_row: usize, d_head: usize) -> f32 {
+    let a_off = a_row * d_head;
+    let b_off = b_row * d_head;
+    (0..d_head).map(|d| a[a_off + d] * b[b_off + d]).sum()
+}
+
+/// Compute softmax-normalised attention scores for a single query row.
+fn softmax_scores(
+    q: &[f32],
+    k: &[f32],
+    row: usize,
+    seq_len: usize,
+    d_head: usize,
+    scale: f32,
+) -> Vec<f32> {
+    let mut scores: Vec<f32> = (0..seq_len)
+        .map(|j| dot_product(q, row, k, j, d_head) * scale)
+        .collect();
+
+    let max_score = scores.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+
+    let mut sum = 0.0f32;
+    for s in &mut scores {
+        *s = (*s - max_score).exp();
+        sum += *s;
+    }
+    for s in &mut scores {
+        *s /= sum;
+    }
+    scores
+}
+
+/// Accumulate weighted values into `output` for a single query row.
+fn accumulate_weighted_values(
+    output: &mut [f32],
+    scores: &[f32],
+    v: &[f32],
+    row: usize,
+    seq_len: usize,
+    d_head: usize,
+) {
+    let out_off = row * d_head;
+    for (j, &w) in scores.iter().enumerate().take(seq_len) {
+        let v_off = j * d_head;
+        for d in 0..d_head {
+            output[out_off + d] += w * v[v_off + d];
+        }
+    }
+}
+
 /// Standard (naive) attention computation
 fn naive_attention(q: &[f32], k: &[f32], v: &[f32], config: &AttentionConfig) -> Vec<f32> {
     let seq_len = config.seq_len;
@@ -170,40 +222,73 @@ fn naive_attention(q: &[f32], k: &[f32], v: &[f32], config: &AttentionConfig) ->
 
     let mut output = vec![0.0f32; seq_len * d_head];
 
-    // For each query position
     for i in 0..seq_len {
-        // Compute attention scores
-        let mut scores = vec![0.0f32; seq_len];
-        let mut max_score = f32::NEG_INFINITY;
-
-        for j in 0..seq_len {
-            let mut dot = 0.0f32;
-            for d in 0..d_head {
-                dot += q[i * d_head + d] * k[j * d_head + d];
-            }
-            scores[j] = dot * scale;
-            max_score = max_score.max(scores[j]);
-        }
-
-        // Softmax
-        let mut sum = 0.0f32;
-        for score in &mut scores {
-            *score = (*score - max_score).exp();
-            sum += *score;
-        }
-        for score in &mut scores {
-            *score /= sum;
-        }
-
-        // Weighted sum of values
-        for j in 0..seq_len {
-            for d in 0..d_head {
-                output[i * d_head + d] += scores[j] * v[j * d_head + d];
-            }
-        }
+        let scores = softmax_scores(q, k, i, seq_len, d_head, scale);
+        accumulate_weighted_values(&mut output, &scores, v, i, seq_len, d_head);
     }
 
     output
+}
+
+/// Process one row of query `i` against key/value tile `j_start..j_end`,
+/// updating `output`, `row_max`, and `row_sum` with online softmax.
+#[allow(clippy::too_many_arguments)]
+fn flash_tile_row(
+    q: &[f32],
+    k: &[f32],
+    v: &[f32],
+    output: &mut [f32],
+    row_max: &mut f32,
+    row_sum: &mut f32,
+    i: usize,
+    j_start: usize,
+    j_end: usize,
+    d_head: usize,
+    scale: f32,
+) {
+    let old_max = *row_max;
+    let old_sum = *row_sum;
+
+    // Compute scores for this tile
+    let mut tile_scores: Vec<f32> = (j_start..j_end)
+        .map(|j| dot_product(q, i, k, j, d_head) * scale)
+        .collect();
+    let tile_max = tile_scores
+        .iter()
+        .copied()
+        .fold(f32::NEG_INFINITY, f32::max);
+
+    // Online softmax update
+    let new_max = old_max.max(tile_max);
+    let old_rescale = (old_max - new_max).exp();
+    let tile_rescale = (tile_max - new_max).exp();
+
+    let mut tile_sum = 0.0f32;
+    for score in &mut tile_scores {
+        *score = (*score - tile_max).exp() * tile_rescale;
+        tile_sum += *score;
+    }
+
+    let new_sum = old_sum * old_rescale + tile_sum;
+
+    // Rescale existing output
+    let out_off = i * d_head;
+    let rescale = old_sum * old_rescale / new_sum;
+    for d in 0..d_head {
+        output[out_off + d] *= rescale;
+    }
+
+    // Add contribution from this tile
+    for (tj, j) in (j_start..j_end).enumerate() {
+        let weight = tile_scores[tj] / new_sum;
+        let v_off = j * d_head;
+        for d in 0..d_head {
+            output[out_off + d] += weight * v[v_off + d];
+        }
+    }
+
+    *row_max = new_max;
+    *row_sum = new_sum;
 }
 
 /// FlashAttention-style tiled attention (memory efficient)
@@ -227,53 +312,20 @@ fn flash_attention(q: &[f32], k: &[f32], v: &[f32], config: &AttentionConfig) ->
             let i_start = block_i * BLOCK_SIZE;
             let i_end = (i_start + BLOCK_SIZE).min(seq_len);
 
-            // Compute attention for this tile
             for i in i_start..i_end {
-                let old_max = row_max[i];
-                let old_sum = row_sum[i];
-
-                // Compute scores for this tile
-                let mut tile_scores = vec![0.0f32; j_end - j_start];
-                let mut tile_max = f32::NEG_INFINITY;
-
-                for (tj, j) in (j_start..j_end).enumerate() {
-                    let mut dot = 0.0f32;
-                    for d in 0..d_head {
-                        dot += q[i * d_head + d] * k[j * d_head + d];
-                    }
-                    tile_scores[tj] = dot * scale;
-                    tile_max = tile_max.max(tile_scores[tj]);
-                }
-
-                // Online softmax update
-                let new_max = old_max.max(tile_max);
-                let old_scale = (old_max - new_max).exp();
-                let tile_scale = (tile_max - new_max).exp();
-
-                // Update running sum
-                let mut tile_sum = 0.0f32;
-                for score in &mut tile_scores {
-                    *score = (*score - tile_max).exp() * tile_scale;
-                    tile_sum += *score;
-                }
-
-                let new_sum = old_sum * old_scale + tile_sum;
-
-                // Update output with rescaling
-                for d in 0..d_head {
-                    output[i * d_head + d] *= old_sum * old_scale / new_sum;
-                }
-
-                // Add contribution from this tile
-                for (tj, j) in (j_start..j_end).enumerate() {
-                    let weight = tile_scores[tj] / new_sum;
-                    for d in 0..d_head {
-                        output[i * d_head + d] += weight * v[j * d_head + d];
-                    }
-                }
-
-                row_max[i] = new_max;
-                row_sum[i] = new_sum;
+                flash_tile_row(
+                    q,
+                    k,
+                    v,
+                    &mut output,
+                    &mut row_max[i],
+                    &mut row_sum[i],
+                    i,
+                    j_start,
+                    j_end,
+                    d_head,
+                    scale,
+                );
             }
         }
     }
