@@ -416,6 +416,14 @@ path = "examples/distillation/distill_layer_matching.rs"
 name = "distill_quantization_aware"
 path = "examples/distillation/distill_quantization_aware.rs"
 
+[[example]]
+name = "distill_attention_transfer"
+path = "examples/distillation/distill_attention_transfer.rs"
+
+[[example]]
+name = "distill_self_distillation"
+path = "examples/distillation/distill_self_distillation.rs"
+
 # Category L: CLI Tools (additional)
 [[example]]
 name = "cli_apr_info"
