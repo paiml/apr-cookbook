@@ -138,6 +138,22 @@ name = "simd_matrix_operations"
 path = "examples/acceleration/simd_matrix_operations.rs"
 
 [[example]]
+name = "acceleration_kernel_fusion"
+path = "examples/acceleration/acceleration_kernel_fusion.rs"
+
+[[example]]
+name = "acceleration_mmap_inference"
+path = "examples/acceleration/acceleration_mmap_inference.rs"
+
+[[example]]
+name = "acceleration_autotuner"
+path = "examples/acceleration/acceleration_autotuner.rs"
+
+[[example]]
+name = "acceleration_quantized_matmul"
+path = "examples/acceleration/acceleration_quantized_matmul.rs"
+
+[[example]]
 name = "apr_info"
 path = "examples/cli/apr_info.rs"
 
@@ -576,6 +592,18 @@ path = "examples/speech/whisper_transcribe.rs"
 name = "whisper_streaming"
 path = "examples/speech/whisper_streaming.rs"
 
+[[example]]
+name = "speech_vad"
+path = "examples/speech/speech_vad.rs"
+
+[[example]]
+name = "speech_diarization"
+path = "examples/speech/speech_diarization.rs"
+
+[[example]]
+name = "speech_multilingual"
+path = "examples/speech/speech_multilingual.rs"
+
 # --- Category P: Inference Patterns ---
 
 [[example]]
@@ -657,6 +685,18 @@ path = "examples/distributed/distributed_inference.rs"
 [[example]]
 name = "distributed_model_sharding"
 path = "examples/distributed/distributed_model_sharding.rs"
+
+[[example]]
+name = "distributed_pipeline_parallel"
+path = "examples/distributed/distributed_pipeline_parallel.rs"
+
+[[example]]
+name = "distributed_ring_allreduce"
+path = "examples/distributed/distributed_ring_allreduce.rs"
+
+[[example]]
+name = "distributed_gossip_protocol"
+path = "examples/distributed/distributed_gossip_protocol.rs"
 
 # --- Category: Optimize ---
 
