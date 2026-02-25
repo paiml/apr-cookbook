@@ -417,48 +417,13 @@ fn simulate_latency(variant: usize, rng: &mut DeterministicRng, degradation: f64
 // Main
 // ============================================================================
 
-fn main() {
-    println!("=== Latency Histogram & SLO Monitoring Example ===\n");
+// ============================================================================
+// Helper Functions (extracted from main for reduced cyclomatic complexity)
+// ============================================================================
 
-    let mut rng = DeterministicRng::new(42);
-
-    // =========================================================================
-    // 1. Histogram-Based Latency Tracking
-    // =========================================================================
-    println!("1. Histogram-Based Latency Tracking");
-    println!("   -----------------------------------------------");
-
-    let mut global_histogram = LatencyHistogram::new();
-
-    // Generate 1000 requests across all variants
-    let total_requests = 1000;
-    for i in 0..total_requests {
-        let variant = i % NUM_VARIANTS;
-        let latency = simulate_latency(variant, &mut rng, 0.0);
-        global_histogram.record(latency);
-    }
-
-    println!("   Total requests: {}", global_histogram.count());
-    println!("   Mean latency:   {}ms", global_histogram.mean_us() / 1000);
-    println!("   Min latency:    {}ms", global_histogram.min_us / 1000);
-    println!("   Max latency:    {}ms", global_histogram.max_us / 1000);
-    println!();
-
-    // Print percentiles
-    println!("   Percentiles:");
-    for &p in &PERCENTILES {
-        let val = global_histogram.percentile(p);
-        println!("     p{:>5}: {}ms", format_percentile(p), val / 1000);
-    }
-    println!();
-
-    // =========================================================================
-    // 2. SLO Compliance Monitoring
-    // =========================================================================
-    println!("2. SLO Compliance Monitoring");
-    println!("   -----------------------------------------------");
-
-    let slos = [
+/// Define the standard SLO thresholds used across all sections.
+fn define_slos() -> [Slo; 5] {
+    [
         Slo {
             percentile: 50.0,
             threshold_us: 15_000,
@@ -479,15 +444,56 @@ fn main() {
             percentile: 99.9,
             threshold_us: 150_000,
         },
-    ];
+    ]
+}
+
+/// Section 1: Histogram-Based Latency Tracking.
+///
+/// Generates 1000 requests across all variants and reports summary statistics
+/// and percentiles.
+fn run_histogram_tracking(rng: &mut DeterministicRng) -> LatencyHistogram {
+    println!("1. Histogram-Based Latency Tracking");
+    println!("   -----------------------------------------------");
+
+    let mut global_histogram = LatencyHistogram::new();
+
+    let total_requests = 1000;
+    for i in 0..total_requests {
+        let variant = i % NUM_VARIANTS;
+        let latency = simulate_latency(variant, rng, 0.0);
+        global_histogram.record(latency);
+    }
+
+    println!("   Total requests: {}", global_histogram.count());
+    println!("   Mean latency:   {}ms", global_histogram.mean_us() / 1000);
+    println!("   Min latency:    {}ms", global_histogram.min_us / 1000);
+    println!("   Max latency:    {}ms", global_histogram.max_us / 1000);
+    println!();
+
+    println!("   Percentiles:");
+    for &p in &PERCENTILES {
+        let val = global_histogram.percentile(p);
+        println!("     p{:>5}: {}ms", format_percentile(p), val / 1000);
+    }
+    println!();
+
+    global_histogram
+}
+
+/// Section 2: SLO Compliance Monitoring.
+///
+/// Checks the global histogram against defined SLOs and reports compliance.
+fn run_slo_compliance(histogram: &LatencyHistogram, slos: &[Slo]) {
+    println!("2. SLO Compliance Monitoring");
+    println!("   -----------------------------------------------");
 
     println!("   Defined SLOs:");
-    for slo in &slos {
+    for slo in slos {
         println!("     {slo}");
     }
     println!();
 
-    let results = global_histogram.check_slos(&slos);
+    let results = histogram.check_slos(slos);
     let pass_count = results.iter().filter(|r| r.passed).count();
     let total_slos = results.len();
 
@@ -503,23 +509,25 @@ fn main() {
         pass_count as f64 / total_slos as f64 * 100.0
     );
     println!();
+}
 
-    // =========================================================================
-    // 3. Rolling Window Percentiles Over Time
-    // =========================================================================
+/// Section 3: Rolling Window Percentiles Over Time.
+///
+/// Simulates gradual degradation across windows and reports per-window
+/// percentiles, SLO violations, and the overall p99 trend.
+fn run_rolling_windows(rng: &mut DeterministicRng, slos: &[Slo]) {
     println!("3. Rolling Window Percentiles Over Time");
     println!("   -----------------------------------------------");
 
     let mut window_tracker = RollingWindowTracker::new();
 
     for window_id in 0..NUM_WINDOWS {
-        // Simulate gradual degradation over windows
         let degradation = window_id as f64 * 0.3;
         let mut window_hist = LatencyHistogram::new();
 
         for i in 0..REQUESTS_PER_WINDOW {
             let variant = i % NUM_VARIANTS;
-            let latency = simulate_latency(variant, &mut rng, degradation);
+            let latency = simulate_latency(variant, rng, degradation);
             window_hist.record(latency);
         }
 
@@ -527,7 +535,7 @@ fn main() {
 
         let p50 = window_hist.percentile(50.0) / 1000;
         let p99 = window_hist.percentile(99.0) / 1000;
-        let slo_results = window_hist.check_slos(&slos);
+        let slo_results = window_hist.check_slos(slos);
         let violations = slo_results.iter().filter(|r| !r.passed).count();
 
         println!(
@@ -550,10 +558,13 @@ fn main() {
         trend_label
     );
     println!();
+}
 
-    // =========================================================================
-    // 4. Latency Breakdown by Model Variant
-    // =========================================================================
+/// Section 4: Latency Breakdown by Model Variant.
+///
+/// Generates per-variant data, prints individual and aggregate statistics,
+/// and returns the merged aggregate histogram.
+fn run_variant_breakdown(rng: &mut DeterministicRng) -> LatencyHistogram {
     println!("4. Latency Breakdown by Model Variant");
     println!("   -----------------------------------------------");
 
@@ -563,10 +574,9 @@ fn main() {
         LatencyHistogram::new(),
     ];
 
-    // Generate per-variant data
     for _ in 0..500 {
         for (v, hist) in variant_histograms.iter_mut().enumerate() {
-            let latency = simulate_latency(v, &mut rng, 0.0);
+            let latency = simulate_latency(v, rng, 0.0);
             hist.record(latency);
         }
     }
@@ -584,7 +594,6 @@ fn main() {
         );
     }
 
-    // Merge all variant histograms into aggregate
     let mut aggregate = LatencyHistogram::new();
     for hist in &variant_histograms {
         aggregate.merge(hist);
@@ -600,9 +609,13 @@ fn main() {
     );
     println!();
 
-    // =========================================================================
-    // 5. ASCII Histogram Visualization
-    // =========================================================================
+    aggregate
+}
+
+/// Section 5: ASCII Histogram Visualization.
+///
+/// Renders the aggregate histogram as an ASCII bar chart.
+fn run_ascii_visualization(aggregate: &LatencyHistogram) {
     println!("5. ASCII Histogram Visualization");
     println!("   -----------------------------------------------");
     println!(
@@ -612,14 +625,16 @@ fn main() {
     println!();
     print!("{}", aggregate.ascii_histogram());
     println!();
+}
 
-    // =========================================================================
-    // 6. SLO Violation Alerts
-    // =========================================================================
+/// Section 6: SLO Violation Alerts.
+///
+/// Re-simulates per-window data with a separate RNG seed and reports
+/// individual SLO violations and total violation count.
+fn run_slo_alerts(slos: &[Slo]) {
     println!("6. SLO Violation Alerts");
     println!("   -----------------------------------------------");
 
-    // Check each window for violations and generate alerts
     let mut total_violations = 0_usize;
     let mut rng_alerts = DeterministicRng::new(99);
 
@@ -633,7 +648,7 @@ fn main() {
             window_hist.record(latency);
         }
 
-        let slo_results = window_hist.check_slos(&slos);
+        let slo_results = window_hist.check_slos(slos);
         let violations: Vec<&SloCheckResult> = slo_results.iter().filter(|r| !r.passed).collect();
 
         if violations.is_empty() {
@@ -654,6 +669,20 @@ fn main() {
     } else {
         println!("   All windows within SLO bounds");
     }
+}
+
+fn main() {
+    println!("=== Latency Histogram & SLO Monitoring Example ===\n");
+
+    let mut rng = DeterministicRng::new(42);
+    let slos = define_slos();
+
+    let global_histogram = run_histogram_tracking(&mut rng);
+    run_slo_compliance(&global_histogram, &slos);
+    run_rolling_windows(&mut rng, &slos);
+    let aggregate = run_variant_breakdown(&mut rng);
+    run_ascii_visualization(&aggregate);
+    run_slo_alerts(&slos);
 
     println!("\n=== Example Complete ===");
 }
