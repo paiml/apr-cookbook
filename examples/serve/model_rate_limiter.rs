@@ -392,15 +392,10 @@ fn simulated_latency_us(seed: u64, request_id: usize) -> u64 {
 }
 
 // ---------------------------------------------------------------------------
-// main
+// Demo helper functions (extracted from main to reduce cyclomatic complexity)
 // ---------------------------------------------------------------------------
 
-fn main() {
-    println!("=== Model Rate Limiter Example ===\n");
-
-    let seed = 42_u64;
-
-    // =========================================================================
+fn demo_token_bucket() {
     println!("1. Token Bucket Rate Limiter");
     println!("   ─────────────────────────────────────────");
 
@@ -437,8 +432,9 @@ fn main() {
         bucket.available()
     );
     println!();
+}
 
-    // =========================================================================
+fn demo_sliding_window() {
     println!("2. Sliding Window Rate Limiter");
     println!("   ─────────────────────────────────────────");
 
@@ -453,8 +449,8 @@ fn main() {
     );
 
     // Fill the window
-    accepted = 0;
-    rejected = 0;
+    let mut accepted = 0_u64;
+    let mut rejected = 0_u64;
     for _ in 0..70 {
         if window.try_acquire(clock.now_ms()) {
             accepted += 1;
@@ -486,8 +482,9 @@ fn main() {
     }
     println!("   30 more requests: {} accepted", accepted);
     println!();
+}
 
-    // =========================================================================
+fn demo_per_client_fairness() {
     println!("3. Per-Client Rate Limiting with Fairness");
     println!("   ─────────────────────────────────────────");
 
@@ -549,8 +546,9 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
+fn demo_request_prioritization(seed: u64) {
     println!("4. Request Prioritization");
     println!("   ─────────────────────────────────────────");
 
@@ -592,8 +590,9 @@ fn main() {
         prio_limiter.total_rejected()
     );
     println!();
+}
 
-    // =========================================================================
+fn demo_throughput_under_load(seed: u64) {
     println!("5. Throughput Under Load");
     println!("   ─────────────────────────────────────────");
 
@@ -632,8 +631,9 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
+fn demo_strategy_comparison(seed: u64) {
     println!("6. Strategy Comparison");
     println!("   ─────────────────────────────────────────");
 
@@ -699,6 +699,23 @@ fn main() {
         total_rejected,
         strategies.len()
     );
+}
+
+// ---------------------------------------------------------------------------
+// main
+// ---------------------------------------------------------------------------
+
+fn main() {
+    println!("=== Model Rate Limiter Example ===\n");
+
+    let seed = 42_u64;
+
+    demo_token_bucket();
+    demo_sliding_window();
+    demo_per_client_fairness();
+    demo_request_prioritization(seed);
+    demo_throughput_under_load(seed);
+    demo_strategy_comparison(seed);
 
     println!("=== Example Complete ===");
 }

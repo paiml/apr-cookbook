@@ -469,19 +469,14 @@ fn deterministic_rand(seed: u64, index: u64) -> u64 {
 // Main
 // ---------------------------------------------------------------------------
 
-fn main() {
-    println!("=== Recipe: GPU Memory Pool Allocation ===");
-    println!("Demonstrating memory pooling strategies for inference workloads");
-    println!();
+// ---------------------------------------------------------------------------
+// Section helper functions
+// ---------------------------------------------------------------------------
 
-    // -----------------------------------------------------------------------
-    // Section 1: Create memory pool with configurable block sizes
-    // -----------------------------------------------------------------------
+/// Section 1: Create a memory pool and display its configuration.
+fn section_create_pool(pool_size: usize, slab_size: usize) {
     println!("--- Section 1: Create Memory Pool with Configurable Block Sizes ---");
     println!();
-
-    let pool_size: usize = 1024 * 1024; // 1 MiB
-    let slab_size: usize = 4096; // 4 KiB slabs
 
     let pool = MemoryPool::with_slab_size(pool_size, AllocationStrategy::Slab, slab_size);
     println!("Pool created:");
@@ -495,131 +490,90 @@ fn main() {
     println!("  Free bytes:  {}", pool.free_bytes());
     println!("  Block count: {}", pool.blocks.len());
     println!();
+}
 
-    // -----------------------------------------------------------------------
-    // Section 2: Slab allocation vs dynamic allocation comparison
-    // -----------------------------------------------------------------------
+/// Run an allocation benchmark for a single strategy: allocate `num_allocs`
+/// random-sized blocks, free every other one, then print results.
+fn bench_strategy(
+    label: &str,
+    pool: &mut MemoryPool,
+    num_allocs: usize,
+    seed: u64,
+    alignment: usize,
+) {
+    let start = Instant::now();
+    let mut offsets = Vec::new();
+    for i in 0..num_allocs {
+        let size = (deterministic_rand(seed, i as u64) % 8192 + 128) as usize;
+        let req = AllocationRequest {
+            size,
+            tenant_id: None,
+            alignment,
+        };
+        match pool.allocate(&req) {
+            Ok(offset) => offsets.push(offset),
+            Err(_) => break,
+        }
+    }
+    let alloc_time = start.elapsed();
+    let alloc_count = offsets.len();
+
+    let start = Instant::now();
+    for offset in offsets.iter().step_by(2) {
+        let _ = pool.free(*offset);
+    }
+    let free_time = start.elapsed();
+
+    println!("{}:", label);
+    println!("  Allocations:  {}/{}", alloc_count, num_allocs);
+    println!("  Alloc time:   {:?}", alloc_time);
+    println!(
+        "  Free time:    {:?} (freed {})",
+        free_time,
+        alloc_count / 2
+    );
+    println!("  Used:         {} bytes", pool.used_bytes());
+    println!("  Fragmentation: {}", pool.fragmentation_stats());
+    println!();
+}
+
+/// Section 2: Compare slab, best-fit, and first-fit allocation strategies.
+fn section_allocation_comparison(pool_size: usize, slab_size: usize, seed: u64) {
     println!("--- Section 2: Slab vs Dynamic Allocation Comparison ---");
     println!();
 
     let num_allocs = 100;
-    let seed = 42u64;
 
-    // Slab allocation benchmark
     let mut slab_pool = MemoryPool::with_slab_size(pool_size, AllocationStrategy::Slab, slab_size);
-    let start = Instant::now();
-    let mut slab_offsets = Vec::new();
-    for i in 0..num_allocs {
-        let size = (deterministic_rand(seed, i as u64) % 8192 + 128) as usize;
-        let req = AllocationRequest {
-            size,
-            tenant_id: None,
-            alignment: 1,
-        };
-        match slab_pool.allocate(&req) {
-            Ok(offset) => slab_offsets.push(offset),
-            Err(_) => break,
-        }
-    }
-    let slab_alloc_time = start.elapsed();
-    let slab_alloc_count = slab_offsets.len();
-
-    // Free half
-    let start = Instant::now();
-    for offset in slab_offsets.iter().step_by(2) {
-        let _ = slab_pool.free(*offset);
-    }
-    let slab_free_time = start.elapsed();
-
-    println!("Slab Allocation (slab_size={} bytes):", slab_size);
-    println!("  Allocations:  {}/{}", slab_alloc_count, num_allocs);
-    println!("  Alloc time:   {:?}", slab_alloc_time);
-    println!(
-        "  Free time:    {:?} (freed {})",
-        slab_free_time,
-        slab_alloc_count / 2
+    bench_strategy(
+        &format!("Slab Allocation (slab_size={} bytes)", slab_size),
+        &mut slab_pool,
+        num_allocs,
+        seed,
+        1,
     );
-    println!("  Used:         {} bytes", slab_pool.used_bytes());
-    println!("  Fragmentation: {}", slab_pool.fragmentation_stats());
-    println!();
 
-    // BestFit allocation benchmark
     let mut bestfit_pool = MemoryPool::new(pool_size, AllocationStrategy::BestFit);
-    let start = Instant::now();
-    let mut bf_offsets = Vec::new();
-    for i in 0..num_allocs {
-        let size = (deterministic_rand(seed, i as u64) % 8192 + 128) as usize;
-        let req = AllocationRequest {
-            size,
-            tenant_id: None,
-            alignment: 64,
-        };
-        match bestfit_pool.allocate(&req) {
-            Ok(offset) => bf_offsets.push(offset),
-            Err(_) => break,
-        }
-    }
-    let bf_alloc_time = start.elapsed();
-    let bf_alloc_count = bf_offsets.len();
-
-    let start = Instant::now();
-    for offset in bf_offsets.iter().step_by(2) {
-        let _ = bestfit_pool.free(*offset);
-    }
-    let bf_free_time = start.elapsed();
-
-    println!("BestFit Allocation (alignment=64 bytes):");
-    println!("  Allocations:  {}/{}", bf_alloc_count, num_allocs);
-    println!("  Alloc time:   {:?}", bf_alloc_time);
-    println!(
-        "  Free time:    {:?} (freed {})",
-        bf_free_time,
-        bf_alloc_count / 2
+    bench_strategy(
+        "BestFit Allocation (alignment=64 bytes)",
+        &mut bestfit_pool,
+        num_allocs,
+        seed,
+        64,
     );
-    println!("  Used:         {} bytes", bestfit_pool.used_bytes());
-    println!("  Fragmentation: {}", bestfit_pool.fragmentation_stats());
-    println!();
 
-    // FirstFit allocation benchmark
     let mut firstfit_pool = MemoryPool::new(pool_size, AllocationStrategy::FirstFit);
-    let start = Instant::now();
-    let mut ff_offsets = Vec::new();
-    for i in 0..num_allocs {
-        let size = (deterministic_rand(seed, i as u64) % 8192 + 128) as usize;
-        let req = AllocationRequest {
-            size,
-            tenant_id: None,
-            alignment: 64,
-        };
-        match firstfit_pool.allocate(&req) {
-            Ok(offset) => ff_offsets.push(offset),
-            Err(_) => break,
-        }
-    }
-    let ff_alloc_time = start.elapsed();
-    let ff_alloc_count = ff_offsets.len();
-
-    let start = Instant::now();
-    for offset in ff_offsets.iter().step_by(2) {
-        let _ = firstfit_pool.free(*offset);
-    }
-    let ff_free_time = start.elapsed();
-
-    println!("FirstFit Allocation (alignment=64 bytes):");
-    println!("  Allocations:  {}/{}", ff_alloc_count, num_allocs);
-    println!("  Alloc time:   {:?}", ff_alloc_time);
-    println!(
-        "  Free time:    {:?} (freed {})",
-        ff_free_time,
-        ff_alloc_count / 2
+    bench_strategy(
+        "FirstFit Allocation (alignment=64 bytes)",
+        &mut firstfit_pool,
+        num_allocs,
+        seed,
+        64,
     );
-    println!("  Used:         {} bytes", firstfit_pool.used_bytes());
-    println!("  Fragmentation: {}", firstfit_pool.fragmentation_stats());
-    println!();
+}
 
-    // -----------------------------------------------------------------------
-    // Section 3: Fragmentation analysis after mixed allocations
-    // -----------------------------------------------------------------------
+/// Section 3: Fragmentation analysis after mixed allocations.
+fn section_fragmentation_analysis() {
     println!("--- Section 3: Fragmentation Analysis ---");
     println!();
 
@@ -657,10 +611,10 @@ fn main() {
     println!("After defragmentation ({} blocks moved):", moved);
     println!("  {}", after_defrag);
     println!();
+}
 
-    // -----------------------------------------------------------------------
-    // Section 4: Multi-tenant memory budgets
-    // -----------------------------------------------------------------------
+/// Section 4: Multi-tenant memory budgets with budget enforcement.
+fn section_multi_tenant_budgets() {
     println!("--- Section 4: Multi-Tenant Memory Budgets ---");
     println!();
 
@@ -717,10 +671,10 @@ fn main() {
         );
     }
     println!();
+}
 
-    // -----------------------------------------------------------------------
-    // Section 5: Memory watermark tracking
-    // -----------------------------------------------------------------------
+/// Section 5: Memory watermark tracking across allocation waves.
+fn section_watermark_tracking(seed: u64) {
     println!("--- Section 5: Memory Watermark Tracking ---");
     println!();
 
@@ -757,10 +711,10 @@ fn main() {
         (wm_pool.used_bytes() as f64 / wm_pool.total_bytes as f64) * 100.0,
     );
     println!();
+}
 
-    // -----------------------------------------------------------------------
-    // Section 6: Allocation strategy comparison summary
-    // -----------------------------------------------------------------------
+/// Section 6: Allocation strategy comparison summary table.
+fn section_strategy_summary(seed: u64) {
     println!("--- Section 6: Allocation Strategy Comparison Summary ---");
     println!();
 
@@ -822,6 +776,23 @@ fn main() {
 
     println!();
     println!("=== GPU Memory Pool Recipe Complete ===");
+}
+
+fn main() {
+    println!("=== Recipe: GPU Memory Pool Allocation ===");
+    println!("Demonstrating memory pooling strategies for inference workloads");
+    println!();
+
+    let pool_size: usize = 1024 * 1024; // 1 MiB
+    let slab_size: usize = 4096; // 4 KiB slabs
+    let seed = 42u64;
+
+    section_create_pool(pool_size, slab_size);
+    section_allocation_comparison(pool_size, slab_size, seed);
+    section_fragmentation_analysis();
+    section_multi_tenant_budgets();
+    section_watermark_tracking(seed);
+    section_strategy_summary(seed);
 }
 
 // ---------------------------------------------------------------------------

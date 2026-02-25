@@ -37,9 +37,24 @@ fn main() -> Result<()> {
     println!("Demonstrating model version management with semantic versioning");
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 1: Define version scheme and register model versions
-    // ---------------------------------------------------------------
+    let mut registry = register_model_versions(&mut ctx);
+    check_compatibility_matrix(&mut registry, &mut ctx);
+    resolve_dependencies(&mut registry, &mut ctx);
+    compute_upgrade_paths(&registry);
+    apply_lifecycle_transitions(&mut registry);
+    print_version_history(&registry, &mut ctx);
+
+    println!("=== Recipe complete ===");
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Extracted helper functions (one per section of main)
+// ---------------------------------------------------------------------------
+
+/// Section 1: Define version scheme and register model versions.
+fn register_model_versions(ctx: &mut RecipeContext) -> VersionRegistry {
     println!("--- Section 1: Register Model Versions ---");
 
     // Demonstrate version parsing
@@ -184,9 +199,11 @@ fn main() -> Result<()> {
     }
     println!();
 
-    // ---------------------------------------------------------------
-    // Section 2: Compatibility matrix (which versions work together)
-    // ---------------------------------------------------------------
+    registry
+}
+
+/// Section 2: Compatibility matrix (which versions work together).
+fn check_compatibility_matrix(registry: &mut VersionRegistry, ctx: &mut RecipeContext) {
     println!("--- Section 2: Compatibility Matrix ---");
 
     // Define compatibility rules
@@ -264,10 +281,10 @@ fn main() -> Result<()> {
     }
     ctx.record_metric("compatible_pairs", compatible_count);
     println!();
+}
 
-    // ---------------------------------------------------------------
-    // Section 3: Dependency resolution across model ecosystem
-    // ---------------------------------------------------------------
+/// Section 3: Dependency resolution across model ecosystem.
+fn resolve_dependencies(registry: &mut VersionRegistry, ctx: &mut RecipeContext) {
     println!("--- Section 3: Dependency Resolution ---");
 
     // fraud-detector v2.0.0 requires feature-encoder >= 2.0.0
@@ -305,10 +322,10 @@ fn main() -> Result<()> {
     }
     ctx.record_metric("dependency_rules", registry.dependencies.len() as i64);
     println!();
+}
 
-    // ---------------------------------------------------------------
-    // Section 4: Compute upgrade paths with breaking change detection
-    // ---------------------------------------------------------------
+/// Section 4: Compute upgrade paths with breaking change detection.
+fn compute_upgrade_paths(registry: &VersionRegistry) {
     println!("--- Section 4: Upgrade Paths ---");
 
     let upgrade_scenarios = [
@@ -355,10 +372,10 @@ fn main() -> Result<()> {
         }
     }
     println!();
+}
 
-    // ---------------------------------------------------------------
-    // Section 5: Version lifecycle transitions
-    // ---------------------------------------------------------------
+/// Section 5: Version lifecycle transitions.
+fn apply_lifecycle_transitions(registry: &mut VersionRegistry) {
     println!("--- Section 5: Version Lifecycle Transitions ---");
 
     let transitions = [
@@ -411,10 +428,10 @@ fn main() -> Result<()> {
         if invalid.is_err() { "BLOCKED" } else { "OK" }
     );
     println!();
+}
 
-    // ---------------------------------------------------------------
-    // Section 6: Version history summary with changelog
-    // ---------------------------------------------------------------
+/// Section 6: Version history summary with changelog.
+fn print_version_history(registry: &VersionRegistry, ctx: &mut RecipeContext) {
     println!("--- Section 6: Version History & Changelog ---");
 
     for model_name in ["fraud-detector", "feature-encoder"] {
@@ -463,9 +480,6 @@ fn main() -> Result<()> {
         registry.compatibility_rules.len() as i64,
     );
     println!();
-    println!("=== Recipe complete ===");
-
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------
