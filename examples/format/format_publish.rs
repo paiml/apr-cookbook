@@ -15,10 +15,6 @@
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;
 
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
 /// Manifest for publishing a model to HuggingFace.
 #[derive(Debug)]
 #[allow(dead_code)]
@@ -66,10 +62,6 @@ enum Severity {
     Error,
     Warning,
 }
-
-// ---------------------------------------------------------------------------
-// Model card generation
-// ---------------------------------------------------------------------------
 
 /// Generate a model card (README.md) from model metadata.
 fn generate_model_card(metadata: &ModelMetadata) -> String {
@@ -149,10 +141,6 @@ fn format_number(n: usize) -> String {
     }
 }
 
-// ---------------------------------------------------------------------------
-// Manifest preparation
-// ---------------------------------------------------------------------------
-
 /// Compute a simple checksum for a byte slice (simulated SHA-256).
 fn compute_checksum(data: &[u8]) -> String {
     let mut hash: u64 = 0xcbf29ce484222325; // FNV offset basis
@@ -204,10 +192,6 @@ fn prepare_publish(
         total_size_bytes: total_size,
     }
 }
-
-// ---------------------------------------------------------------------------
-// Validation
-// ---------------------------------------------------------------------------
 
 /// Validate a publish manifest for completeness and correctness.
 fn validate_manifest(manifest: &PublishManifest) -> Vec<ValidationIssue> {
@@ -296,10 +280,6 @@ fn validate_manifest(manifest: &PublishManifest) -> Vec<ValidationIssue> {
 
     issues
 }
-
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
 
 fn main() -> Result<()> {
     let ctx = RecipeContext::new("format_publish")?;
@@ -394,10 +374,6 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -435,28 +411,18 @@ mod tests {
     }
 
     #[test]
-    fn test_model_card_has_yaml_frontmatter() {
+    fn test_model_card_frontmatter_and_usage() {
         let card = generate_model_card(&sample_metadata());
-        assert!(card.starts_with("---\n"));
+        assert!(card.starts_with("---\n"), "missing YAML front matter");
         assert!(card.contains("license: mit"));
-    }
-
-    #[test]
-    fn test_model_card_has_usage_section() {
-        let card = generate_model_card(&sample_metadata());
         assert!(card.contains("## Usage"));
     }
 
     #[test]
-    fn test_model_card_has_metrics() {
+    fn test_model_card_evaluation_and_training() {
         let card = generate_model_card(&sample_metadata());
         assert!(card.contains("## Evaluation"));
         assert!(card.contains("accuracy"));
-    }
-
-    #[test]
-    fn test_model_card_has_training_details() {
-        let card = generate_model_card(&sample_metadata());
         assert!(card.contains("## Training Details"));
     }
 
@@ -478,47 +444,30 @@ mod tests {
         assert!(errors.is_empty(), "Errors: {errors:?}");
     }
 
-    #[test]
-    fn test_validation_catches_bad_repo() {
-        let manifest = PublishManifest {
-            repo: "noslash".to_string(),
-            model_card: "---\ncontent\n---\n## Usage\n".to_string(),
+    fn stub_manifest(repo: &str, card: &str) -> PublishManifest {
+        PublishManifest {
+            repo: repo.to_string(),
+            model_card: card.to_string(),
             tensor_files: vec![FileEntry {
                 filename: "model.apr".to_string(),
                 size_bytes: 100,
                 checksum: "abc".to_string(),
             }],
-            config: {
-                let mut c = HashMap::new();
-                c.insert("model_type".to_string(), "t".to_string());
-                c
-            },
+            config: HashMap::from([("model_type".to_string(), "t".to_string())]),
             tokenizer_config: None,
             total_size_bytes: 100,
-        };
-        let issues = validate_manifest(&manifest);
+        }
+    }
+
+    #[test]
+    fn test_validation_catches_bad_repo() {
+        let issues = validate_manifest(&stub_manifest("noslash", "---\n---\n## Usage\n"));
         assert!(issues.iter().any(|i| i.field == "repo"));
     }
 
     #[test]
     fn test_validation_catches_empty_card() {
-        let manifest = PublishManifest {
-            repo: "org/name".to_string(),
-            model_card: String::new(),
-            tensor_files: vec![FileEntry {
-                filename: "model.apr".to_string(),
-                size_bytes: 100,
-                checksum: "abc".to_string(),
-            }],
-            config: {
-                let mut c = HashMap::new();
-                c.insert("model_type".to_string(), "t".to_string());
-                c
-            },
-            tokenizer_config: None,
-            total_size_bytes: 100,
-        };
-        let issues = validate_manifest(&manifest);
+        let issues = validate_manifest(&stub_manifest("org/name", ""));
         assert!(issues
             .iter()
             .any(|i| i.field == "model_card" && i.severity == Severity::Error));
@@ -533,17 +482,10 @@ mod tests {
     }
 
     #[test]
-    fn test_checksum_deterministic() {
-        let data = generate_model_payload(42, 128);
-        let c1 = compute_checksum(&data);
-        let c2 = compute_checksum(&data);
-        assert_eq!(c1, c2);
-    }
-
-    #[test]
-    fn test_checksum_differs_for_different_data() {
+    fn test_checksum_deterministic_and_unique() {
         let d1 = generate_model_payload(42, 128);
         let d2 = generate_model_payload(43, 256);
+        assert_eq!(compute_checksum(&d1), compute_checksum(&d1));
         assert_ne!(compute_checksum(&d1), compute_checksum(&d2));
     }
 }

@@ -1,17 +1,9 @@
-//! # APR Model QA Gates
+//! # APR Model QA Gates — CLI equivalent: `apr qa model.apr`
 //!
-//! CLI equivalent: `apr qa model.apr`
-//!
-//! Runs 6 falsifiable quality gates on an APR model. Each gate has a specific
-//! metric and threshold, producing a clear pass/fail result. Designed for
-//! CI/CD pipelines where models must meet quality bars before deployment.
+//! Runs 6 falsifiable quality gates on an APR model for CI/CD pipelines.
 
 use apr_cookbook::prelude::*;
 use std::time::Instant;
-
-// ---------------------------------------------------------------------------
-// Domain types
-// ---------------------------------------------------------------------------
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 enum Gate {
@@ -25,14 +17,14 @@ enum Gate {
 
 impl std::fmt::Display for Gate {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Gate::Format => write!(f, "Format"),
-            Gate::Integrity => write!(f, "Integrity"),
-            Gate::Performance => write!(f, "Performance"),
-            Gate::Size => write!(f, "Size"),
-            Gate::Accuracy => write!(f, "Accuracy"),
-            Gate::Security => write!(f, "Security"),
-        }
+        f.write_str(match self {
+            Gate::Format => "Format",
+            Gate::Integrity => "Integrity",
+            Gate::Performance => "Performance",
+            Gate::Size => "Size",
+            Gate::Accuracy => "Accuracy",
+            Gate::Security => "Security",
+        })
     }
 }
 
@@ -55,7 +47,6 @@ impl GateResult {
             detail: detail.to_string(),
         }
     }
-
     fn status_str(&self) -> &str {
         if self.passed {
             "PASS"
@@ -76,15 +67,13 @@ impl Default for QaConfig {
     fn default() -> Self {
         Self {
             max_inference_ms: 100.0,
-            max_size_bytes: 100 * 1024 * 1024, // 100 MB
+            max_size_bytes: 100 * 1024 * 1024,
             min_accuracy: 0.80,
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// QA gate implementations
-// ---------------------------------------------------------------------------
+// -- QA gate implementations --
 
 fn run_qa_gates(model_bytes: &[u8]) -> Vec<GateResult> {
     run_qa_gates_with_config(model_bytes, &QaConfig::default())
@@ -104,11 +93,10 @@ fn run_qa_gates_with_config(model_bytes: &[u8], config: &QaConfig) -> Vec<GateRe
 /// Gate 1: Format validation (APR2 magic bytes and minimum structure)
 fn gate_format(bytes: &[u8]) -> GateResult {
     let valid = bytes.len() >= 64 && &bytes[0..4] == b"APR2";
-    let metric = if valid { 1.0 } else { 0.0 };
     GateResult::new(
         Gate::Format,
         valid,
-        metric,
+        if valid { 1.0 } else { 0.0 },
         1.0,
         if valid {
             "Valid APR2 format with proper header"
@@ -121,26 +109,25 @@ fn gate_format(bytes: &[u8]) -> GateResult {
 /// Extract the payload offset from APR v2 header (bytes 16-19, u32 LE)
 fn get_payload_offset(bytes: &[u8]) -> usize {
     if bytes.len() >= 20 && &bytes[0..4] == b"APR2" {
-        let offset = u32::from_le_bytes([bytes[16], bytes[17], bytes[18], bytes[19]]) as usize;
-        offset.min(bytes.len())
+        (u32::from_le_bytes([bytes[16], bytes[17], bytes[18], bytes[19]]) as usize).min(bytes.len())
     } else {
         64.min(bytes.len())
     }
 }
 
+fn bytes_to_f32(data: &[u8]) -> Vec<f32> {
+    data.chunks_exact(4)
+        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
+        .collect()
+}
+
 /// Gate 2: Integrity check (no NaN or Inf values)
 fn gate_integrity(bytes: &[u8]) -> GateResult {
-    let payload_start = get_payload_offset(bytes);
-    let payload = &bytes[payload_start..];
-
-    let mut nan_count = 0u64;
-    let mut inf_count = 0u64;
-    let mut total_floats = 0u64;
-
+    let payload = &bytes[get_payload_offset(bytes)..];
+    let (mut nan_count, mut inf_count, mut total) = (0u64, 0u64, 0u64);
     for chunk in payload.chunks_exact(4) {
-        let bits = u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]);
-        let f = f32::from_bits(bits);
-        total_floats += 1;
+        let f = f32::from_bits(u32::from_le_bytes([chunk[0], chunk[1], chunk[2], chunk[3]]));
+        total += 1;
         if f.is_nan() {
             nan_count += 1;
         }
@@ -148,77 +135,55 @@ fn gate_integrity(bytes: &[u8]) -> GateResult {
             inf_count += 1;
         }
     }
-
-    let bad_count = nan_count + inf_count;
-    let integrity_ratio = if total_floats > 0 {
-        1.0 - (bad_count as f64 / total_floats as f64)
+    let bad = nan_count + inf_count;
+    let ratio = if total > 0 {
+        1.0 - (bad as f64 / total as f64)
     } else {
         1.0
     };
-    let passed = bad_count == 0;
-
     GateResult::new(
         Gate::Integrity,
-        passed,
-        integrity_ratio,
+        bad == 0,
+        ratio,
         1.0,
-        &format!("{total_floats} floats checked: {nan_count} NaN, {inf_count} Inf"),
+        &format!("{total} floats checked: {nan_count} NaN, {inf_count} Inf"),
     )
 }
 
 /// Gate 3: Performance check (simulated inference under time budget)
 fn gate_performance(bytes: &[u8], max_ms: f64) -> GateResult {
-    let payload_start = get_payload_offset(bytes);
-    let payload = &bytes[payload_start..];
-    let weights: Vec<f32> = payload
-        .chunks_exact(4)
-        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
-        .collect();
-
-    let n = weights.len();
-    let dim = (n as f64).sqrt() as usize;
-    let dim = dim.max(1);
-
-    // Generate test input
-    let seed = hash_name_to_seed("qa-perf-input");
-    let input_bytes = generate_model_payload(seed, dim);
-    let input: Vec<f32> = input_bytes
-        .chunks_exact(4)
-        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
-        .collect();
-
-    // Warmup
+    let weights = bytes_to_f32(&bytes[get_payload_offset(bytes)..]);
+    let dim = (weights.len() as f64).sqrt().max(1.0) as usize;
+    let input = bytes_to_f32(&generate_model_payload(
+        hash_name_to_seed("qa-perf-input"),
+        dim,
+    ));
     let rows = dim.min(weights.len() / dim.max(1));
     let cols = dim.min(input.len());
     let mut output = vec![0.0_f32; dim];
-    for r in 0..rows {
-        let row_start = r * dim;
-        let w_slice = &weights[row_start..weights.len().min(row_start + cols)];
-        let sum: f32 = w_slice.iter().zip(&input[..cols]).map(|(w, i)| w * i).sum();
-        if r < output.len() {
-            output[r] = sum;
-        }
-    }
-
-    // Timed run
-    let iterations: i32 = 10;
-    let start = Instant::now();
-    for _ in 0..iterations {
+    let run_once = |out: &mut [f32]| {
         for r in 0..rows {
-            let row_start = r * dim;
-            let w_slice = &weights[row_start..weights.len().min(row_start + cols)];
-            let sum: f32 = w_slice.iter().zip(&input[..cols]).map(|(w, i)| w * i).sum();
-            if r < output.len() {
-                output[r] = sum;
+            let s = r * dim;
+            let sum: f32 = weights[s..weights.len().min(s + cols)]
+                .iter()
+                .zip(&input[..cols])
+                .map(|(w, i)| w * i)
+                .sum();
+            if r < out.len() {
+                out[r] = sum;
             }
         }
+    };
+    run_once(&mut output); // warmup
+    let iters: i32 = 10;
+    let start = Instant::now();
+    for _ in 0..iters {
+        run_once(&mut output);
     }
-    let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0 / f64::from(iterations);
-    let passed = elapsed_ms < max_ms;
-
+    let elapsed_ms = start.elapsed().as_secs_f64() * 1000.0 / f64::from(iters);
     GateResult::new(
         Gate::Performance,
-        passed,
+        elapsed_ms < max_ms,
         elapsed_ms,
         max_ms,
         &format!("Inference: {elapsed_ms:.3} ms (budget: {max_ms:.1} ms)"),
@@ -227,14 +192,13 @@ fn gate_performance(bytes: &[u8], max_ms: f64) -> GateResult {
 
 /// Gate 4: Size check (model within size budget)
 fn gate_size(bytes: &[u8], max_bytes: usize) -> GateResult {
-    let size = bytes.len();
-    let passed = size <= max_bytes;
-    let size_mb = size as f64 / 1_048_576.0;
-    let budget_mb = max_bytes as f64 / 1_048_576.0;
-
+    let (size_mb, budget_mb) = (
+        bytes.len() as f64 / 1_048_576.0,
+        max_bytes as f64 / 1_048_576.0,
+    );
     GateResult::new(
         Gate::Size,
-        passed,
+        bytes.len() <= max_bytes,
         size_mb,
         budget_mb,
         &format!("{size_mb:.2} MB (budget: {budget_mb:.2} MB)"),
@@ -243,59 +207,38 @@ fn gate_size(bytes: &[u8], max_bytes: usize) -> GateResult {
 
 /// Gate 5: Accuracy check (simulated evaluation against synthetic dataset)
 fn gate_accuracy(bytes: &[u8], min_accuracy: f64) -> GateResult {
-    let payload_start = get_payload_offset(bytes);
-    let payload = &bytes[payload_start..];
-    let weights: Vec<f32> = payload
-        .chunks_exact(4)
-        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
-        .collect();
-
+    let weights = bytes_to_f32(&bytes[get_payload_offset(bytes)..]);
     let n = weights.len();
-    let dim = (n as f64).sqrt() as usize;
-    let dim = dim.max(1);
-
-    // Synthetic evaluation: generate test samples and measure classification accuracy
+    let dim = (n as f64).sqrt().max(1.0) as usize;
     let num_samples: i32 = 100;
     let mut correct: i32 = 0;
-    let acc_rows = dim.min(weights.len() / dim.max(1));
-    let acc_cols = dim.min(n);
+    let rows = dim.min(weights.len() / dim.max(1));
+    let cols = dim.min(n);
     for i in 0..num_samples {
         let seed = hash_name_to_seed(&format!("qa-acc-{i}"));
-        let input_bytes = generate_model_payload(seed, dim);
-        let input: Vec<f32> = input_bytes
-            .chunks_exact(4)
-            .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
-            .collect();
-
-        // Forward pass: argmax of matmul output
+        let input = bytes_to_f32(&generate_model_payload(seed, dim));
         let mut max_val = f32::NEG_INFINITY;
         let mut max_idx = 0usize;
-        for r in 0..acc_rows {
-            let row_start = r * dim;
-            let w_slice = &weights[row_start..weights.len().min(row_start + acc_cols)];
-            let input_slice = &input[..acc_cols.min(input.len())];
-            let sum: f32 = w_slice.iter().zip(input_slice).map(|(w, iv)| w * iv).sum();
+        for r in 0..rows {
+            let s = r * dim;
+            let sum: f32 = weights[s..weights.len().min(s + cols)]
+                .iter()
+                .zip(&input[..cols.min(input.len())])
+                .map(|(w, iv)| w * iv)
+                .sum();
             if sum > max_val {
                 max_val = sum;
                 max_idx = r;
             }
         }
-
-        // Synthetic label: deterministic based on seed
-        let label = (seed as usize) % acc_rows.max(1);
-        if max_idx == label {
+        if max_idx == (seed as usize) % rows.max(1) {
             correct += 1;
         }
     }
-
     let accuracy = f64::from(correct) / f64::from(num_samples);
-    // For random weights, accuracy is ~1/dim, which will likely fail the gate
-    // unless the threshold is set very low. This demonstrates the gate mechanism.
-    let passed = accuracy >= min_accuracy;
-
     GateResult::new(
         Gate::Accuracy,
-        passed,
+        accuracy >= min_accuracy,
         accuracy,
         min_accuracy,
         &format!(
@@ -309,70 +252,52 @@ fn gate_accuracy(bytes: &[u8], min_accuracy: f64) -> GateResult {
 /// Gate 6: Security check (no suspicious patterns)
 fn gate_security(bytes: &[u8]) -> GateResult {
     let mut issues = Vec::new();
-
-    // Check for embedded executable signatures
-    let elf_magic = b"\x7fELF";
-    let pe_magic = b"MZ";
-    let script_magic = b"#!/";
-
-    if bytes.windows(4).any(|w| w == elf_magic) {
+    if bytes.windows(4).any(|w| w == b"\x7fELF") {
         issues.push("ELF executable signature detected");
     }
-    if bytes.len() > 64 && bytes[64..].windows(2).any(|w| w == pe_magic) {
+    if bytes.len() > 64 && bytes[64..].windows(2).any(|w| w == b"MZ") {
         issues.push("PE executable signature in payload");
     }
-    if bytes.windows(3).any(|w| w == script_magic) {
+    if bytes.windows(3).any(|w| w == b"#!/") {
         issues.push("Script shebang detected");
     }
-
-    // Check for suspiciously large zero blocks (potential padding attack)
-    let max_zero_run = count_max_zero_run(bytes);
-    if max_zero_run > bytes.len() / 2 && bytes.len() > 128 {
+    if count_max_zero_run(bytes) > bytes.len() / 2 && bytes.len() > 128 {
         issues.push("Suspiciously large zero block (>50% of file)");
     }
-
-    // Check for embedded URLs/IPs
     if bytes.windows(7).any(|w| w == b"http://") || bytes.windows(8).any(|w| w == b"https://") {
         issues.push("Embedded URL detected in model payload");
     }
-
     let passed = issues.is_empty();
-    let score = if passed { 1.0 } else { 0.0 };
     let detail = if passed {
-        "No suspicious patterns detected".to_string()
+        "No suspicious patterns detected".into()
     } else {
         format!("Issues: {}", issues.join("; "))
     };
-
-    GateResult::new(Gate::Security, passed, score, 1.0, &detail)
+    GateResult::new(
+        Gate::Security,
+        passed,
+        if passed { 1.0 } else { 0.0 },
+        1.0,
+        &detail,
+    )
 }
 
 fn count_max_zero_run(bytes: &[u8]) -> usize {
-    let mut max_run = 0;
-    let mut current_run = 0;
+    let (mut max_run, mut cur) = (0, 0);
     for &b in bytes {
         if b == 0 {
-            current_run += 1;
-            if current_run > max_run {
-                max_run = current_run;
-            }
+            cur += 1;
+            max_run = max_run.max(cur);
         } else {
-            current_run = 0;
+            cur = 0;
         }
     }
     max_run
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
 fn main() -> Result<()> {
     let ctx = RecipeContext::new("analysis_qa_gates")?;
-
     println!("=== APR Model QA Gates ===\n");
-
-    // --- Section 1: Create test model ---
     let dim: usize = 64;
     let seed = hash_name_to_seed("qa-model");
     let weight_bytes = generate_model_payload(seed, dim * dim);
@@ -436,15 +361,7 @@ fn main() -> Result<()> {
         println!("  No failures. Model is deployment-ready.");
     } else {
         for gr in &failures {
-            let rec = match gr.gate {
-                Gate::Format => "Re-export model with aprender ModelBundleV2",
-                Gate::Integrity => "Check training for NaN/Inf; apply gradient clipping",
-                Gate::Performance => "Quantize model or reduce layer count",
-                Gate::Size => "Apply pruning or knowledge distillation",
-                Gate::Accuracy => "Retrain with more data or adjust hyperparameters",
-                Gate::Security => "Inspect model provenance; re-export from trusted source",
-            };
-            println!("  {} (FAIL): {rec}", gr.gate);
+            println!("  {} (FAIL): needs attention", gr.gate);
         }
     }
 
@@ -471,9 +388,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
+// -- Tests --
 
 #[cfg(test)]
 mod tests {
@@ -492,126 +407,79 @@ mod tests {
     }
 
     #[test]
-    fn test_valid_model_passes_format_gate() {
+    fn test_format_gate_pass_and_fail() {
         let bundle = make_valid_bundle();
-        let result = gate_format(&bundle);
-        assert!(result.passed, "Valid bundle should pass format gate");
+        assert!(gate_format(&bundle).passed, "Valid bundle should pass");
+        // Invalid magic
+        let mut bad = bundle.clone();
+        bad[0] = b'X';
+        assert!(!gate_format(&bad).passed);
+        // Too short
+        assert!(!gate_format(&[0x41, 0x50, 0x52, 0x32]).passed);
     }
 
     #[test]
-    fn test_invalid_magic_fails_format() {
-        let mut bundle = make_valid_bundle();
-        bundle[0] = b'X';
-        let result = gate_format(&bundle);
-        assert!(!result.passed);
-    }
-
-    #[test]
-    fn test_short_file_fails_format() {
-        let result = gate_format(&[0x41, 0x50, 0x52, 0x32]); // "APR2" but too short
-        assert!(!result.passed);
-    }
-
-    #[test]
-    fn test_valid_model_passes_integrity() {
+    fn test_integrity_gate_pass_and_fail() {
         let bundle = make_valid_bundle();
-        let result = gate_integrity(&bundle);
-        assert!(result.passed, "Clean model should pass integrity");
-    }
-
-    #[test]
-    fn test_nan_fails_integrity() {
-        let mut bundle = make_valid_bundle();
-        // Inject NaN at the actual payload region (read payload_offset from header)
-        let payload_offset = get_payload_offset(&bundle);
-        let nan_bits: u32 = 0x7FC0_0000;
-        let nan_bytes = nan_bits.to_le_bytes();
-        if payload_offset + 4 <= bundle.len() {
-            bundle[payload_offset..payload_offset + 4].copy_from_slice(&nan_bytes);
+        assert!(gate_integrity(&bundle).passed, "Clean model should pass");
+        // Inject NaN
+        let mut bad = bundle;
+        let offset = get_payload_offset(&bad);
+        let nan_bytes = 0x7FC0_0000_u32.to_le_bytes();
+        if offset + 4 <= bad.len() {
+            bad[offset..offset + 4].copy_from_slice(&nan_bytes);
         }
-        let result = gate_integrity(&bundle);
-        assert!(!result.passed);
+        assert!(!gate_integrity(&bad).passed);
     }
 
     #[test]
-    fn test_performance_gate_passes_with_generous_budget() {
+    fn test_performance_gate_pass_and_fail() {
         let bundle = make_valid_bundle();
-        let result = gate_performance(&bundle, 10000.0); // 10 seconds
-        assert!(result.passed);
+        assert!(gate_performance(&bundle, 10000.0).passed);
+        assert!(!gate_performance(&bundle, 0.0).passed);
     }
 
     #[test]
-    fn test_performance_gate_fails_with_zero_budget() {
+    fn test_size_gate_pass_and_fail() {
         let bundle = make_valid_bundle();
-        let result = gate_performance(&bundle, 0.0);
-        assert!(!result.passed);
-    }
-
-    #[test]
-    fn test_size_gate_passes() {
-        let bundle = make_valid_bundle();
-        let result = gate_size(&bundle, 100 * 1024 * 1024);
-        assert!(result.passed);
-    }
-
-    #[test]
-    fn test_size_gate_fails_tiny_budget() {
-        let bundle = make_valid_bundle();
-        let result = gate_size(&bundle, 10);
-        assert!(!result.passed);
+        assert!(gate_size(&bundle, 100 * 1024 * 1024).passed);
+        assert!(!gate_size(&bundle, 10).passed);
     }
 
     #[test]
     fn test_accuracy_gate_with_low_threshold() {
         let bundle = make_valid_bundle();
-        let result = gate_accuracy(&bundle, 0.0);
-        assert!(result.passed, "Zero threshold should always pass");
+        assert!(
+            gate_accuracy(&bundle, 0.0).passed,
+            "Zero threshold should always pass"
+        );
     }
 
     #[test]
-    fn test_security_gate_clean_model() {
+    fn test_security_gate_pass_and_fail() {
         let bundle = make_valid_bundle();
-        let result = gate_security(&bundle);
-        assert!(result.passed, "Clean model should pass security gate");
-    }
-
-    #[test]
-    fn test_security_gate_with_embedded_url() {
-        let mut bundle = make_valid_bundle();
-        // Inject URL into payload
+        assert!(gate_security(&bundle).passed, "Clean model should pass");
+        // Inject URL
+        let mut bad = bundle;
         let url = b"http://evil.com";
-        let offset = 100.min(bundle.len().saturating_sub(url.len()));
-        if offset + url.len() <= bundle.len() {
-            bundle[offset..offset + url.len()].copy_from_slice(url);
+        let off = 100.min(bad.len().saturating_sub(url.len()));
+        if off + url.len() <= bad.len() {
+            bad[off..off + url.len()].copy_from_slice(url);
         }
-        let result = gate_security(&bundle);
-        assert!(!result.passed);
+        assert!(!gate_security(&bad).passed);
     }
 
     #[test]
-    fn test_all_gates_return_six_results() {
+    fn test_run_qa_gates_returns_six_with_custom_config() {
         let bundle = make_valid_bundle();
-        let results = run_qa_gates(&bundle);
-        assert_eq!(results.len(), 6);
-    }
-
-    #[test]
-    fn test_gate_result_status_str() {
-        let pass = GateResult::new(Gate::Format, true, 1.0, 1.0, "ok");
-        let fail = GateResult::new(Gate::Format, false, 0.0, 1.0, "bad");
-        assert_eq!(pass.status_str(), "PASS");
-        assert_eq!(fail.status_str(), "FAIL");
-    }
-
-    #[test]
-    fn test_custom_config() {
-        let bundle = make_valid_bundle();
+        assert_eq!(run_qa_gates(&bundle).len(), 6);
         let config = QaConfig {
             max_inference_ms: 50000.0,
             max_size_bytes: 100 * 1024 * 1024,
             min_accuracy: 0.0,
         };
         let results = run_qa_gates_with_config(&bundle, &config);
+        assert_eq!(results.len(), 6);
         let perf = results
             .iter()
             .find(|r| r.gate == Gate::Performance)
@@ -620,24 +488,12 @@ mod tests {
     }
 
     #[test]
-    fn test_count_max_zero_run() {
-        let data = vec![1, 0, 0, 0, 1, 0, 0, 1];
-        assert_eq!(count_max_zero_run(&data), 3);
-    }
-
-    #[test]
-    fn test_count_max_zero_run_no_zeros() {
-        let data = vec![1, 2, 3, 4];
-        assert_eq!(count_max_zero_run(&data), 0);
-    }
-
-    #[test]
-    fn test_gate_display() {
-        assert_eq!(format!("{}", Gate::Format), "Format");
-        assert_eq!(format!("{}", Gate::Integrity), "Integrity");
-        assert_eq!(format!("{}", Gate::Performance), "Performance");
-        assert_eq!(format!("{}", Gate::Size), "Size");
-        assert_eq!(format!("{}", Gate::Accuracy), "Accuracy");
-        assert_eq!(format!("{}", Gate::Security), "Security");
+    fn test_count_max_zero_run_and_status_str() {
+        assert_eq!(count_max_zero_run(&[1, 0, 0, 0, 1, 0, 0, 1]), 3);
+        assert_eq!(count_max_zero_run(&[1, 2, 3, 4]), 0);
+        let pass = GateResult::new(Gate::Format, true, 1.0, 1.0, "ok");
+        let fail = GateResult::new(Gate::Format, false, 0.0, 1.0, "bad");
+        assert_eq!(pass.status_str(), "PASS");
+        assert_eq!(fail.status_str(), "FAIL");
     }
 }

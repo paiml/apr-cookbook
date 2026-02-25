@@ -603,3 +603,36 @@ roadmap:
   - apr-v2
   - format
   notes: null
+- id: PMAT-028
+  github_issue: null
+  item_type: task
+  title: Dogfood all 48 APR CLI demo examples
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-02-25T12:03:36Z
+  updated: 2026-02-25T12:15:55Z
+  spec: null
+  acceptance_criteria:
+  - Run every new example from apr-cli-demos.md spec end-to-end, fix runtime failures, verify output
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: 'Harden 48 CLI demos: fix warnings, reduce file sizes, fix runtime edge cases'
+  github_issue: null
+  item_type: task
+  title: 'New task: Harden 48 CLI demos: fix warnings, reduce file sizes, fix runtime edge cases'
+  status: inprogress
+  priority: medium
+  assigned_to: null
+  created: 2026-02-25T12:16:30.339750589+00:00
+  updated: 2026-02-25T12:16:30.339750589+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

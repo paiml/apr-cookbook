@@ -3,24 +3,9 @@
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune && apr prune && apr distill && apr merge && apr quantize`
 //!
-//! Demonstrates the complete model optimization pipeline that the `apr` CLI
-//! composes from individual subcommands. This is the flagship example showing
-//! how to chain: LoRA fine-tuning → magnitude pruning → knowledge distillation
-//! → TIES model merging → 4-bit quantization.
+//! Demonstrates chaining: LoRA fine-tuning → magnitude pruning → knowledge
+//! distillation → TIES model merging → 4-bit quantization.
 //!
-//! ## QA Checklist
-//! 1. [x] `cargo run` succeeds (Exit Code 0)
-//! 2. [x] `cargo test` passes
-//! 3. [x] Deterministic output (Verified)
-//! 4. [x] No temp files leaked
-//! 5. [x] Clippy clean
-//! 6. [x] No `unwrap()` in logic
-//!
-//! ## Learning Objective
-//! Understand how the full `apr` CLI optimization pipeline composes finetune,
-//! prune, distill, merge, and quantize stages into a single workflow.
-//!
-//! ## Run Command
 //! ```bash
 //! cargo run --example optimize_full_pipeline
 //! ```
@@ -59,8 +44,7 @@ fn det_weights(size: usize, seed: u64) -> Vec<f32> {
 
 /// Generate synthetic training data
 fn gen_data(n: usize, d_in: usize, d_out: usize, seed: u64) -> (Vec<Vec<f32>>, Vec<Vec<f32>>) {
-    let mut inputs = Vec::with_capacity(n);
-    let mut targets = Vec::with_capacity(n);
+    let (mut inputs, mut targets) = (Vec::with_capacity(n), Vec::with_capacity(n));
     for i in 0..n {
         let x: Vec<f32> = (0..d_in)
             .map(|j| {
@@ -134,11 +118,10 @@ fn mse_loss(pred: &[f32], target: &[f32]) -> f32 {
 
 fn stage_finetune(base_weights: Vec<f32>, ctx: &mut RecipeContext) -> Vec<f32> {
     println!("Stage 1: LoRA Fine-Tuning (apr finetune --method lora)");
-    println!("   ─────────────────────────────────────────");
 
     let base_tensor = Tensor::from_vec(base_weights, false);
     let mut lora_layer = LoRALayer::new(base_tensor, D_OUT, D_IN, RANK, ALPHA);
-    let mut optimizer = AdamW::default_params(0.001);
+    let mut optimizer = AdamW::default_params(0.0001);
     let (inputs, targets) = gen_data(100, D_IN, D_OUT, 42);
 
     let mut initial_loss = 0.0f32;
@@ -152,7 +135,8 @@ fn stage_finetune(base_weights: Vec<f32>, ctx: &mut RecipeContext) -> Vec<f32> {
             let loss = mse_loss(&pred, t);
             epoch_loss += loss;
 
-            let grad_scale = loss * 0.01;
+            // Gradient clipping prevents positive-feedback divergence
+            let grad_scale = (loss * 0.01).min(0.1);
             for param in lora_layer.trainable_params() {
                 let grad = Array1::from_elem(param.len(), grad_scale);
                 param.set_grad(grad);
@@ -173,15 +157,9 @@ fn stage_finetune(base_weights: Vec<f32>, ctx: &mut RecipeContext) -> Vec<f32> {
     let merged = lora_layer.base_weight().data().to_vec();
 
     let lora_params = RANK * D_IN + D_OUT * RANK;
-    let base_params = D_OUT * D_IN;
-    println!(
-        "   LoRA r={}, trainable: {} ({:.1}% of base)",
-        RANK,
-        lora_params,
-        lora_params as f32 / base_params as f32 * 100.0
-    );
-    println!("   Loss: {:.6} → {:.6}", initial_loss, final_loss);
-
+    let pct = lora_params as f32 / (D_OUT * D_IN) as f32 * 100.0;
+    println!("   LoRA r={RANK}, trainable: {lora_params} ({pct:.1}% of base)");
+    println!("   Loss: {initial_loss:.6} → {final_loss:.6}");
     ctx.record_float_metric("finetune_initial_loss", f64::from(initial_loss));
     ctx.record_float_metric("finetune_final_loss", f64::from(final_loss));
     println!();
@@ -195,7 +173,6 @@ fn stage_prune(weights: &[f32], target_sparsity: f32) -> Vec<f32> {
     println!(
         "Stage 2: Magnitude Pruning (apr prune --method magnitude --target {target_sparsity})"
     );
-    println!("   ─────────────────────────────────────────");
 
     let mut magnitudes: Vec<(usize, f32)> = weights
         .iter()
@@ -224,12 +201,10 @@ fn stage_prune(weights: &[f32], target_sparsity: f32) -> Vec<f32> {
 
 fn stage_distill(ctx: &mut RecipeContext) {
     println!("Stage 3: Knowledge Distillation (apr distill --strategy standard)");
-    println!("   ─────────────────────────────────────────");
 
     let batch = 16;
     let classes = 5;
 
-    // Generate teacher (confident) and student (weak) logits
     let teacher_data: Vec<f32> = (0..batch * classes)
         .map(|i| {
             let mut h = DefaultHasher::new();
@@ -251,10 +226,8 @@ fn stage_distill(ctx: &mut RecipeContext) {
         .collect();
     let labels: Vec<usize> = (0..batch).map(|b| b % classes).collect();
 
-    let teacher =
-        Array2::from_shape_vec((batch, classes), teacher_data).expect("valid teacher shape");
-    let student =
-        Array2::from_shape_vec((batch, classes), student_data).expect("valid student shape");
+    let teacher = Array2::from_shape_vec((batch, classes), teacher_data).expect("teacher shape");
+    let student = Array2::from_shape_vec((batch, classes), student_data).expect("student shape");
 
     let loss_fn = DistillationLoss::new(3.0, 0.7);
     let loss = loss_fn.forward(&student, &teacher, &labels);
@@ -270,20 +243,18 @@ fn stage_distill(ctx: &mut RecipeContext) {
 
 fn stage_merge(finetuned_weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
     println!("Stage 4: TIES Model Merge (apr merge --strategy ties --density 0.2)");
-    println!("   ─────────────────────────────────────────");
 
     let layers: Vec<(&str, usize)> = vec![("weight", finetuned_weights.len())];
 
-    // Base model
     let base: Model = layers
         .iter()
         .map(|&(name, size)| {
-            let data = det_weights(size, 42);
-            (name.to_string(), Tensor::from_vec(data, false))
+            (
+                name.to_string(),
+                Tensor::from_vec(det_weights(size, 42), false),
+            )
         })
         .collect();
-
-    // Two task-specific variants
     let variant_a: Model = layers
         .iter()
         .map(|&(name, _)| {
@@ -293,7 +264,6 @@ fn stage_merge(finetuned_weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
             )
         })
         .collect();
-
     let variant_b: Model = layers
         .iter()
         .map(|&(name, size)| {
@@ -317,7 +287,6 @@ fn stage_merge(finetuned_weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
 
     let merged_weights = merged["weight"].data().to_vec();
 
-    // Compute distance from base
     let dist: f32 = merged_weights
         .iter()
         .zip(det_weights(finetuned_weights.len(), 42).iter())
@@ -339,7 +308,6 @@ fn stage_merge(finetuned_weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
 
 fn stage_quantize(weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
     println!("Stage 5: 4-bit Quantization (apr quantize --scheme int4)");
-    println!("   ─────────────────────────────────────────");
 
     let max_abs = weights
         .iter()
@@ -356,13 +324,13 @@ fn stage_quantize(weights: &[f32], ctx: &mut RecipeContext) -> Vec<f32> {
         })
         .collect();
 
-    let rmse: f32 = weights
+    let rmse = (weights
         .iter()
         .zip(quantized.iter())
         .map(|(a, b)| (a - b).powi(2))
         .sum::<f32>()
-        / weights.len() as f32;
-    let rmse = rmse.sqrt();
+        / weights.len() as f32)
+        .sqrt();
 
     let original_bytes = weights.len() * 4;
     let quantized_bytes = weights.len() / 2; // 4 bits per param
@@ -417,13 +385,8 @@ fn main() -> Result<()> {
     // Stage 5: 4-bit Quantization
     let final_weights = stage_quantize(&merged, &mut ctx);
 
-    // ── Save Final Model ──
-
     println!("Pipeline Complete — Saving to APR v2");
-    println!("   ─────────────────────────────────────────");
-
     let weight_bytes: Vec<u8> = final_weights.iter().flat_map(|f| f.to_le_bytes()).collect();
-
     let model_path = ctx.path("optimized_model.apr");
 
     let bundle = ModelBundleV2::new()
@@ -452,17 +415,10 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_det_weights_deterministic() {
+    fn test_det_weights_deterministic_and_seed_sensitive() {
         let w1 = det_weights(100, 42);
-        let w2 = det_weights(100, 42);
-        assert_eq!(w1, w2);
-    }
-
-    #[test]
-    fn test_det_weights_different_seeds() {
-        let w1 = det_weights(100, 42);
-        let w2 = det_weights(100, 43);
-        assert_ne!(w1, w2);
+        assert_eq!(w1, det_weights(100, 42));
+        assert_ne!(w1, det_weights(100, 43));
     }
 
     #[test]
@@ -484,52 +440,34 @@ mod tests {
     }
 
     #[test]
-    fn test_mse_loss_zero() {
+    fn test_mse_loss() {
         let a = vec![1.0, 2.0, 3.0];
         assert!(mse_loss(&a, &a).abs() < 1e-6);
+        assert!((mse_loss(&a, &vec![2.0, 3.0, 4.0]) - 1.0).abs() < 1e-6);
     }
 
     #[test]
-    fn test_mse_loss_nonzero() {
-        let a = vec![1.0, 2.0, 3.0];
-        let b = vec![2.0, 3.0, 4.0];
-        assert!((mse_loss(&a, &b) - 1.0).abs() < 1e-6);
-    }
-
-    #[test]
-    fn test_stage_prune_sparsity() {
+    fn test_stage_prune() {
         let weights = det_weights(256, 42);
         let pruned = stage_prune(&weights, 0.5);
-        let zeros = pruned.iter().filter(|&&w| w == 0.0).count();
-        let sparsity = zeros as f32 / pruned.len() as f32;
+        assert_eq!(pruned.len(), weights.len());
+        let sparsity = pruned.iter().filter(|&&w| w == 0.0).count() as f32 / pruned.len() as f32;
         assert!((sparsity - 0.5).abs() < 0.05);
     }
 
     #[test]
-    fn test_stage_prune_preserves_length() {
-        let weights = det_weights(256, 42);
-        let pruned = stage_prune(&weights, 0.3);
-        assert_eq!(pruned.len(), weights.len());
-    }
-
-    #[test]
-    fn test_stage_quantize_bounded_error() {
+    fn test_stage_quantize() {
         let weights = det_weights(256, 42);
         let quantized = stage_quantize(&weights, &mut RecipeContext::new("test_q").unwrap());
-        let rmse: f32 = weights
+        assert_eq!(quantized.len(), weights.len());
+        let rmse = (weights
             .iter()
             .zip(quantized.iter())
             .map(|(a, b)| (a - b).powi(2))
             .sum::<f32>()
-            / weights.len() as f32;
-        assert!(rmse.sqrt() < 0.1, "RMSE too large: {}", rmse.sqrt());
-    }
-
-    #[test]
-    fn test_stage_quantize_preserves_length() {
-        let weights = det_weights(256, 42);
-        let quantized = stage_quantize(&weights, &mut RecipeContext::new("test_q2").unwrap());
-        assert_eq!(quantized.len(), weights.len());
+            / weights.len() as f32)
+            .sqrt();
+        assert!(rmse < 0.1, "RMSE too large: {rmse}");
     }
 
     #[test]

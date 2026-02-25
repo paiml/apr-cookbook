@@ -76,45 +76,26 @@ fn det_weights(size: usize, seed: u64) -> Vec<f32> {
         .collect()
 }
 
-/// Simulate quantize-then-dequantize for a given mode
-///
-/// FP32: identity (no quantization)
-/// Q8: round to 256 levels
-/// Q4: round to 16 levels (simulating NF4)
+/// Simulate quantize-then-dequantize (FP32=identity, Q8=256 levels, Q4=16 levels/NF4)
 fn quantize_dequantize(weights: &[f32], mode: QuantMode) -> Vec<f32> {
-    match mode {
-        QuantMode::FP32 => weights.to_vec(),
-        QuantMode::Q8 => {
-            let max_abs = weights
-                .iter()
-                .map(|v| v.abs())
-                .fold(0.0f32, f32::max)
-                .max(1e-8);
-            let scale = max_abs / 127.0;
-            weights
-                .iter()
-                .map(|&v| {
-                    let q = (v / scale).round().clamp(-128.0, 127.0);
-                    q * scale
-                })
-                .collect()
-        }
-        QuantMode::Q4 => {
-            let max_abs = weights
-                .iter()
-                .map(|v| v.abs())
-                .fold(0.0f32, f32::max)
-                .max(1e-8);
-            let scale = max_abs / 7.0;
-            weights
-                .iter()
-                .map(|&v| {
-                    let q = (v / scale).round().clamp(-8.0, 7.0);
-                    q * scale
-                })
-                .collect()
-        }
+    if mode == QuantMode::FP32 {
+        return weights.to_vec();
     }
+    let max_abs = weights
+        .iter()
+        .map(|v| v.abs())
+        .fold(0.0f32, f32::max)
+        .max(1e-8);
+    let (divisor, lo, hi) = match mode {
+        QuantMode::Q8 => (127.0, -128.0, 127.0),
+        QuantMode::Q4 => (7.0, -8.0, 7.0),
+        QuantMode::FP32 => unreachable!(),
+    };
+    let scale = max_abs / divisor;
+    weights
+        .iter()
+        .map(|&v| (v / scale).round().clamp(lo, hi) * scale)
+        .collect()
 }
 
 /// Compute RMSE between original and quantized weights
@@ -214,7 +195,7 @@ fn train_qlora(mode: QuantMode, epochs: usize) -> (f32, f32) {
 
     let base_tensor = Tensor::from_vec(raw_weights, false);
     let mut lora_layer = LoRALayer::new(base_tensor, D_OUT, D_IN, RANK, ALPHA);
-    let mut optimizer = AdamW::default_params(0.001);
+    let mut optimizer = AdamW::default_params(0.0001);
     let (inputs, targets) = gen_data(50, D_IN, D_OUT, 42);
 
     let mut initial_loss = 0.0f32;
@@ -228,7 +209,7 @@ fn train_qlora(mode: QuantMode, epochs: usize) -> (f32, f32) {
             let loss = mse_loss(&pred, t);
             epoch_loss += loss;
 
-            let grad_scale = loss * 0.01;
+            let grad_scale = (loss * 0.01).min(0.1);
             for param in lora_layer.trainable_params() {
                 let grad = Array1::from_elem(param.len(), grad_scale);
                 param.set_grad(grad);
@@ -330,7 +311,7 @@ fn main() -> Result<()> {
         let quantized_base = quantize_dequantize(&raw_weights, QuantMode::Q4);
         let base_tensor = Tensor::from_vec(raw_weights, false);
         let mut lora_layer = LoRALayer::new(base_tensor, D_OUT, D_IN, rank, rank as f32);
-        let mut optimizer = AdamW::default_params(0.001);
+        let mut optimizer = AdamW::default_params(0.0001);
         let (inputs, targets) = gen_data(50, D_IN, D_OUT, 42);
 
         let mut final_loss = 0.0f32;
@@ -342,7 +323,7 @@ fn main() -> Result<()> {
                 let loss = mse_loss(&pred, t);
                 epoch_loss += loss;
 
-                let grad_scale = loss * 0.01;
+                let grad_scale = (loss * 0.01).min(0.1);
                 for param in lora_layer.trainable_params() {
                     let grad = Array1::from_elem(param.len(), grad_scale);
                     param.set_grad(grad);
@@ -418,29 +399,22 @@ mod tests {
         let weights = det_weights(256, 42);
         let quantized = quantize_dequantize(&weights, QuantMode::FP32);
         assert_eq!(weights, quantized, "FP32 should be identity");
+        assert!(quantization_error(&weights, &quantized).abs() < 1e-10);
     }
 
     #[test]
     fn test_q8_bounded_error() {
-        let weights = det_weights(256, 42);
-        let quantized = quantize_dequantize(&weights, QuantMode::Q8);
-        let rmse = quantization_error(&weights, &quantized);
-        assert!(rmse < 0.001, "Q8 RMSE should be very small: {}", rmse);
+        let w = det_weights(256, 42);
+        let rmse = quantization_error(&w, &quantize_dequantize(&w, QuantMode::Q8));
+        assert!(rmse < 0.001, "Q8 RMSE should be very small: {rmse}");
     }
 
     #[test]
     fn test_q4_larger_error_than_q8() {
-        let weights = det_weights(256, 42);
-        let q8 = quantize_dequantize(&weights, QuantMode::Q8);
-        let q4 = quantize_dequantize(&weights, QuantMode::Q4);
-        let rmse_q8 = quantization_error(&weights, &q8);
-        let rmse_q4 = quantization_error(&weights, &q4);
-        assert!(
-            rmse_q4 > rmse_q8,
-            "Q4 error ({}) should exceed Q8 error ({})",
-            rmse_q4,
-            rmse_q8
-        );
+        let w = det_weights(256, 42);
+        let r8 = quantization_error(&w, &quantize_dequantize(&w, QuantMode::Q8));
+        let r4 = quantization_error(&w, &quantize_dequantize(&w, QuantMode::Q4));
+        assert!(r4 > r8, "Q4 error ({r4}) should exceed Q8 ({r8})");
     }
 
     #[test]
@@ -468,62 +442,44 @@ mod tests {
 
     #[test]
     fn test_memory_savings_q4() {
-        let n_params = D_OUT * D_IN;
-        let fp32_bytes = n_params * 4;
-        let q4_bytes = n_params * QuantMode::Q4.bits_per_param() / 8;
+        let n = D_OUT * D_IN;
+        let (fp32, q4) = (n * 4, n * QuantMode::Q4.bits_per_param() / 8);
         assert!(
-            q4_bytes < fp32_bytes,
-            "Q4 ({}) should use less memory than FP32 ({})",
-            q4_bytes,
-            fp32_bytes
+            q4 < fp32,
+            "Q4 ({q4}) should use less memory than FP32 ({fp32})"
         );
-        // 4 bits vs 32 bits = 8x reduction
-        assert_eq!(fp32_bytes / q4_bytes, 8);
+        assert_eq!(fp32 / q4, 8); // 4 bits vs 32 bits = 8x reduction
     }
 
     #[test]
-    fn test_quant_mode_bits() {
-        assert_eq!(QuantMode::FP32.bits_per_param(), 32);
-        assert_eq!(QuantMode::Q8.bits_per_param(), 8);
-        assert_eq!(QuantMode::Q4.bits_per_param(), 4);
-    }
-
-    #[test]
-    fn test_quant_mode_names() {
-        assert_eq!(QuantMode::FP32.name(), "FP32");
-        assert_eq!(QuantMode::Q8.name(), "INT8");
-        assert_eq!(QuantMode::Q4.name(), "NF4");
+    fn test_quant_mode_properties() {
+        for (mode, bits, name) in [
+            (QuantMode::FP32, 32, "FP32"),
+            (QuantMode::Q8, 8, "INT8"),
+            (QuantMode::Q4, 4, "NF4"),
+        ] {
+            assert_eq!(mode.bits_per_param(), bits);
+            assert_eq!(mode.name(), name);
+        }
     }
 
     #[test]
     fn test_save_apr_v2() {
-        let raw = det_weights(D_OUT * D_IN, 42);
-        let base = Tensor::from_vec(raw, false);
+        let base = Tensor::from_vec(det_weights(D_OUT * D_IN, 42), false);
         let mut layer = LoRALayer::new(base, D_OUT, D_IN, RANK, ALPHA);
         layer.merge();
-
-        let weight_bytes: Vec<u8> = layer
+        let bytes: Vec<u8> = layer
             .base_weight()
             .data()
             .iter()
             .flat_map(|f| f.to_le_bytes())
             .collect();
-
         let bundle = ModelBundleV2::new()
             .with_name("test-qlora")
             .with_compression(Compression::Lz4)
             .with_quantization(Quantization::FP32)
-            .add_tensor("weight", vec![D_OUT, D_IN], weight_bytes)
+            .add_tensor("weight", vec![D_OUT, D_IN], bytes)
             .build();
-
         assert_eq!(&bundle[0..4], b"APR2");
-    }
-
-    #[test]
-    fn test_quantization_error_zero_for_fp32() {
-        let weights = det_weights(100, 77);
-        let quantized = quantize_dequantize(&weights, QuantMode::FP32);
-        let err = quantization_error(&weights, &quantized);
-        assert!(err.abs() < 1e-10, "FP32 error should be zero: {}", err);
     }
 }
