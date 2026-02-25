@@ -705,7 +705,7 @@ mod tests {
     #[test]
     fn test_pixel_to_u8() {
         let p = Pixel::new(0.5, 0.5, 0.5);
-        let (r, g, b) = p.to_u8();
+        let (r, _g, _b) = p.to_u8();
         assert_eq!(r, 127);
     }
 
@@ -853,9 +853,7 @@ mod proptests {
         fn prop_pixel_to_u8_valid(r in 0.0f32..1.0, g in 0.0f32..1.0, b in 0.0f32..1.0) {
             let p = Pixel::new(r, g, b);
             let (r8, g8, b8) = p.to_u8();
-            prop_assert!(r8 <= 255);
-            prop_assert!(g8 <= 255);
-            prop_assert!(b8 <= 255);
+            let _ = (r8, g8, b8);
         }
 
         #[test]

@@ -360,7 +360,7 @@ mod tests {
 
     #[test]
     fn test_percentiles() {
-        let mut times: Vec<f64> = (1..=100).map(|i| i as f64).collect();
+        let times: Vec<f64> = (1..=100).map(|i| i as f64).collect();
 
         let config = BenchConfig {
             model_path: None,
