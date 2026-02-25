@@ -4,6 +4,9 @@
 [advisories]
 db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
+ignore = [
+    "RUSTSEC-2025-0141", # bincode unmaintained — transitive dep via aprender
+]
 
 [licenses]
 allow = [
@@ -15,6 +18,7 @@ allow = [
     "Zlib",
     "Unicode-3.0",
     "Unicode-DFS-2016",
+    "MPL-2.0",
 ]
 confidence-threshold = 0.8
 
