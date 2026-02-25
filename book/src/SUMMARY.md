@@ -132,6 +132,8 @@
 - [Pruning-Aware Distillation](./recipes/k-distillation/pruning-aware.md)
 - [Quantization-Aware Distillation](./recipes/k-distillation/quantization-aware.md)
 - [Structured Pruning](./recipes/k-distillation/structured-pruning.md)
+- [Attention Transfer](./recipes/k-distillation/attention-transfer.md)
+- [Self-Distillation](./recipes/k-distillation/self-distillation.md)
 
 # Category L: CLI Tools
 
