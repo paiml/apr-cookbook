@@ -1,3 +1,6 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/finetune_qlora.rs`
+//! which mirrors the `apr finetune --method qlora` CLI workflow.
+//!
 //! Entrenar QLoRA Fine-Tuning Example
 //!
 //! Demonstrates Quantized LoRA (QLoRA) fine-tuning: the base model weights

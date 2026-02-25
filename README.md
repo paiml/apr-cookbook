@@ -13,14 +13,37 @@
 
 ![](.github/apr-cookbook-hero.svg)
 
-121 executable examples across 20 categories covering model bundling, format conversion, training, inference, and deployment with the APR v2 format.
+169 executable examples across 24 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
 
-## Quick Start
+## Installation
 
 ```bash
+# Clone the repository
+git clone https://github.com/paiml/apr-cookbook.git
+cd apr-cookbook
+
+# Build all examples
+cargo build --examples
+
+# Run tests
+cargo test --all-features
+```
+
+Requires Rust 1.75+ (`rustup update stable`).
+
+## Usage
+
+```bash
+# Run any example by name
 cargo run --example create_apr_from_scratch
 cargo run --example bundle_static_model
-cargo run --example simple_inference
+cargo run --example optimize_full_pipeline
+
+# Run example tests
+cargo test --example finetune_lora
+
+# List all examples
+cargo run --example 2>&1 | head -50
 ```
 
 ## Stack
@@ -52,6 +75,10 @@ cargo run --example simple_inference
 | [Distributed](examples/distributed/) | 2 | Multi-node inference, model sharding |
 | [Inference](examples/inference/) | 11 | Speculative decode, KV-cache, streaming, ensemble, tool use |
 | [Serving](examples/serve/) | 5 | HTTP server, A/B testing, canary deploy, rate limiting |
+| [Optimize](examples/optimize/) | 22 | Full pipeline, LoRA, QLoRA, pruning, distillation, merge, quantize |
+| [Chat](examples/chat/) | 5 | ChatML, LLaMA 2, Mistral, multi-format, injection defense |
+| [Analysis](examples/analysis/) | 11 | Inspect, validate, diff, bench, profile, QA gates, oracle |
+| [Format](examples/format/) | 10 | Import, export, Rosetta convert/chain/verify, batch export |
 | [Advanced](examples/advanced/) | 16 | RAG pipeline, style transfer, voice recognition, and more |
 
 Run any example:
@@ -103,6 +130,20 @@ cargo test --all-features
 - [The APR Cookbook](https://paiml.github.io/apr-cookbook/) — Online book
 - [API Reference](https://docs.rs/apr-cookbook) — Rust docs
 - [APR v2 Spec](docs/specifications/cookbook-spec.md) — Format specification
+
+## Contributing
+
+1. Fork the repository
+2. Create your example following the template in `docs/specifications/apr-cli-demos.md`
+3. Ensure all quality gates pass:
+   ```bash
+   cargo fmt --check
+   cargo clippy --all-targets -- -D warnings
+   cargo test --all-features
+   ```
+4. Submit a pull request
+
+Every example must include a doc header with QA checklist, use `RecipeContext` for isolation, and contain 8-15 unit tests.
 
 ## License
 

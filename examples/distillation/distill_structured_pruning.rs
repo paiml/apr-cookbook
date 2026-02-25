@@ -1,3 +1,6 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/prune_structured.rs`
+//! which mirrors the `apr prune --method structured` CLI workflow.
+//!
 //! # Recipe: Structured Pruning for Model Compression
 //!
 //! **Category**: Model Distillation

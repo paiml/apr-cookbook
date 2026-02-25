@@ -1,3 +1,6 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/finetune_lora.rs`
+//! which mirrors the `apr finetune --method lora` CLI workflow.
+//!
 //! Entrenar LoRA Fine-Tuning Example
 //!
 //! Demonstrates parameter-efficient fine-tuning using Low-Rank Adaptation (LoRA)

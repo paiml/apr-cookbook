@@ -161,6 +161,10 @@ path = "examples/creation/create_apr_kmeans_clustering.rs"
 name = "create_apr_ngram_language_model"
 path = "examples/creation/create_apr_ngram_language_model.rs"
 
+[[example]]
+name = "create_apr_neural_network"
+path = "examples/creation/create_apr_neural_network.rs"
+
 # Category B: Binary Bundling (additional)
 [[example]]
 name = "bundle_apr_static_binary"
@@ -294,6 +298,10 @@ path = "examples/api/api_batch_inference.rs"
 name = "api_model_health_check"
 path = "examples/api/api_model_health_check.rs"
 
+[[example]]
+name = "api_auth_middleware"
+path = "examples/api/api_auth_middleware.rs"
+
 # Category G: Serverless
 [[example]]
 name = "serverless_lambda_inference"
@@ -361,6 +369,10 @@ path = "examples/gpu/gpu_multi_gpu_inference.rs"
 name = "gpu_memory_management"
 path = "examples/gpu/gpu_memory_management.rs"
 
+[[example]]
+name = "gpu_memory_pool"
+path = "examples/gpu/gpu_memory_pool.rs"
+
 # Category J: SIMD Acceleration (additional)
 [[example]]
 name = "trueno_simd_ops"
@@ -419,6 +431,10 @@ path = "examples/cli/cli_apr_convert.rs"
 [[example]]
 name = "cli_apr_serve"
 path = "examples/cli/cli_apr_serve.rs"
+
+[[example]]
+name = "cli_apr_diff"
+path = "examples/cli/cli_apr_diff.rs"
 
 # --- Benchmarks ---
 
@@ -600,3 +616,199 @@ path = "examples/distributed/distributed_inference.rs"
 [[example]]
 name = "distributed_model_sharding"
 path = "examples/distributed/distributed_model_sharding.rs"
+
+# --- Category: Optimize ---
+
+[[example]]
+name = "distill_standard_kl"
+path = "examples/optimize/distill_standard_kl.rs"
+
+[[example]]
+name = "distill_progressive"
+path = "examples/optimize/distill_progressive.rs"
+
+[[example]]
+name = "distill_ensemble"
+path = "examples/optimize/distill_ensemble.rs"
+
+[[example]]
+name = "distill_checkpoint"
+path = "examples/optimize/distill_checkpoint.rs"
+
+[[example]]
+name = "optimize_full_pipeline"
+path = "examples/optimize/optimize_full_pipeline.rs"
+
+[[example]]
+name = "prune_magnitude"
+path = "examples/optimize/prune_magnitude.rs"
+
+[[example]]
+name = "prune_structured"
+path = "examples/optimize/prune_structured.rs"
+
+[[example]]
+name = "prune_depth"
+path = "examples/optimize/prune_depth.rs"
+
+[[example]]
+name = "prune_wanda"
+path = "examples/optimize/prune_wanda.rs"
+
+[[example]]
+name = "prune_gradual_schedule"
+path = "examples/optimize/prune_gradual_schedule.rs"
+
+[[example]]
+name = "finetune_lora"
+path = "examples/optimize/finetune_lora.rs"
+
+[[example]]
+name = "finetune_qlora"
+path = "examples/optimize/finetune_qlora.rs"
+
+[[example]]
+name = "finetune_merge_adapter"
+path = "examples/optimize/finetune_merge_adapter.rs"
+
+[[example]]
+name = "finetune_plan_vram"
+path = "examples/optimize/finetune_plan_vram.rs"
+
+[[example]]
+name = "merge_average"
+path = "examples/optimize/merge_average.rs"
+
+[[example]]
+name = "merge_weighted"
+path = "examples/optimize/merge_weighted.rs"
+
+[[example]]
+name = "merge_slerp"
+path = "examples/optimize/merge_slerp.rs"
+
+[[example]]
+name = "merge_ties"
+path = "examples/optimize/merge_ties.rs"
+
+[[example]]
+name = "merge_dare"
+path = "examples/optimize/merge_dare.rs"
+
+[[example]]
+name = "merge_hierarchical"
+path = "examples/optimize/merge_hierarchical.rs"
+
+[[example]]
+name = "quantize_4bit"
+path = "examples/optimize/quantize_4bit.rs"
+
+[[example]]
+name = "quantize_fake_qat"
+path = "examples/optimize/quantize_fake_qat.rs"
+
+# --- Category: Chat Templates ---
+
+[[example]]
+name = "chat_chatml"
+path = "examples/chat/chat_chatml.rs"
+
+[[example]]
+name = "chat_llama2"
+path = "examples/chat/chat_llama2.rs"
+
+[[example]]
+name = "chat_mistral"
+path = "examples/chat/chat_mistral.rs"
+
+[[example]]
+name = "chat_multi_format"
+path = "examples/chat/chat_multi_format.rs"
+
+[[example]]
+name = "chat_injection_defense"
+path = "examples/chat/chat_injection_defense.rs"
+
+[[example]]
+name = "analysis_oracle"
+path = "examples/analysis/analysis_oracle.rs"
+
+[[example]]
+name = "analysis_canary"
+path = "examples/analysis/analysis_canary.rs"
+
+[[example]]
+name = "analysis_tree"
+path = "examples/analysis/analysis_tree.rs"
+
+[[example]]
+name = "analysis_hex"
+path = "examples/analysis/analysis_hex.rs"
+
+[[example]]
+name = "analysis_explain"
+path = "examples/analysis/analysis_explain.rs"
+
+[[example]]
+name = "analysis_inspect"
+path = "examples/analysis/analysis_inspect.rs"
+
+[[example]]
+name = "analysis_validate"
+path = "examples/analysis/analysis_validate.rs"
+
+[[example]]
+name = "analysis_diff"
+path = "examples/analysis/analysis_diff.rs"
+
+[[example]]
+name = "analysis_bench"
+path = "examples/analysis/analysis_bench.rs"
+
+[[example]]
+name = "analysis_profile"
+path = "examples/analysis/analysis_profile.rs"
+
+[[example]]
+name = "analysis_qa_gates"
+path = "examples/analysis/analysis_qa_gates.rs"
+
+[[example]]
+name = "format_import_hf"
+path = "examples/format/format_import_hf.rs"
+
+[[example]]
+name = "format_export_safetensors"
+path = "examples/format/format_export_safetensors.rs"
+
+[[example]]
+name = "format_export_gguf"
+path = "examples/format/format_export_gguf.rs"
+
+[[example]]
+name = "format_rosetta_convert"
+path = "examples/format/format_rosetta_convert.rs"
+
+[[example]]
+name = "format_rosetta_chain"
+path = "examples/format/format_rosetta_chain.rs"
+
+[[example]]
+name = "format_rosetta_verify"
+path = "examples/format/format_rosetta_verify.rs"
+
+[[example]]
+name = "format_convert_quantize"
+path = "examples/format/format_convert_quantize.rs"
+
+[[example]]
+name = "format_publish"
+path = "examples/format/format_publish.rs"
+
+[[example]]
+name = "format_pull_cache"
+path = "examples/format/format_pull_cache.rs"
+
+[[example]]
+name = "format_batch_export"
+path = "examples/format/format_batch_export.rs"
