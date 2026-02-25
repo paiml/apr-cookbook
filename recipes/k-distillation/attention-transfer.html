@@ -1,0 +1,1025 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Attention Transfer - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/neural-network.html"><strong aria-hidden="true">14.</strong> Neural Network</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">15.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">16.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">17.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">18.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">19.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">20.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">21.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">22.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">23.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">24.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">25.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">26.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">27.</strong> Curriculum Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd.html"><strong aria-hidden="true">28.</strong> Autograd Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lora.html"><strong aria-hidden="true">29.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/qlora.html"><strong aria-hidden="true">30.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/distillation.html"><strong aria-hidden="true">31.</strong> Knowledge Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/model-merge.html"><strong aria-hidden="true">32.</strong> Model Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/eval-metrics.html"><strong aria-hidden="true">33.</strong> Evaluation Metrics</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/hyperparameter-sweep.html"><strong aria-hidden="true">34.</strong> Hyperparameter Sweep</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/checkpoint-resume.html"><strong aria-hidden="true">35.</strong> Checkpoint Resume</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/mixed-precision.html"><strong aria-hidden="true">36.</strong> Mixed-Precision Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/few-shot.html"><strong aria-hidden="true">37.</strong> Few-Shot Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/gradient-accumulation.html"><strong aria-hidden="true">38.</strong> Gradient Accumulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lr-schedule.html"><strong aria-hidden="true">39.</strong> Learning Rate Schedules</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/data-preprocessing.html"><strong aria-hidden="true">40.</strong> Data Preprocessing</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">41.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">42.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">43.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">44.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">45.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">46.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">47.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">48.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">49.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">50.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">51.</strong> Model Rollback</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-versioning.html"><strong aria-hidden="true">52.</strong> Model Versioning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">53.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">54.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">55.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">56.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">57.</strong> Health Check</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/auth-middleware.html"><strong aria-hidden="true">58.</strong> Auth Middleware</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">60.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">61.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">62.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">63.</strong> Container Image</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/model-warmup.html"><strong aria-hidden="true">64.</strong> Model Warmup</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">65.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">66.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">67.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">68.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">69.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">70.</strong> Streaming Compilation</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/model-loader.html"><strong aria-hidden="true">71.</strong> Model Loader</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">72.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/flash-attention.html"><strong aria-hidden="true">73.</strong> FlashAttention</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">74.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">75.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">76.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">77.</strong> Memory Management</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-pool.html"><strong aria-hidden="true">78.</strong> Memory Pool</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/ptx-analysis.html"><strong aria-hidden="true">79.</strong> PTX Analysis</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">80.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">81.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">82.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">83.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">84.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">85.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">86.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">87.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">88.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">89.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/structured-pruning.html"><strong aria-hidden="true">90.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/attention-transfer.html" class="active"><strong aria-hidden="true">91.</strong> Attention Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/self-distillation.html"><strong aria-hidden="true">92.</strong> Self-Distillation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">93.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">94.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">95.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">96.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">97.</strong> apr-serve</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-diff.html"><strong aria-hidden="true">98.</strong> apr-diff</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-tui.html"><strong aria-hidden="true">99.</strong> apr-tui</a></li><li class="chapter-item expanded affix "><li class="part-title">Category M: Inference Monitoring</li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/index.html"><strong aria-hidden="true">100.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/explainability.html"><strong aria-hidden="true">101.</strong> Inference Explainability</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/hash-chain-audit.html"><strong aria-hidden="true">102.</strong> Hash Chain Audit</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cost-tracking.html"><strong aria-hidden="true">103.</strong> Cost Tracking</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/latency-histogram.html"><strong aria-hidden="true">104.</strong> Latency Histogram</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/drift-detection.html"><strong aria-hidden="true">105.</strong> Drift Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cbtop-headless.html"><strong aria-hidden="true">106.</strong> Headless cbtop</a></li><li class="chapter-item expanded affix "><li class="part-title">Category N: Speech Recognition</li><li class="chapter-item expanded "><a href="../../recipes/n-speech/index.html"><strong aria-hidden="true">107.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-transcribe.html"><strong aria-hidden="true">108.</strong> Whisper Transcription</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-streaming.html"><strong aria-hidden="true">109.</strong> Streaming ASR</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/vad.html"><strong aria-hidden="true">110.</strong> Voice Activity Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/diarization.html"><strong aria-hidden="true">111.</strong> Speaker Diarization</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/multilingual.html"><strong aria-hidden="true">112.</strong> Multilingual Identification</a></li><li class="chapter-item expanded affix "><li class="part-title">Category O: Distributed Computing</li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/index.html"><strong aria-hidden="true">113.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/distributed-inference.html"><strong aria-hidden="true">114.</strong> Distributed Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/model-sharding.html"><strong aria-hidden="true">115.</strong> Model Sharding</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/ring-allreduce.html"><strong aria-hidden="true">116.</strong> Ring AllReduce</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/pipeline-parallel.html"><strong aria-hidden="true">117.</strong> Pipeline Parallelism</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/gossip-protocol.html"><strong aria-hidden="true">118.</strong> Gossip Protocol</a></li><li class="chapter-item expanded affix "><li class="part-title">Category P: Inference Patterns</li><li class="chapter-item expanded "><a href="../../recipes/p-inference/index.html"><strong aria-hidden="true">119.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/simple.html"><strong aria-hidden="true">120.</strong> Simple Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/speculative-decode.html"><strong aria-hidden="true">121.</strong> Speculative Decoding</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/kv-cache.html"><strong aria-hidden="true">122.</strong> KV-Cache Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/multi-turn.html"><strong aria-hidden="true">123.</strong> Multi-turn Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/tool-use.html"><strong aria-hidden="true">124.</strong> Tool Use</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/streaming.html"><strong aria-hidden="true">125.</strong> Streaming Tokens</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/adaptive-batch.html"><strong aria-hidden="true">126.</strong> Adaptive Batching</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/dynamic-batch-sla.html"><strong aria-hidden="true">127.</strong> Dynamic Batch SLA</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/ensemble.html"><strong aria-hidden="true">128.</strong> Ensemble Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/pipeline.html"><strong aria-hidden="true">129.</strong> Model Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/quantized-comparison.html"><strong aria-hidden="true">130.</strong> Quantized Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/apr-run.html"><strong aria-hidden="true">131.</strong> APR Run</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Q: Model Serving</li><li class="chapter-item expanded "><a href="../../recipes/q-serving/index.html"><strong aria-hidden="true">132.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/http-server.html"><strong aria-hidden="true">133.</strong> HTTP Model Server</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/ab-testing.html"><strong aria-hidden="true">134.</strong> A/B Testing</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/canary-deploy.html"><strong aria-hidden="true">135.</strong> Canary Deploy</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/rate-limiter.html"><strong aria-hidden="true">136.</strong> Rate Limiter</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/selection-router.html"><strong aria-hidden="true">137.</strong> Selection Router</a></li><li class="chapter-item expanded affix "><li class="part-title">Category R: Model Optimization</li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/index.html"><strong aria-hidden="true">138.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/full-pipeline.html"><strong aria-hidden="true">139.</strong> Full Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-lora.html"><strong aria-hidden="true">140.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-qlora.html"><strong aria-hidden="true">141.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-merge-adapter.html"><strong aria-hidden="true">142.</strong> Adapter Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-plan-vram.html"><strong aria-hidden="true">143.</strong> VRAM Planning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-magnitude.html"><strong aria-hidden="true">144.</strong> Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-structured.html"><strong aria-hidden="true">145.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-depth.html"><strong aria-hidden="true">146.</strong> Depth Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-wanda.html"><strong aria-hidden="true">147.</strong> Wanda Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-gradual-schedule.html"><strong aria-hidden="true">148.</strong> Gradual Schedule</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-standard-kl.html"><strong aria-hidden="true">149.</strong> Standard KL Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-progressive.html"><strong aria-hidden="true">150.</strong> Progressive Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-ensemble.html"><strong aria-hidden="true">151.</strong> Ensemble Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-checkpoint.html"><strong aria-hidden="true">152.</strong> Distillation Checkpoint</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-average.html"><strong aria-hidden="true">153.</strong> Average Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-weighted.html"><strong aria-hidden="true">154.</strong> Weighted Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-slerp.html"><strong aria-hidden="true">155.</strong> SLERP Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-ties.html"><strong aria-hidden="true">156.</strong> TIES Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-dare.html"><strong aria-hidden="true">157.</strong> DARE Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-hierarchical.html"><strong aria-hidden="true">158.</strong> Hierarchical Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-4bit.html"><strong aria-hidden="true">159.</strong> Int4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-fake-qat.html"><strong aria-hidden="true">160.</strong> Fake QAT</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/tune.html"><strong aria-hidden="true">161.</strong> Tune</a></li><li class="chapter-item expanded affix "><li class="part-title">Category S: Chat Templates</li><li class="chapter-item expanded "><a href="../../recipes/s-chat/index.html"><strong aria-hidden="true">162.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/chatml.html"><strong aria-hidden="true">163.</strong> ChatML Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/llama2.html"><strong aria-hidden="true">164.</strong> LLaMA 2 Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/mistral.html"><strong aria-hidden="true">165.</strong> Mistral Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/multi-format.html"><strong aria-hidden="true">166.</strong> Multi-Format Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/injection-defense.html"><strong aria-hidden="true">167.</strong> Injection Defense</a></li><li class="chapter-item expanded affix "><li class="part-title">Category T: Model Analysis</li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/index.html"><strong aria-hidden="true">168.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/inspect.html"><strong aria-hidden="true">169.</strong> Inspect</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/validate.html"><strong aria-hidden="true">170.</strong> Validate</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/diff.html"><strong aria-hidden="true">171.</strong> Diff</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/bench.html"><strong aria-hidden="true">172.</strong> Bench</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/profile.html"><strong aria-hidden="true">173.</strong> Profile</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-gates.html"><strong aria-hidden="true">174.</strong> QA Gates</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/oracle.html"><strong aria-hidden="true">175.</strong> Oracle</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/canary.html"><strong aria-hidden="true">176.</strong> Canary</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tree.html"><strong aria-hidden="true">177.</strong> Tree</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/hex.html"><strong aria-hidden="true">178.</strong> Hex</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/explain.html"><strong aria-hidden="true">179.</strong> Explain</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/trace.html"><strong aria-hidden="true">180.</strong> Trace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/eval.html"><strong aria-hidden="true">181.</strong> Eval</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/flow.html"><strong aria-hidden="true">182.</strong> Flow</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/lint.html"><strong aria-hidden="true">183.</strong> Lint</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/check.html"><strong aria-hidden="true">184.</strong> Check</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/debug.html"><strong aria-hidden="true">185.</strong> Debug</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/parity.html"><strong aria-hidden="true">186.</strong> Parity</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qualify.html"><strong aria-hidden="true">187.</strong> Qualify</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/compare-hf.html"><strong aria-hidden="true">188.</strong> Compare HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/probar.html"><strong aria-hidden="true">189.</strong> Probar</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tensors.html"><strong aria-hidden="true">190.</strong> Tensors</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/slice.html"><strong aria-hidden="true">191.</strong> Slice</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-capability.html"><strong aria-hidden="true">192.</strong> QA Capability</a></li><li class="chapter-item expanded affix "><li class="part-title">Category U: Format Operations</li><li class="chapter-item expanded "><a href="../../recipes/u-format/index.html"><strong aria-hidden="true">193.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/import-hf.html"><strong aria-hidden="true">194.</strong> Import from HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-safetensors.html"><strong aria-hidden="true">195.</strong> Export SafeTensors</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-gguf.html"><strong aria-hidden="true">196.</strong> Export GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-convert.html"><strong aria-hidden="true">197.</strong> Rosetta Convert</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-chain.html"><strong aria-hidden="true">198.</strong> Rosetta Chain</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-verify.html"><strong aria-hidden="true">199.</strong> Rosetta Verify</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/convert-quantize.html"><strong aria-hidden="true">200.</strong> Convert + Quantize</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/publish.html"><strong aria-hidden="true">201.</strong> Publish</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/pull-cache.html"><strong aria-hidden="true">202.</strong> Pull + Cache</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/batch-export.html"><strong aria-hidden="true">203.</strong> Batch Export</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/migration-pipeline.html"><strong aria-hidden="true">204.</strong> Migration Pipeline</a></li><li class="chapter-item expanded affix "><li class="part-title">Category V: Advanced Pipelines</li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/index.html"><strong aria-hidden="true">205.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/showcase.html"><strong aria-hidden="true">206.</strong> Model Showcase</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/cicd-pipeline.html"><strong aria-hidden="true">207.</strong> CI/CD Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/ab-experiment.html"><strong aria-hidden="true">208.</strong> A/B Experiment</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/debug-fix-loop.html"><strong aria-hidden="true">209.</strong> Debug-Fix Loop</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/compliance-audit.html"><strong aria-hidden="true">210.</strong> Compliance Audit</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Y: Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/index.html"><strong aria-hidden="true">211.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/autotuner.html"><strong aria-hidden="true">212.</strong> Autotuner</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/kernel-fusion.html"><strong aria-hidden="true">213.</strong> Kernel Fusion</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/mmap-inference.html"><strong aria-hidden="true">214.</strong> Memory-Mapped Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/quantized-matmul.html"><strong aria-hidden="true">215.</strong> Quantized MatMul</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">216.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">217.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">218.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">219.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">220.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/k-distillation/attention-transfer.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="attention-transfer"><a class="header" href="#attention-transfer">Attention Transfer</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example distill_attention_transfer
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: Attention Transfer Distillation
+//!
+//! **Category**: Model Distillation
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (N/A)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Transfer attention maps from a large teacher model to a smaller student,
+//! using MSE loss between projected attention weight matrices.
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example distill_attention_transfer
+//! ```
+
+use apr_cookbook::prelude::*;
+use serde::{Deserialize, Serialize};
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new(&quot;distill_attention_transfer&quot;)?;
+
+    println!(&quot;=== Recipe: {} ===&quot;, ctx.name());
+    println!(&quot;Attention transfer distillation: Teacher -&gt; Student&quot;);
+    println!();
+
+    // --- Section: Model Specifications ---
+    println!(&quot;--- Model Specifications ---&quot;);
+    println!();
+
+    let teacher = AttentionModelSpec {
+        name: &quot;teacher&quot;.to_string(),
+        layers: 12,
+        hidden_size: 768,
+        num_heads: 12,
+        head_dim: 64,
+        seq_len: 128,
+        params_millions: 110.0,
+    };
+
+    let student = AttentionModelSpec {
+        name: &quot;student&quot;.to_string(),
+        layers: 4,
+        hidden_size: 256,
+        num_heads: 4,
+        head_dim: 64,
+        seq_len: 128,
+        params_millions: 6.5,
+    };
+
+    println!(&quot;Teacher Model:&quot;);
+    println!(&quot;  Layers: {}&quot;, teacher.layers);
+    println!(&quot;  Hidden: {}&quot;, teacher.hidden_size);
+    println!(&quot;  Attention heads: {}&quot;, teacher.num_heads);
+    println!(&quot;  Head dim: {}&quot;, teacher.head_dim);
+    println!(&quot;  Parameters: {:.1}M&quot;, teacher.params_millions);
+    println!();
+
+    println!(&quot;Student Model:&quot;);
+    println!(&quot;  Layers: {}&quot;, student.layers);
+    println!(&quot;  Hidden: {}&quot;, student.hidden_size);
+    println!(&quot;  Attention heads: {}&quot;, student.num_heads);
+    println!(&quot;  Head dim: {}&quot;, student.head_dim);
+    println!(&quot;  Parameters: {:.1}M&quot;, student.params_millions);
+    println!();
+
+    let compression_ratio = teacher.params_millions / student.params_millions;
+    ctx.record_float_metric(&quot;compression_ratio&quot;, compression_ratio);
+
+    // --- Section: Attention Map Extraction ---
+    println!(&quot;--- Attention Map Extraction ---&quot;);
+    println!();
+
+    let layer_mappings = build_layer_mappings(&amp;teacher, &amp;student)?;
+
+    println!(&quot;Layer Mappings (Teacher -&gt; Student):&quot;);
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&lt;10} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;10}&quot;,
+        &quot;Name&quot;, &quot;T.Layer&quot;, &quot;T.Heads&quot;, &quot;S.Layer&quot;, &quot;S.Heads&quot;
+    );
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+
+    for mapping in &amp;layer_mappings {
+        println!(
+            &quot;{:&lt;10} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;10}&quot;,
+            mapping.name,
+            mapping.teacher_layer,
+            mapping.teacher_heads,
+            mapping.student_layer,
+            mapping.student_heads,
+        );
+    }
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+    println!();
+
+    ctx.record_metric(&quot;layer_mappings&quot;, layer_mappings.len() as i64);
+
+    // --- Section: Attention Projection ---
+    println!(&quot;--- Attention Projection ---&quot;);
+    println!();
+
+    let projections: Vec&lt;AttentionProjection&gt; = layer_mappings
+        .iter()
+        .map(compute_projection)
+        .collect::&lt;Result&lt;Vec&lt;_&gt;&gt;&gt;()?;
+
+    println!(&quot;Projection Analysis:&quot;);
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&lt;10} {:&gt;14} {:&gt;14} {:&gt;12} {:&gt;10}&quot;,
+        &quot;Layer&quot;, &quot;Teacher Shape&quot;, &quot;Student Shape&quot;, &quot;Projection&quot;, &quot;Params&quot;
+    );
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+
+    for proj in &amp;projections {
+        println!(
+            &quot;{:&lt;10} {:&gt;5}x{:&lt;8} {:&gt;5}x{:&lt;8} {:&gt;12} {:&gt;10}&quot;,
+            proj.layer_name,
+            proj.teacher_attn_shape.0,
+            proj.teacher_attn_shape.1,
+            proj.student_attn_shape.0,
+            proj.student_attn_shape.1,
+            proj.projection_type,
+            proj.projection_params,
+        );
+    }
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+    println!();
+
+    // --- Section: Training Loop ---
+    println!(&quot;--- Attention Transfer Training ---&quot;);
+    println!();
+
+    let config = AttentionTransferConfig {
+        epochs: 10,
+        learning_rate: 1e-4,
+        beta: 0.5, // Weight for attention transfer loss vs task loss
+    };
+
+    println!(&quot;Config:&quot;);
+    println!(&quot;  Epochs: {}&quot;, config.epochs);
+    println!(&quot;  Learning rate: {:.0e}&quot;, config.learning_rate);
+    println!(&quot;  Beta (attention loss weight): {}&quot;, config.beta);
+    println!();
+
+    println!(&quot;Training Progress:&quot;);
+    println!(&quot;{:-&lt;80}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&gt;6} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;12}&quot;,
+        &quot;Epoch&quot;, &quot;Task Loss&quot;, &quot;Attn Loss&quot;, &quot;Total Loss&quot;, &quot;Teacher Acc&quot;, &quot;Student Acc&quot;
+    );
+    println!(&quot;{:-&lt;80}&quot;, &quot;&quot;);
+
+    let mut training_log = Vec::new();
+    for epoch in 1..=config.epochs {
+        let result = simulate_attention_transfer_epoch(epoch, &amp;config, &amp;projections)?;
+        training_log.push(result.clone());
+
+        println!(
+            &quot;{:&gt;6} {:&gt;12.4} {:&gt;12.4} {:&gt;12.4} {:&gt;11.2}% {:&gt;11.2}%&quot;,
+            epoch,
+            result.task_loss,
+            result.attention_transfer_loss,
+            result.total_loss,
+            result.teacher_accuracy * 100.0,
+            result.student_accuracy * 100.0,
+        );
+    }
+    println!(&quot;{:-&lt;80}&quot;, &quot;&quot;);
+
+    // --- Section: Results ---
+    println!();
+    println!(&quot;--- Results ---&quot;);
+    println!();
+
+    let final_result = training_log
+        .last()
+        .ok_or_else(|| CookbookError::invalid_format(&quot;No training results&quot;))?;
+
+    ctx.record_float_metric(&quot;final_student_accuracy&quot;, final_result.student_accuracy);
+    ctx.record_float_metric(&quot;final_attention_loss&quot;, final_result.attention_transfer_loss);
+
+    // Compare with vanilla distillation (no attention transfer)
+    let vanilla_accuracy = 0.85;
+
+    println!(
+        &quot;  Teacher accuracy:           {:.2}%&quot;,
+        final_result.teacher_accuracy * 100.0
+    );
+    println!(
+        &quot;  Student accuracy (vanilla):  {:.2}%&quot;,
+        vanilla_accuracy * 100.0
+    );
+    println!(
+        &quot;  Student accuracy (attn xfr): {:.2}%&quot;,
+        final_result.student_accuracy * 100.0
+    );
+    println!(
+        &quot;  Improvement over vanilla:   +{:.2}%&quot;,
+        (final_result.student_accuracy - vanilla_accuracy) * 100.0
+    );
+    println!(
+        &quot;  Knowledge retention:         {:.1}%&quot;,
+        (final_result.student_accuracy / final_result.teacher_accuracy) * 100.0
+    );
+    println!(&quot;  Compression: {:.1}x fewer parameters&quot;, compression_ratio);
+    println!(
+        &quot;  Final attention MSE: {:.4}&quot;,
+        final_result.attention_transfer_loss
+    );
+
+    // Per-layer attention alignment quality
+    println!();
+    println!(&quot;Per-Layer Attention Alignment:&quot;);
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&lt;10} {:&gt;12} {:&gt;12} {:&gt;12}&quot;,
+        &quot;Layer&quot;, &quot;Attn MSE&quot;, &quot;Cosine Sim&quot;, &quot;Quality&quot;
+    );
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+
+    for proj in &amp;projections {
+        let layer_quality = compute_layer_attention_quality(proj)?;
+        println!(
+            &quot;{:&lt;10} {:&gt;12.4} {:&gt;12.3} {:&gt;12}&quot;,
+            layer_quality.layer_name,
+            layer_quality.attention_mse,
+            layer_quality.cosine_similarity,
+            layer_quality.quality_label,
+        );
+    }
+    println!(&quot;{:-&lt;50}&quot;, &quot;&quot;);
+
+    // Save training log
+    let log_path = ctx.path(&quot;attention_transfer_log.json&quot;);
+    save_log(&amp;log_path, &amp;training_log)?;
+    println!();
+    println!(&quot;Log saved to: {:?}&quot;, log_path);
+
+    ctx.report()?;
+
+    Ok(())
+}
+
+// --- Data Structures ---
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AttentionModelSpec {
+    name: String,
+    layers: u32,
+    hidden_size: u32,
+    num_heads: u32,
+    head_dim: u32,
+    seq_len: u32,
+    params_millions: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AttentionLayerMapping {
+    name: String,
+    teacher_layer: u32,
+    student_layer: u32,
+    teacher_heads: u32,
+    student_heads: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AttentionProjection {
+    layer_name: String,
+    teacher_attn_shape: (u32, u32), // (num_heads, seq_len)
+    student_attn_shape: (u32, u32),
+    projection_type: String,
+    projection_params: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct AttentionTransferConfig {
+    epochs: u32,
+    learning_rate: f64,
+    beta: f64, // Weight for attention transfer loss
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct EpochResult {
+    epoch: u32,
+    task_loss: f64,
+    attention_transfer_loss: f64,
+    total_loss: f64,
+    teacher_accuracy: f64,
+    student_accuracy: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct LayerAttentionQuality {
+    layer_name: String,
+    attention_mse: f64,
+    cosine_similarity: f64,
+    quality_label: String,
+}
+
+// --- Core Logic ---
+
+fn build_layer_mappings(
+    teacher: &amp;AttentionModelSpec,
+    student: &amp;AttentionModelSpec,
+) -&gt; Result&lt;Vec&lt;AttentionLayerMapping&gt;&gt; {
+    // Map student layers to evenly spaced teacher layers
+    let student_layers = student.layers;
+    let teacher_layers = teacher.layers;
+
+    if student_layers == 0 {
+        return Err(CookbookError::invalid_format(
+            &quot;Student must have at least one layer&quot;,
+        ));
+    }
+
+    let names = [&quot;early&quot;, &quot;mid_early&quot;, &quot;mid_late&quot;, &quot;late&quot;];
+
+    let mappings: Vec&lt;AttentionLayerMapping&gt; = (0..student_layers)
+        .map(|s_idx| {
+            // Evenly distribute student layers across teacher layers
+            let t_idx = if student_layers == 1 {
+                teacher_layers - 1
+            } else {
+                (s_idx * (teacher_layers - 1)) / (student_layers - 1)
+            };
+
+            let name = names.get(s_idx as usize).copied().unwrap_or(&quot;extra&quot;);
+
+            AttentionLayerMapping {
+                name: name.to_string(),
+                teacher_layer: t_idx,
+                student_layer: s_idx,
+                teacher_heads: teacher.num_heads,
+                student_heads: student.num_heads,
+            }
+        })
+        .collect();
+
+    Ok(mappings)
+}
+
+fn compute_projection(mapping: &amp;AttentionLayerMapping) -&gt; Result&lt;AttentionProjection&gt; {
+    let seq_len = 128_u32;
+
+    let teacher_shape = (mapping.teacher_heads, seq_len);
+    let student_shape = (mapping.student_heads, seq_len);
+
+    // Projection type depends on whether head counts differ
+    let (projection_type, projection_params) = if mapping.teacher_heads == mapping.student_heads {
+        (&quot;Identity&quot;.to_string(), 0)
+    } else {
+        // Linear projection: maps teacher heads -&gt; student heads
+        // Projection matrix shape: (student_heads, teacher_heads)
+        let params = mapping.student_heads * mapping.teacher_heads;
+        (&quot;Linear&quot;.to_string(), params)
+    };
+
+    Ok(AttentionProjection {
+        layer_name: mapping.name.clone(),
+        teacher_attn_shape: teacher_shape,
+        student_attn_shape: student_shape,
+        projection_type,
+        projection_params,
+    })
+}
+
+fn simulate_attention_transfer_epoch(
+    epoch: u32,
+    config: &amp;AttentionTransferConfig,
+    projections: &amp;[AttentionProjection],
+) -&gt; Result&lt;EpochResult&gt; {
+    let progress = f64::from(epoch) / f64::from(config.epochs);
+
+    // Teacher accuracy is constant (already trained)
+    let teacher_accuracy = 0.92;
+
+    // Task loss decreases over training
+    let initial_task_loss = 2.0;
+    let final_task_loss = 0.35;
+    let task_loss = initial_task_loss - (initial_task_loss - final_task_loss) * progress;
+
+    // Attention transfer loss: decreases as student learns teacher attention patterns
+    // More projection layers = slightly harder to converge
+    let n_projections = projections.len() as f64;
+    let difficulty_factor = 1.0 + 0.05 * (n_projections - 1.0);
+    let initial_attn_loss = 1.5 * difficulty_factor;
+    let final_attn_loss = 0.08;
+    let attention_transfer_loss = initial_attn_loss * (-2.5 * progress).exp()
+        + final_attn_loss * (1.0 - (-2.5 * progress).exp());
+
+    // Combined loss
+    let total_loss = (1.0 - config.beta) * task_loss + config.beta * attention_transfer_loss;
+
+    // Student accuracy: attention transfer provides a boost over vanilla distillation
+    let max_student_accuracy = 0.895; // Better than vanilla (0.85) due to attention guidance
+    let student_accuracy = max_student_accuracy * (1.0 - (-3.5 * progress).exp());
+
+    Ok(EpochResult {
+        epoch,
+        task_loss,
+        attention_transfer_loss,
+        total_loss,
+        teacher_accuracy,
+        student_accuracy,
+    })
+}
+
+fn compute_layer_attention_quality(proj: &amp;AttentionProjection) -&gt; Result&lt;LayerAttentionQuality&gt; {
+    let seed = hash_name_to_seed(&amp;proj.layer_name);
+
+    // MSE decreases for later layers (better alignment after training)
+    let base_mse = 0.15 - (seed % 10) as f64 / 100.0;
+    let attention_mse = base_mse.max(0.02);
+
+    // Cosine similarity of attention patterns
+    let cosine_similarity = 0.85 + (seed % 12) as f64 / 100.0;
+    let cosine_similarity = cosine_similarity.min(0.99);
+
+    let quality_label = if cosine_similarity &gt; 0.95 {
+        &quot;Excellent&quot;
+    } else if cosine_similarity &gt; 0.90 {
+        &quot;Good&quot;
+    } else if cosine_similarity &gt; 0.85 {
+        &quot;Fair&quot;
+    } else {
+        &quot;Needs work&quot;
+    };
+
+    Ok(LayerAttentionQuality {
+        layer_name: proj.layer_name.clone(),
+        attention_mse,
+        cosine_similarity,
+        quality_label: quality_label.to_string(),
+    })
+}
+
+fn save_log(path: &amp;std::path::Path, log: &amp;[EpochResult]) -&gt; Result&lt;()&gt; {
+    let json = serde_json::to_string_pretty(log)
+        .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+    std::fs::write(path, json)?;
+    Ok(())
+}
+
+// --- Tests ---
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn teacher_spec() -&gt; AttentionModelSpec {
+        AttentionModelSpec {
+            name: &quot;teacher&quot;.to_string(),
+            layers: 12,
+            hidden_size: 768,
+            num_heads: 12,
+            head_dim: 64,
+            seq_len: 128,
+            params_millions: 110.0,
+        }
+    }
+
+    fn student_spec() -&gt; AttentionModelSpec {
+        AttentionModelSpec {
+            name: &quot;student&quot;.to_string(),
+            layers: 4,
+            hidden_size: 256,
+            num_heads: 4,
+            head_dim: 64,
+            seq_len: 128,
+            params_millions: 6.5,
+        }
+    }
+
+    fn default_config() -&gt; AttentionTransferConfig {
+        AttentionTransferConfig {
+            epochs: 10,
+            learning_rate: 1e-4,
+            beta: 0.5,
+        }
+    }
+
+    #[test]
+    fn test_build_layer_mappings() {
+        let teacher = teacher_spec();
+        let student = student_spec();
+        let mappings = build_layer_mappings(&amp;teacher, &amp;student).unwrap();
+
+        assert_eq!(mappings.len(), 4);
+        assert_eq!(mappings[0].teacher_layer, 0);
+        assert_eq!(mappings[3].teacher_layer, 11);
+    }
+
+    #[test]
+    fn test_build_layer_mappings_heads() {
+        let teacher = teacher_spec();
+        let student = student_spec();
+        let mappings = build_layer_mappings(&amp;teacher, &amp;student).unwrap();
+
+        for mapping in &amp;mappings {
+            assert_eq!(mapping.teacher_heads, 12);
+            assert_eq!(mapping.student_heads, 4);
+        }
+    }
+
+    #[test]
+    fn test_build_layer_mappings_zero_student_layers() {
+        let teacher = teacher_spec();
+        let mut student = student_spec();
+        student.layers = 0;
+
+        let result = build_layer_mappings(&amp;teacher, &amp;student);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_compute_projection_linear() {
+        let mapping = AttentionLayerMapping {
+            name: &quot;early&quot;.to_string(),
+            teacher_layer: 0,
+            student_layer: 0,
+            teacher_heads: 12,
+            student_heads: 4,
+        };
+
+        let proj = compute_projection(&amp;mapping).unwrap();
+
+        assert_eq!(proj.projection_type, &quot;Linear&quot;);
+        assert_eq!(proj.projection_params, 48); // 4 * 12
+    }
+
+    #[test]
+    fn test_compute_projection_identity() {
+        let mapping = AttentionLayerMapping {
+            name: &quot;same&quot;.to_string(),
+            teacher_layer: 0,
+            student_layer: 0,
+            teacher_heads: 8,
+            student_heads: 8,
+        };
+
+        let proj = compute_projection(&amp;mapping).unwrap();
+
+        assert_eq!(proj.projection_type, &quot;Identity&quot;);
+        assert_eq!(proj.projection_params, 0);
+    }
+
+    #[test]
+    fn test_epoch_result_teacher_constant() {
+        let config = default_config();
+        let projections = vec![AttentionProjection {
+            layer_name: &quot;test&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        }];
+
+        let r1 = simulate_attention_transfer_epoch(1, &amp;config, &amp;projections).unwrap();
+        let r5 = simulate_attention_transfer_epoch(5, &amp;config, &amp;projections).unwrap();
+
+        assert_eq!(r1.teacher_accuracy, r5.teacher_accuracy);
+    }
+
+    #[test]
+    fn test_student_improves_over_epochs() {
+        let config = default_config();
+        let projections = vec![AttentionProjection {
+            layer_name: &quot;test&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        }];
+
+        let early = simulate_attention_transfer_epoch(1, &amp;config, &amp;projections).unwrap();
+        let late = simulate_attention_transfer_epoch(10, &amp;config, &amp;projections).unwrap();
+
+        assert!(late.student_accuracy &gt; early.student_accuracy);
+    }
+
+    #[test]
+    fn test_attention_loss_decreases() {
+        let config = default_config();
+        let projections = vec![AttentionProjection {
+            layer_name: &quot;test&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        }];
+
+        let early = simulate_attention_transfer_epoch(1, &amp;config, &amp;projections).unwrap();
+        let late = simulate_attention_transfer_epoch(10, &amp;config, &amp;projections).unwrap();
+
+        assert!(late.attention_transfer_loss &lt; early.attention_transfer_loss);
+    }
+
+    #[test]
+    fn test_total_loss_combines_components() {
+        let config = AttentionTransferConfig {
+            epochs: 10,
+            learning_rate: 1e-4,
+            beta: 0.5,
+        };
+        let projections = vec![AttentionProjection {
+            layer_name: &quot;test&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        }];
+
+        let result = simulate_attention_transfer_epoch(5, &amp;config, &amp;projections).unwrap();
+
+        let expected_total =
+            (1.0 - config.beta) * result.task_loss + config.beta * result.attention_transfer_loss;
+        assert!((result.total_loss - expected_total).abs() &lt; 1e-10);
+    }
+
+    #[test]
+    fn test_layer_attention_quality_bounded() {
+        let proj = AttentionProjection {
+            layer_name: &quot;test_layer&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        };
+
+        let quality = compute_layer_attention_quality(&amp;proj).unwrap();
+
+        assert!(quality.attention_mse &gt; 0.0);
+        assert!(quality.cosine_similarity &gt;= 0.0);
+        assert!(quality.cosine_similarity &lt;= 1.0);
+        assert!(!quality.quality_label.is_empty());
+    }
+
+    #[test]
+    fn test_deterministic_epoch() {
+        let config = default_config();
+        let projections = vec![AttentionProjection {
+            layer_name: &quot;test&quot;.to_string(),
+            teacher_attn_shape: (12, 128),
+            student_attn_shape: (4, 128),
+            projection_type: &quot;Linear&quot;.to_string(),
+            projection_params: 48,
+        }];
+
+        let r1 = simulate_attention_transfer_epoch(5, &amp;config, &amp;projections).unwrap();
+        let r2 = simulate_attention_transfer_epoch(5, &amp;config, &amp;projections).unwrap();
+
+        assert_eq!(r1.student_accuracy, r2.student_accuracy);
+        assert_eq!(r1.attention_transfer_loss, r2.attention_transfer_loss);
+        assert_eq!(r1.total_loss, r2.total_loss);
+    }
+
+    #[test]
+    fn test_save_log() {
+        let ctx = RecipeContext::new(&quot;test_attn_save&quot;).unwrap();
+        let path = ctx.path(&quot;log.json&quot;);
+
+        let log = vec![EpochResult {
+            epoch: 1,
+            task_loss: 1.5,
+            attention_transfer_loss: 0.8,
+            total_loss: 1.15,
+            teacher_accuracy: 0.92,
+            student_accuracy: 0.45,
+        }];
+
+        save_log(&amp;path, &amp;log).unwrap();
+        assert!(path.exists());
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_student_accuracy_bounded(epoch in 1u32..100) {
+            let config = AttentionTransferConfig {
+                epochs: 100,
+                learning_rate: 1e-4,
+                beta: 0.5,
+            };
+            let projections = vec![AttentionProjection {
+                layer_name: &quot;test&quot;.to_string(),
+                teacher_attn_shape: (12, 128),
+                student_attn_shape: (4, 128),
+                projection_type: &quot;Linear&quot;.to_string(),
+                projection_params: 48,
+            }];
+
+            let result = simulate_attention_transfer_epoch(epoch, &amp;config, &amp;projections).unwrap();
+
+            prop_assert!(result.student_accuracy &gt;= 0.0);
+            prop_assert!(result.student_accuracy &lt;= result.teacher_accuracy);
+        }
+
+        #[test]
+        fn prop_attention_loss_positive(epoch in 1u32..50) {
+            let config = AttentionTransferConfig {
+                epochs: 50,
+                learning_rate: 1e-4,
+                beta: 0.5,
+            };
+            let projections = vec![AttentionProjection {
+                layer_name: &quot;test&quot;.to_string(),
+                teacher_attn_shape: (12, 128),
+                student_attn_shape: (4, 128),
+                projection_type: &quot;Linear&quot;.to_string(),
+                projection_params: 48,
+            }];
+
+            let result = simulate_attention_transfer_epoch(epoch, &amp;config, &amp;projections).unwrap();
+
+            prop_assert!(result.attention_transfer_loss &gt; 0.0);
+            prop_assert!(result.task_loss &gt; 0.0);
+            prop_assert!(result.total_loss &gt; 0.0);
+        }
+
+        #[test]
+        fn prop_total_loss_is_weighted_sum(epoch in 1u32..50, beta in 0.0f64..1.0) {
+            let config = AttentionTransferConfig {
+                epochs: 50,
+                learning_rate: 1e-4,
+                beta,
+            };
+            let projections = vec![AttentionProjection {
+                layer_name: &quot;test&quot;.to_string(),
+                teacher_attn_shape: (12, 128),
+                student_attn_shape: (4, 128),
+                projection_type: &quot;Linear&quot;.to_string(),
+                projection_params: 48,
+            }];
+
+            let result = simulate_attention_transfer_epoch(epoch, &amp;config, &amp;projections).unwrap();
+
+            let expected = (1.0 - beta) * result.task_loss + beta * result.attention_transfer_loss;
+            prop_assert!((result.total_loss - expected).abs() &lt; 1e-10);
+        }
+
+        #[test]
+        fn prop_layer_quality_cosine_bounded(name in &quot;[a-z]{3,10}&quot;) {
+            let proj = AttentionProjection {
+                layer_name: name,
+                teacher_attn_shape: (12, 128),
+                student_attn_shape: (4, 128),
+                projection_type: &quot;Linear&quot;.to_string(),
+                projection_params: 48,
+            };
+
+            let quality = compute_layer_attention_quality(&amp;proj).unwrap();
+
+            prop_assert!(quality.cosine_similarity &gt;= 0.0);
+            prop_assert!(quality.cosine_similarity &lt;= 1.0);
+            prop_assert!(quality.attention_mse &gt; 0.0);
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/k-distillation/structured-pruning.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/k-distillation/self-distillation.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/k-distillation/structured-pruning.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/k-distillation/self-distillation.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

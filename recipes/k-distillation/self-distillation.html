@@ -1,0 +1,1023 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Self-Distillation - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/neural-network.html"><strong aria-hidden="true">14.</strong> Neural Network</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">15.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">16.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">17.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">18.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">19.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">20.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">21.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">22.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">23.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">24.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">25.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">26.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">27.</strong> Curriculum Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd.html"><strong aria-hidden="true">28.</strong> Autograd Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lora.html"><strong aria-hidden="true">29.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/qlora.html"><strong aria-hidden="true">30.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/distillation.html"><strong aria-hidden="true">31.</strong> Knowledge Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/model-merge.html"><strong aria-hidden="true">32.</strong> Model Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/eval-metrics.html"><strong aria-hidden="true">33.</strong> Evaluation Metrics</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/hyperparameter-sweep.html"><strong aria-hidden="true">34.</strong> Hyperparameter Sweep</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/checkpoint-resume.html"><strong aria-hidden="true">35.</strong> Checkpoint Resume</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/mixed-precision.html"><strong aria-hidden="true">36.</strong> Mixed-Precision Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/few-shot.html"><strong aria-hidden="true">37.</strong> Few-Shot Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/gradient-accumulation.html"><strong aria-hidden="true">38.</strong> Gradient Accumulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lr-schedule.html"><strong aria-hidden="true">39.</strong> Learning Rate Schedules</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/data-preprocessing.html"><strong aria-hidden="true">40.</strong> Data Preprocessing</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">41.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">42.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">43.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">44.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">45.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">46.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">47.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">48.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">49.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">50.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">51.</strong> Model Rollback</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-versioning.html"><strong aria-hidden="true">52.</strong> Model Versioning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">53.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">54.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">55.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">56.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">57.</strong> Health Check</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/auth-middleware.html"><strong aria-hidden="true">58.</strong> Auth Middleware</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">60.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">61.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">62.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">63.</strong> Container Image</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/model-warmup.html"><strong aria-hidden="true">64.</strong> Model Warmup</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">65.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">66.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">67.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">68.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">69.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">70.</strong> Streaming Compilation</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/model-loader.html"><strong aria-hidden="true">71.</strong> Model Loader</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">72.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/flash-attention.html"><strong aria-hidden="true">73.</strong> FlashAttention</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">74.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">75.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">76.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">77.</strong> Memory Management</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-pool.html"><strong aria-hidden="true">78.</strong> Memory Pool</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/ptx-analysis.html"><strong aria-hidden="true">79.</strong> PTX Analysis</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">80.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">81.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">82.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">83.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">84.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">85.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">86.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">87.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">88.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">89.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/structured-pruning.html"><strong aria-hidden="true">90.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/attention-transfer.html"><strong aria-hidden="true">91.</strong> Attention Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/self-distillation.html" class="active"><strong aria-hidden="true">92.</strong> Self-Distillation</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">93.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">94.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">95.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">96.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">97.</strong> apr-serve</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-diff.html"><strong aria-hidden="true">98.</strong> apr-diff</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-tui.html"><strong aria-hidden="true">99.</strong> apr-tui</a></li><li class="chapter-item expanded affix "><li class="part-title">Category M: Inference Monitoring</li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/index.html"><strong aria-hidden="true">100.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/explainability.html"><strong aria-hidden="true">101.</strong> Inference Explainability</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/hash-chain-audit.html"><strong aria-hidden="true">102.</strong> Hash Chain Audit</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cost-tracking.html"><strong aria-hidden="true">103.</strong> Cost Tracking</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/latency-histogram.html"><strong aria-hidden="true">104.</strong> Latency Histogram</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/drift-detection.html"><strong aria-hidden="true">105.</strong> Drift Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cbtop-headless.html"><strong aria-hidden="true">106.</strong> Headless cbtop</a></li><li class="chapter-item expanded affix "><li class="part-title">Category N: Speech Recognition</li><li class="chapter-item expanded "><a href="../../recipes/n-speech/index.html"><strong aria-hidden="true">107.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-transcribe.html"><strong aria-hidden="true">108.</strong> Whisper Transcription</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-streaming.html"><strong aria-hidden="true">109.</strong> Streaming ASR</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/vad.html"><strong aria-hidden="true">110.</strong> Voice Activity Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/diarization.html"><strong aria-hidden="true">111.</strong> Speaker Diarization</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/multilingual.html"><strong aria-hidden="true">112.</strong> Multilingual Identification</a></li><li class="chapter-item expanded affix "><li class="part-title">Category O: Distributed Computing</li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/index.html"><strong aria-hidden="true">113.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/distributed-inference.html"><strong aria-hidden="true">114.</strong> Distributed Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/model-sharding.html"><strong aria-hidden="true">115.</strong> Model Sharding</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/ring-allreduce.html"><strong aria-hidden="true">116.</strong> Ring AllReduce</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/pipeline-parallel.html"><strong aria-hidden="true">117.</strong> Pipeline Parallelism</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/gossip-protocol.html"><strong aria-hidden="true">118.</strong> Gossip Protocol</a></li><li class="chapter-item expanded affix "><li class="part-title">Category P: Inference Patterns</li><li class="chapter-item expanded "><a href="../../recipes/p-inference/index.html"><strong aria-hidden="true">119.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/simple.html"><strong aria-hidden="true">120.</strong> Simple Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/speculative-decode.html"><strong aria-hidden="true">121.</strong> Speculative Decoding</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/kv-cache.html"><strong aria-hidden="true">122.</strong> KV-Cache Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/multi-turn.html"><strong aria-hidden="true">123.</strong> Multi-turn Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/tool-use.html"><strong aria-hidden="true">124.</strong> Tool Use</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/streaming.html"><strong aria-hidden="true">125.</strong> Streaming Tokens</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/adaptive-batch.html"><strong aria-hidden="true">126.</strong> Adaptive Batching</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/dynamic-batch-sla.html"><strong aria-hidden="true">127.</strong> Dynamic Batch SLA</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/ensemble.html"><strong aria-hidden="true">128.</strong> Ensemble Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/pipeline.html"><strong aria-hidden="true">129.</strong> Model Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/quantized-comparison.html"><strong aria-hidden="true">130.</strong> Quantized Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/apr-run.html"><strong aria-hidden="true">131.</strong> APR Run</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Q: Model Serving</li><li class="chapter-item expanded "><a href="../../recipes/q-serving/index.html"><strong aria-hidden="true">132.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/http-server.html"><strong aria-hidden="true">133.</strong> HTTP Model Server</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/ab-testing.html"><strong aria-hidden="true">134.</strong> A/B Testing</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/canary-deploy.html"><strong aria-hidden="true">135.</strong> Canary Deploy</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/rate-limiter.html"><strong aria-hidden="true">136.</strong> Rate Limiter</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/selection-router.html"><strong aria-hidden="true">137.</strong> Selection Router</a></li><li class="chapter-item expanded affix "><li class="part-title">Category R: Model Optimization</li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/index.html"><strong aria-hidden="true">138.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/full-pipeline.html"><strong aria-hidden="true">139.</strong> Full Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-lora.html"><strong aria-hidden="true">140.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-qlora.html"><strong aria-hidden="true">141.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-merge-adapter.html"><strong aria-hidden="true">142.</strong> Adapter Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-plan-vram.html"><strong aria-hidden="true">143.</strong> VRAM Planning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-magnitude.html"><strong aria-hidden="true">144.</strong> Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-structured.html"><strong aria-hidden="true">145.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-depth.html"><strong aria-hidden="true">146.</strong> Depth Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-wanda.html"><strong aria-hidden="true">147.</strong> Wanda Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-gradual-schedule.html"><strong aria-hidden="true">148.</strong> Gradual Schedule</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-standard-kl.html"><strong aria-hidden="true">149.</strong> Standard KL Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-progressive.html"><strong aria-hidden="true">150.</strong> Progressive Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-ensemble.html"><strong aria-hidden="true">151.</strong> Ensemble Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-checkpoint.html"><strong aria-hidden="true">152.</strong> Distillation Checkpoint</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-average.html"><strong aria-hidden="true">153.</strong> Average Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-weighted.html"><strong aria-hidden="true">154.</strong> Weighted Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-slerp.html"><strong aria-hidden="true">155.</strong> SLERP Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-ties.html"><strong aria-hidden="true">156.</strong> TIES Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-dare.html"><strong aria-hidden="true">157.</strong> DARE Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-hierarchical.html"><strong aria-hidden="true">158.</strong> Hierarchical Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-4bit.html"><strong aria-hidden="true">159.</strong> Int4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-fake-qat.html"><strong aria-hidden="true">160.</strong> Fake QAT</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/tune.html"><strong aria-hidden="true">161.</strong> Tune</a></li><li class="chapter-item expanded affix "><li class="part-title">Category S: Chat Templates</li><li class="chapter-item expanded "><a href="../../recipes/s-chat/index.html"><strong aria-hidden="true">162.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/chatml.html"><strong aria-hidden="true">163.</strong> ChatML Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/llama2.html"><strong aria-hidden="true">164.</strong> LLaMA 2 Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/mistral.html"><strong aria-hidden="true">165.</strong> Mistral Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/multi-format.html"><strong aria-hidden="true">166.</strong> Multi-Format Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/injection-defense.html"><strong aria-hidden="true">167.</strong> Injection Defense</a></li><li class="chapter-item expanded affix "><li class="part-title">Category T: Model Analysis</li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/index.html"><strong aria-hidden="true">168.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/inspect.html"><strong aria-hidden="true">169.</strong> Inspect</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/validate.html"><strong aria-hidden="true">170.</strong> Validate</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/diff.html"><strong aria-hidden="true">171.</strong> Diff</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/bench.html"><strong aria-hidden="true">172.</strong> Bench</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/profile.html"><strong aria-hidden="true">173.</strong> Profile</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-gates.html"><strong aria-hidden="true">174.</strong> QA Gates</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/oracle.html"><strong aria-hidden="true">175.</strong> Oracle</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/canary.html"><strong aria-hidden="true">176.</strong> Canary</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tree.html"><strong aria-hidden="true">177.</strong> Tree</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/hex.html"><strong aria-hidden="true">178.</strong> Hex</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/explain.html"><strong aria-hidden="true">179.</strong> Explain</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/trace.html"><strong aria-hidden="true">180.</strong> Trace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/eval.html"><strong aria-hidden="true">181.</strong> Eval</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/flow.html"><strong aria-hidden="true">182.</strong> Flow</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/lint.html"><strong aria-hidden="true">183.</strong> Lint</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/check.html"><strong aria-hidden="true">184.</strong> Check</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/debug.html"><strong aria-hidden="true">185.</strong> Debug</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/parity.html"><strong aria-hidden="true">186.</strong> Parity</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qualify.html"><strong aria-hidden="true">187.</strong> Qualify</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/compare-hf.html"><strong aria-hidden="true">188.</strong> Compare HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/probar.html"><strong aria-hidden="true">189.</strong> Probar</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tensors.html"><strong aria-hidden="true">190.</strong> Tensors</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/slice.html"><strong aria-hidden="true">191.</strong> Slice</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-capability.html"><strong aria-hidden="true">192.</strong> QA Capability</a></li><li class="chapter-item expanded affix "><li class="part-title">Category U: Format Operations</li><li class="chapter-item expanded "><a href="../../recipes/u-format/index.html"><strong aria-hidden="true">193.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/import-hf.html"><strong aria-hidden="true">194.</strong> Import from HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-safetensors.html"><strong aria-hidden="true">195.</strong> Export SafeTensors</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-gguf.html"><strong aria-hidden="true">196.</strong> Export GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-convert.html"><strong aria-hidden="true">197.</strong> Rosetta Convert</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-chain.html"><strong aria-hidden="true">198.</strong> Rosetta Chain</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-verify.html"><strong aria-hidden="true">199.</strong> Rosetta Verify</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/convert-quantize.html"><strong aria-hidden="true">200.</strong> Convert + Quantize</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/publish.html"><strong aria-hidden="true">201.</strong> Publish</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/pull-cache.html"><strong aria-hidden="true">202.</strong> Pull + Cache</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/batch-export.html"><strong aria-hidden="true">203.</strong> Batch Export</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/migration-pipeline.html"><strong aria-hidden="true">204.</strong> Migration Pipeline</a></li><li class="chapter-item expanded affix "><li class="part-title">Category V: Advanced Pipelines</li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/index.html"><strong aria-hidden="true">205.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/showcase.html"><strong aria-hidden="true">206.</strong> Model Showcase</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/cicd-pipeline.html"><strong aria-hidden="true">207.</strong> CI/CD Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/ab-experiment.html"><strong aria-hidden="true">208.</strong> A/B Experiment</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/debug-fix-loop.html"><strong aria-hidden="true">209.</strong> Debug-Fix Loop</a></li><li class="chapter-item expanded "><a href="../../recipes/v-advanced/compliance-audit.html"><strong aria-hidden="true">210.</strong> Compliance Audit</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Y: Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/index.html"><strong aria-hidden="true">211.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/autotuner.html"><strong aria-hidden="true">212.</strong> Autotuner</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/kernel-fusion.html"><strong aria-hidden="true">213.</strong> Kernel Fusion</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/mmap-inference.html"><strong aria-hidden="true">214.</strong> Memory-Mapped Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/y-acceleration/quantized-matmul.html"><strong aria-hidden="true">215.</strong> Quantized MatMul</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">216.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">217.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">218.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">219.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">220.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/k-distillation/self-distillation.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="self-distillation"><a class="header" href="#self-distillation">Self-Distillation</a></h1>
+<blockquote>
+<p><strong>Status</strong>: Verified | <strong>Idempotent</strong>: Yes | <strong>Coverage</strong>: 95%+</p>
+</blockquote>
+<h2 id="run-command"><a class="header" href="#run-command">Run Command</a></h2>
+<pre><code class="language-bash">cargo run --example distill_self_distillation
+</code></pre>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # Recipe: Self-Distillation
+//!
+//! **Category**: Model Distillation
+//! **Isolation Level**: Full
+//! **Idempotency**: Guaranteed
+//! **Dependencies**: None (default features)
+//!
+//! ## QA Checklist
+//! 1. [x] `cargo run` succeeds (Exit Code 0)
+//! 2. [x] `cargo test` passes
+//! 3. [x] Deterministic output (Verified)
+//! 4. [x] No temp files leaked
+//! 5. [x] Memory usage stable
+//! 6. [x] WASM compatible (N/A)
+//! 7. [x] Clippy clean
+//! 8. [x] Rustfmt standard
+//! 9. [x] No `unwrap()` in logic
+//! 10. [x] Proptests pass (100+ cases)
+//!
+//! ## Learning Objective
+//! Self-distillation: deeper layers teach shallower layers within the same model.
+//! Demonstrates born-again networks with iterative self-distillation generations.
+//!
+//! ## Run Command
+//! ```bash
+//! cargo run --example distill_self_distillation
+//! ```
+
+use apr_cookbook::prelude::*;
+use serde::{Deserialize, Serialize};
+
+fn main() -&gt; Result&lt;()&gt; {
+    let mut ctx = RecipeContext::new(&quot;distill_self_distillation&quot;)?;
+
+    println!(&quot;=== Recipe: {} ===&quot;, ctx.name());
+    println!(&quot;Self-distillation: deeper layers teach shallower layers&quot;);
+    println!();
+
+    // --- Section 1: Model Architecture ---
+    println!(&quot;--- Model Architecture ---&quot;);
+    println!();
+
+    let model = SelfDistillModel {
+        name: &quot;resnet-sd&quot;.to_string(),
+        num_layers: 8,
+        hidden_size: 512,
+        num_classes: 10,
+        params_millions: 25.0,
+    };
+
+    println!(&quot;Model: {}&quot;, model.name);
+    println!(&quot;  Layers: {}&quot;, model.num_layers);
+    println!(&quot;  Hidden size: {}&quot;, model.hidden_size);
+    println!(&quot;  Classes: {}&quot;, model.num_classes);
+    println!(&quot;  Parameters: {:.1}M&quot;, model.params_millions);
+    println!();
+
+    ctx.record_metric(&quot;num_layers&quot;, i64::from(model.num_layers));
+
+    // --- Section 2: Layer Representations ---
+    println!(&quot;--- Layer Intermediate Representations ---&quot;);
+    println!();
+
+    let layer_reps = compute_layer_representations(&amp;model)?;
+
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&gt;6} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;12}&quot;,
+        &quot;Layer&quot;, &quot;Dim&quot;, &quot;Entropy&quot;, &quot;Confidence&quot;, &quot;Role&quot;
+    );
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+
+    for rep in &amp;layer_reps {
+        println!(
+            &quot;{:&gt;6} {:&gt;12} {:&gt;12.4} {:&gt;12.3} {:&gt;12}&quot;,
+            rep.layer_index, rep.hidden_dim, rep.entropy, rep.confidence, rep.role
+        );
+    }
+    println!(&quot;{:-&lt;65}&quot;, &quot;&quot;);
+    println!();
+
+    // --- Section 3: Self-Distillation (deep -&gt; shallow) ---
+    println!(&quot;--- Self-Distillation: Deep Layers -&gt; Shallow Layers ---&quot;);
+    println!();
+
+    let config = SelfDistillConfig {
+        temperature: 3.0,
+        alpha_kl: 0.6,
+        alpha_aux: 0.2,
+        alpha_task: 0.2,
+        epochs: 10,
+    };
+
+    println!(&quot;Self-Distillation Config:&quot;);
+    println!(&quot;  Temperature: {}&quot;, config.temperature);
+    println!(&quot;  Alpha KL (deep-&gt;shallow): {}&quot;, config.alpha_kl);
+    println!(&quot;  Alpha auxiliary classifiers: {}&quot;, config.alpha_aux);
+    println!(&quot;  Alpha task loss: {}&quot;, config.alpha_task);
+    println!(&quot;  Epochs: {}&quot;, config.epochs);
+    println!();
+
+    let sd_pairs = build_distillation_pairs(&amp;model)?;
+
+    println!(&quot;Distillation Pairs (Teacher Layer -&gt; Student Layer):&quot;);
+    for pair in &amp;sd_pairs {
+        println!(
+            &quot;  Layer {} ({}) teaches Layer {} ({})&quot;,
+            pair.teacher_layer, pair.teacher_role, pair.student_layer, pair.student_role
+        );
+    }
+    println!();
+
+    println!(&quot;Training Progress:&quot;);
+    println!(&quot;{:-&lt;75}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&gt;6} {:&gt;10} {:&gt;10} {:&gt;10} {:&gt;10} {:&gt;12}&quot;,
+        &quot;Epoch&quot;, &quot;KL Loss&quot;, &quot;Aux Loss&quot;, &quot;Task Loss&quot;, &quot;Total&quot;, &quot;Accuracy&quot;
+    );
+    println!(&quot;{:-&lt;75}&quot;, &quot;&quot;);
+
+    let mut training_log = Vec::new();
+    for epoch in 1..=config.epochs {
+        let result = simulate_self_distill_epoch(epoch, &amp;config)?;
+        training_log.push(result.clone());
+
+        println!(
+            &quot;{:&gt;6} {:&gt;10.4} {:&gt;10.4} {:&gt;10.4} {:&gt;10.4} {:&gt;11.2}%&quot;,
+            epoch,
+            result.kl_loss,
+            result.aux_loss,
+            result.task_loss,
+            result.total_loss,
+            result.accuracy * 100.0
+        );
+    }
+    println!(&quot;{:-&lt;75}&quot;, &quot;&quot;);
+    println!();
+
+    let final_epoch = training_log
+        .last()
+        .ok_or_else(|| CookbookError::invalid_format(&quot;No training results&quot;))?;
+
+    ctx.record_float_metric(&quot;sd_final_accuracy&quot;, final_epoch.accuracy);
+    ctx.record_float_metric(&quot;sd_final_loss&quot;, final_epoch.total_loss);
+
+    // --- Section 4: Born-Again Networks ---
+    println!(&quot;--- Born-Again Networks: Iterative Self-Distillation ---&quot;);
+    println!();
+    println!(&quot;Each generation trains from scratch, then self-distills using&quot;);
+    println!(&quot;the previous generation as a soft-target teacher.&quot;);
+    println!();
+
+    let num_generations = 5;
+    let generations = simulate_born_again_generations(num_generations, &amp;config)?;
+
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&gt;4} {:&gt;15} {:&gt;15} {:&gt;15}&quot;,
+        &quot;Gen&quot;, &quot;Accuracy&quot;, &quot;Improvement&quot;, &quot;Cumulative&quot;
+    );
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+
+    let baseline_accuracy = generations
+        .first()
+        .ok_or_else(|| CookbookError::invalid_format(&quot;No generations&quot;))?
+        .accuracy;
+
+    for gen in &amp;generations {
+        let improvement = if gen.generation == 0 {
+            0.0
+        } else {
+            let prev = &amp;generations[gen.generation as usize - 1];
+            gen.accuracy - prev.accuracy
+        };
+        let cumulative = gen.accuracy - baseline_accuracy;
+
+        println!(
+            &quot;{:&gt;4} {:&gt;14.2}% {:&gt;14.2}% {:&gt;14.2}%&quot;,
+            gen.generation,
+            gen.accuracy * 100.0,
+            improvement * 100.0,
+            cumulative * 100.0
+        );
+    }
+    println!(&quot;{:-&lt;60}&quot;, &quot;&quot;);
+
+    let final_gen = generations
+        .last()
+        .ok_or_else(|| CookbookError::invalid_format(&quot;No generation results&quot;))?;
+
+    let total_improvement = final_gen.accuracy - baseline_accuracy;
+    println!();
+    println!(&quot;Born-Again Results:&quot;);
+    println!(&quot;  Baseline (gen 0): {:.2}%&quot;, baseline_accuracy * 100.0);
+    println!(
+        &quot;  Final (gen {}): {:.2}%&quot;,
+        final_gen.generation,
+        final_gen.accuracy * 100.0
+    );
+    println!(&quot;  Total improvement: +{:.2}%&quot;, total_improvement * 100.0);
+    println!(&quot;  Generations: {}&quot;, num_generations);
+
+    ctx.record_float_metric(&quot;born_again_baseline&quot;, baseline_accuracy);
+    ctx.record_float_metric(&quot;born_again_final&quot;, final_gen.accuracy);
+    ctx.record_float_metric(&quot;born_again_improvement&quot;, total_improvement);
+    ctx.record_metric(&quot;born_again_generations&quot;, i64::from(num_generations));
+
+    // --- Section 5: Layer-wise Accuracy Improvement ---
+    println!();
+    println!(&quot;--- Layer-wise Auxiliary Classifier Accuracy ---&quot;);
+    println!();
+
+    let layer_accuracies = compute_layer_accuracies(&amp;model, &amp;config)?;
+
+    println!(&quot;{:-&lt;55}&quot;, &quot;&quot;);
+    println!(
+        &quot;{:&gt;6} {:&gt;15} {:&gt;15} {:&gt;12}&quot;,
+        &quot;Layer&quot;, &quot;Before SD&quot;, &quot;After SD&quot;, &quot;Gain&quot;
+    );
+    println!(&quot;{:-&lt;55}&quot;, &quot;&quot;);
+
+    for la in &amp;layer_accuracies {
+        println!(
+            &quot;{:&gt;6} {:&gt;14.2}% {:&gt;14.2}% {:&gt;11.2}%&quot;,
+            la.layer_index,
+            la.before_sd * 100.0,
+            la.after_sd * 100.0,
+            (la.after_sd - la.before_sd) * 100.0
+        );
+    }
+    println!(&quot;{:-&lt;55}&quot;, &quot;&quot;);
+    println!();
+
+    // Save results
+    let log_path = ctx.path(&quot;self_distillation_log.json&quot;);
+    save_log(&amp;log_path, &amp;training_log)?;
+
+    let gen_path = ctx.path(&quot;born_again_generations.json&quot;);
+    save_generations(&amp;gen_path, &amp;generations)?;
+
+    println!(&quot;Training log saved to: {:?}&quot;, log_path);
+    println!(&quot;Generation log saved to: {:?}&quot;, gen_path);
+
+    println!();
+    ctx.report()?;
+
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Data structures
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SelfDistillModel {
+    name: String,
+    num_layers: u32,
+    hidden_size: u32,
+    num_classes: u32,
+    params_millions: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct SelfDistillConfig {
+    temperature: f64,
+    alpha_kl: f64,
+    alpha_aux: f64,
+    alpha_task: f64,
+    epochs: u32,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct LayerRepresentation {
+    layer_index: u32,
+    hidden_dim: u32,
+    entropy: f64,
+    confidence: f64,
+    role: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct DistillationPair {
+    teacher_layer: u32,
+    student_layer: u32,
+    teacher_role: String,
+    student_role: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct EpochResult {
+    epoch: u32,
+    kl_loss: f64,
+    aux_loss: f64,
+    task_loss: f64,
+    total_loss: f64,
+    accuracy: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct GenerationResult {
+    generation: u32,
+    accuracy: f64,
+    final_loss: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct LayerAccuracy {
+    layer_index: u32,
+    before_sd: f64,
+    after_sd: f64,
+}
+
+// ---------------------------------------------------------------------------
+// Simulation functions
+// ---------------------------------------------------------------------------
+
+/// Compute intermediate representations for each layer.
+fn compute_layer_representations(model: &amp;SelfDistillModel) -&gt; Result&lt;Vec&lt;LayerRepresentation&gt;&gt; {
+    let mut reps = Vec::new();
+
+    for i in 0..model.num_layers {
+        let depth_ratio = f64::from(i) / f64::from(model.num_layers - 1);
+        let seed = hash_name_to_seed(&amp;format!(&quot;layer_{i}&quot;));
+
+        // Deeper layers have lower entropy (more refined features)
+        let entropy = 2.5 * (1.0 - 0.6 * depth_ratio) + (seed % 10) as f64 / 100.0;
+
+        // Deeper layers have higher confidence
+        let confidence = 0.5 + 0.4 * depth_ratio + (seed % 5) as f64 / 100.0;
+
+        let role = match i {
+            0 =&gt; &quot;input&quot;,
+            l if l == model.num_layers - 1 =&gt; &quot;output&quot;,
+            l if l &lt; model.num_layers / 3 =&gt; &quot;shallow&quot;,
+            l if l &lt; 2 * model.num_layers / 3 =&gt; &quot;middle&quot;,
+            _ =&gt; &quot;deep&quot;,
+        };
+
+        reps.push(LayerRepresentation {
+            layer_index: i,
+            hidden_dim: model.hidden_size,
+            entropy: entropy.clamp(0.1, 3.0),
+            confidence: confidence.clamp(0.0, 1.0),
+            role: role.to_string(),
+        });
+    }
+
+    Ok(reps)
+}
+
+/// Build teacher-student pairs: deeper layers teach shallower layers.
+fn build_distillation_pairs(model: &amp;SelfDistillModel) -&gt; Result&lt;Vec&lt;DistillationPair&gt;&gt; {
+    let mid = model.num_layers / 2;
+    let mut pairs = Vec::new();
+
+    // Pair each shallow layer with a corresponding deep layer
+    for i in 0..mid {
+        let teacher_idx = model.num_layers - 1 - i;
+        let student_idx = i;
+
+        let teacher_role = if teacher_idx == model.num_layers - 1 {
+            &quot;output&quot;
+        } else {
+            &quot;deep&quot;
+        };
+
+        let student_role = if student_idx == 0 { &quot;input&quot; } else { &quot;shallow&quot; };
+
+        pairs.push(DistillationPair {
+            teacher_layer: teacher_idx,
+            student_layer: student_idx,
+            teacher_role: teacher_role.to_string(),
+            student_role: student_role.to_string(),
+        });
+    }
+
+    Ok(pairs)
+}
+
+/// Simulate one epoch of self-distillation training.
+fn simulate_self_distill_epoch(epoch: u32, config: &amp;SelfDistillConfig) -&gt; Result&lt;EpochResult&gt; {
+    let progress = f64::from(epoch) / f64::from(config.epochs);
+
+    // KL divergence loss between deep and shallow layer logits
+    let kl_initial = 1.8;
+    let kl_final = 0.25;
+    let kl_loss = kl_initial - (kl_initial - kl_final) * (1.0 - (-3.5 * progress).exp());
+
+    // Auxiliary classifier loss for intermediate layers
+    let aux_initial = 1.2;
+    let aux_final = 0.35;
+    let aux_loss = aux_initial - (aux_initial - aux_final) * (1.0 - (-3.0 * progress).exp());
+
+    // Standard task loss (cross-entropy)
+    let task_initial = 0.8;
+    let task_final = 0.18;
+    let task_loss = task_initial - (task_initial - task_final) * (1.0 - (-2.5 * progress).exp());
+
+    // Weighted total loss
+    let total_loss =
+        config.alpha_kl * kl_loss + config.alpha_aux * aux_loss + config.alpha_task * task_loss;
+
+    // Accuracy improves with self-distillation
+    let max_accuracy = 0.935;
+    let accuracy = max_accuracy * (1.0 - (-3.0 * progress).exp());
+
+    Ok(EpochResult {
+        epoch,
+        kl_loss,
+        aux_loss,
+        task_loss,
+        total_loss,
+        accuracy,
+    })
+}
+
+/// Simulate born-again network generations.
+///
+/// Each generation trains a fresh model using the previous generation's
+/// predictions as soft targets. Accuracy improves with diminishing returns.
+fn simulate_born_again_generations(
+    num_generations: u32,
+    _config: &amp;SelfDistillConfig,
+) -&gt; Result&lt;Vec&lt;GenerationResult&gt;&gt; {
+    let mut results = Vec::new();
+
+    // Generation 0: baseline trained normally
+    let baseline_accuracy = 0.912;
+    let baseline_loss = 0.32;
+
+    results.push(GenerationResult {
+        generation: 0,
+        accuracy: baseline_accuracy,
+        final_loss: baseline_loss,
+    });
+
+    // Each subsequent generation improves with diminishing returns
+    for gen in 1..num_generations {
+        let gen_f = f64::from(gen);
+
+        // Diminishing accuracy gains: ~1.2% first gen, ~0.6% second, etc.
+        let improvement = 0.012 / gen_f.sqrt();
+        let prev_accuracy = results
+            .last()
+            .ok_or_else(|| CookbookError::invalid_format(&quot;Missing previous generation&quot;))?
+            .accuracy;
+
+        let accuracy = (prev_accuracy + improvement).min(0.98);
+
+        // Loss decreases with each generation
+        let loss = baseline_loss * (-0.3 * gen_f).exp() + 0.08;
+
+        results.push(GenerationResult {
+            generation: gen,
+            accuracy,
+            final_loss: loss,
+        });
+    }
+
+    Ok(results)
+}
+
+/// Compute per-layer auxiliary classifier accuracy before and after self-distillation.
+fn compute_layer_accuracies(
+    model: &amp;SelfDistillModel,
+    _config: &amp;SelfDistillConfig,
+) -&gt; Result&lt;Vec&lt;LayerAccuracy&gt;&gt; {
+    let mut accuracies = Vec::new();
+
+    for i in 0..model.num_layers {
+        let depth_ratio = f64::from(i) / f64::from(model.num_layers - 1);
+
+        // Before self-distillation: shallow layers have poor auxiliary accuracy
+        let before_sd = 0.45 + 0.47 * depth_ratio;
+
+        // After self-distillation: shallow layers gain significant accuracy
+        // because they receive knowledge from deeper layers
+        let gain = 0.08 * (1.0 - depth_ratio).powi(2) + 0.02;
+        let after_sd = (before_sd + gain).min(0.96);
+
+        accuracies.push(LayerAccuracy {
+            layer_index: i,
+            before_sd,
+            after_sd,
+        });
+    }
+
+    Ok(accuracies)
+}
+
+fn save_log(path: &amp;std::path::Path, log: &amp;[EpochResult]) -&gt; Result&lt;()&gt; {
+    let json = serde_json::to_string_pretty(log)
+        .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+    std::fs::write(path, json)?;
+    Ok(())
+}
+
+fn save_generations(path: &amp;std::path::Path, generations: &amp;[GenerationResult]) -&gt; Result&lt;()&gt; {
+    let json = serde_json::to_string_pretty(generations)
+        .map_err(|e| CookbookError::Serialization(e.to_string()))?;
+    std::fs::write(path, json)?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn test_model() -&gt; SelfDistillModel {
+        SelfDistillModel {
+            name: &quot;test-model&quot;.to_string(),
+            num_layers: 8,
+            hidden_size: 512,
+            num_classes: 10,
+            params_millions: 25.0,
+        }
+    }
+
+    fn test_config() -&gt; SelfDistillConfig {
+        SelfDistillConfig {
+            temperature: 3.0,
+            alpha_kl: 0.6,
+            alpha_aux: 0.2,
+            alpha_task: 0.2,
+            epochs: 10,
+        }
+    }
+
+    #[test]
+    fn test_layer_representations() {
+        let model = test_model();
+        let reps = compute_layer_representations(&amp;model).unwrap();
+
+        assert_eq!(reps.len(), model.num_layers as usize);
+        // First layer should be &quot;input&quot;
+        assert_eq!(reps[0].role, &quot;input&quot;);
+        // Last layer should be &quot;output&quot;
+        assert_eq!(reps[reps.len() - 1].role, &quot;output&quot;);
+    }
+
+    #[test]
+    fn test_deeper_layers_higher_confidence() {
+        let model = test_model();
+        let reps = compute_layer_representations(&amp;model).unwrap();
+
+        // On average, deeper layers should have higher confidence
+        let shallow_avg = reps[..3].iter().map(|r| r.confidence).sum::&lt;f64&gt;() / 3.0;
+        let deep_avg = reps[5..].iter().map(|r| r.confidence).sum::&lt;f64&gt;() / 3.0;
+
+        assert!(deep_avg &gt; shallow_avg);
+    }
+
+    #[test]
+    fn test_distillation_pairs() {
+        let model = test_model();
+        let pairs = build_distillation_pairs(&amp;model).unwrap();
+
+        // Should have num_layers/2 pairs
+        assert_eq!(pairs.len(), (model.num_layers / 2) as usize);
+
+        // Teacher layers should be deeper than student layers
+        for pair in &amp;pairs {
+            assert!(pair.teacher_layer &gt; pair.student_layer);
+        }
+    }
+
+    #[test]
+    fn test_self_distill_epoch_loss_decreases() {
+        let config = test_config();
+
+        let early = simulate_self_distill_epoch(1, &amp;config).unwrap();
+        let late = simulate_self_distill_epoch(10, &amp;config).unwrap();
+
+        assert!(late.total_loss &lt; early.total_loss);
+        assert!(late.kl_loss &lt; early.kl_loss);
+    }
+
+    #[test]
+    fn test_self_distill_accuracy_improves() {
+        let config = test_config();
+
+        let early = simulate_self_distill_epoch(1, &amp;config).unwrap();
+        let late = simulate_self_distill_epoch(10, &amp;config).unwrap();
+
+        assert!(late.accuracy &gt; early.accuracy);
+    }
+
+    #[test]
+    fn test_born_again_improves() {
+        let config = test_config();
+        let generations = simulate_born_again_generations(5, &amp;config).unwrap();
+
+        assert_eq!(generations.len(), 5);
+
+        // Each generation should be at least as good as the previous
+        for window in generations.windows(2) {
+            assert!(window[1].accuracy &gt;= window[0].accuracy);
+        }
+    }
+
+    #[test]
+    fn test_born_again_diminishing_returns() {
+        let config = test_config();
+        let generations = simulate_born_again_generations(5, &amp;config).unwrap();
+
+        // First improvement should be larger than later improvements
+        let first_gain = generations[1].accuracy - generations[0].accuracy;
+        let last_gain = generations[4].accuracy - generations[3].accuracy;
+
+        assert!(first_gain &gt; last_gain);
+    }
+
+    #[test]
+    fn test_layer_accuracies_shallow_gain_more() {
+        let model = test_model();
+        let config = test_config();
+        let accuracies = compute_layer_accuracies(&amp;model, &amp;config).unwrap();
+
+        assert_eq!(accuracies.len(), model.num_layers as usize);
+
+        // Shallow layers should gain more from self-distillation
+        let shallow_gain = accuracies[0].after_sd - accuracies[0].before_sd;
+        let deep_gain =
+            accuracies[accuracies.len() - 1].after_sd - accuracies[accuracies.len() - 1].before_sd;
+
+        assert!(shallow_gain &gt; deep_gain);
+    }
+
+    #[test]
+    fn test_deterministic_epoch() {
+        let config = test_config();
+
+        let r1 = simulate_self_distill_epoch(5, &amp;config).unwrap();
+        let r2 = simulate_self_distill_epoch(5, &amp;config).unwrap();
+
+        assert_eq!(r1.kl_loss, r2.kl_loss);
+        assert_eq!(r1.accuracy, r2.accuracy);
+        assert_eq!(r1.total_loss, r2.total_loss);
+    }
+
+    #[test]
+    fn test_save_log() {
+        let ctx = RecipeContext::new(&quot;test_sd_save_log&quot;).unwrap();
+        let path = ctx.path(&quot;log.json&quot;);
+
+        let log = vec![EpochResult {
+            epoch: 1,
+            kl_loss: 1.0,
+            aux_loss: 0.5,
+            task_loss: 0.3,
+            total_loss: 0.7,
+            accuracy: 0.8,
+        }];
+
+        save_log(&amp;path, &amp;log).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn test_save_generations() {
+        let ctx = RecipeContext::new(&quot;test_sd_save_gen&quot;).unwrap();
+        let path = ctx.path(&quot;gen.json&quot;);
+
+        let generations = vec![GenerationResult {
+            generation: 0,
+            accuracy: 0.9,
+            final_loss: 0.3,
+        }];
+
+        save_generations(&amp;path, &amp;generations).unwrap();
+        assert!(path.exists());
+    }
+
+    #[test]
+    fn test_weighted_loss_components() {
+        let config = test_config();
+        let result = simulate_self_distill_epoch(5, &amp;config).unwrap();
+
+        // Total loss should be the weighted sum
+        let expected_total = config.alpha_kl * result.kl_loss
+            + config.alpha_aux * result.aux_loss
+            + config.alpha_task * result.task_loss;
+
+        assert!((result.total_loss - expected_total).abs() &lt; 1e-10);
+    }
+}
+
+#[cfg(test)]
+mod proptests {
+    use super::*;
+    use proptest::prelude::*;
+
+    proptest! {
+        #![proptest_config(ProptestConfig::with_cases(100))]
+
+        #[test]
+        fn prop_accuracy_bounded(epoch in 1u32..100) {
+            let config = SelfDistillConfig {
+                temperature: 3.0,
+                alpha_kl: 0.6,
+                alpha_aux: 0.2,
+                alpha_task: 0.2,
+                epochs: 100,
+            };
+
+            let result = simulate_self_distill_epoch(epoch, &amp;config).unwrap();
+
+            prop_assert!(result.accuracy &gt;= 0.0);
+            prop_assert!(result.accuracy &lt;= 1.0);
+        }
+
+        #[test]
+        fn prop_loss_positive(epoch in 1u32..50) {
+            let config = SelfDistillConfig {
+                temperature: 3.0,
+                alpha_kl: 0.6,
+                alpha_aux: 0.2,
+                alpha_task: 0.2,
+                epochs: 50,
+            };
+
+            let result = simulate_self_distill_epoch(epoch, &amp;config).unwrap();
+
+            prop_assert!(result.kl_loss &gt; 0.0);
+            prop_assert!(result.aux_loss &gt; 0.0);
+            prop_assert!(result.task_loss &gt; 0.0);
+            prop_assert!(result.total_loss &gt; 0.0);
+        }
+
+        #[test]
+        fn prop_born_again_monotonic(num_gens in 2u32..10) {
+            let config = SelfDistillConfig {
+                temperature: 3.0,
+                alpha_kl: 0.6,
+                alpha_aux: 0.2,
+                alpha_task: 0.2,
+                epochs: 10,
+            };
+
+            let generations = simulate_born_again_generations(num_gens, &amp;config).unwrap();
+
+            for window in generations.windows(2) {
+                prop_assert!(window[1].accuracy &gt;= window[0].accuracy);
+            }
+        }
+
+        #[test]
+        fn prop_layer_accuracy_after_ge_before(num_layers in 2u32..20) {
+            let model = SelfDistillModel {
+                name: &quot;prop-test&quot;.to_string(),
+                num_layers,
+                hidden_size: 256,
+                num_classes: 10,
+                params_millions: 10.0,
+            };
+            let config = SelfDistillConfig {
+                temperature: 3.0,
+                alpha_kl: 0.6,
+                alpha_aux: 0.2,
+                alpha_task: 0.2,
+                epochs: 10,
+            };
+
+            let accuracies = compute_layer_accuracies(&amp;model, &amp;config).unwrap();
+
+            for la in &amp;accuracies {
+                prop_assert!(la.after_sd &gt;= la.before_sd);
+                prop_assert!(la.after_sd &lt;= 1.0);
+                prop_assert!(la.before_sd &gt;= 0.0);
+            }
+        }
+    }
+}</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/k-distillation/attention-transfer.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/l-cli/index.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/k-distillation/attention-transfer.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/l-cli/index.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
