@@ -490,22 +490,20 @@ fn make_default_variants() -> Vec<ModelVariant> {
     ]
 }
 
-fn main() {
-    println!("=== Model Selection Router Example ===\n");
+// ---------------------------------------------------------------------------
+// Helper functions extracted from main() to reduce cyclomatic complexity
+// ---------------------------------------------------------------------------
 
-    // =========================================================================
-    // Section 1: Register model variants with capabilities
-    // =========================================================================
+/// Section 1: Print the model variant registry table.
+fn print_variant_registry(variants: &[ModelVariant]) {
     println!("1. Model Variant Registry");
     println!("   ─────────────────────────────────────────");
-
-    let variants = make_default_variants();
     println!(
         "   {:>16} {:>12} {:>10} {:>10}",
         "Model", "Latency(ms)", "Accuracy", "Cost($)"
     );
     println!("   {}", "\u{2500}".repeat(52));
-    for v in &variants {
+    for v in variants {
         println!(
             "   {:>16} {:>12.1} {:>9.0}% {:>10.3}",
             v.name,
@@ -515,14 +513,14 @@ fn main() {
         );
     }
     println!("   Registered {} model variants\n", variants.len());
+}
 
-    // =========================================================================
-    // Section 2: Round-robin routing baseline
-    // =========================================================================
+/// Section 2: Run round-robin routing baseline and print results.
+fn run_round_robin_baseline(variants: &[ModelVariant]) {
     println!("2. Round-Robin Routing Baseline");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::RoundRobin);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::RoundRobin);
     let requests: Vec<InferenceRequest> = (0..30)
         .map(|i| InferenceRequest::new(i, Priority::Medium, 500.0, 1.0))
         .collect();
@@ -553,14 +551,14 @@ fn main() {
         router.metrics.avg_latency, router.metrics.avg_cost
     );
     println!();
+}
 
-    // =========================================================================
-    // Section 3: Latency-optimized routing
-    // =========================================================================
+/// Section 3: Run latency-optimized routing and print results.
+fn run_latency_optimized_routing(variants: &[ModelVariant]) {
     println!("3. Latency-Optimized Routing");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::LowestLatency);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::LowestLatency);
 
     let latency_requests = vec![
         InferenceRequest::new(100, Priority::High, 20.0, 1.0), // tight SLA -> fast-small
@@ -589,14 +587,14 @@ fn main() {
         });
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 4: Cost-aware routing with budget constraints
-    // =========================================================================
+/// Section 4: Run cost-aware routing and print results.
+fn run_cost_aware_routing(variants: &[ModelVariant]) {
     println!("4. Cost-Aware Routing with Budget Constraints");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::CostAware);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::CostAware);
 
     let cost_requests = vec![
         InferenceRequest::new(200, Priority::Low, 500.0, 0.002), // tight budget -> fast-small
@@ -629,14 +627,14 @@ fn main() {
         router.metrics.avg_cost * router.metrics.total_requests as f64
     );
     println!();
+}
 
-    // =========================================================================
-    // Section 4b: Accuracy-weighted routing by priority
-    // =========================================================================
+/// Section 4b: Run accuracy-weighted routing by priority and print results.
+fn run_accuracy_weighted_routing(variants: &[ModelVariant]) {
     println!("   Accuracy-Weighted Routing by Priority:");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::AccuracyWeighted);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::AccuracyWeighted);
 
     let priority_requests = vec![
         InferenceRequest::new(250, Priority::High, 500.0, 1.0),
@@ -661,14 +659,14 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 5: Shadow traffic comparison
-    // =========================================================================
+/// Section 5: Run shadow traffic comparison and print results.
+fn run_shadow_traffic_comparison(variants: &[ModelVariant]) {
     println!("5. Shadow Traffic Comparison");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::LowestLatency);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::LowestLatency);
 
     let shadow_requests: Vec<InferenceRequest> = (300..320)
         .map(|i| InferenceRequest::new(i, Priority::Medium, 100.0, 1.0))
@@ -714,51 +712,56 @@ fn main() {
     );
 
     if !shadow_comparisons.is_empty() {
-        println!(
-            "\n   {:>4} {:>14} {:>8} {:>14} {:>8}",
-            "ID", "Primary", "Correct", "Shadow", "Correct"
-        );
-        println!("   {}", "\u{2500}".repeat(52));
-        for (id, primary, p_acc, shadow, s_acc) in shadow_comparisons.iter().take(8) {
-            println!(
-                "   {:>4} {:>14} {:>8} {:>14} {:>8}",
-                id,
-                primary,
-                if *p_acc { "yes" } else { "no" },
-                shadow,
-                if *s_acc { "yes" } else { "no" }
-            );
-        }
-        // Tally shadow wins
-        let shadow_wins = shadow_comparisons
-            .iter()
-            .filter(|(_, _, p, _, s)| !p && *s)
-            .count();
-        let primary_wins = shadow_comparisons
-            .iter()
-            .filter(|(_, _, p, _, s)| *p && !s)
-            .count();
-        let both_correct = shadow_comparisons
-            .iter()
-            .filter(|(_, _, p, _, s)| *p && *s)
-            .count();
-        println!(
-            "\n   Shadow wins: {} | Primary wins: {} | Both correct: {} | Total shadow: {}",
-            shadow_wins,
-            primary_wins,
-            both_correct,
-            shadow_comparisons.len()
-        );
+        print_shadow_comparison_table(&shadow_comparisons);
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 6: Adaptive routing with feedback loop
-    // =========================================================================
+/// Print the shadow comparison table and win/loss tally.
+fn print_shadow_comparison_table(shadow_comparisons: &[(u64, String, bool, String, bool)]) {
+    println!(
+        "\n   {:>4} {:>14} {:>8} {:>14} {:>8}",
+        "ID", "Primary", "Correct", "Shadow", "Correct"
+    );
+    println!("   {}", "\u{2500}".repeat(52));
+    for (id, primary, p_acc, shadow, s_acc) in shadow_comparisons.iter().take(8) {
+        println!(
+            "   {:>4} {:>14} {:>8} {:>14} {:>8}",
+            id,
+            primary,
+            if *p_acc { "yes" } else { "no" },
+            shadow,
+            if *s_acc { "yes" } else { "no" }
+        );
+    }
+    // Tally shadow wins
+    let shadow_wins = shadow_comparisons
+        .iter()
+        .filter(|(_, _, p, _, s)| !p && *s)
+        .count();
+    let primary_wins = shadow_comparisons
+        .iter()
+        .filter(|(_, _, p, _, s)| *p && !s)
+        .count();
+    let both_correct = shadow_comparisons
+        .iter()
+        .filter(|(_, _, p, _, s)| *p && *s)
+        .count();
+    println!(
+        "\n   Shadow wins: {} | Primary wins: {} | Both correct: {} | Total shadow: {}",
+        shadow_wins,
+        primary_wins,
+        both_correct,
+        shadow_comparisons.len()
+    );
+}
+
+/// Section 6: Run adaptive routing with feedback loop and print results.
+fn run_adaptive_routing(variants: &[ModelVariant]) {
     println!("6. Adaptive Routing with Feedback Loop");
     println!("   ─────────────────────────────────────────");
 
-    let mut router = ModelRouter::new(variants.clone(), RoutingStrategy::RoundRobin);
+    let mut router = ModelRouter::new(variants.to_vec(), RoutingStrategy::RoundRobin);
     // Demonstrate strategy switching
     router.set_strategy(RoutingStrategy::Adaptive);
 
@@ -769,17 +772,7 @@ fn main() {
     }
 
     // Run some requests with initial weights
-    for i in 0..50_u64 {
-        let req = InferenceRequest::new(400 + i, Priority::Medium, 500.0, 1.0);
-        let idx = router.route(&req);
-        let variant = &router.variants[idx];
-        router.record_observation(&PerformanceObservation {
-            model_name: variant.name.clone(),
-            latency_ms: simulate_latency(variant, req.id),
-            was_accurate: simulate_accuracy(variant, req.id),
-            cost: variant.cost_per_request,
-        });
-    }
+    route_and_observe(&mut router, 400, 50);
 
     println!("\n   After 50 requests (before adaptation):");
     for name in VARIANT_NAMES {
@@ -800,17 +793,7 @@ fn main() {
 
     // Run more requests with updated weights
     let pre_count = router.decision_count();
-    for i in 50..100_u64 {
-        let req = InferenceRequest::new(400 + i, Priority::Medium, 500.0, 1.0);
-        let idx = router.route(&req);
-        let variant = &router.variants[idx];
-        router.record_observation(&PerformanceObservation {
-            model_name: variant.name.clone(),
-            latency_ms: simulate_latency(variant, req.id),
-            was_accurate: simulate_accuracy(variant, req.id),
-            cost: variant.cost_per_request,
-        });
-    }
+    route_and_observe(&mut router, 450, 50);
 
     println!("\n   After 50 more requests (post-adaptation):");
     for name in VARIANT_NAMES {
@@ -823,6 +806,28 @@ fn main() {
         println!("     {name}: {post_count} routed");
     }
 
+    print_final_metrics(&router);
+    print_audit_trail(&router);
+    println!();
+}
+
+/// Route a batch of requests through the router and record observations.
+fn route_and_observe(router: &mut ModelRouter, start_id: u64, count: u64) {
+    for i in 0..count {
+        let req = InferenceRequest::new(start_id + i, Priority::Medium, 500.0, 1.0);
+        let idx = router.route(&req);
+        let variant = &router.variants[idx];
+        router.record_observation(&PerformanceObservation {
+            model_name: variant.name.clone(),
+            latency_ms: simulate_latency(variant, req.id),
+            was_accurate: simulate_accuracy(variant, req.id),
+            cost: variant.cost_per_request,
+        });
+    }
+}
+
+/// Print final aggregate metrics.
+fn print_final_metrics(router: &ModelRouter) {
     println!("\n   Final aggregate metrics:");
     println!("     Total requests: {}", router.metrics.total_requests);
     println!("     Avg latency: {:.1}ms", router.metrics.avg_latency);
@@ -833,8 +838,10 @@ fn main() {
         router.shadow_count(),
         router.shadow_count() as f64 / router.decision_count() as f64 * 100.0
     );
+}
 
-    // Print a sample of the audit trail
+/// Print the last 5 entries from the audit trail.
+fn print_audit_trail(router: &ModelRouter) {
     println!("\n   Audit trail (last 5 decisions):");
     println!(
         "     {:>4} {:>16} {:>16} {:>14}",
@@ -850,7 +857,20 @@ fn main() {
             d.shadow_model.as_deref().unwrap_or("-")
         );
     }
-    println!();
+}
+
+fn main() {
+    println!("=== Model Selection Router Example ===\n");
+
+    let variants = make_default_variants();
+
+    print_variant_registry(&variants);
+    run_round_robin_baseline(&variants);
+    run_latency_optimized_routing(&variants);
+    run_cost_aware_routing(&variants);
+    run_accuracy_weighted_routing(&variants);
+    run_shadow_traffic_comparison(&variants);
+    run_adaptive_routing(&variants);
 
     println!("=== Example Complete ===");
 }
