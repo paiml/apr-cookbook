@@ -1,0 +1,709 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Diff - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/neural-network.html"><strong aria-hidden="true">14.</strong> Neural Network</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">15.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">16.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">17.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">18.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">19.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">20.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">21.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">22.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">23.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">24.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">25.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">26.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">27.</strong> Curriculum Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd.html"><strong aria-hidden="true">28.</strong> Autograd Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lora.html"><strong aria-hidden="true">29.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/qlora.html"><strong aria-hidden="true">30.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/distillation.html"><strong aria-hidden="true">31.</strong> Knowledge Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/model-merge.html"><strong aria-hidden="true">32.</strong> Model Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/eval-metrics.html"><strong aria-hidden="true">33.</strong> Evaluation Metrics</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/hyperparameter-sweep.html"><strong aria-hidden="true">34.</strong> Hyperparameter Sweep</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/checkpoint-resume.html"><strong aria-hidden="true">35.</strong> Checkpoint Resume</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/mixed-precision.html"><strong aria-hidden="true">36.</strong> Mixed-Precision Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/few-shot.html"><strong aria-hidden="true">37.</strong> Few-Shot Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/gradient-accumulation.html"><strong aria-hidden="true">38.</strong> Gradient Accumulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lr-schedule.html"><strong aria-hidden="true">39.</strong> Learning Rate Schedules</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/data-preprocessing.html"><strong aria-hidden="true">40.</strong> Data Preprocessing</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">41.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">42.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">43.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">44.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">45.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">46.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">47.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">48.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">49.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">50.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">51.</strong> Model Rollback</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-versioning.html"><strong aria-hidden="true">52.</strong> Model Versioning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">53.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">54.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">55.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">56.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">57.</strong> Health Check</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/auth-middleware.html"><strong aria-hidden="true">58.</strong> Auth Middleware</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">60.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">61.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">62.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">63.</strong> Container Image</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/model-warmup.html"><strong aria-hidden="true">64.</strong> Model Warmup</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">65.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">66.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">67.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">68.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">69.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">70.</strong> Streaming Compilation</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/model-loader.html"><strong aria-hidden="true">71.</strong> Model Loader</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">72.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/flash-attention.html"><strong aria-hidden="true">73.</strong> FlashAttention</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">74.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">75.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">76.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">77.</strong> Memory Management</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-pool.html"><strong aria-hidden="true">78.</strong> Memory Pool</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">79.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">80.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">81.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">82.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">83.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">84.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">85.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">86.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">87.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">88.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/structured-pruning.html"><strong aria-hidden="true">89.</strong> Structured Pruning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">90.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">91.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">92.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">93.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">94.</strong> apr-serve</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-diff.html"><strong aria-hidden="true">95.</strong> apr-diff</a></li><li class="chapter-item expanded affix "><li class="part-title">Category M: Inference Monitoring</li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/index.html"><strong aria-hidden="true">96.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/explainability.html"><strong aria-hidden="true">97.</strong> Inference Explainability</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/hash-chain-audit.html"><strong aria-hidden="true">98.</strong> Hash Chain Audit</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cost-tracking.html"><strong aria-hidden="true">99.</strong> Cost Tracking</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/latency-histogram.html"><strong aria-hidden="true">100.</strong> Latency Histogram</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/drift-detection.html"><strong aria-hidden="true">101.</strong> Drift Detection</a></li><li class="chapter-item expanded affix "><li class="part-title">Category N: Speech Recognition</li><li class="chapter-item expanded "><a href="../../recipes/n-speech/index.html"><strong aria-hidden="true">102.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-transcribe.html"><strong aria-hidden="true">103.</strong> Whisper Transcription</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-streaming.html"><strong aria-hidden="true">104.</strong> Streaming ASR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category O: Distributed Computing</li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/index.html"><strong aria-hidden="true">105.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/distributed-inference.html"><strong aria-hidden="true">106.</strong> Distributed Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/model-sharding.html"><strong aria-hidden="true">107.</strong> Model Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">Category P: Inference Patterns</li><li class="chapter-item expanded "><a href="../../recipes/p-inference/index.html"><strong aria-hidden="true">108.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/simple.html"><strong aria-hidden="true">109.</strong> Simple Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/speculative-decode.html"><strong aria-hidden="true">110.</strong> Speculative Decoding</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/kv-cache.html"><strong aria-hidden="true">111.</strong> KV-Cache Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/multi-turn.html"><strong aria-hidden="true">112.</strong> Multi-turn Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/tool-use.html"><strong aria-hidden="true">113.</strong> Tool Use</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/streaming.html"><strong aria-hidden="true">114.</strong> Streaming Tokens</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/adaptive-batch.html"><strong aria-hidden="true">115.</strong> Adaptive Batching</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/dynamic-batch-sla.html"><strong aria-hidden="true">116.</strong> Dynamic Batch SLA</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/ensemble.html"><strong aria-hidden="true">117.</strong> Ensemble Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/pipeline.html"><strong aria-hidden="true">118.</strong> Model Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/quantized-comparison.html"><strong aria-hidden="true">119.</strong> Quantized Comparison</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Q: Model Serving</li><li class="chapter-item expanded "><a href="../../recipes/q-serving/index.html"><strong aria-hidden="true">120.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/http-server.html"><strong aria-hidden="true">121.</strong> HTTP Model Server</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/ab-testing.html"><strong aria-hidden="true">122.</strong> A/B Testing</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/canary-deploy.html"><strong aria-hidden="true">123.</strong> Canary Deploy</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/rate-limiter.html"><strong aria-hidden="true">124.</strong> Rate Limiter</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/selection-router.html"><strong aria-hidden="true">125.</strong> Selection Router</a></li><li class="chapter-item expanded affix "><li class="part-title">Category R: Model Optimization</li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/index.html"><strong aria-hidden="true">126.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/full-pipeline.html"><strong aria-hidden="true">127.</strong> Full Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-lora.html"><strong aria-hidden="true">128.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-qlora.html"><strong aria-hidden="true">129.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-merge-adapter.html"><strong aria-hidden="true">130.</strong> Adapter Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-plan-vram.html"><strong aria-hidden="true">131.</strong> VRAM Planning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-magnitude.html"><strong aria-hidden="true">132.</strong> Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-structured.html"><strong aria-hidden="true">133.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-depth.html"><strong aria-hidden="true">134.</strong> Depth Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-wanda.html"><strong aria-hidden="true">135.</strong> Wanda Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-gradual-schedule.html"><strong aria-hidden="true">136.</strong> Gradual Schedule</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-standard-kl.html"><strong aria-hidden="true">137.</strong> Standard KL Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-progressive.html"><strong aria-hidden="true">138.</strong> Progressive Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-ensemble.html"><strong aria-hidden="true">139.</strong> Ensemble Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-checkpoint.html"><strong aria-hidden="true">140.</strong> Distillation Checkpoint</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-average.html"><strong aria-hidden="true">141.</strong> Average Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-weighted.html"><strong aria-hidden="true">142.</strong> Weighted Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-slerp.html"><strong aria-hidden="true">143.</strong> SLERP Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-ties.html"><strong aria-hidden="true">144.</strong> TIES Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-dare.html"><strong aria-hidden="true">145.</strong> DARE Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-hierarchical.html"><strong aria-hidden="true">146.</strong> Hierarchical Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-4bit.html"><strong aria-hidden="true">147.</strong> Int4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-fake-qat.html"><strong aria-hidden="true">148.</strong> Fake QAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Category S: Chat Templates</li><li class="chapter-item expanded "><a href="../../recipes/s-chat/index.html"><strong aria-hidden="true">149.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/chatml.html"><strong aria-hidden="true">150.</strong> ChatML Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/llama2.html"><strong aria-hidden="true">151.</strong> LLaMA 2 Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/mistral.html"><strong aria-hidden="true">152.</strong> Mistral Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/multi-format.html"><strong aria-hidden="true">153.</strong> Multi-Format Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/injection-defense.html"><strong aria-hidden="true">154.</strong> Injection Defense</a></li><li class="chapter-item expanded affix "><li class="part-title">Category T: Model Analysis</li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/index.html"><strong aria-hidden="true">155.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/inspect.html"><strong aria-hidden="true">156.</strong> Inspect</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/validate.html"><strong aria-hidden="true">157.</strong> Validate</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/diff.html" class="active"><strong aria-hidden="true">158.</strong> Diff</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/bench.html"><strong aria-hidden="true">159.</strong> Bench</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/profile.html"><strong aria-hidden="true">160.</strong> Profile</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-gates.html"><strong aria-hidden="true">161.</strong> QA Gates</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/oracle.html"><strong aria-hidden="true">162.</strong> Oracle</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/canary.html"><strong aria-hidden="true">163.</strong> Canary</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tree.html"><strong aria-hidden="true">164.</strong> Tree</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/hex.html"><strong aria-hidden="true">165.</strong> Hex</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/explain.html"><strong aria-hidden="true">166.</strong> Explain</a></li><li class="chapter-item expanded affix "><li class="part-title">Category U: Format Operations</li><li class="chapter-item expanded "><a href="../../recipes/u-format/index.html"><strong aria-hidden="true">167.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/import-hf.html"><strong aria-hidden="true">168.</strong> Import from HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-safetensors.html"><strong aria-hidden="true">169.</strong> Export SafeTensors</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-gguf.html"><strong aria-hidden="true">170.</strong> Export GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-convert.html"><strong aria-hidden="true">171.</strong> Rosetta Convert</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-chain.html"><strong aria-hidden="true">172.</strong> Rosetta Chain</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-verify.html"><strong aria-hidden="true">173.</strong> Rosetta Verify</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/convert-quantize.html"><strong aria-hidden="true">174.</strong> Convert + Quantize</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/publish.html"><strong aria-hidden="true">175.</strong> Publish</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/pull-cache.html"><strong aria-hidden="true">176.</strong> Pull + Cache</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/batch-export.html"><strong aria-hidden="true">177.</strong> Batch Export</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">178.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">179.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">180.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">181.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">182.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/t-analysis/diff.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="model-weight-diff"><a class="header" href="#model-weight-diff">Model Weight Diff</a></h1>
+<p><strong>CLI Equivalent:</strong> <code>apr diff model_a.apr model_b.apr --weights --values</code></p>
+<h2 id="what-this-demonstrates"><a class="header" href="#what-this-demonstrates">What This Demonstrates</a></h2>
+<p>Compares two APR models structurally and numerically. Reports tensor-level weight differences including L2 distance, max absolute diff, mean absolute diff, and cosine similarity. Essential for tracking fine-tuning impact, merge quality, and quantization drift.</p>
+<h2 id="run"><a class="header" href="#run">Run</a></h2>
+<pre><code class="language-bash">cargo run --example analysis_diff
+</code></pre>
+<h2 id="key-apis"><a class="header" href="#key-apis">Key APIs</a></h2>
+<ul>
+<li><code>diff_weights(&amp;weights_a, &amp;weights_b)</code> -- produce structural changes and per-tensor weight diffs</li>
+<li><code>cosine_similarity(&amp;a, &amp;b)</code> -- compute cosine similarity between two float slices</li>
+<li><code>l2_distance(&amp;a, &amp;b)</code> -- compute Euclidean distance between weight vectors</li>
+<li><code>ChangeKind::{Added, Removed, ShapeChanged, Unchanged}</code> -- structural change classification</li>
+</ul>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # APR Model Diff
+//!
+//! CLI equivalent: `apr diff model_a.apr model_b.apr --weights --values`
+//!
+//! Compares two APR models structurally and numerically. Reports tensor-level
+//! weight differences including L2 distance, max absolute diff, mean absolute
+//! diff, and cosine similarity. Essential for tracking fine-tuning impact.
+
+use apr_cookbook::prelude::*;
+
+// ---------------------------------------------------------------------------
+// Domain types
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+struct TensorDiff {
+    name: String,
+    l2_distance: f64,
+    max_abs_diff: f64,
+    mean_abs_diff: f64,
+    cosine_similarity: f64,
+}
+
+#[derive(Debug, Clone)]
+struct StructuralChange {
+    kind: ChangeKind,
+    tensor_name: String,
+    detail: String,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+enum ChangeKind {
+    Added,
+    Removed,
+    ShapeChanged,
+    Unchanged,
+}
+
+impl std::fmt::Display for ChangeKind {
+    fn fmt(&amp;self, f: &amp;mut std::fmt::Formatter&lt;'_&gt;) -&gt; std::fmt::Result {
+        match self {
+            ChangeKind::Added =&gt; write!(f, &quot;ADDED&quot;),
+            ChangeKind::Removed =&gt; write!(f, &quot;REMOVED&quot;),
+            ChangeKind::ShapeChanged =&gt; write!(f, &quot;SHAPE_CHANGED&quot;),
+            ChangeKind::Unchanged =&gt; write!(f, &quot;UNCHANGED&quot;),
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
+#[allow(dead_code)]
+struct DiffResult {
+    structural_changes: Vec&lt;StructuralChange&gt;,
+    weight_diffs: Vec&lt;TensorDiff&gt;,
+}
+
+// ---------------------------------------------------------------------------
+// Diff logic
+// ---------------------------------------------------------------------------
+
+/// A named collection of weight tensors for diffing.
+/// Operates on raw float data — avoids parsing compressed APR bundles.
+type ModelWeights = Vec&lt;(String, Vec&lt;f32&gt;)&gt;;
+
+fn bytes_to_floats(bytes: &amp;[u8]) -&gt; Vec&lt;f32&gt; {
+    bytes
+        .chunks_exact(4)
+        .map(|c| f32::from_le_bytes([c[0], c[1], c[2], c[3]]))
+        .collect()
+}
+
+fn cosine_similarity(a: &amp;[f32], b: &amp;[f32]) -&gt; f64 {
+    let n = a.len().min(b.len());
+    if n == 0 {
+        return 0.0;
+    }
+    let mut dot: f64 = 0.0;
+    let mut norm_a: f64 = 0.0;
+    let mut norm_b: f64 = 0.0;
+    for i in 0..n {
+        let va = f64::from(a[i]);
+        let vb = f64::from(b[i]);
+        dot += va * vb;
+        norm_a += va * va;
+        norm_b += vb * vb;
+    }
+    let denom = norm_a.sqrt() * norm_b.sqrt();
+    if denom &lt; 1e-12 {
+        return 0.0;
+    }
+    (dot / denom).clamp(-1.0, 1.0)
+}
+
+fn l2_distance(a: &amp;[f32], b: &amp;[f32]) -&gt; f64 {
+    let n = a.len().min(b.len());
+    let mut sum: f64 = 0.0;
+    for i in 0..n {
+        let d = f64::from(a[i]) - f64::from(b[i]);
+        sum += d * d;
+    }
+    sum.sqrt()
+}
+
+fn max_abs_diff(a: &amp;[f32], b: &amp;[f32]) -&gt; f64 {
+    let n = a.len().min(b.len());
+    let mut max_d: f64 = 0.0;
+    for i in 0..n {
+        let d = (f64::from(a[i]) - f64::from(b[i])).abs();
+        if d &gt; max_d {
+            max_d = d;
+        }
+    }
+    max_d
+}
+
+fn mean_abs_diff(a: &amp;[f32], b: &amp;[f32]) -&gt; f64 {
+    let n = a.len().min(b.len());
+    if n == 0 {
+        return 0.0;
+    }
+    let mut sum: f64 = 0.0;
+    for i in 0..n {
+        sum += (f64::from(a[i]) - f64::from(b[i])).abs();
+    }
+    sum / n as f64
+}
+
+fn diff_weights(a: &amp;ModelWeights, b: &amp;ModelWeights) -&gt; DiffResult {
+    let mut structural_changes = Vec::new();
+    let mut weight_diffs = Vec::new();
+
+    let names_a: Vec&lt;&amp;str&gt; = a.iter().map(|(n, _)| n.as_str()).collect();
+    let names_b: Vec&lt;&amp;str&gt; = b.iter().map(|(n, _)| n.as_str()).collect();
+
+    for name in &amp;names_a {
+        if !names_b.contains(name) {
+            structural_changes.push(StructuralChange {
+                kind: ChangeKind::Removed,
+                tensor_name: (*name).to_string(),
+                detail: &quot;Tensor present in model A but not in model B&quot;.to_string(),
+            });
+        }
+    }
+
+    for name in &amp;names_b {
+        if !names_a.contains(name) {
+            structural_changes.push(StructuralChange {
+                kind: ChangeKind::Added,
+                tensor_name: (*name).to_string(),
+                detail: &quot;Tensor present in model B but not in model A&quot;.to_string(),
+            });
+        }
+    }
+
+    for (name_a, floats_a) in a {
+        if let Some((_, floats_b)) = b.iter().find(|(n, _)| n == name_a) {
+            if floats_a.len() == floats_b.len() {
+                structural_changes.push(StructuralChange {
+                    kind: ChangeKind::Unchanged,
+                    tensor_name: name_a.clone(),
+                    detail: format!(&quot;{} params&quot;, floats_a.len()),
+                });
+            } else {
+                structural_changes.push(StructuralChange {
+                    kind: ChangeKind::ShapeChanged,
+                    tensor_name: name_a.clone(),
+                    detail: format!(&quot;{} params -&gt; {} params&quot;, floats_a.len(), floats_b.len()),
+                });
+            }
+
+            let n = floats_a.len().min(floats_b.len());
+            if n &gt; 0 {
+                let fa = &amp;floats_a[..n];
+                let fb = &amp;floats_b[..n];
+                weight_diffs.push(TensorDiff {
+                    name: name_a.clone(),
+                    l2_distance: l2_distance(fa, fb),
+                    max_abs_diff: max_abs_diff(fa, fb),
+                    mean_abs_diff: mean_abs_diff(fa, fb),
+                    cosine_similarity: cosine_similarity(fa, fb),
+                });
+            }
+        }
+    }
+
+    DiffResult {
+        structural_changes,
+        weight_diffs,
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+fn main() -&gt; Result&lt;()&gt; {
+    let ctx = RecipeContext::new(&quot;analysis_diff&quot;)?;
+
+    println!(&quot;=== APR Model Diff ===\n&quot;);
+
+    // --- Section 1: Create base and fine-tuned models ---
+    println!(&quot;--- Creating Base and Fine-Tuned Models ---&quot;);
+
+    let dim = 64;
+    let seed_base = hash_name_to_seed(&quot;diff-base&quot;);
+    let seed_ft = hash_name_to_seed(&quot;diff-finetuned&quot;);
+
+    let base_w1 = generate_model_payload(seed_base, dim * dim);
+    let base_w2 = generate_model_payload(seed_base + 1, dim * 32);
+    let base_w3 = generate_model_payload(seed_base + 2, 32);
+
+    // Build APR v2 bundles for file I/O demonstration
+    let bundle_a = ModelBundleV2::new()
+        .with_name(&quot;base-model&quot;)
+        .with_description(&quot;Base model before fine-tuning&quot;)
+        .with_compression(Compression::Lz4)
+        .with_quantization(Quantization::FP32)
+        .add_tensor(&quot;encoder.weight&quot;, vec![dim, dim], base_w1.clone())
+        .add_tensor(&quot;decoder.weight&quot;, vec![dim, 32], base_w2.clone())
+        .add_tensor(&quot;decoder.bias&quot;, vec![32], base_w3.clone())
+        .build();
+
+    // Fine-tuned model: same structure, slightly different weights
+    let ft_w1 = generate_model_payload(seed_ft, dim * dim);
+    let ft_w2 = generate_model_payload(seed_ft + 1, dim * 32);
+    let ft_w3 = generate_model_payload(seed_ft + 2, 32);
+
+    let bundle_b = ModelBundleV2::new()
+        .with_name(&quot;finetuned-model&quot;)
+        .with_description(&quot;Model after LoRA fine-tuning&quot;)
+        .with_compression(Compression::Lz4)
+        .with_quantization(Quantization::FP32)
+        .add_tensor(&quot;encoder.weight&quot;, vec![dim, dim], ft_w1.clone())
+        .add_tensor(&quot;decoder.weight&quot;, vec![dim, 32], ft_w2.clone())
+        .add_tensor(&quot;decoder.bias&quot;, vec![32], ft_w3.clone())
+        .build();
+
+    std::fs::write(ctx.path(&quot;base-model.apr&quot;), &amp;bundle_a)?;
+    std::fs::write(ctx.path(&quot;finetuned-model.apr&quot;), &amp;bundle_b)?;
+    println!(&quot;Base model:       {} bytes&quot;, bundle_a.len());
+    println!(&quot;Fine-tuned model: {} bytes\n&quot;, bundle_b.len());
+
+    // Build weight maps from raw data (not compressed bundles) for accurate diff
+    let weights_a: ModelWeights = vec![
+        (&quot;encoder.weight&quot;.into(), bytes_to_floats(&amp;base_w1)),
+        (&quot;decoder.weight&quot;.into(), bytes_to_floats(&amp;base_w2)),
+        (&quot;decoder.bias&quot;.into(), bytes_to_floats(&amp;base_w3)),
+    ];
+    let weights_b: ModelWeights = vec![
+        (&quot;encoder.weight&quot;.into(), bytes_to_floats(&amp;ft_w1)),
+        (&quot;decoder.weight&quot;.into(), bytes_to_floats(&amp;ft_w2)),
+        (&quot;decoder.bias&quot;.into(), bytes_to_floats(&amp;ft_w3)),
+    ];
+
+    // --- Section 2: Structural comparison ---
+    println!(&quot;--- Structural Comparison ---&quot;);
+    let diff = diff_weights(&amp;weights_a, &amp;weights_b);
+
+    println!(&quot;\n{:&lt;20} {:&lt;15} Detail&quot;, &quot;Tensor&quot;, &quot;Status&quot;);
+    println!(&quot;{}&quot;, &quot;-&quot;.repeat(60));
+    for change in &amp;diff.structural_changes {
+        println!(
+            &quot;{:&lt;20} {:&lt;15} {}&quot;,
+            change.tensor_name, change.kind, change.detail
+        );
+    }
+
+    // --- Section 3: Per-tensor weight diff table ---
+    println!(&quot;\n--- Weight Differences ---&quot;);
+    println!(
+        &quot;\n{:&lt;15} {:&gt;12} {:&gt;12} {:&gt;12} {:&gt;10}&quot;,
+        &quot;Tensor&quot;, &quot;L2 Dist&quot;, &quot;Max Abs&quot;, &quot;Mean Abs&quot;, &quot;Cosine&quot;
+    );
+    println!(&quot;{}&quot;, &quot;-&quot;.repeat(65));
+    for wd in &amp;diff.weight_diffs {
+        println!(
+            &quot;{:&lt;15} {:&gt;12.6} {:&gt;12.6} {:&gt;12.6} {:&gt;10.6}&quot;,
+            wd.name, wd.l2_distance, wd.max_abs_diff, wd.mean_abs_diff, wd.cosine_similarity
+        );
+    }
+
+    // --- Section 4: Summary statistics ---
+    println!(&quot;\n--- Summary ---&quot;);
+    if !diff.weight_diffs.is_empty() {
+        let avg_l2: f64 = diff.weight_diffs.iter().map(|d| d.l2_distance).sum::&lt;f64&gt;()
+            / diff.weight_diffs.len() as f64;
+        let avg_cosine: f64 = diff
+            .weight_diffs
+            .iter()
+            .map(|d| d.cosine_similarity)
+            .sum::&lt;f64&gt;()
+            / diff.weight_diffs.len() as f64;
+        let max_max_abs: f64 = diff
+            .weight_diffs
+            .iter()
+            .map(|d| d.max_abs_diff)
+            .fold(0.0_f64, f64::max);
+
+        println!(&quot;Average L2 distance:      {avg_l2:.6}&quot;);
+        println!(&quot;Average cosine similarity: {avg_cosine:.6}&quot;);
+        println!(&quot;Maximum absolute diff:     {max_max_abs:.6}&quot;);
+
+        let structural_adds = diff
+            .structural_changes
+            .iter()
+            .filter(|c| c.kind == ChangeKind::Added)
+            .count();
+        let structural_removes = diff
+            .structural_changes
+            .iter()
+            .filter(|c| c.kind == ChangeKind::Removed)
+            .count();
+        println!(&quot;Tensors added:            {structural_adds}&quot;);
+        println!(&quot;Tensors removed:          {structural_removes}&quot;);
+    }
+
+    // --- Section 5: Identical model diff ---
+    println!(&quot;\n--- Self-Diff (identical models) ---&quot;);
+    let self_diff = diff_weights(&amp;weights_a, &amp;weights_a);
+    for wd in &amp;self_diff.weight_diffs {
+        println!(
+            &quot;  {}: L2={:.6}, cosine={:.6}&quot;,
+            wd.name, wd.l2_distance, wd.cosine_similarity
+        );
+        assert!(
+            wd.l2_distance &lt; 1e-10,
+            &quot;Identical models must have zero L2 distance&quot;
+        );
+        assert!(
+            (wd.cosine_similarity - 1.0).abs() &lt; 1e-6,
+            &quot;Identical models must have cosine=1.0&quot;
+        );
+    }
+    println!(&quot;Self-diff verified: all distances are zero.&quot;);
+
+    ctx.report()?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_weights(seed: u64, dim: usize) -&gt; ModelWeights {
+        let payload = generate_model_payload(seed, dim * dim);
+        vec![(&quot;weight&quot;.into(), bytes_to_floats(&amp;payload))]
+    }
+
+    #[test]
+    fn test_identical_models_zero_diff() {
+        let weights = make_weights(42, 16);
+        let diff = diff_weights(&amp;weights, &amp;weights);
+        for wd in &amp;diff.weight_diffs {
+            assert!(wd.l2_distance &lt; 1e-10);
+            assert!(wd.max_abs_diff &lt; 1e-10);
+            assert!(wd.mean_abs_diff &lt; 1e-10);
+        }
+    }
+
+    #[test]
+    fn test_identical_models_cosine_one() {
+        let weights = make_weights(42, 16);
+        let diff = diff_weights(&amp;weights, &amp;weights);
+        for wd in &amp;diff.weight_diffs {
+            assert!((wd.cosine_similarity - 1.0).abs() &lt; 1e-6);
+        }
+    }
+
+    #[test]
+    fn test_different_models_nonzero_diff() {
+        let a = make_weights(42, 16);
+        let b = make_weights(99, 16);
+        let diff = diff_weights(&amp;a, &amp;b);
+        let has_nonzero = diff.weight_diffs.iter().any(|d| d.l2_distance &gt; 1e-6);
+        assert!(has_nonzero, &quot;Different models should have non-zero diff&quot;);
+    }
+
+    #[test]
+    fn test_cosine_similarity_unit_vectors() {
+        let a = vec![1.0_f32, 0.0, 0.0];
+        let b = vec![1.0_f32, 0.0, 0.0];
+        let cs = cosine_similarity(&amp;a, &amp;b);
+        assert!((cs - 1.0).abs() &lt; 1e-6);
+    }
+
+    #[test]
+    fn test_cosine_similarity_orthogonal() {
+        let a = vec![1.0_f32, 0.0, 0.0];
+        let b = vec![0.0_f32, 1.0, 0.0];
+        let cs = cosine_similarity(&amp;a, &amp;b);
+        assert!(cs.abs() &lt; 1e-6);
+    }
+
+    #[test]
+    fn test_cosine_similarity_range() {
+        let a = vec![1.0_f32, 2.0, 3.0, 4.0];
+        let b = vec![-1.0_f32, -2.0, -3.0, -4.0];
+        let cs = cosine_similarity(&amp;a, &amp;b);
+        assert!((-1.0..=1.0).contains(&amp;cs));
+    }
+
+    #[test]
+    fn test_l2_distance_zero_for_same() {
+        let a = vec![1.0_f32, 2.0, 3.0];
+        let d = l2_distance(&amp;a, &amp;a);
+        assert!(d &lt; 1e-10);
+    }
+
+    #[test]
+    fn test_l2_distance_known_value() {
+        let a = vec![0.0_f32, 0.0, 0.0];
+        let b = vec![3.0_f32, 4.0, 0.0];
+        let d = l2_distance(&amp;a, &amp;b);
+        assert!((d - 5.0).abs() &lt; 1e-6);
+    }
+
+    #[test]
+    fn test_max_abs_diff_known() {
+        let a = vec![0.0_f32, 0.0, 0.0];
+        let b = vec![1.0_f32, 5.0, 3.0];
+        let d = max_abs_diff(&amp;a, &amp;b);
+        assert!((d - 5.0).abs() &lt; 1e-6);
+    }
+
+    #[test]
+    fn test_mean_abs_diff_known() {
+        let a = vec![0.0_f32, 0.0, 0.0];
+        let b = vec![1.0_f32, 2.0, 3.0];
+        let d = mean_abs_diff(&amp;a, &amp;b);
+        assert!((d - 2.0).abs() &lt; 1e-6);
+    }
+
+    #[test]
+    fn test_structural_unchanged() {
+        let a = make_weights(42, 16);
+        let b = make_weights(99, 16);
+        let diff = diff_weights(&amp;a, &amp;b);
+        let has_unchanged = diff
+            .structural_changes
+            .iter()
+            .any(|c| c.kind == ChangeKind::Unchanged);
+        assert!(has_unchanged);
+    }
+
+    #[test]
+    fn test_cosine_similarity_empty() {
+        let cs = cosine_similarity(&amp;[], &amp;[]);
+        assert!((cs - 0.0).abs() &lt; 1e-6);
+    }
+}</code></pre>
+<h2 id="source"><a class="header" href="#source">Source</a></h2>
+<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_diff.rs"><code>examples/analysis/analysis_diff.rs</code></a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/t-analysis/validate.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/t-analysis/bench.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/t-analysis/validate.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/t-analysis/bench.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>

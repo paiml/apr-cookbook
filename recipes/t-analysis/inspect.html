@@ -1,0 +1,751 @@
+<!DOCTYPE HTML>
+<html lang="en" class="rust" dir="ltr">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Inspect - APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="Production recipes for bundling, converting, and deploying ML models using the APR format with Toyota Way quality principles">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff">
+
+        <link rel="icon" href="../../favicon.svg">
+        <link rel="shortcut icon" href="../../favicon.png">
+        <link rel="stylesheet" href="../../css/variables.css">
+        <link rel="stylesheet" href="../../css/general.css">
+        <link rel="stylesheet" href="../../css/chrome.css">
+        <link rel="stylesheet" href="../../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../../FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="../../fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../../highlight.css">
+        <link rel="stylesheet" href="../../tomorrow-night.css">
+        <link rel="stylesheet" href="../../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body class="sidebar-visible no-js">
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "../../";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "rust";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('rust')
+            html.classList.add(theme);
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
+        </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var body = document.querySelector('body');
+            var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="../../introduction.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">Getting Started</li><li class="chapter-item expanded "><a href="../../getting-started/installation.html"><strong aria-hidden="true">1.</strong> Installation</a></li><li class="chapter-item expanded "><a href="../../getting-started/quick-start.html"><strong aria-hidden="true">2.</strong> Quick Start</a></li><li class="chapter-item expanded "><a href="../../getting-started/structure.html"><strong aria-hidden="true">3.</strong> Project Structure</a></li><li class="chapter-item expanded affix "><li class="part-title">Core Concepts</li><li class="chapter-item expanded "><a href="../../concepts/apr-format.html"><strong aria-hidden="true">4.</strong> The APR Format</a></li><li class="chapter-item expanded "><a href="../../concepts/bundling.html"><strong aria-hidden="true">5.</strong> Model Bundling</a></li><li class="chapter-item expanded "><a href="../../concepts/conversion.html"><strong aria-hidden="true">6.</strong> Format Conversion</a></li><li class="chapter-item expanded "><a href="../../concepts/zero-copy.html"><strong aria-hidden="true">7.</strong> Zero-Copy Loading</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Category A: Model Creation</li><li class="chapter-item expanded "><a href="../../recipes/a-creation/index.html"><strong aria-hidden="true">8.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/create-apr-from-scratch.html"><strong aria-hidden="true">9.</strong> Create APR from Scratch</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/linear-regression.html"><strong aria-hidden="true">10.</strong> Linear Regression Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/decision-tree.html"><strong aria-hidden="true">11.</strong> Decision Tree Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/kmeans-clustering.html"><strong aria-hidden="true">12.</strong> K-Means Clustering</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/ngram-language-model.html"><strong aria-hidden="true">13.</strong> N-gram Language Model</a></li><li class="chapter-item expanded "><a href="../../recipes/a-creation/neural-network.html"><strong aria-hidden="true">14.</strong> Neural Network</a></li><li class="chapter-item expanded affix "><li class="part-title">Category B: Binary Bundling</li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/index.html"><strong aria-hidden="true">15.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-static.html"><strong aria-hidden="true">16.</strong> Bundle Static Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-quantized.html"><strong aria-hidden="true">17.</strong> Bundle Quantized Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/bundle-encrypted.html"><strong aria-hidden="true">18.</strong> Bundle Encrypted Model</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/static-binary.html"><strong aria-hidden="true">19.</strong> Static Binary Embedding</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/quantized-q4.html"><strong aria-hidden="true">20.</strong> Q4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/signed.html"><strong aria-hidden="true">21.</strong> Signed Models</a></li><li class="chapter-item expanded "><a href="../../recipes/b-bundling/lambda-package.html"><strong aria-hidden="true">22.</strong> Lambda Package</a></li><li class="chapter-item expanded affix "><li class="part-title">Category C: Training</li><li class="chapter-item expanded "><a href="../../recipes/c-training/index.html"><strong aria-hidden="true">23.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/incremental.html"><strong aria-hidden="true">24.</strong> Incremental Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/online-learning.html"><strong aria-hidden="true">25.</strong> Online Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/federated-simulation.html"><strong aria-hidden="true">26.</strong> Federated Simulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/curriculum.html"><strong aria-hidden="true">27.</strong> Curriculum Learning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/autograd.html"><strong aria-hidden="true">28.</strong> Autograd Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lora.html"><strong aria-hidden="true">29.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/qlora.html"><strong aria-hidden="true">30.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/distillation.html"><strong aria-hidden="true">31.</strong> Knowledge Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/model-merge.html"><strong aria-hidden="true">32.</strong> Model Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/eval-metrics.html"><strong aria-hidden="true">33.</strong> Evaluation Metrics</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/hyperparameter-sweep.html"><strong aria-hidden="true">34.</strong> Hyperparameter Sweep</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/checkpoint-resume.html"><strong aria-hidden="true">35.</strong> Checkpoint Resume</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/mixed-precision.html"><strong aria-hidden="true">36.</strong> Mixed-Precision Training</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/few-shot.html"><strong aria-hidden="true">37.</strong> Few-Shot Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/gradient-accumulation.html"><strong aria-hidden="true">38.</strong> Gradient Accumulation</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/lr-schedule.html"><strong aria-hidden="true">39.</strong> Learning Rate Schedules</a></li><li class="chapter-item expanded "><a href="../../recipes/c-training/data-preprocessing.html"><strong aria-hidden="true">40.</strong> Data Preprocessing</a></li><li class="chapter-item expanded affix "><li class="part-title">Category D: Format Conversion</li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/index.html"><strong aria-hidden="true">41.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/safetensors-to-apr.html"><strong aria-hidden="true">42.</strong> SafeTensors to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/apr-to-gguf.html"><strong aria-hidden="true">43.</strong> APR to GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/gguf-to-apr.html"><strong aria-hidden="true">44.</strong> GGUF to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/phi-to-apr.html"><strong aria-hidden="true">45.</strong> Phi Model to APR</a></li><li class="chapter-item expanded "><a href="../../recipes/d-conversion/onnx-to-apr.html"><strong aria-hidden="true">46.</strong> ONNX to APR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category E: Model Registry</li><li class="chapter-item expanded "><a href="../../recipes/e-registry/index.html"><strong aria-hidden="true">47.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/register-apr.html"><strong aria-hidden="true">48.</strong> Register APR Model</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-lineage.html"><strong aria-hidden="true">49.</strong> Model Lineage</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-comparison.html"><strong aria-hidden="true">50.</strong> Model Comparison</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-rollback.html"><strong aria-hidden="true">51.</strong> Model Rollback</a></li><li class="chapter-item expanded "><a href="../../recipes/e-registry/model-versioning.html"><strong aria-hidden="true">52.</strong> Model Versioning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category F: API Integration</li><li class="chapter-item expanded "><a href="../../recipes/f-api/index.html"><strong aria-hidden="true">53.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/model-inference.html"><strong aria-hidden="true">54.</strong> Model Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/streaming-inference.html"><strong aria-hidden="true">55.</strong> Streaming Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/batch-inference.html"><strong aria-hidden="true">56.</strong> Batch Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/health-check.html"><strong aria-hidden="true">57.</strong> Health Check</a></li><li class="chapter-item expanded "><a href="../../recipes/f-api/auth-middleware.html"><strong aria-hidden="true">58.</strong> Auth Middleware</a></li><li class="chapter-item expanded affix "><li class="part-title">Category G: Serverless</li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/index.html"><strong aria-hidden="true">59.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/lambda-inference.html"><strong aria-hidden="true">60.</strong> Lambda Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/cold-start.html"><strong aria-hidden="true">61.</strong> Cold Start Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/edge-function.html"><strong aria-hidden="true">62.</strong> Edge Functions</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/container-image.html"><strong aria-hidden="true">63.</strong> Container Image</a></li><li class="chapter-item expanded "><a href="../../recipes/g-serverless/model-warmup.html"><strong aria-hidden="true">64.</strong> Model Warmup</a></li><li class="chapter-item expanded affix "><li class="part-title">Category H: WASM/Browser</li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/index.html"><strong aria-hidden="true">65.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/browser-inference.html"><strong aria-hidden="true">66.</strong> Browser Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/web-worker.html"><strong aria-hidden="true">67.</strong> Web Workers</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/progressive-loading.html"><strong aria-hidden="true">68.</strong> Progressive Loading</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/webgpu-acceleration.html"><strong aria-hidden="true">69.</strong> WebGPU Acceleration</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/streaming-compilation.html"><strong aria-hidden="true">70.</strong> Streaming Compilation</a></li><li class="chapter-item expanded "><a href="../../recipes/h-wasm/model-loader.html"><strong aria-hidden="true">71.</strong> Model Loader</a></li><li class="chapter-item expanded affix "><li class="part-title">Category I: GPU Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/index.html"><strong aria-hidden="true">72.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/flash-attention.html"><strong aria-hidden="true">73.</strong> FlashAttention</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/cuda-inference.html"><strong aria-hidden="true">74.</strong> CUDA Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/tensor-core.html"><strong aria-hidden="true">75.</strong> Tensor Core Optimization</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/multi-gpu.html"><strong aria-hidden="true">76.</strong> Multi-GPU Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-management.html"><strong aria-hidden="true">77.</strong> Memory Management</a></li><li class="chapter-item expanded "><a href="../../recipes/i-gpu/memory-pool.html"><strong aria-hidden="true">78.</strong> Memory Pool</a></li><li class="chapter-item expanded affix "><li class="part-title">Category J: SIMD Acceleration</li><li class="chapter-item expanded "><a href="../../recipes/j-simd/index.html"><strong aria-hidden="true">79.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/matrix-operations.html"><strong aria-hidden="true">80.</strong> Matrix Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/vectorized-inference.html"><strong aria-hidden="true">81.</strong> Vectorized Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/quantized-operations.html"><strong aria-hidden="true">82.</strong> Quantized Operations</a></li><li class="chapter-item expanded "><a href="../../recipes/j-simd/auto-vectorization.html"><strong aria-hidden="true">83.</strong> Auto-Vectorization</a></li><li class="chapter-item expanded affix "><li class="part-title">Category K: Model Distillation</li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/index.html"><strong aria-hidden="true">84.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/knowledge-transfer.html"><strong aria-hidden="true">85.</strong> Knowledge Transfer</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/layer-matching.html"><strong aria-hidden="true">86.</strong> Layer Matching</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/pruning-aware.html"><strong aria-hidden="true">87.</strong> Pruning-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/quantization-aware.html"><strong aria-hidden="true">88.</strong> Quantization-Aware Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/k-distillation/structured-pruning.html"><strong aria-hidden="true">89.</strong> Structured Pruning</a></li><li class="chapter-item expanded affix "><li class="part-title">Category L: CLI Tools</li><li class="chapter-item expanded "><a href="../../recipes/l-cli/index.html"><strong aria-hidden="true">90.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-info.html"><strong aria-hidden="true">91.</strong> apr-info</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-bench.html"><strong aria-hidden="true">92.</strong> apr-bench</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-convert.html"><strong aria-hidden="true">93.</strong> apr-convert</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-serve.html"><strong aria-hidden="true">94.</strong> apr-serve</a></li><li class="chapter-item expanded "><a href="../../recipes/l-cli/apr-diff.html"><strong aria-hidden="true">95.</strong> apr-diff</a></li><li class="chapter-item expanded affix "><li class="part-title">Category M: Inference Monitoring</li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/index.html"><strong aria-hidden="true">96.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/explainability.html"><strong aria-hidden="true">97.</strong> Inference Explainability</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/hash-chain-audit.html"><strong aria-hidden="true">98.</strong> Hash Chain Audit</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/cost-tracking.html"><strong aria-hidden="true">99.</strong> Cost Tracking</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/latency-histogram.html"><strong aria-hidden="true">100.</strong> Latency Histogram</a></li><li class="chapter-item expanded "><a href="../../recipes/m-monitoring/drift-detection.html"><strong aria-hidden="true">101.</strong> Drift Detection</a></li><li class="chapter-item expanded affix "><li class="part-title">Category N: Speech Recognition</li><li class="chapter-item expanded "><a href="../../recipes/n-speech/index.html"><strong aria-hidden="true">102.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-transcribe.html"><strong aria-hidden="true">103.</strong> Whisper Transcription</a></li><li class="chapter-item expanded "><a href="../../recipes/n-speech/whisper-streaming.html"><strong aria-hidden="true">104.</strong> Streaming ASR</a></li><li class="chapter-item expanded affix "><li class="part-title">Category O: Distributed Computing</li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/index.html"><strong aria-hidden="true">105.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/distributed-inference.html"><strong aria-hidden="true">106.</strong> Distributed Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/o-distributed/model-sharding.html"><strong aria-hidden="true">107.</strong> Model Sharding</a></li><li class="chapter-item expanded affix "><li class="part-title">Category P: Inference Patterns</li><li class="chapter-item expanded "><a href="../../recipes/p-inference/index.html"><strong aria-hidden="true">108.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/simple.html"><strong aria-hidden="true">109.</strong> Simple Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/speculative-decode.html"><strong aria-hidden="true">110.</strong> Speculative Decoding</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/kv-cache.html"><strong aria-hidden="true">111.</strong> KV-Cache Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/multi-turn.html"><strong aria-hidden="true">112.</strong> Multi-turn Chat</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/tool-use.html"><strong aria-hidden="true">113.</strong> Tool Use</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/streaming.html"><strong aria-hidden="true">114.</strong> Streaming Tokens</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/adaptive-batch.html"><strong aria-hidden="true">115.</strong> Adaptive Batching</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/dynamic-batch-sla.html"><strong aria-hidden="true">116.</strong> Dynamic Batch SLA</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/ensemble.html"><strong aria-hidden="true">117.</strong> Ensemble Inference</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/pipeline.html"><strong aria-hidden="true">118.</strong> Model Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/p-inference/quantized-comparison.html"><strong aria-hidden="true">119.</strong> Quantized Comparison</a></li><li class="chapter-item expanded affix "><li class="part-title">Category Q: Model Serving</li><li class="chapter-item expanded "><a href="../../recipes/q-serving/index.html"><strong aria-hidden="true">120.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/http-server.html"><strong aria-hidden="true">121.</strong> HTTP Model Server</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/ab-testing.html"><strong aria-hidden="true">122.</strong> A/B Testing</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/canary-deploy.html"><strong aria-hidden="true">123.</strong> Canary Deploy</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/rate-limiter.html"><strong aria-hidden="true">124.</strong> Rate Limiter</a></li><li class="chapter-item expanded "><a href="../../recipes/q-serving/selection-router.html"><strong aria-hidden="true">125.</strong> Selection Router</a></li><li class="chapter-item expanded affix "><li class="part-title">Category R: Model Optimization</li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/index.html"><strong aria-hidden="true">126.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/full-pipeline.html"><strong aria-hidden="true">127.</strong> Full Pipeline</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-lora.html"><strong aria-hidden="true">128.</strong> LoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-qlora.html"><strong aria-hidden="true">129.</strong> QLoRA Fine-tuning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-merge-adapter.html"><strong aria-hidden="true">130.</strong> Adapter Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/finetune-plan-vram.html"><strong aria-hidden="true">131.</strong> VRAM Planning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-magnitude.html"><strong aria-hidden="true">132.</strong> Magnitude Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-structured.html"><strong aria-hidden="true">133.</strong> Structured Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-depth.html"><strong aria-hidden="true">134.</strong> Depth Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-wanda.html"><strong aria-hidden="true">135.</strong> Wanda Pruning</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/prune-gradual-schedule.html"><strong aria-hidden="true">136.</strong> Gradual Schedule</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-standard-kl.html"><strong aria-hidden="true">137.</strong> Standard KL Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-progressive.html"><strong aria-hidden="true">138.</strong> Progressive Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-ensemble.html"><strong aria-hidden="true">139.</strong> Ensemble Distillation</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/distill-checkpoint.html"><strong aria-hidden="true">140.</strong> Distillation Checkpoint</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-average.html"><strong aria-hidden="true">141.</strong> Average Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-weighted.html"><strong aria-hidden="true">142.</strong> Weighted Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-slerp.html"><strong aria-hidden="true">143.</strong> SLERP Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-ties.html"><strong aria-hidden="true">144.</strong> TIES Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-dare.html"><strong aria-hidden="true">145.</strong> DARE Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/merge-hierarchical.html"><strong aria-hidden="true">146.</strong> Hierarchical Merge</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-4bit.html"><strong aria-hidden="true">147.</strong> Int4 Quantization</a></li><li class="chapter-item expanded "><a href="../../recipes/r-optimize/quantize-fake-qat.html"><strong aria-hidden="true">148.</strong> Fake QAT</a></li><li class="chapter-item expanded affix "><li class="part-title">Category S: Chat Templates</li><li class="chapter-item expanded "><a href="../../recipes/s-chat/index.html"><strong aria-hidden="true">149.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/chatml.html"><strong aria-hidden="true">150.</strong> ChatML Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/llama2.html"><strong aria-hidden="true">151.</strong> LLaMA 2 Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/mistral.html"><strong aria-hidden="true">152.</strong> Mistral Format</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/multi-format.html"><strong aria-hidden="true">153.</strong> Multi-Format Detection</a></li><li class="chapter-item expanded "><a href="../../recipes/s-chat/injection-defense.html"><strong aria-hidden="true">154.</strong> Injection Defense</a></li><li class="chapter-item expanded affix "><li class="part-title">Category T: Model Analysis</li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/index.html"><strong aria-hidden="true">155.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/inspect.html" class="active"><strong aria-hidden="true">156.</strong> Inspect</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/validate.html"><strong aria-hidden="true">157.</strong> Validate</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/diff.html"><strong aria-hidden="true">158.</strong> Diff</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/bench.html"><strong aria-hidden="true">159.</strong> Bench</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/profile.html"><strong aria-hidden="true">160.</strong> Profile</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/qa-gates.html"><strong aria-hidden="true">161.</strong> QA Gates</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/oracle.html"><strong aria-hidden="true">162.</strong> Oracle</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/canary.html"><strong aria-hidden="true">163.</strong> Canary</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/tree.html"><strong aria-hidden="true">164.</strong> Tree</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/hex.html"><strong aria-hidden="true">165.</strong> Hex</a></li><li class="chapter-item expanded "><a href="../../recipes/t-analysis/explain.html"><strong aria-hidden="true">166.</strong> Explain</a></li><li class="chapter-item expanded affix "><li class="part-title">Category U: Format Operations</li><li class="chapter-item expanded "><a href="../../recipes/u-format/index.html"><strong aria-hidden="true">167.</strong> Overview</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/import-hf.html"><strong aria-hidden="true">168.</strong> Import from HuggingFace</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-safetensors.html"><strong aria-hidden="true">169.</strong> Export SafeTensors</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/export-gguf.html"><strong aria-hidden="true">170.</strong> Export GGUF</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-convert.html"><strong aria-hidden="true">171.</strong> Rosetta Convert</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-chain.html"><strong aria-hidden="true">172.</strong> Rosetta Chain</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/rosetta-verify.html"><strong aria-hidden="true">173.</strong> Rosetta Verify</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/convert-quantize.html"><strong aria-hidden="true">174.</strong> Convert + Quantize</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/publish.html"><strong aria-hidden="true">175.</strong> Publish</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/pull-cache.html"><strong aria-hidden="true">176.</strong> Pull + Cache</a></li><li class="chapter-item expanded "><a href="../../recipes/u-format/batch-export.html"><strong aria-hidden="true">177.</strong> Batch Export</a></li><li class="spacer"></li><li class="chapter-item expanded affix "><li class="part-title">Reference</li><li class="chapter-item expanded "><a href="../../reference/api.html"><strong aria-hidden="true">178.</strong> API Documentation</a></li><li class="chapter-item expanded "><a href="../../reference/errors.html"><strong aria-hidden="true">179.</strong> Error Handling</a></li><li class="chapter-item expanded "><a href="../../reference/features.html"><strong aria-hidden="true">180.</strong> Feature Flags</a></li><li class="chapter-item expanded affix "><li class="part-title">Appendix</li><li class="chapter-item expanded "><a href="../../appendix/toyota-way.html"><strong aria-hidden="true">181.</strong> Toyota Way Principles</a></li><li class="chapter-item expanded "><a href="../../appendix/qa-checklist.html"><strong aria-hidden="true">182.</strong> Recipe QA Checklist</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </label>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">APR Cookbook - Idiomatic Rust Patterns for ML Model Deployment</h1>
+
+                    <div class="right-buttons">
+                        <a href="../../print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook" title="Git repository" aria-label="Git repository">
+                            <i id="git-repository-button" class="fa fa-github"></i>
+                        </a>
+                        <a href="https://github.com/paiml/apr-cookbook/edit/main/book/src/recipes/t-analysis/inspect.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="model-metadata-inspection"><a class="header" href="#model-metadata-inspection">Model Metadata Inspection</a></h1>
+<p><strong>CLI Equivalent:</strong> <code>apr inspect model.apr [--verbose] [--json]</code></p>
+<h2 id="what-this-demonstrates"><a class="header" href="#what-this-demonstrates">What This Demonstrates</a></h2>
+<p>Inspects an APR model file to extract metadata, architecture details, tensor listing, size breakdown by category, and compression statistics. Essential for understanding model structure before inference or conversion.</p>
+<h2 id="run"><a class="header" href="#run">Run</a></h2>
+<pre><code class="language-bash">cargo run --example analysis_inspect
+</code></pre>
+<h2 id="key-apis"><a class="header" href="#key-apis">Key APIs</a></h2>
+<ul>
+<li><code>ModelBundleV2::new().with_name().add_tensor().build()</code> -- create a multi-tensor APR v2 bundle</li>
+<li><code>inspect_apr(&amp;bytes)</code> -- parse magic bytes, metadata, tensor directory from raw APR binary</li>
+<li><code>size_breakdown(&amp;tensors)</code> -- categorize tensors into embedding, attention, feed-forward, normalization</li>
+<li><code>detect_compression(&amp;bytes)</code> -- detect LZ4/Zstd compression from magic bytes in payload</li>
+</ul>
+<h2 id="code"><a class="header" href="#code">Code</a></h2>
+<pre><code class="language-rust ignore">//! # APR Model Inspection
+//!
+//! CLI equivalent: `apr inspect model.apr`
+//!
+//! Inspects an APR model file to extract metadata, architecture details,
+//! tensor listing, and size breakdown. Essential for understanding model
+//! structure before inference or conversion.
+
+use apr_cookbook::prelude::*;
+use std::collections::HashMap;
+use std::fmt;
+
+// ---------------------------------------------------------------------------
+// Domain types
+// ---------------------------------------------------------------------------
+
+#[derive(Debug, Clone)]
+struct TensorInfo {
+    name: String,
+    shape: Vec&lt;usize&gt;,
+    dtype: String,
+    size_bytes: usize,
+}
+
+impl TensorInfo {
+    fn param_count(&amp;self) -&gt; usize {
+        self.shape.iter().product()
+    }
+}
+
+#[derive(Debug, Clone)]
+struct InspectResult {
+    name: String,
+    description: String,
+    format_version: u8,
+    num_tensors: usize,
+    total_params: usize,
+    total_bytes: usize,
+    compression: String,
+    tensors: Vec&lt;TensorInfo&gt;,
+}
+
+impl fmt::Display for InspectResult {
+    fn fmt(&amp;self, f: &amp;mut fmt::Formatter&lt;'_&gt;) -&gt; fmt::Result {
+        writeln!(f, &quot;Model: {}&quot;, self.name)?;
+        writeln!(f, &quot;Description: {}&quot;, self.description)?;
+        writeln!(f, &quot;Format: APR v{}&quot;, self.format_version)?;
+        writeln!(f, &quot;Tensors: {}&quot;, self.num_tensors)?;
+        writeln!(f, &quot;Parameters: {}&quot;, self.total_params)?;
+        writeln!(f, &quot;Total size: {} bytes&quot;, self.total_bytes)?;
+        writeln!(f, &quot;Compression: {}&quot;, self.compression)?;
+        Ok(())
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Inspection logic
+// ---------------------------------------------------------------------------
+
+fn inspect_apr(bytes: &amp;[u8]) -&gt; std::result::Result&lt;InspectResult, String&gt; {
+    // Validate magic bytes
+    if bytes.len() &lt; 4 {
+        return Err(&quot;File too small to be a valid APR model&quot;.to_string());
+    }
+    if &amp;bytes[0..4] != b&quot;APR2&quot; {
+        return Err(format!(
+            &quot;Invalid magic bytes: expected APR2, got {:?}&quot;,
+            &amp;bytes[0..4]
+        ));
+    }
+
+    // Parse format version (byte 4)
+    let format_version = if bytes.len() &gt; 4 { bytes[4] } else { 2 };
+
+    // Extract model name from metadata region
+    let name = extract_metadata_string(bytes, &quot;name&quot;).unwrap_or_else(|| &quot;unknown&quot;.to_string());
+    let description = extract_metadata_string(bytes, &quot;description&quot;).unwrap_or_default();
+    let compression = detect_compression(bytes);
+
+    // Parse tensor directory
+    let tensors = parse_tensor_directory(bytes);
+    let num_tensors = tensors.len();
+    let total_params: usize = tensors.iter().map(TensorInfo::param_count).sum();
+    let total_bytes: usize = tensors.iter().map(|t| t.size_bytes).sum();
+
+    Ok(InspectResult {
+        name,
+        description,
+        format_version,
+        num_tensors,
+        total_params,
+        total_bytes,
+        compression,
+        tensors,
+    })
+}
+
+fn extract_metadata_string(bytes: &amp;[u8], key: &amp;str) -&gt; Option&lt;String&gt; {
+    // Search for key pattern in metadata region (after header)
+    let search = format!(&quot;{}=&quot;, key);
+    let search_bytes = search.as_bytes();
+    for i in 4..bytes.len().saturating_sub(search_bytes.len()) {
+        if &amp;bytes[i..i + search_bytes.len()] == search_bytes {
+            let start = i + search_bytes.len();
+            let end = bytes[start..]
+                .iter()
+                .position(|&amp;b| b == 0 || b == b'\n')
+                .map_or(bytes.len().min(start + 256), |p| start + p);
+            return Some(String::from_utf8_lossy(&amp;bytes[start..end]).to_string());
+        }
+    }
+    None
+}
+
+fn detect_compression(bytes: &amp;[u8]) -&gt; String {
+    // Check for LZ4 frame magic (0x04224D18) in payload region
+    let lz4_magic: [u8; 4] = [0x04, 0x22, 0x4D, 0x18];
+    for window in bytes.windows(4) {
+        if window == lz4_magic {
+            return &quot;LZ4&quot;.to_string();
+        }
+    }
+    // Check for zstd magic (0xFD2FB528)
+    let zstd_magic: [u8; 4] = [0x28, 0xB5, 0x2F, 0xFD];
+    for window in bytes.windows(4) {
+        if window == zstd_magic {
+            return &quot;Zstd&quot;.to_string();
+        }
+    }
+    &quot;None&quot;.to_string()
+}
+
+fn parse_tensor_directory(bytes: &amp;[u8]) -&gt; Vec&lt;TensorInfo&gt; {
+    // For APR v2 bundles built with ModelBundleV2, extract tensor info
+    // from the structured format. We simulate parsing here since the
+    // actual format is handled by aprender.
+    let mut tensors = Vec::new();
+    let mut offset = 0;
+
+    // Search for tensor markers in the payload
+    let marker = b&quot;tensor:&quot;;
+    while offset &lt; bytes.len().saturating_sub(marker.len() + 20) {
+        if &amp;bytes[offset..offset + marker.len()] == marker {
+            let name_start = offset + marker.len();
+            let name_end = bytes[name_start..]
+                .iter()
+                .position(|&amp;b| b == b':')
+                .map_or(name_start, |p| name_start + p);
+            let name = String::from_utf8_lossy(&amp;bytes[name_start..name_end]).to_string();
+
+            // Parse shape from next segment
+            let shape_start = name_end + 1;
+            let shape_end = bytes[shape_start..]
+                .iter()
+                .position(|&amp;b| b == b':')
+                .map_or(shape_start, |p| shape_start + p);
+            let shape_str = String::from_utf8_lossy(&amp;bytes[shape_start..shape_end]);
+            let shape: Vec&lt;usize&gt; = shape_str
+                .split('x')
+                .filter_map(|s| s.parse().ok())
+                .collect();
+
+            let param_count: usize = if shape.is_empty() {
+                1
+            } else {
+                shape.iter().product()
+            };
+            let size_bytes = param_count * 4; // assume FP32
+
+            tensors.push(TensorInfo {
+                name,
+                shape,
+                dtype: &quot;f32&quot;.to_string(),
+                size_bytes,
+            });
+
+            offset = shape_end + 1;
+        } else {
+            offset += 1;
+        }
+    }
+
+    // If no tensors found via markers, infer from bundle size
+    if tensors.is_empty() &amp;&amp; bytes.len() &gt; 64 {
+        let payload_size = bytes.len().saturating_sub(64);
+        let estimated_params = payload_size / 4;
+        tensors.push(TensorInfo {
+            name: &quot;weights&quot;.to_string(),
+            shape: vec![estimated_params],
+            dtype: &quot;f32&quot;.to_string(),
+            size_bytes: payload_size,
+        });
+    }
+
+    tensors
+}
+
+fn format_size(bytes: usize) -&gt; String {
+    if bytes &gt;= 1_073_741_824 {
+        format!(&quot;{:.2} GB&quot;, bytes as f64 / 1_073_741_824.0)
+    } else if bytes &gt;= 1_048_576 {
+        format!(&quot;{:.2} MB&quot;, bytes as f64 / 1_048_576.0)
+    } else if bytes &gt;= 1024 {
+        format!(&quot;{:.2} KB&quot;, bytes as f64 / 1024.0)
+    } else {
+        format!(&quot;{} B&quot;, bytes)
+    }
+}
+
+fn size_breakdown(tensors: &amp;[TensorInfo]) -&gt; HashMap&lt;String, usize&gt; {
+    let mut breakdown = HashMap::new();
+    for t in tensors {
+        let category = if t.name.contains(&quot;embed&quot;) {
+            &quot;embedding&quot;
+        } else if t.name.contains(&quot;attn&quot;) || t.name.contains(&quot;attention&quot;) {
+            &quot;attention&quot;
+        } else if t.name.contains(&quot;ffn&quot;) || t.name.contains(&quot;mlp&quot;) {
+            &quot;feed-forward&quot;
+        } else if t.name.contains(&quot;norm&quot;) || t.name.contains(&quot;ln&quot;) {
+            &quot;normalization&quot;
+        } else {
+            &quot;other&quot;
+        };
+        *breakdown.entry(category.to_string()).or_insert(0) += t.size_bytes;
+    }
+    breakdown
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+fn main() -&gt; Result&lt;()&gt; {
+    let ctx = RecipeContext::new(&quot;analysis_inspect&quot;)?;
+
+    // --- Section 1: Create a multi-tensor test model ---
+    println!(&quot;=== APR Model Inspector ===\n&quot;);
+
+    let embed_dim = 128;
+    let hidden_dim = 256;
+    let vocab_size = 1000;
+
+    let seed = hash_name_to_seed(&quot;inspect-model&quot;);
+    let embed_bytes = generate_model_payload(seed, vocab_size * embed_dim);
+    let attn_bytes = generate_model_payload(seed + 1, hidden_dim * hidden_dim);
+    let ffn_bytes = generate_model_payload(seed + 2, hidden_dim * hidden_dim);
+    let norm_bytes = generate_model_payload(seed + 3, hidden_dim);
+    let output_bytes = generate_model_payload(seed + 4, vocab_size * hidden_dim);
+
+    let bundle = ModelBundleV2::new()
+        .with_name(&quot;transformer-tiny&quot;)
+        .with_description(&quot;Tiny transformer for inspection demo&quot;)
+        .with_compression(Compression::Lz4)
+        .with_quantization(Quantization::FP32)
+        .add_tensor(&quot;embed.weight&quot;, vec![vocab_size, embed_dim], embed_bytes)
+        .add_tensor(&quot;attn.qkv&quot;, vec![hidden_dim, hidden_dim], attn_bytes)
+        .add_tensor(&quot;ffn.up&quot;, vec![hidden_dim, hidden_dim], ffn_bytes)
+        .add_tensor(&quot;norm.weight&quot;, vec![hidden_dim], norm_bytes)
+        .add_tensor(&quot;output.proj&quot;, vec![vocab_size, hidden_dim], output_bytes)
+        .build();
+
+    let model_path = ctx.path(&quot;transformer-tiny.apr&quot;);
+    std::fs::write(&amp;model_path, &amp;bundle)?;
+    println!(
+        &quot;Created test model: {} ({} bytes)\n&quot;,
+        model_path.display(),
+        bundle.len()
+    );
+
+    // --- Section 2: Model overview ---
+    println!(&quot;--- Model Overview ---&quot;);
+    let result = inspect_apr(&amp;bundle).map_err(CookbookError::invalid_format)?;
+    println!(&quot;{result}&quot;);
+
+    // --- Section 3: Tensor listing table ---
+    println!(&quot;--- Tensor Listing ---&quot;);
+    println!(
+        &quot;{:&lt;20} {:&lt;20} {:&lt;8} {:&lt;12} {:&lt;10}&quot;,
+        &quot;Name&quot;, &quot;Shape&quot;, &quot;DType&quot;, &quot;Params&quot;, &quot;Size&quot;
+    );
+    println!(&quot;{}&quot;, &quot;-&quot;.repeat(70));
+    for t in &amp;result.tensors {
+        let shape_str = t
+            .shape
+            .iter()
+            .map(|d: &amp;usize| d.to_string())
+            .collect::&lt;Vec&lt;_&gt;&gt;()
+            .join(&quot;x&quot;);
+        println!(
+            &quot;{:&lt;20} {:&lt;20} {:&lt;8} {:&lt;12} {:&lt;10}&quot;,
+            t.name,
+            shape_str,
+            t.dtype,
+            t.param_count(),
+            format_size(t.size_bytes)
+        );
+    }
+    println!();
+
+    // --- Section 4: Size breakdown by category ---
+    println!(&quot;--- Size Breakdown ---&quot;);
+    let breakdown = size_breakdown(&amp;result.tensors);
+    let total: usize = breakdown.values().sum();
+    let mut sorted: Vec&lt;_&gt; = breakdown.iter().collect();
+    sorted.sort_by(|a, b| b.1.cmp(a.1));
+    for (category, size) in &amp;sorted {
+        let pct = if total &gt; 0 {
+            (**size as f64 / total as f64) * 100.0
+        } else {
+            0.0
+        };
+        println!(
+            &quot;  {:&lt;20} {:&gt;10}  ({:.1}%)&quot;,
+            category,
+            format_size(**size),
+            pct
+        );
+    }
+    println!(&quot;  {:&lt;20} {:&gt;10}&quot;, &quot;TOTAL&quot;, format_size(total));
+    println!();
+
+    // --- Section 5: Compression statistics ---
+    println!(&quot;--- Compression Stats ---&quot;);
+    let raw_size = result.total_bytes;
+    let file_size = bundle.len();
+    let ratio = if raw_size &gt; 0 {
+        file_size as f64 / raw_size as f64
+    } else {
+        1.0
+    };
+    println!(&quot;  Raw tensor size:    {}&quot;, format_size(raw_size));
+    println!(&quot;  File size on disk:  {}&quot;, format_size(file_size));
+    println!(&quot;  Compression ratio:  {:.2}x&quot;, 1.0 / ratio);
+    println!(&quot;  Compression method: {}&quot;, result.compression);
+
+    // Verify magic bytes
+    assert_eq!(&amp;bundle[0..4], b&quot;APR2&quot;, &quot;APR v2 magic bytes must be present&quot;);
+    println!(&quot;\nMagic bytes verified: APR2&quot;);
+
+    ctx.report()?;
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn make_test_bundle(name: &amp;str, tensors: Vec&lt;(&amp;str, Vec&lt;usize&gt;)&gt;) -&gt; Vec&lt;u8&gt; {
+        let seed = hash_name_to_seed(name);
+        let mut builder = ModelBundleV2::new()
+            .with_name(name)
+            .with_description(&quot;test model&quot;)
+            .with_compression(Compression::Lz4)
+            .with_quantization(Quantization::FP32);
+
+        for (i, (tname, shape)) in tensors.iter().enumerate() {
+            let num_elements: usize = shape.iter().product();
+            let payload = generate_model_payload(seed + i as u64, num_elements);
+            builder = builder.add_tensor(*tname, shape.clone(), payload);
+        }
+        builder.build()
+    }
+
+    #[test]
+    fn test_magic_bytes_valid() {
+        let bundle = make_test_bundle(&quot;test&quot;, vec![(&quot;w&quot;, vec![4, 4])]);
+        assert_eq!(&amp;bundle[0..4], b&quot;APR2&quot;);
+    }
+
+    #[test]
+    fn test_magic_bytes_invalid() {
+        let mut bundle = make_test_bundle(&quot;test&quot;, vec![(&quot;w&quot;, vec![4, 4])]);
+        bundle[0] = b'X';
+        let result = inspect_apr(&amp;bundle);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_file_too_small() {
+        let result = inspect_apr(&amp;[0x41, 0x50]);
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains(&quot;too small&quot;));
+    }
+
+    #[test]
+    fn test_tensor_count_single() {
+        let bundle = make_test_bundle(&quot;single&quot;, vec![(&quot;weight&quot;, vec![10, 5])]);
+        let result = inspect_apr(&amp;bundle).unwrap();
+        assert!(result.num_tensors &gt;= 1);
+    }
+
+    #[test]
+    fn test_param_count_calculation() {
+        let info = TensorInfo {
+            name: &quot;w&quot;.to_string(),
+            shape: vec![10, 20, 3],
+            dtype: &quot;f32&quot;.to_string(),
+            size_bytes: 2400,
+        };
+        assert_eq!(info.param_count(), 600);
+    }
+
+    #[test]
+    fn test_size_bytes_calculation() {
+        let info = TensorInfo {
+            name: &quot;w&quot;.to_string(),
+            shape: vec![100, 100],
+            dtype: &quot;f32&quot;.to_string(),
+            size_bytes: 40000,
+        };
+        assert_eq!(info.size_bytes, 40000);
+        assert_eq!(info.param_count(), 10000);
+    }
+
+    #[test]
+    fn test_format_size_bytes() {
+        assert_eq!(format_size(500), &quot;500 B&quot;);
+    }
+
+    #[test]
+    fn test_format_size_kb() {
+        let s = format_size(2048);
+        assert!(s.contains(&quot;KB&quot;));
+    }
+
+    #[test]
+    fn test_format_size_mb() {
+        let s = format_size(5_242_880);
+        assert!(s.contains(&quot;MB&quot;));
+    }
+
+    #[test]
+    fn test_format_size_gb() {
+        let s = format_size(2_147_483_648);
+        assert!(s.contains(&quot;GB&quot;));
+    }
+
+    #[test]
+    fn test_size_breakdown_categories() {
+        let tensors = vec![
+            TensorInfo {
+                name: &quot;embed.weight&quot;.to_string(),
+                shape: vec![100],
+                dtype: &quot;f32&quot;.to_string(),
+                size_bytes: 400,
+            },
+            TensorInfo {
+                name: &quot;attn.qkv&quot;.to_string(),
+                shape: vec![64],
+                dtype: &quot;f32&quot;.to_string(),
+                size_bytes: 256,
+            },
+            TensorInfo {
+                name: &quot;ffn.up&quot;.to_string(),
+                shape: vec![128],
+                dtype: &quot;f32&quot;.to_string(),
+                size_bytes: 512,
+            },
+        ];
+        let breakdown = size_breakdown(&amp;tensors);
+        assert!(breakdown.contains_key(&quot;embedding&quot;));
+        assert!(breakdown.contains_key(&quot;attention&quot;));
+        assert!(breakdown.contains_key(&quot;feed-forward&quot;));
+    }
+
+    #[test]
+    fn test_detect_compression_none() {
+        // Simple APR2 header with no compression markers
+        let mut data = b&quot;APR2&quot;.to_vec();
+        data.extend_from_slice(&amp;[0u8; 100]);
+        let comp = detect_compression(&amp;data);
+        assert_eq!(comp, &quot;None&quot;);
+    }
+
+    #[test]
+    fn test_inspect_result_display() {
+        let result = InspectResult {
+            name: &quot;test&quot;.to_string(),
+            description: &quot;demo&quot;.to_string(),
+            format_version: 2,
+            num_tensors: 3,
+            total_params: 1000,
+            total_bytes: 4000,
+            compression: &quot;LZ4&quot;.to_string(),
+            tensors: vec![],
+        };
+        let display = format!(&quot;{result}&quot;);
+        assert!(display.contains(&quot;test&quot;));
+        assert!(display.contains(&quot;APR v2&quot;));
+        assert!(display.contains(&quot;1000&quot;));
+    }
+}</code></pre>
+<h2 id="source"><a class="header" href="#source">Source</a></h2>
+<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_inspect.rs"><code>examples/analysis/analysis_inspect.rs</code></a></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="../../recipes/t-analysis/index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next prefetch" href="../../recipes/t-analysis/validate.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="../../recipes/t-analysis/index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next prefetch" href="../../recipes/t-analysis/validate.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+        <script src="../../ace.js"></script>
+        <script src="../../editor.js"></script>
+        <script src="../../mode-rust.js"></script>
+        <script src="../../theme-dawn.js"></script>
+        <script src="../../theme-tomorrow_night.js"></script>
+
+        <script src="../../elasticlunr.min.js"></script>
+        <script src="../../mark.min.js"></script>
+        <script src="../../searcher.js"></script>
+
+        <script src="../../clipboard.min.js"></script>
+        <script src="../../highlight.js"></script>
+        <script src="../../book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
