@@ -401,13 +401,10 @@ fn build_registry() -> ToolRegistry {
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Section helpers (extracted from main to reduce cyclomatic complexity)
 // ---------------------------------------------------------------------------
 
-fn main() {
-    println!("=== Chat Tool Use / Function Calling Example ===\n");
-
-    // =========================================================================
+fn demo_tool_registration() {
     println!("1. Tool Registration & Discovery");
     println!("   ─────────────────────────────────────────");
     let registry = build_registry();
@@ -416,10 +413,12 @@ fn main() {
         println!("   {}. {:16} - {}", i + 1, tool.name, tool.description);
     }
     println!("   Names: {:?}\n", registry.names());
+}
 
-    // =========================================================================
+fn demo_single_turn_dispatch() {
     println!("2. Single-Turn Tool Dispatch");
     println!("   ─────────────────────────────────────────");
+    let registry = build_registry();
     let dispatches = [
         ("calculator", "15 * 7"),
         ("calculator", "100 / 3"),
@@ -438,8 +437,9 @@ fn main() {
         println!("   [{tag}] {name}({args}) -> {}", r.output);
     }
     println!();
+}
 
-    // =========================================================================
+fn demo_multi_turn_conversation() {
     println!("3. Multi-Turn Conversation");
     println!("   ─────────────────────────────────────────");
     let mut engine = ChatEngine::new(build_registry(), 42);
@@ -462,8 +462,9 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
+fn demo_parallel_tool_calls() {
     println!("4. Parallel Tool Calls");
     println!("   ─────────────────────────────────────────");
     let mut engine = ChatEngine::new(build_registry(), 99);
@@ -490,8 +491,9 @@ fn main() {
         }
         println!();
     }
+}
 
-    // =========================================================================
+fn demo_error_handling() {
     println!("5. Error Handling & Fallbacks");
     println!("   ─────────────────────────────────────────");
     let registry = build_registry();
@@ -512,8 +514,9 @@ fn main() {
         println!("   [{tag}] {name}({args:>16}) -> {}", r.output);
     }
     println!();
+}
 
-    // =========================================================================
+fn demo_throughput_benchmark() {
     println!("6. Throughput Benchmark");
     println!("   ─────────────────────────────────────────");
     let n_conv = 100;
@@ -545,6 +548,20 @@ fn main() {
         "   Avg latency:    {:.1} us/turn",
         elapsed.as_micros() as f64 / f64::from(total_turns)
     );
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+fn main() {
+    println!("=== Chat Tool Use / Function Calling Example ===\n");
+    demo_tool_registration();
+    demo_single_turn_dispatch();
+    demo_multi_turn_conversation();
+    demo_parallel_tool_calls();
+    demo_error_handling();
+    demo_throughput_benchmark();
     println!("\n=== Example Complete ===");
 }
 

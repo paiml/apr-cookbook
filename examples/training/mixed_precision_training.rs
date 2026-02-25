@@ -273,16 +273,8 @@ fn train_epoch(
     (avg_loss, accuracy, elapsed)
 }
 
-fn main() {
-    println!("=== Mixed-Precision Training Example ===\n");
-
-    let seed = 42;
-    let train_data = generate_data(200, seed);
-    let test_data = generate_data(50, seed + 100);
-
-    // =========================================================================
-    // Section 1: Precision Comparison
-    // =========================================================================
+/// Section 1: Compare memory footprint across precision levels
+fn section_precision_memory(seed: u64) {
     println!("1. Precision Memory Comparison");
     println!("   ─────────────────────────────────────────");
     println!(
@@ -303,10 +295,10 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 2: Precision Casting Effects
-    // =========================================================================
+/// Section 2: Show how casting affects numeric values at each precision
+fn section_precision_casting() {
     println!("2. Precision Casting Effects");
     println!("   ─────────────────────────────────────────");
 
@@ -327,10 +319,14 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 3: Training Loop Comparison
-    // =========================================================================
+/// Section 3: Train each precision variant and report loss, accuracy, scaler state
+fn section_training_loop(
+    seed: u64,
+    train_data: &[(Vec<f32>, usize)],
+    test_data: &[(Vec<f32>, usize)],
+) {
     println!("3. Training Comparison (5 epochs)");
     println!("   ─────────────────────────────────────────");
 
@@ -347,7 +343,7 @@ fn main() {
         };
 
         for epoch in 0..n_epochs {
-            let (loss, acc, us) = train_epoch(&mut model, &train_data, lr, &mut scaler);
+            let (loss, acc, us) = train_epoch(&mut model, train_data, lr, &mut scaler);
             if epoch == 0 || epoch == n_epochs - 1 {
                 println!(
                     "   Epoch {}: loss={:.4}, acc={:.1}%, time={}us",
@@ -360,15 +356,13 @@ fn main() {
         }
 
         // Test accuracy
-        let mut correct = 0;
-        for (input, target) in &test_data {
-            if predict(&model.forward(input)) == *target {
-                correct += 1;
-            }
-        }
+        let correct = test_data
+            .iter()
+            .filter(|(input, target)| predict(&model.forward(input)) == *target)
+            .count();
         println!(
             "   Test accuracy: {:.1}%",
-            f64::from(correct) / test_data.len() as f64 * 100.0
+            f64::from(correct as u32) / test_data.len() as f64 * 100.0
         );
 
         if let Some(ref scaler) = scaler {
@@ -379,10 +373,10 @@ fn main() {
         }
         println!();
     }
+}
 
-    // =========================================================================
-    // Section 4: Throughput Benchmark
-    // =========================================================================
+/// Section 4: Benchmark forward-pass throughput per precision
+fn section_throughput_benchmark(seed: u64, train_data: &[(Vec<f32>, usize)]) {
     println!("4. Throughput Benchmark");
     println!("   ─────────────────────────────────────────");
 
@@ -419,10 +413,10 @@ fn main() {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 5: Loss Scaler Behavior
-    // =========================================================================
+/// Section 5: Demonstrate loss scaler growth, backoff, and recovery
+fn section_loss_scaler_dynamics() {
     println!("5. Loss Scaler Dynamics");
     println!("   ─────────────────────────────────────────");
 
@@ -446,6 +440,20 @@ fn main() {
     println!("   After 100 more steps: {:.0}", scaler.scale);
     println!("   Total overflows: {}", scaler.overflow_count);
     println!();
+}
+
+fn main() {
+    println!("=== Mixed-Precision Training Example ===\n");
+
+    let seed = 42;
+    let train_data = generate_data(200, seed);
+    let test_data = generate_data(50, seed + 100);
+
+    section_precision_memory(seed);
+    section_precision_casting();
+    section_training_loop(seed, &train_data, &test_data);
+    section_throughput_benchmark(seed, &train_data);
+    section_loss_scaler_dynamics();
 
     println!("=== Example Complete ===");
 }
