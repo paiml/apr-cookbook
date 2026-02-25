@@ -79,47 +79,50 @@ struct LayerGroup {
 // Component classification
 // ---------------------------------------------------------------------------
 
-/// Classify a tensor name into an architecture component.
-///
-/// Standard naming conventions:
-///   - `embed_tokens`, `wte`, `embed` -> Embedding
-///   - `self_attn`, `q_proj`, `k_proj`, `v_proj`, `o_proj` (inside self_attn) -> SelfAttention
-///   - `cross_attn`, `encoder_attn` -> CrossAttention
-///   - `mlp`, `gate_proj`, `up_proj`, `down_proj`, `fc1`, `fc2` -> Ffn
-///   - `layernorm`, `layer_norm`, `input_layernorm`, `rmsnorm` -> LayerNorm
-///   - `lm_head`, `output` -> Output
+/// Keyword-to-component lookup table, checked in priority order.
+/// Each entry is `(keywords, component)`. The first match wins.
+const COMPONENT_RULES: &[(&[&str], FlowComponent)] = &[
+    (&["embed", "wte", "wpe"], FlowComponent::Embedding),
+    (
+        &["cross_attn", "encoder_attn"],
+        FlowComponent::CrossAttention,
+    ),
+    (
+        &["self_attn", "q_proj", "k_proj", "v_proj", "o_proj"],
+        FlowComponent::SelfAttention,
+    ),
+    (
+        &["mlp", "gate_proj", "up_proj", "down_proj", "fc1", "fc2"],
+        FlowComponent::Ffn,
+    ),
+    (&["norm", "layernorm", "rmsnorm"], FlowComponent::LayerNorm),
+];
+
+/// Check whether `lower` matches the special-case Output rule, which needs
+/// a negative guard (`!contains("layer")`).
+fn is_output_tensor(lower: &str) -> bool {
+    lower.contains("lm_head") || (lower.contains("output") && !lower.contains("layer"))
+}
+
+/// Check whether `lower` matches any keyword in a rule's keyword list.
+fn matches_any_keyword(lower: &str, keywords: &[&str]) -> bool {
+    keywords.iter().any(|kw| lower.contains(kw))
+}
+
+/// Classify a tensor name into an architecture component using a lookup table.
 fn classify_tensor(name: &str) -> FlowComponent {
     let lower = name.to_lowercase();
 
-    if lower.contains("embed") || lower.contains("wte") || lower.contains("wpe") {
-        return FlowComponent::Embedding;
-    }
-    if lower.contains("lm_head") || lower.contains("output") && !lower.contains("layer") {
+    if is_output_tensor(&lower) {
         return FlowComponent::Output;
     }
-    if lower.contains("cross_attn") || lower.contains("encoder_attn") {
-        return FlowComponent::CrossAttention;
+
+    for &(keywords, component) in COMPONENT_RULES {
+        if matches_any_keyword(&lower, keywords) {
+            return component;
+        }
     }
-    if lower.contains("self_attn")
-        || lower.contains("q_proj")
-        || lower.contains("k_proj")
-        || lower.contains("v_proj")
-        || lower.contains("o_proj")
-    {
-        return FlowComponent::SelfAttention;
-    }
-    if lower.contains("mlp")
-        || lower.contains("gate_proj")
-        || lower.contains("up_proj")
-        || lower.contains("down_proj")
-        || lower.contains("fc1")
-        || lower.contains("fc2")
-    {
-        return FlowComponent::Ffn;
-    }
-    if lower.contains("norm") || lower.contains("layernorm") || lower.contains("rmsnorm") {
-        return FlowComponent::LayerNorm;
-    }
+
     FlowComponent::Unknown
 }
 

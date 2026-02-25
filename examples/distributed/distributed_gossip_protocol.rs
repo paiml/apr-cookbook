@@ -243,17 +243,11 @@ fn run_gossip(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Main
+// Section helpers
 // ─────────────────────────────────────────────────────────────────────────────
 
-fn main() -> Result<()> {
-    println!("=== Gossip Protocol: Decentralized Parameter Averaging ===\n");
-
-    let mut ctx = RecipeContext::new("distributed_gossip_protocol")?;
-
-    // =========================================================================
-    // Section 1: Initialize nodes
-    // =========================================================================
+/// Print node initialization summary and return initial divergence metrics.
+fn print_initialization(nodes: &[GossipNode]) -> (f64, f64) {
     println!("1. Node Initialization");
     println!("   ─────────────────────────────────────────");
     println!("   Nodes:       {NUM_NODES}");
@@ -262,15 +256,13 @@ fn main() -> Result<()> {
     println!("   Epsilon:     {CONVERGENCE_EPSILON}");
     println!();
 
-    let mut nodes = init_nodes(ctx.rng(), NUM_NODES, NUM_PARAMS);
-
-    let (init_max, init_avg) = measure_divergence(&nodes);
+    let (init_max, init_avg) = measure_divergence(nodes);
     println!("   Initial divergence:");
     println!("     Max L2: {init_max:.6}");
     println!("     Avg L2: {init_avg:.6}");
     println!();
 
-    for node in &nodes {
+    for node in nodes {
         println!(
             "   Node {} params[0..3]: [{:.4}, {:.4}, {:.4}]",
             node.id, node.params[0], node.params[1], node.params[2]
@@ -278,33 +270,14 @@ fn main() -> Result<()> {
     }
     println!();
 
-    // =========================================================================
-    // Section 2: Run gossip rounds
-    // =========================================================================
-    println!("2. Gossip Rounds");
-    println!("   ─────────────────────────────────────────");
-    println!("   ┌───────┬────────────────┬────────────────┬──────────┐");
-    println!("   │ Round │ Max Divergence │ Avg Divergence │ Messages │");
-    println!("   ├───────┼────────────────┼────────────────┼──────────┤");
+    (init_max, init_avg)
+}
 
-    let result = run_gossip(ctx.rng(), &mut nodes, NUM_ROUNDS);
-
-    for round in &result.rounds {
-        println!(
-            "   │ {:>5} │ {:>14.8} │ {:>14.8} │ {:>8} │",
-            round.round, round.max_divergence, round.avg_divergence, round.messages,
-        );
-    }
-    println!("   └───────┴────────────────┴────────────────┴──────────┘");
-    println!();
-
-    // =========================================================================
-    // Section 3: Convergence analysis
-    // =========================================================================
+/// Print convergence analysis: halving rate, total messages, and final status.
+fn print_convergence_analysis(result: &ConvergenceResult) {
     println!("3. Convergence Analysis");
     println!("   ─────────────────────────────────────────");
 
-    // Show exponential decay: compare successive pairs of rounds
     if result.rounds.len() >= 4 {
         println!("   Halving rate (max divergence ratio between consecutive rounds):");
         for i in 1..result.rounds.len() {
@@ -326,39 +299,72 @@ fn main() -> Result<()> {
         result.converged
     );
     println!();
+}
 
-    // =========================================================================
-    // Section 4: Final verification
-    // =========================================================================
+/// Verify all nodes are within epsilon of each other, print results.
+fn print_final_verification(nodes: &[GossipNode]) {
     println!("4. Final Verification");
     println!("   ─────────────────────────────────────────");
 
     let verification_epsilon = 1e-4;
-    let all_close = {
-        let mut ok = true;
-        for i in 0..nodes.len() {
-            for j in (i + 1)..nodes.len() {
-                if l2_distance(&nodes[i].params, &nodes[j].params) > verification_epsilon {
-                    ok = false;
-                }
-            }
-        }
-        ok
-    };
+    let all_close = nodes.iter().enumerate().all(|(i, _)| {
+        nodes[i + 1..]
+            .iter()
+            .all(|other| l2_distance(&nodes[i].params, &other.params) <= verification_epsilon)
+    });
 
     println!("   Verification epsilon: {verification_epsilon}");
     println!("   All nodes within epsilon: {all_close}");
     println!();
 
-    for node in &nodes {
+    for node in nodes {
         println!(
             "   Node {} (v{}): params[0..3] = [{:.6}, {:.6}, {:.6}]",
             node.id, node.version, node.params[0], node.params[1], node.params[2]
         );
     }
     println!();
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main
+// ─────────────────────────────────────────────────────────────────────────────
+
+fn main() -> Result<()> {
+    println!("=== Gossip Protocol: Decentralized Parameter Averaging ===\n");
+
+    let mut ctx = RecipeContext::new("distributed_gossip_protocol")?;
+
+    // Section 1: Initialize nodes
+    let mut nodes = init_nodes(ctx.rng(), NUM_NODES, NUM_PARAMS);
+    let (init_max, _init_avg) = print_initialization(&nodes);
+
+    // Section 2: Run gossip rounds
+    println!("2. Gossip Rounds");
+    println!("   ─────────────────────────────────────────");
+    println!("   ┌───────┬────────────────┬────────────────┬──────────┐");
+    println!("   │ Round │ Max Divergence │ Avg Divergence │ Messages │");
+    println!("   ├───────┼────────────────┼────────────────┼──────────┤");
+
+    let result = run_gossip(ctx.rng(), &mut nodes, NUM_ROUNDS);
+
+    for round in &result.rounds {
+        println!(
+            "   │ {:>5} │ {:>14.8} │ {:>14.8} │ {:>8} │",
+            round.round, round.max_divergence, round.avg_divergence, round.messages,
+        );
+    }
+    println!("   └───────┴────────────────┴────────────────┴──────────┘");
+    println!();
+
+    // Section 3: Convergence analysis
+    print_convergence_analysis(&result);
+
+    // Section 4: Final verification
+    print_final_verification(&nodes);
 
     // Record metrics
+    let total_messages: usize = result.rounds.iter().map(|r| r.messages).sum();
     ctx.record_float_metric("initial_max_divergence", init_max);
     ctx.record_float_metric("final_max_divergence", result.final_divergence);
     ctx.record_metric("total_messages", total_messages as i64);

@@ -3,5 +3,5 @@
 TIES, DARE, and SLERP model merging strategies.
 
 ```bash
-cargo run --example entrenar_model_merge
+cargo run --example merge_average
 ```

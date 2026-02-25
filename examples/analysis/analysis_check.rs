@@ -188,16 +188,19 @@ fn stage_tensor_count(bytes: &[u8]) -> StageResult {
     }
 }
 
-/// Stage 4: Shape consistency -- no zero dimensions in tensor index.
-fn stage_shape_consistency(bytes: &[u8]) -> StageResult {
+/// Parse all tensor shapes from the APR v2 tensor index.
+///
+/// Returns `None` if the header is too short; otherwise returns a vector of
+/// dimension vectors (one per tensor).
+fn parse_tensor_shapes(bytes: &[u8]) -> Option<Vec<Vec<u64>>> {
     if bytes.len() < 64 {
-        return StageResult::skip("Shape consistency", "No header to parse");
+        return None;
     }
     let tensor_count = u32::from_le_bytes([bytes[8], bytes[9], bytes[10], bytes[11]]) as usize;
     let index_offset = u32::from_le_bytes([bytes[12], bytes[13], bytes[14], bytes[15]]) as usize;
 
     let mut offset = index_offset;
-    let mut zero_dim_found = false;
+    let mut all_shapes = Vec::with_capacity(tensor_count);
 
     for _ in 0..tensor_count {
         // Read name_len + name
@@ -224,6 +227,7 @@ fn stage_shape_consistency(bytes: &[u8]) -> StageResult {
         ]) as usize;
         offset += 4;
 
+        let mut dims = Vec::with_capacity(shape_len);
         for _ in 0..shape_len {
             if offset + 8 > bytes.len() {
                 break;
@@ -238,22 +242,32 @@ fn stage_shape_consistency(bytes: &[u8]) -> StageResult {
                 bytes[offset + 6],
                 bytes[offset + 7],
             ]);
-            if dim == 0 {
-                zero_dim_found = true;
-            }
+            dims.push(dim);
             offset += 8;
         }
+        all_shapes.push(dims);
 
         // Skip offset (8) + length (8) + dtype (1)
         offset += 17;
     }
+
+    Some(all_shapes)
+}
+
+/// Stage 4: Shape consistency -- no zero dimensions in tensor index.
+fn stage_shape_consistency(bytes: &[u8]) -> StageResult {
+    let Some(all_shapes) = parse_tensor_shapes(bytes) else {
+        return StageResult::skip("Shape consistency", "No header to parse");
+    };
+
+    let zero_dim_found = all_shapes.iter().any(|dims| dims.contains(&0));
 
     if zero_dim_found {
         StageResult::fail("Shape consistency", "Zero dimension found in tensor shape")
     } else {
         StageResult::pass(
             "Shape consistency",
-            &format!("All shapes valid across {tensor_count} tensor(s)"),
+            &format!("All shapes valid across {} tensor(s)", all_shapes.len()),
         )
     }
 }
@@ -396,67 +410,16 @@ fn stage_sparsity_analysis(bytes: &[u8]) -> StageResult {
 
 /// Stage 9: Embedding dimension consistency -- all tensors sharing a common dim.
 fn stage_embedding_consistency(bytes: &[u8]) -> StageResult {
-    if bytes.len() < 64 {
+    let Some(all_dims) = parse_tensor_shapes(bytes) else {
         return StageResult::skip("Embedding consistency", "No header");
-    }
-    let tensor_count = u32::from_le_bytes([bytes[8], bytes[9], bytes[10], bytes[11]]) as usize;
+    };
+
+    let tensor_count = all_dims.len();
     if tensor_count < 2 {
         return StageResult::skip(
             "Embedding consistency",
             "Need at least 2 tensors to check consistency",
         );
-    }
-
-    let index_offset = u32::from_le_bytes([bytes[12], bytes[13], bytes[14], bytes[15]]) as usize;
-
-    let mut all_dims: Vec<Vec<u64>> = Vec::new();
-    let mut offset = index_offset;
-
-    for _ in 0..tensor_count {
-        if offset + 4 > bytes.len() {
-            break;
-        }
-        let name_len = u32::from_le_bytes([
-            bytes[offset],
-            bytes[offset + 1],
-            bytes[offset + 2],
-            bytes[offset + 3],
-        ]) as usize;
-        offset += 4 + name_len;
-
-        if offset + 4 > bytes.len() {
-            break;
-        }
-        let shape_len = u32::from_le_bytes([
-            bytes[offset],
-            bytes[offset + 1],
-            bytes[offset + 2],
-            bytes[offset + 3],
-        ]) as usize;
-        offset += 4;
-
-        let mut dims = Vec::new();
-        for _ in 0..shape_len {
-            if offset + 8 > bytes.len() {
-                break;
-            }
-            let dim = u64::from_le_bytes([
-                bytes[offset],
-                bytes[offset + 1],
-                bytes[offset + 2],
-                bytes[offset + 3],
-                bytes[offset + 4],
-                bytes[offset + 5],
-                bytes[offset + 6],
-                bytes[offset + 7],
-            ]);
-            dims.push(dim);
-            offset += 8;
-        }
-        all_dims.push(dims);
-
-        // Skip offset (8) + length (8) + dtype (1)
-        offset += 17;
     }
 
     // Find a common dimension shared by the majority of tensors

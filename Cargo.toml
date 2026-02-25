@@ -225,28 +225,12 @@ name = "entrenar_autograd_training"
 path = "examples/training/entrenar_autograd_training.rs"
 
 [[example]]
-name = "entrenar_lora_finetune"
-path = "examples/training/entrenar_lora_finetune.rs"
-
-[[example]]
-name = "entrenar_model_merge"
-path = "examples/training/entrenar_model_merge.rs"
-
-[[example]]
 name = "entrenar_eval_metrics"
 path = "examples/training/entrenar_eval_metrics.rs"
 
 [[example]]
-name = "entrenar_distillation"
-path = "examples/training/entrenar_distillation.rs"
-
-[[example]]
 name = "hyperparameter_sweep"
 path = "examples/training/hyperparameter_sweep.rs"
-
-[[example]]
-name = "entrenar_qlora_finetune"
-path = "examples/training/entrenar_qlora_finetune.rs"
 
 [[example]]
 name = "checkpoint_resume"
@@ -429,16 +413,8 @@ name = "distill_layer_matching"
 path = "examples/distillation/distill_layer_matching.rs"
 
 [[example]]
-name = "distill_pruning_aware"
-path = "examples/distillation/distill_pruning_aware.rs"
-
-[[example]]
 name = "distill_quantization_aware"
 path = "examples/distillation/distill_quantization_aware.rs"
-
-[[example]]
-name = "distill_structured_pruning"
-path = "examples/distillation/distill_structured_pruning.rs"
 
 # Category L: CLI Tools (additional)
 [[example]]

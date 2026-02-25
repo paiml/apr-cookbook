@@ -3,5 +3,5 @@
 Quantized LoRA for memory-efficient fine-tuning.
 
 ```bash
-cargo run --example entrenar_qlora_finetune
+cargo run --example finetune_qlora
 ```

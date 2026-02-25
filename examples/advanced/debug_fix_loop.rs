@@ -220,6 +220,71 @@ struct LayerDiagnostics {
     dead_ratio: f64,
 }
 
+/// Accumulator for finite weight statistics (sum, sum-of-squares, extrema).
+struct FiniteStats {
+    sum: f64,
+    sum_sq: f64,
+    count: usize,
+    min_val: f64,
+    max_val: f64,
+    near_zero_count: usize,
+}
+
+impl FiniteStats {
+    fn new() -> Self {
+        Self {
+            sum: 0.0,
+            sum_sq: 0.0,
+            count: 0,
+            min_val: f64::MAX,
+            max_val: f64::MIN,
+            near_zero_count: 0,
+        }
+    }
+
+    fn accumulate(&mut self, w: f64) {
+        self.sum += w;
+        self.sum_sq += w * w;
+        self.count += 1;
+        self.min_val = self.min_val.min(w);
+        self.max_val = self.max_val.max(w);
+        if w.abs() < 1e-10 {
+            self.near_zero_count += 1;
+        }
+    }
+
+    fn mean(&self) -> f64 {
+        if self.count > 0 {
+            self.sum / self.count as f64
+        } else {
+            0.0
+        }
+    }
+
+    fn std_dev(&self) -> f64 {
+        if self.count > 1 {
+            let m = self.mean();
+            (self.sum_sq / self.count as f64 - m * m).max(0.0).sqrt()
+        } else {
+            0.0
+        }
+    }
+}
+
+/// Count non-finite values in a weight slice.
+fn count_nonfinite(weights: &[f64]) -> (usize, usize) {
+    let mut nan_count = 0usize;
+    let mut inf_count = 0usize;
+    for &w in weights {
+        if w.is_nan() {
+            nan_count += 1;
+        } else if w.is_infinite() {
+            inf_count += 1;
+        }
+    }
+    (nan_count, inf_count)
+}
+
 /// Compute diagnostics for a layer's weights.
 /// Returns `None` only if the layer has zero weights.
 fn compute_layer_diagnostics(weights: &[f64]) -> Option<LayerDiagnostics> {
@@ -227,64 +292,29 @@ fn compute_layer_diagnostics(weights: &[f64]) -> Option<LayerDiagnostics> {
         return None;
     }
 
-    let mut nan_count = 0usize;
-    let mut inf_count = 0usize;
-    let mut sum = 0.0_f64;
-    let mut sum_sq = 0.0_f64;
-    let mut valid_count = 0usize;
-    let mut min_val = f64::MAX;
-    let mut max_val = f64::MIN;
-    let mut near_zero_count = 0usize;
+    let (nan_count, inf_count) = count_nonfinite(weights);
 
+    let mut stats = FiniteStats::new();
     for &w in weights {
-        if w.is_nan() {
-            nan_count += 1;
-            continue;
-        }
-        if w.is_infinite() {
-            inf_count += 1;
-            continue;
-        }
-        sum += w;
-        sum_sq += w * w;
-        valid_count += 1;
-        if w < min_val {
-            min_val = w;
-        }
-        if w > max_val {
-            max_val = w;
-        }
-        if w.abs() < 1e-10 {
-            near_zero_count += 1;
+        if w.is_finite() {
+            stats.accumulate(w);
         }
     }
 
-    let mean = if valid_count > 0 {
-        sum / valid_count as f64
+    let (min_val, max_val) = if stats.count > 0 {
+        (stats.min_val, stats.max_val)
     } else {
-        0.0
+        (0.0, 0.0)
     };
-    let variance = if valid_count > 1 {
-        (sum_sq / valid_count as f64 - mean * mean).max(0.0)
-    } else {
-        0.0
-    };
-    let std_dev = variance.sqrt();
-    let dead_ratio = near_zero_count as f64 / weights.len() as f64;
-
-    if valid_count == 0 {
-        min_val = 0.0;
-        max_val = 0.0;
-    }
 
     Some(LayerDiagnostics {
         nan_count,
         inf_count,
-        mean,
-        std_dev,
+        mean: stats.mean(),
+        std_dev: stats.std_dev(),
         min_val,
         max_val,
-        dead_ratio,
+        dead_ratio: stats.near_zero_count as f64 / weights.len() as f64,
     })
 }
 

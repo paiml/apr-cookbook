@@ -114,6 +114,7 @@
 - [Multi-GPU Inference](./recipes/i-gpu/multi-gpu.md)
 - [Memory Management](./recipes/i-gpu/memory-management.md)
 - [Memory Pool](./recipes/i-gpu/memory-pool.md)
+- [PTX Analysis](./recipes/i-gpu/ptx-analysis.md)
 
 # Category J: SIMD Acceleration
 
@@ -140,6 +141,7 @@
 - [apr-convert](./recipes/l-cli/apr-convert.md)
 - [apr-serve](./recipes/l-cli/apr-serve.md)
 - [apr-diff](./recipes/l-cli/apr-diff.md)
+- [apr-tui](./recipes/l-cli/apr-tui.md)
 
 # Category M: Inference Monitoring
 
@@ -149,18 +151,25 @@
 - [Cost Tracking](./recipes/m-monitoring/cost-tracking.md)
 - [Latency Histogram](./recipes/m-monitoring/latency-histogram.md)
 - [Drift Detection](./recipes/m-monitoring/drift-detection.md)
+- [Headless cbtop](./recipes/m-monitoring/cbtop-headless.md)
 
 # Category N: Speech Recognition
 
 - [Overview](./recipes/n-speech/index.md)
 - [Whisper Transcription](./recipes/n-speech/whisper-transcribe.md)
 - [Streaming ASR](./recipes/n-speech/whisper-streaming.md)
+- [Voice Activity Detection](./recipes/n-speech/vad.md)
+- [Speaker Diarization](./recipes/n-speech/diarization.md)
+- [Multilingual Identification](./recipes/n-speech/multilingual.md)
 
 # Category O: Distributed Computing
 
 - [Overview](./recipes/o-distributed/index.md)
 - [Distributed Inference](./recipes/o-distributed/distributed-inference.md)
 - [Model Sharding](./recipes/o-distributed/model-sharding.md)
+- [Ring AllReduce](./recipes/o-distributed/ring-allreduce.md)
+- [Pipeline Parallelism](./recipes/o-distributed/pipeline-parallel.md)
+- [Gossip Protocol](./recipes/o-distributed/gossip-protocol.md)
 
 # Category P: Inference Patterns
 
@@ -176,6 +185,7 @@
 - [Ensemble Inference](./recipes/p-inference/ensemble.md)
 - [Model Pipeline](./recipes/p-inference/pipeline.md)
 - [Quantized Comparison](./recipes/p-inference/quantized-comparison.md)
+- [APR Run](./recipes/p-inference/apr-run.md)
 
 # Category Q: Model Serving
 
@@ -211,6 +221,7 @@
 - [Hierarchical Merge](./recipes/r-optimize/merge-hierarchical.md)
 - [Int4 Quantization](./recipes/r-optimize/quantize-4bit.md)
 - [Fake QAT](./recipes/r-optimize/quantize-fake-qat.md)
+- [Tune](./recipes/r-optimize/tune.md)
 
 # Category S: Chat Templates
 
@@ -235,6 +246,19 @@
 - [Tree](./recipes/t-analysis/tree.md)
 - [Hex](./recipes/t-analysis/hex.md)
 - [Explain](./recipes/t-analysis/explain.md)
+- [Trace](./recipes/t-analysis/trace.md)
+- [Eval](./recipes/t-analysis/eval.md)
+- [Flow](./recipes/t-analysis/flow.md)
+- [Lint](./recipes/t-analysis/lint.md)
+- [Check](./recipes/t-analysis/check.md)
+- [Debug](./recipes/t-analysis/debug.md)
+- [Parity](./recipes/t-analysis/parity.md)
+- [Qualify](./recipes/t-analysis/qualify.md)
+- [Compare HuggingFace](./recipes/t-analysis/compare-hf.md)
+- [Probar](./recipes/t-analysis/probar.md)
+- [Tensors](./recipes/t-analysis/tensors.md)
+- [Slice](./recipes/t-analysis/slice.md)
+- [QA Capability](./recipes/t-analysis/qa-capability.md)
 
 # Category U: Format Operations
 
@@ -249,6 +273,24 @@
 - [Publish](./recipes/u-format/publish.md)
 - [Pull + Cache](./recipes/u-format/pull-cache.md)
 - [Batch Export](./recipes/u-format/batch-export.md)
+- [Migration Pipeline](./recipes/u-format/migration-pipeline.md)
+
+# Category V: Advanced Pipelines
+
+- [Overview](./recipes/v-advanced/index.md)
+- [Model Showcase](./recipes/v-advanced/showcase.md)
+- [CI/CD Pipeline](./recipes/v-advanced/cicd-pipeline.md)
+- [A/B Experiment](./recipes/v-advanced/ab-experiment.md)
+- [Debug-Fix Loop](./recipes/v-advanced/debug-fix-loop.md)
+- [Compliance Audit](./recipes/v-advanced/compliance-audit.md)
+
+# Category Y: Acceleration
+
+- [Overview](./recipes/y-acceleration/index.md)
+- [Autotuner](./recipes/y-acceleration/autotuner.md)
+- [Kernel Fusion](./recipes/y-acceleration/kernel-fusion.md)
+- [Memory-Mapped Inference](./recipes/y-acceleration/mmap-inference.md)
+- [Quantized MatMul](./recipes/y-acceleration/quantized-matmul.md)
 
 ---
 
