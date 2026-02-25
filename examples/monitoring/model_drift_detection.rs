@@ -246,8 +246,7 @@ fn compute_psi(baseline: &[f64], production: &[f64], num_bins: usize) -> f64 {
     let q = histogram_proportions(production, min_val, max_val, num_bins);
 
     let mut psi = 0.0;
-    for (i, (&pi, &qi)) in p.iter().zip(q.iter()).enumerate() {
-        let _ = i; // used only for iteration
+    for (&pi, &qi) in p.iter().zip(q.iter()) {
         let pi_s = pi.max(PSI_EPSILON);
         let qi_s = qi.max(PSI_EPSILON);
         psi += (pi_s - qi_s) * (pi_s / qi_s).ln();
@@ -396,8 +395,8 @@ impl ConfidenceMonitor {
         count as f64 / self.confidences.len() as f64
     }
 
-    /// Number of recorded predictions (used in tests).
-    #[allow(dead_code)]
+    /// Number of recorded predictions.
+    #[cfg(test)]
     fn len(&self) -> usize {
         self.confidences.len()
     }
@@ -457,8 +456,8 @@ impl AccuracyTracker {
         self.accuracy_drop() > tolerance
     }
 
-    /// Number of recorded outcomes (used in tests).
-    #[allow(dead_code)]
+    /// Number of recorded outcomes.
+    #[cfg(test)]
     fn len(&self) -> usize {
         self.outcomes.len()
     }
@@ -567,11 +566,8 @@ fn simulate_ground_truth(features: &[f64; NUM_FEATURES], seed: u64) -> usize {
 
 /// Summary statistics for a single monitoring window.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct WindowStats {
     window_id: usize,
-    psi_values: [f64; NUM_FEATURES],
-    ks_values: [f64; NUM_FEATURES],
     mean_confidence: f64,
     mean_entropy: f64,
     accuracy: f64,
@@ -807,8 +803,6 @@ fn main() {
 
         let stats = WindowStats {
             window_id,
-            psi_values,
-            ks_values,
             mean_confidence: win_monitor.mean_confidence(),
             mean_entropy: win_monitor.mean_entropy(),
             accuracy: win_accuracy.accuracy(),
@@ -1134,8 +1128,6 @@ mod tests {
     fn test_window_stats_structure() {
         let stats = WindowStats {
             window_id: 0,
-            psi_values: [0.01, 0.02, 0.03, 0.04],
-            ks_values: [0.05, 0.06, 0.07, 0.08],
             mean_confidence: 0.75,
             mean_entropy: 0.5,
             accuracy: 0.80,

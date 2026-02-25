@@ -21,14 +21,12 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 /// A single entry in the model cache.
 #[derive(Debug, Clone)]
-#[allow(dead_code)]
 struct CacheEntry {
     uri: String,
     path: String,
     size_bytes: usize,
     downloaded_at: u64, // seconds since epoch
     last_accessed: u64,
-    checksum: String,
 }
 
 /// Cache manager that tracks downloaded models.
@@ -114,16 +112,12 @@ impl CacheManager {
             .collect();
         let path = format!("{}/{filename}.apr", self.cache_dir);
 
-        let data = generate_model_payload(seed, model_size);
-        let checksum = compute_fnv_checksum(&data);
-
         let entry = CacheEntry {
             uri: uri.to_string(),
             path: path.clone(),
             size_bytes: model_size,
             downloaded_at: now,
             last_accessed: now,
-            checksum,
         };
 
         self.entries.push(entry);
@@ -159,7 +153,7 @@ impl CacheManager {
     }
 
     /// Remove a specific URI from the cache.
-    #[allow(dead_code)]
+    #[cfg(test)]
     fn remove(&mut self, uri: &str) -> bool {
         if let Some(idx) = self.find(uri) {
             self.entries.remove(idx);
@@ -170,7 +164,7 @@ impl CacheManager {
     }
 
     /// Clear the entire cache.
-    #[allow(dead_code)]
+    #[cfg(test)]
     fn clear(&mut self) -> usize {
         let count = self.entries.len();
         self.entries.clear();
@@ -212,6 +206,7 @@ impl CacheManager {
 }
 
 /// FNV-1a checksum for cache verification.
+#[cfg(test)]
 fn compute_fnv_checksum(data: &[u8]) -> String {
     let mut hash: u64 = 0xcbf29ce484222325;
     for &byte in data {
