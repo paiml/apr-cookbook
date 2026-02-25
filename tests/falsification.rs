@@ -436,6 +436,77 @@ fn naive_attention(q: &[f32], k: &[f32], v: &[f32], seq_len: usize, head_dim: us
     output
 }
 
+/// Compute scaled dot-product attention scores for a tile block of query rows.
+fn compute_block_attention(
+    q: &[f32],
+    k: &[f32],
+    block_attn: &mut [f32],
+    block_start: usize,
+    block_end: usize,
+    seq_len: usize,
+    head_dim: usize,
+    scale: f32,
+) {
+    for i in block_start..block_end {
+        for j in 0..seq_len {
+            let mut dot = 0.0;
+            for d in 0..head_dim {
+                dot += q[i * head_dim + d] * k[j * head_dim + d];
+            }
+            block_attn[(i - block_start) * seq_len + j] = dot / scale;
+        }
+    }
+}
+
+/// Online softmax correction and output accumulation for a single query row.
+///
+/// Implements the FlashAttention online softmax algorithm: track running max,
+/// apply correction factor when max increases, then accumulate weighted values.
+fn accumulate_row_attention(
+    block_attn_row: &[f32],
+    v: &[f32],
+    output_row: &mut [f32],
+    row_max: &mut f32,
+    row_sum: &mut f32,
+    seq_len: usize,
+    head_dim: usize,
+) {
+    let old_max = *row_max;
+    let new_max = block_attn_row.iter().fold(old_max, |a, &b| a.max(b));
+
+    if new_max > old_max {
+        let correction = (old_max - new_max).exp();
+        *row_sum *= correction;
+        for val in output_row.iter_mut() {
+            *val *= correction;
+        }
+        *row_max = new_max;
+    }
+
+    for j in 0..seq_len {
+        let exp = (block_attn_row[j] - *row_max).exp();
+        *row_sum += exp;
+        for d in 0..head_dim {
+            output_row[d] += exp * v[j * head_dim + d];
+        }
+    }
+}
+
+/// Normalize each row of the output by its accumulated softmax denominator.
+fn normalize_attention_output(
+    output: &mut [f32],
+    row_sum: &[f32],
+    seq_len: usize,
+    head_dim: usize,
+) {
+    for i in 0..seq_len {
+        let inv_sum = 1.0 / row_sum[i];
+        for d in 0..head_dim {
+            output[i * head_dim + d] *= inv_sum;
+        }
+    }
+}
+
 /// Tiled attention: O(block_size^2) space (simulates FlashAttention's memory efficiency)
 fn tiled_attention(q: &[f32], k: &[f32], v: &[f32], seq_len: usize, head_dim: usize) -> Vec<f32> {
     let block_size = 64;
@@ -449,51 +520,34 @@ fn tiled_attention(q: &[f32], k: &[f32], v: &[f32], seq_len: usize, head_dim: us
         let block_len = block_end - block_start;
         let mut block_attn = vec![0.0f32; block_len * seq_len];
 
-        // Compute scaled dot-product for this block
-        for i in block_start..block_end {
-            for j in 0..seq_len {
-                let mut dot = 0.0;
-                for d in 0..head_dim {
-                    dot += q[i * head_dim + d] * k[j * head_dim + d];
-                }
-                block_attn[(i - block_start) * seq_len + j] = dot / scale;
-            }
-        }
+        compute_block_attention(
+            q,
+            k,
+            &mut block_attn,
+            block_start,
+            block_end,
+            seq_len,
+            head_dim,
+            scale,
+        );
 
-        // Online softmax + output accumulation (FlashAttention algorithm)
         for i in block_start..block_end {
             let bi = i - block_start;
-            let old_max = row_max[i];
-            let new_max = block_attn[bi * seq_len..(bi + 1) * seq_len]
-                .iter()
-                .fold(old_max, |a, &b| a.max(b));
-
-            if new_max > old_max {
-                let correction = (old_max - new_max).exp();
-                row_sum[i] *= correction;
-                for d in 0..head_dim {
-                    output[i * head_dim + d] *= correction;
-                }
-                row_max[i] = new_max;
-            }
-
-            for j in 0..seq_len {
-                let exp = (block_attn[bi * seq_len + j] - row_max[i]).exp();
-                row_sum[i] += exp;
-                for d in 0..head_dim {
-                    output[i * head_dim + d] += exp * v[j * head_dim + d];
-                }
-            }
+            let attn_row = &block_attn[bi * seq_len..(bi + 1) * seq_len];
+            let out_row = &mut output[i * head_dim..(i + 1) * head_dim];
+            accumulate_row_attention(
+                attn_row,
+                v,
+                out_row,
+                &mut row_max[i],
+                &mut row_sum[i],
+                seq_len,
+                head_dim,
+            );
         }
     }
 
-    // Final normalization
-    for i in 0..seq_len {
-        for d in 0..head_dim {
-            output[i * head_dim + d] /= row_sum[i];
-        }
-    }
-
+    normalize_attention_output(&mut output, &row_sum, seq_len, head_dim);
     output
 }
 
