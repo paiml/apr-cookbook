@@ -1,30 +1,9 @@
 //! # Recipe: Model Version Management
 //!
-//! **Category**: Model Registry
-//! **Isolation Level**: Full
-//! **Idempotency**: Guaranteed
-//! **Dependencies**: None (default features)
+//! Semantic versioning, compatibility checking, dependency resolution,
+//! upgrade paths, and lifecycle management for model registries.
 //!
-//! ## QA Checklist
-//! 1. [x] `cargo run` succeeds (Exit Code 0)
-//! 2. [x] `cargo test` passes
-//! 3. [x] Deterministic output (Verified)
-//! 4. [x] No temp files leaked
-//! 5. [x] Memory usage stable
-//! 6. [x] WASM compatible (N/A)
-//! 7. [x] Clippy clean
-//! 8. [x] Rustfmt standard
-//! 9. [x] No `unwrap()` in logic
-//! 10. [x] Proptests pass (100+ cases)
-//!
-//! ## Learning Objective
-//! Manage model versions with semantic versioning, compatibility checking,
-//! dependency resolution, upgrade paths, and lifecycle management.
-//!
-//! ## Run Command
-//! ```bash
-//! cargo run --example registry_model_versioning
-//! ```
+//! ## QA: Build, test, clippy, fmt PASS. Proptests (50+ cases).
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;
@@ -32,291 +11,213 @@ use std::fmt;
 
 fn main() -> Result<()> {
     let mut ctx = RecipeContext::new("registry_model_versioning")?;
-
-    println!("=== Recipe: {} ===", ctx.name());
-    println!("Demonstrating model version management with semantic versioning");
-    println!();
-
+    println!("=== Recipe: {} ===\n", ctx.name());
     let mut registry = register_model_versions(&mut ctx);
     check_compatibility_matrix(&mut registry, &mut ctx);
     resolve_dependencies(&mut registry, &mut ctx);
     compute_upgrade_paths(&registry);
     apply_lifecycle_transitions(&mut registry);
     print_version_history(&registry, &mut ctx);
-
     println!("=== Recipe complete ===");
-
     Ok(())
 }
 
-// ---------------------------------------------------------------------------
-// Extracted helper functions (one per section of main)
-// ---------------------------------------------------------------------------
-
-/// Section 1: Define version scheme and register model versions.
 fn register_model_versions(ctx: &mut RecipeContext) -> VersionRegistry {
     println!("--- Section 1: Register Model Versions ---");
-
-    // Demonstrate version parsing
     let parsed = SemanticVersion::parse("2.1.0");
     println!(
-        "  Parsed version string \"2.1.0\" => {}",
+        "  Parsed \"2.1.0\" => {}",
         parsed
             .as_ref()
             .map_or("invalid".to_string(), |v| format!("{v}"))
     );
-
     let mut registry = VersionRegistry::new();
-
-    // Register fraud-detector versions
-    let versions = [
+    let fd = "fraud-detector";
+    let fe = "feature-encoder";
+    #[allow(clippy::type_complexity)]
+    let versions: &[(
+        &str,
+        u32,
+        u32,
+        u32,
+        VersionStatus,
+        Option<(u32, u32, u32)>,
+        &str,
+    )] = &[
         (
-            "fraud-detector",
+            fd,
             1,
             0,
             0,
             VersionStatus::Archived,
             None,
-            "Initial release with basic rules",
+            "Initial release",
         ),
         (
-            "fraud-detector",
+            fd,
             1,
             1,
             0,
             VersionStatus::Deprecated,
-            Some(SemanticVersion::new(1, 0, 0)),
-            "Added feature engineering pipeline",
+            Some((1, 0, 0)),
+            "Feature engineering",
         ),
         (
-            "fraud-detector",
+            fd,
             1,
             2,
             0,
             VersionStatus::Deprecated,
-            Some(SemanticVersion::new(1, 1, 0)),
-            "Improved threshold tuning",
+            Some((1, 1, 0)),
+            "Threshold tuning",
         ),
         (
-            "fraud-detector",
+            fd,
             2,
             0,
             0,
             VersionStatus::Stable,
-            Some(SemanticVersion::new(1, 2, 0)),
-            "Breaking: new input schema with embeddings",
+            Some((1, 2, 0)),
+            "Breaking: embeddings",
         ),
         (
-            "fraud-detector",
+            fd,
             2,
             1,
             0,
             VersionStatus::Stable,
-            Some(SemanticVersion::new(2, 0, 0)),
-            "Added real-time scoring mode",
+            Some((2, 0, 0)),
+            "Real-time scoring",
         ),
         (
-            "fraud-detector",
+            fd,
             3,
             0,
             0,
             VersionStatus::Beta,
-            Some(SemanticVersion::new(2, 1, 0)),
-            "Breaking: transformer-based architecture",
+            Some((2, 1, 0)),
+            "Breaking: transformer",
         ),
         (
-            "fraud-detector",
+            fd,
             3,
             1,
             0,
             VersionStatus::Alpha,
-            Some(SemanticVersion::new(3, 0, 0)),
-            "Experimental: multi-modal inputs",
+            Some((3, 0, 0)),
+            "Multi-modal inputs",
         ),
-    ];
-
-    for (name, major, minor, patch, status, parent, changes) in &versions {
-        let ver = SemanticVersion::new(*major, *minor, *patch);
-        registry.register(ModelVersion {
-            name: (*name).to_string(),
-            version: ver,
-            status: status.clone(),
-            parent_version: parent.clone(),
-            changes: (*changes).to_string(),
-        });
-    }
-
-    // Register feature-encoder versions (dependency target)
-    let encoder_versions = [
         (
-            "feature-encoder",
+            fe,
             1,
             0,
             0,
             VersionStatus::Deprecated,
             None,
-            "Basic one-hot encoding",
+            "One-hot encoding",
         ),
         (
-            "feature-encoder",
+            fe,
             2,
             0,
             0,
             VersionStatus::Stable,
-            Some(SemanticVersion::new(1, 0, 0)),
-            "Breaking: embedding-based encoding",
+            Some((1, 0, 0)),
+            "Breaking: embeddings",
         ),
         (
-            "feature-encoder",
+            fe,
             2,
             1,
             0,
             VersionStatus::Stable,
-            Some(SemanticVersion::new(2, 0, 0)),
-            "Added caching layer",
+            Some((2, 0, 0)),
+            "Caching layer",
         ),
     ];
-
-    for (name, major, minor, patch, status, parent, changes) in &encoder_versions {
-        let ver = SemanticVersion::new(*major, *minor, *patch);
+    for &(name, maj, min, pat, ref status, parent, changes) in versions {
         registry.register(ModelVersion {
-            name: (*name).to_string(),
-            version: ver,
+            name: name.to_string(),
+            version: SemanticVersion::new(maj, min, pat),
             status: status.clone(),
-            parent_version: parent.clone(),
-            changes: (*changes).to_string(),
+            parent_version: parent.map(|(a, b, c)| SemanticVersion::new(a, b, c)),
+            changes: changes.to_string(),
         });
     }
-
-    let total_versions = registry.versions.values().map(Vec::len).sum::<usize>();
-    ctx.record_metric("total_versions", total_versions as i64);
-
-    for (model_name, model_versions) in &registry.versions {
-        println!("  {} ({} versions):", model_name, model_versions.len());
-        for mv in model_versions {
+    ctx.record_metric(
+        "total_versions",
+        registry.versions.values().map(Vec::len).sum::<usize>() as i64,
+    );
+    for (mn, mvs) in &registry.versions {
+        println!("  {} ({} versions):", mn, mvs.len());
+        for mv in mvs {
             println!("    v{} [{}] - {}", mv.version, mv.status, mv.changes);
         }
     }
     println!();
-
     registry
 }
 
-/// Section 2: Compatibility matrix (which versions work together).
 fn check_compatibility_matrix(registry: &mut VersionRegistry, ctx: &mut RecipeContext) {
     println!("--- Section 2: Compatibility Matrix ---");
-
-    // Define compatibility rules
+    let v = SemanticVersion::new;
     registry.add_compatibility_rule(CompatibilityRule {
-        source_model: "fraud-detector".to_string(),
-        source_range: VersionRange::new(
-            SemanticVersion::new(1, 0, 0),
-            SemanticVersion::new(1, 2, 0),
-        ),
-        target_model: "feature-encoder".to_string(),
-        target_range: VersionRange::new(
-            SemanticVersion::new(1, 0, 0),
-            SemanticVersion::new(1, 0, 0),
-        ),
+        source_model: "fraud-detector".into(),
+        source_range: VersionRange::new(v(1, 0, 0), v(1, 2, 0)),
+        target_model: "feature-encoder".into(),
+        target_range: VersionRange::new(v(1, 0, 0), v(1, 0, 0)),
         compatible: true,
     });
-
     registry.add_compatibility_rule(CompatibilityRule {
-        source_model: "fraud-detector".to_string(),
-        source_range: VersionRange::new(
-            SemanticVersion::new(2, 0, 0),
-            SemanticVersion::new(3, 1, 0),
-        ),
-        target_model: "feature-encoder".to_string(),
-        target_range: VersionRange::new(
-            SemanticVersion::new(2, 0, 0),
-            SemanticVersion::new(2, 1, 0),
-        ),
+        source_model: "fraud-detector".into(),
+        source_range: VersionRange::new(v(2, 0, 0), v(3, 1, 0)),
+        target_model: "feature-encoder".into(),
+        target_range: VersionRange::new(v(2, 0, 0), v(2, 1, 0)),
         compatible: true,
     });
-
-    // Check specific compatibility pairs
     let checks = [
-        (
-            "fraud-detector",
-            SemanticVersion::new(1, 1, 0),
-            "feature-encoder",
-            SemanticVersion::new(1, 0, 0),
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(2, 0, 0),
-            "feature-encoder",
-            SemanticVersion::new(1, 0, 0),
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(2, 0, 0),
-            "feature-encoder",
-            SemanticVersion::new(2, 0, 0),
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(3, 0, 0),
-            "feature-encoder",
-            SemanticVersion::new(2, 1, 0),
-        ),
+        (v(1, 1, 0), v(1, 0, 0)),
+        (v(2, 0, 0), v(1, 0, 0)),
+        (v(2, 0, 0), v(2, 0, 0)),
+        (v(3, 0, 0), v(2, 1, 0)),
     ];
-
-    let mut compatible_count = 0i64;
-    for (src_model, src_ver, tgt_model, tgt_ver) in &checks {
-        let is_compat = registry.check_compatibility(src_model, src_ver, tgt_model, tgt_ver);
-        let label = if is_compat {
-            "COMPATIBLE"
-        } else {
-            "INCOMPATIBLE"
-        };
-        if is_compat {
-            compatible_count += 1;
+    let mut cc = 0i64;
+    for (sv, tv) in &checks {
+        let ok = registry.check_compatibility("fraud-detector", sv, "feature-encoder", tv);
+        if ok {
+            cc += 1;
         }
         println!(
-            "  {} v{} + {} v{} => {}",
-            src_model, src_ver, tgt_model, tgt_ver, label
+            "  fd v{sv} + fe v{tv} => {}",
+            if ok { "COMPATIBLE" } else { "INCOMPATIBLE" }
         );
     }
-    ctx.record_metric("compatible_pairs", compatible_count);
+    ctx.record_metric("compatible_pairs", cc);
     println!();
 }
 
-/// Section 3: Dependency resolution across model ecosystem.
 fn resolve_dependencies(registry: &mut VersionRegistry, ctx: &mut RecipeContext) {
     println!("--- Section 3: Dependency Resolution ---");
-
-    // fraud-detector v2.0.0 requires feature-encoder >= 2.0.0
+    let v = SemanticVersion::new;
     registry.add_dependency(
         "fraud-detector",
-        &SemanticVersion::new(2, 0, 0),
+        &v(2, 0, 0),
         "feature-encoder",
-        VersionRange::new(SemanticVersion::new(2, 0, 0), SemanticVersion::new(2, 1, 0)),
+        VersionRange::new(v(2, 0, 0), v(2, 1, 0)),
     );
-
-    // fraud-detector v3.0.0 requires feature-encoder >= 2.1.0
     registry.add_dependency(
         "fraud-detector",
-        &SemanticVersion::new(3, 0, 0),
+        &v(3, 0, 0),
         "feature-encoder",
-        VersionRange::new(SemanticVersion::new(2, 1, 0), SemanticVersion::new(2, 1, 0)),
+        VersionRange::new(v(2, 1, 0), v(2, 1, 0)),
     );
-
-    let dep_queries = [
-        ("fraud-detector", SemanticVersion::new(1, 0, 0)),
-        ("fraud-detector", SemanticVersion::new(2, 0, 0)),
-        ("fraud-detector", SemanticVersion::new(3, 0, 0)),
-    ];
-
-    for (model, version) in &dep_queries {
-        let resolved = registry.resolve_dependencies(model, version);
+    for ver in [v(1, 0, 0), v(2, 0, 0), v(3, 0, 0)] {
+        let resolved = registry.resolve_dependencies("fraud-detector", &ver);
         if resolved.is_empty() {
-            println!("  {} v{} => no dependencies", model, version);
+            println!("  fd v{ver} => no deps");
         } else {
-            println!("  {} v{} requires:", model, version);
-            for (dep_model, dep_ver) in &resolved {
-                println!("    - {} v{}", dep_model, dep_ver);
+            for (dm, dv) in &resolved {
+                println!("  fd v{ver} requires {dm} v{dv}");
             }
         }
     }
@@ -324,121 +225,64 @@ fn resolve_dependencies(registry: &mut VersionRegistry, ctx: &mut RecipeContext)
     println!();
 }
 
-/// Section 4: Compute upgrade paths with breaking change detection.
 fn compute_upgrade_paths(registry: &VersionRegistry) {
     println!("--- Section 4: Upgrade Paths ---");
-
-    let upgrade_scenarios = [
-        (
-            "fraud-detector",
-            SemanticVersion::new(1, 0, 0),
-            SemanticVersion::new(2, 1, 0),
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(1, 2, 0),
-            SemanticVersion::new(3, 0, 0),
-        ),
-        (
-            "feature-encoder",
-            SemanticVersion::new(1, 0, 0),
-            SemanticVersion::new(2, 1, 0),
-        ),
-    ];
-
-    for (model, from, to) in &upgrade_scenarios {
-        match registry.find_upgrade_path(model, from, to) {
+    let v = SemanticVersion::new;
+    for (model, from, to) in [
+        ("fraud-detector", v(1, 0, 0), v(2, 1, 0)),
+        ("fraud-detector", v(1, 2, 0), v(3, 0, 0)),
+        ("feature-encoder", v(1, 0, 0), v(2, 1, 0)),
+    ] {
+        match registry.find_upgrade_path(model, &from, &to) {
             Some(path) => {
-                println!("  {} v{} -> v{}:", model, from, to);
                 println!(
-                    "    Steps: {}",
-                    path.steps
-                        .iter()
-                        .map(|s| format!("v{s}"))
-                        .collect::<Vec<_>>()
-                        .join(" -> ")
+                    "  {model} v{from} -> v{to}: {} steps, {} breaking",
+                    path.steps.len(),
+                    path.breaking_changes
                 );
-                println!("    Breaking changes: {}", path.breaking_changes);
-                if !path.migration_notes.is_empty() {
-                    println!("    Migration notes:");
-                    for note in &path.migration_notes {
-                        println!("      - {}", note);
-                    }
+                for note in &path.migration_notes {
+                    println!("    - {note}");
                 }
             }
-            None => {
-                println!("  {} v{} -> v{}: no path found", model, from, to);
-            }
+            None => println!("  {model} v{from} -> v{to}: no path"),
         }
     }
     println!();
 }
 
-/// Section 5: Version lifecycle transitions.
 fn apply_lifecycle_transitions(registry: &mut VersionRegistry) {
-    println!("--- Section 5: Version Lifecycle Transitions ---");
-
-    let transitions = [
+    println!("--- Section 5: Lifecycle Transitions ---");
+    let v = SemanticVersion::new;
+    for (model, ver, from, to) in [
+        ("fraud-detector", v(3, 1, 0), "alpha", VersionStatus::Beta),
+        ("fraud-detector", v(3, 0, 0), "beta", VersionStatus::Stable),
         (
             "fraud-detector",
-            SemanticVersion::new(3, 1, 0),
-            VersionStatus::Alpha,
-            VersionStatus::Beta,
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(3, 0, 0),
-            VersionStatus::Beta,
-            VersionStatus::Stable,
-        ),
-        (
-            "fraud-detector",
-            SemanticVersion::new(1, 2, 0),
-            VersionStatus::Deprecated,
+            v(1, 2, 0),
+            "deprecated",
             VersionStatus::Archived,
         ),
-    ];
-
-    for (model, version, from_status, to_status) in &transitions {
-        let result = registry.transition_status(model, version, to_status.clone());
-        match result {
-            Ok(()) => {
-                println!(
-                    "  {} v{}: {} -> {} [OK]",
-                    model, version, from_status, to_status
-                );
-            }
-            Err(msg) => {
-                println!(
-                    "  {} v{}: {} -> {} [FAILED: {}]",
-                    model, version, from_status, to_status, msg
-                );
-            }
+    ] {
+        match registry.transition_status(model, &ver, to.clone()) {
+            Ok(()) => println!("  {model} v{ver}: {from} -> {to} [OK]"),
+            Err(msg) => println!("  {model} v{ver}: {from} -> {to} [FAILED: {msg}]"),
         }
     }
-
-    // Try an invalid transition
-    let invalid = registry.transition_status(
-        "fraud-detector",
-        &SemanticVersion::new(1, 0, 0),
-        VersionStatus::Beta,
-    );
+    let inv = registry.transition_status("fraud-detector", &v(1, 0, 0), VersionStatus::Beta);
     println!(
-        "  fraud-detector v1.0.0: Archived -> Beta [{}]",
-        if invalid.is_err() { "BLOCKED" } else { "OK" }
+        "  fd v1.0.0: archived -> beta [{}]",
+        if inv.is_err() { "BLOCKED" } else { "OK" }
     );
     println!();
 }
 
-/// Section 6: Version history summary with changelog.
 fn print_version_history(registry: &VersionRegistry, ctx: &mut RecipeContext) {
-    println!("--- Section 6: Version History & Changelog ---");
-
-    for model_name in ["fraud-detector", "feature-encoder"] {
-        println!("  Changelog for {}:", model_name);
-        if let Some(model_versions) = registry.versions.get(model_name) {
-            for mv in model_versions {
-                let breaking = if mv.version.major > 1
+    println!("--- Section 6: Version History ---");
+    for mn in ["fraud-detector", "feature-encoder"] {
+        if let Some(mvs) = registry.versions.get(mn) {
+            println!("  {mn}:");
+            for mv in mvs {
+                let brk = if mv.version.major > 1
                     && mv
                         .parent_version
                         .as_ref()
@@ -448,32 +292,19 @@ fn print_version_history(registry: &VersionRegistry, ctx: &mut RecipeContext) {
                 } else {
                     ""
                 };
-                println!(
-                    "    v{} ({}) - {}{}",
-                    mv.version, mv.status, mv.changes, breaking
-                );
+                println!("    v{} ({}) - {}{brk}", mv.version, mv.status, mv.changes);
             }
         }
-        println!();
     }
-
-    // Summary diff between two versions
     let diff = registry.version_diff(
         "fraud-detector",
         &SemanticVersion::new(1, 0, 0),
         &SemanticVersion::new(3, 0, 0),
     );
-    println!("  Diff summary: fraud-detector v1.0.0 -> v3.0.0");
     println!(
-        "    Total intermediate versions: {}",
-        diff.intermediate_count
+        "  Diff fd v1.0.0->v3.0.0: {} intermediate, {} breaking, {} -> {}",
+        diff.intermediate_count, diff.breaking_count, diff.from_status, diff.to_status
     );
-    println!("    Breaking changes: {}", diff.breaking_count);
-    println!(
-        "    Status transition: {} -> {}",
-        diff.from_status, diff.to_status
-    );
-
     ctx.record_metric("models_tracked", registry.versions.len() as i64);
     ctx.record_metric(
         "compatibility_rules",
@@ -482,18 +313,14 @@ fn print_version_history(registry: &VersionRegistry, ctx: &mut RecipeContext) {
     println!();
 }
 
-// ---------------------------------------------------------------------------
-// Core types
-// ---------------------------------------------------------------------------
+// --- Core Types ---
 
-/// Semantic version with major.minor.patch components.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 struct SemanticVersion {
     major: u32,
     minor: u32,
     patch: u32,
 }
-
 impl SemanticVersion {
     const fn new(major: u32, minor: u32, patch: u32) -> Self {
         Self {
@@ -502,51 +329,40 @@ impl SemanticVersion {
             patch,
         }
     }
-
-    /// Parse a semantic version from a string like "1.2.3".
     fn parse(s: &str) -> Option<Self> {
-        let parts: Vec<&str> = s.split('.').collect();
-        if parts.len() != 3 {
+        let p: Vec<&str> = s.split('.').collect();
+        if p.len() != 3 {
             return None;
         }
-        let major = parts[0].parse().ok()?;
-        let minor = parts[1].parse().ok()?;
-        let patch = parts[2].parse().ok()?;
         Some(Self {
-            major,
-            minor,
-            patch,
+            major: p[0].parse().ok()?,
+            minor: p[1].parse().ok()?,
+            patch: p[2].parse().ok()?,
         })
     }
-
-    /// Returns true if upgrading from `other` to `self` is a breaking change.
     fn is_breaking_from(&self, other: &Self) -> bool {
         self.major > other.major
     }
 }
-
 impl Ord for SemanticVersion {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+    fn cmp(&self, o: &Self) -> std::cmp::Ordering {
         self.major
-            .cmp(&other.major)
-            .then(self.minor.cmp(&other.minor))
-            .then(self.patch.cmp(&other.patch))
+            .cmp(&o.major)
+            .then(self.minor.cmp(&o.minor))
+            .then(self.patch.cmp(&o.patch))
     }
 }
-
 impl PartialOrd for SemanticVersion {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
+    fn partial_cmp(&self, o: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(o))
     }
 }
-
 impl fmt::Display for SemanticVersion {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}.{}.{}", self.major, self.minor, self.patch)
     }
 }
 
-/// Lifecycle status for a model version.
 #[derive(Debug, Clone, PartialEq, Eq)]
 enum VersionStatus {
     Alpha,
@@ -555,37 +371,33 @@ enum VersionStatus {
     Deprecated,
     Archived,
 }
-
 impl VersionStatus {
-    /// Returns the allowed transitions from this status.
-    fn allowed_transitions(&self) -> &[VersionStatus] {
-        match self {
-            Self::Alpha => &[Self::Beta, Self::Deprecated],
-            Self::Beta => &[Self::Stable, Self::Deprecated],
-            Self::Stable => &[Self::Deprecated],
-            Self::Deprecated => &[Self::Archived],
-            Self::Archived => &[],
-        }
-    }
-
     fn can_transition_to(&self, target: &Self) -> bool {
-        self.allowed_transitions().contains(target)
+        matches!(
+            (self, target),
+            (Self::Alpha, Self::Beta | Self::Deprecated)
+                | (Self::Beta, Self::Stable | Self::Deprecated)
+                | (Self::Stable, Self::Deprecated)
+                | (Self::Deprecated, Self::Archived)
+        )
     }
 }
-
 impl fmt::Display for VersionStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            Self::Alpha => write!(f, "alpha"),
-            Self::Beta => write!(f, "beta"),
-            Self::Stable => write!(f, "stable"),
-            Self::Deprecated => write!(f, "deprecated"),
-            Self::Archived => write!(f, "archived"),
-        }
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Alpha => "alpha",
+                Self::Beta => "beta",
+                Self::Stable => "stable",
+                Self::Deprecated => "deprecated",
+                Self::Archived => "archived",
+            }
+        )
     }
 }
 
-/// A registered model version with metadata.
 #[derive(Debug, Clone)]
 struct ModelVersion {
     name: String,
@@ -595,24 +407,20 @@ struct ModelVersion {
     changes: String,
 }
 
-/// Inclusive range of semantic versions.
 #[derive(Debug, Clone)]
 struct VersionRange {
     min: SemanticVersion,
     max: SemanticVersion,
 }
-
 impl VersionRange {
     const fn new(min: SemanticVersion, max: SemanticVersion) -> Self {
         Self { min, max }
     }
-
-    fn contains(&self, version: &SemanticVersion) -> bool {
-        version >= &self.min && version <= &self.max
+    fn contains(&self, v: &SemanticVersion) -> bool {
+        v >= &self.min && v <= &self.max
     }
 }
 
-/// A rule defining compatibility between two model version ranges.
 #[derive(Debug, Clone)]
 struct CompatibilityRule {
     source_model: String,
@@ -622,7 +430,6 @@ struct CompatibilityRule {
     compatible: bool,
 }
 
-/// Computed upgrade path between two versions.
 #[derive(Debug, Clone)]
 struct UpgradePath {
     steps: Vec<SemanticVersion>,
@@ -630,7 +437,6 @@ struct UpgradePath {
     migration_notes: Vec<String>,
 }
 
-/// Summary of differences between two versions.
 #[derive(Debug)]
 struct VersionDiff {
     intermediate_count: usize,
@@ -639,7 +445,6 @@ struct VersionDiff {
     to_status: VersionStatus,
 }
 
-/// A dependency requirement: a model version requires another model within a version range.
 #[derive(Debug, Clone)]
 struct DependencyRule {
     model: String,
@@ -648,18 +453,12 @@ struct DependencyRule {
     depends_on_range: VersionRange,
 }
 
-// ---------------------------------------------------------------------------
-// Version Registry
-// ---------------------------------------------------------------------------
-
-/// Registry tracking model versions, compatibility rules, and dependencies.
 #[derive(Debug)]
 struct VersionRegistry {
     versions: HashMap<String, Vec<ModelVersion>>,
     compatibility_rules: Vec<CompatibilityRule>,
     dependencies: Vec<DependencyRule>,
 }
-
 impl VersionRegistry {
     fn new() -> Self {
         Self {
@@ -668,146 +467,118 @@ impl VersionRegistry {
             dependencies: Vec::new(),
         }
     }
-
-    fn register(&mut self, model_version: ModelVersion) {
-        let entry = self.versions.entry(model_version.name.clone()).or_default();
-        entry.push(model_version);
-        entry.sort_by(|a, b| a.version.cmp(&b.version));
+    fn register(&mut self, mv: ModelVersion) {
+        let e = self.versions.entry(mv.name.clone()).or_default();
+        e.push(mv);
+        e.sort_by(|a, b| a.version.cmp(&b.version));
     }
-
     fn add_compatibility_rule(&mut self, rule: CompatibilityRule) {
         self.compatibility_rules.push(rule);
     }
-
     fn add_dependency(
         &mut self,
         model: &str,
-        version: &SemanticVersion,
-        depends_on_model: &str,
-        depends_on_range: VersionRange,
+        ver: &SemanticVersion,
+        dep_model: &str,
+        dep_range: VersionRange,
     ) {
         self.dependencies.push(DependencyRule {
-            model: model.to_string(),
-            version: version.clone(),
-            depends_on_model: depends_on_model.to_string(),
-            depends_on_range,
+            model: model.into(),
+            version: ver.clone(),
+            depends_on_model: dep_model.into(),
+            depends_on_range: dep_range,
         });
     }
-
-    /// Check whether two model versions are compatible according to registered rules.
     fn check_compatibility(
         &self,
-        source_model: &str,
-        source_version: &SemanticVersion,
-        target_model: &str,
-        target_version: &SemanticVersion,
+        sm: &str,
+        sv: &SemanticVersion,
+        tm: &str,
+        tv: &SemanticVersion,
     ) -> bool {
-        self.compatibility_rules.iter().any(|rule| {
-            rule.compatible
-                && rule.source_model == source_model
-                && rule.target_model == target_model
-                && rule.source_range.contains(source_version)
-                && rule.target_range.contains(target_version)
+        self.compatibility_rules.iter().any(|r| {
+            r.compatible
+                && r.source_model == sm
+                && r.target_model == tm
+                && r.source_range.contains(sv)
+                && r.target_range.contains(tv)
         })
     }
-
-    /// Resolve dependencies for a given model version.
-    /// Returns the best (highest) compatible version for each dependency.
     fn resolve_dependencies(
         &self,
         model: &str,
-        version: &SemanticVersion,
+        ver: &SemanticVersion,
     ) -> Vec<(String, SemanticVersion)> {
-        let mut resolved = Vec::new();
-
+        let mut res = Vec::new();
         for dep in &self.dependencies {
-            if dep.model == model && dep.version == *version {
-                // Find highest available version in the dependency range
-                if let Some(dep_versions) = self.versions.get(&dep.depends_on_model) {
-                    let best = dep_versions
+            if dep.model == model && dep.version == *ver {
+                if let Some(dvs) = self.versions.get(&dep.depends_on_model) {
+                    if let Some(best) = dvs
                         .iter()
                         .filter(|mv| dep.depends_on_range.contains(&mv.version))
-                        .max_by(|a, b| a.version.cmp(&b.version));
-                    if let Some(best_mv) = best {
-                        resolved.push((dep.depends_on_model.clone(), best_mv.version.clone()));
+                        .max_by(|a, b| a.version.cmp(&b.version))
+                    {
+                        res.push((dep.depends_on_model.clone(), best.version.clone()));
                     }
                 }
             }
         }
-
-        resolved
+        res
     }
-
-    /// Compute an upgrade path from one version to another within the same model.
     fn find_upgrade_path(
         &self,
         model: &str,
         from: &SemanticVersion,
         to: &SemanticVersion,
     ) -> Option<UpgradePath> {
-        let model_versions = self.versions.get(model)?;
-
-        // Collect versions in the range [from, to]
-        let steps: Vec<SemanticVersion> = model_versions
+        let mvs = self.versions.get(model)?;
+        let steps: Vec<SemanticVersion> = mvs
             .iter()
             .filter(|mv| mv.version >= *from && mv.version <= *to)
             .map(|mv| mv.version.clone())
             .collect();
-
         if steps.len() < 2 {
             return None;
         }
-
-        // Count breaking changes (major version bumps between consecutive steps)
-        let mut breaking_changes = 0;
-        let mut migration_notes = Vec::new();
-
-        for window in steps.windows(2) {
-            if window[1].is_breaking_from(&window[0]) {
-                breaking_changes += 1;
-                // Find the model version for the target step to get its changes
-                if let Some(mv) = model_versions.iter().find(|mv| mv.version == window[1]) {
-                    migration_notes.push(format!("v{}: {}", mv.version, mv.changes));
+        let mut bc = 0;
+        let mut notes = Vec::new();
+        for w in steps.windows(2) {
+            if w[1].is_breaking_from(&w[0]) {
+                bc += 1;
+                if let Some(mv) = mvs.iter().find(|mv| mv.version == w[1]) {
+                    notes.push(format!("v{}: {}", mv.version, mv.changes));
                 }
             }
         }
-
         Some(UpgradePath {
             steps,
-            breaking_changes,
-            migration_notes,
+            breaking_changes: bc,
+            migration_notes: notes,
         })
     }
-
-    /// Transition a model version to a new lifecycle status.
     fn transition_status(
         &mut self,
         model: &str,
-        version: &SemanticVersion,
+        ver: &SemanticVersion,
         new_status: VersionStatus,
     ) -> std::result::Result<(), String> {
-        let model_versions = self
+        let mvs = self
             .versions
             .get_mut(model)
-            .ok_or_else(|| format!("model '{}' not found", model))?;
-
-        let mv = model_versions
+            .ok_or_else(|| format!("model '{model}' not found"))?;
+        let mv = mvs
             .iter_mut()
-            .find(|mv| mv.version == *version)
-            .ok_or_else(|| format!("version {} not found for '{}'", version, model))?;
-
+            .find(|mv| mv.version == *ver)
+            .ok_or_else(|| format!("version {ver} not found for '{model}'"))?;
         if !mv.status.can_transition_to(&new_status) {
             return Err(format!(
                 "cannot transition from {} to {}",
                 mv.status, new_status
             ));
         }
-
         mv.status = new_status;
         Ok(())
     }
-
-    /// Compute a diff summary between two versions of the same model.
     fn version_diff(
         &self,
         model: &str,
@@ -815,366 +586,175 @@ impl VersionRegistry {
         to: &SemanticVersion,
     ) -> VersionDiff {
         let empty = Vec::new();
-        let model_versions = self.versions.get(model).unwrap_or(&empty);
-
-        let intermediates: Vec<&ModelVersion> = model_versions
-            .iter()
-            .filter(|mv| mv.version > *from && mv.version < *to)
-            .collect();
-
-        let breaking_count = model_versions
-            .iter()
-            .filter(|mv| mv.version > *from && mv.version <= *to)
-            .filter(|mv| {
-                mv.parent_version
-                    .as_ref()
-                    .is_some_and(|p| mv.version.is_breaking_from(p))
-            })
-            .count();
-
-        let from_status = model_versions
-            .iter()
-            .find(|mv| mv.version == *from)
-            .map_or(VersionStatus::Alpha, |mv| mv.status.clone());
-
-        let to_status = model_versions
-            .iter()
-            .find(|mv| mv.version == *to)
-            .map_or(VersionStatus::Alpha, |mv| mv.status.clone());
-
+        let mvs = self.versions.get(model).unwrap_or(&empty);
         VersionDiff {
-            intermediate_count: intermediates.len(),
-            breaking_count,
-            from_status,
-            to_status,
+            intermediate_count: mvs
+                .iter()
+                .filter(|mv| mv.version > *from && mv.version < *to)
+                .count(),
+            breaking_count: mvs
+                .iter()
+                .filter(|mv| mv.version > *from && mv.version <= *to)
+                .filter(|mv| {
+                    mv.parent_version
+                        .as_ref()
+                        .is_some_and(|p| mv.version.is_breaking_from(p))
+                })
+                .count(),
+            from_status: mvs
+                .iter()
+                .find(|mv| mv.version == *from)
+                .map_or(VersionStatus::Alpha, |mv| mv.status.clone()),
+            to_status: mvs
+                .iter()
+                .find(|mv| mv.version == *to)
+                .map_or(VersionStatus::Alpha, |mv| mv.status.clone()),
         }
     }
 }
 
-// ---------------------------------------------------------------------------
-// Tests
-// ---------------------------------------------------------------------------
-
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn test_semantic_version_new() {
-        let v = SemanticVersion::new(1, 2, 3);
-        assert_eq!(v.major, 1);
-        assert_eq!(v.minor, 2);
-        assert_eq!(v.patch, 3);
+    fn v(a: u32, b: u32, c: u32) -> SemanticVersion {
+        SemanticVersion::new(a, b, c)
+    }
+    fn mv(
+        name: &str,
+        ver: SemanticVersion,
+        status: VersionStatus,
+        parent: Option<SemanticVersion>,
+        changes: &str,
+    ) -> ModelVersion {
+        ModelVersion {
+            name: name.into(),
+            version: ver,
+            status,
+            parent_version: parent,
+            changes: changes.into(),
+        }
     }
 
     #[test]
-    fn test_semantic_version_display() {
-        let v = SemanticVersion::new(2, 10, 5);
-        assert_eq!(format!("{}", v), "2.10.5");
-    }
-
-    #[test]
-    fn test_semantic_version_parse() {
-        let v = SemanticVersion::parse("3.2.1");
-        assert_eq!(v, Some(SemanticVersion::new(3, 2, 1)));
-    }
-
-    #[test]
-    fn test_semantic_version_parse_invalid() {
+    fn test_version_parse_display_ordering() {
+        assert_eq!(SemanticVersion::parse("3.2.1"), Some(v(3, 2, 1)));
         assert_eq!(SemanticVersion::parse("1.2"), None);
-        assert_eq!(SemanticVersion::parse("abc"), None);
-        assert_eq!(SemanticVersion::parse("1.2.x"), None);
-        assert_eq!(SemanticVersion::parse(""), None);
+        assert_eq!(format!("{}", v(2, 10, 5)), "2.10.5");
+        assert!(v(1, 0, 0) < v(1, 1, 0) && v(1, 1, 0) < v(2, 0, 0));
+        assert!(v(2, 0, 0).is_breaking_from(&v(1, 9, 9)));
+        assert!(!v(1, 1, 0).is_breaking_from(&v(1, 0, 0)));
     }
-
     #[test]
-    fn test_semantic_version_ordering() {
-        let v1 = SemanticVersion::new(1, 0, 0);
-        let v2 = SemanticVersion::new(1, 1, 0);
-        let v3 = SemanticVersion::new(2, 0, 0);
-        let v4 = SemanticVersion::new(1, 0, 1);
-
-        assert!(v1 < v2);
-        assert!(v2 < v3);
-        assert!(v1 < v4);
-        assert!(v4 < v2);
-    }
-
-    #[test]
-    fn test_semantic_version_equality() {
-        let v1 = SemanticVersion::new(1, 2, 3);
-        let v2 = SemanticVersion::new(1, 2, 3);
-        assert_eq!(v1, v2);
-    }
-
-    #[test]
-    fn test_is_breaking_from() {
-        let v1 = SemanticVersion::new(1, 9, 9);
-        let v2 = SemanticVersion::new(2, 0, 0);
-        let v3 = SemanticVersion::new(1, 1, 0);
-
-        assert!(v2.is_breaking_from(&v1));
-        assert!(!v3.is_breaking_from(&v1));
-    }
-
-    #[test]
-    fn test_version_status_display() {
-        assert_eq!(format!("{}", VersionStatus::Alpha), "alpha");
-        assert_eq!(format!("{}", VersionStatus::Beta), "beta");
-        assert_eq!(format!("{}", VersionStatus::Stable), "stable");
-        assert_eq!(format!("{}", VersionStatus::Deprecated), "deprecated");
-        assert_eq!(format!("{}", VersionStatus::Archived), "archived");
-    }
-
-    #[test]
-    fn test_version_status_transitions() {
+    fn test_status_transitions() {
         assert!(VersionStatus::Alpha.can_transition_to(&VersionStatus::Beta));
-        assert!(VersionStatus::Alpha.can_transition_to(&VersionStatus::Deprecated));
         assert!(!VersionStatus::Alpha.can_transition_to(&VersionStatus::Stable));
         assert!(VersionStatus::Beta.can_transition_to(&VersionStatus::Stable));
-        assert!(VersionStatus::Stable.can_transition_to(&VersionStatus::Deprecated));
-        assert!(!VersionStatus::Stable.can_transition_to(&VersionStatus::Alpha));
-        assert!(VersionStatus::Deprecated.can_transition_to(&VersionStatus::Archived));
         assert!(!VersionStatus::Archived.can_transition_to(&VersionStatus::Stable));
+        assert!(VersionStatus::Deprecated.can_transition_to(&VersionStatus::Archived));
     }
-
     #[test]
-    fn test_version_range_contains() {
-        let range = VersionRange::new(SemanticVersion::new(1, 0, 0), SemanticVersion::new(2, 0, 0));
-        assert!(range.contains(&SemanticVersion::new(1, 0, 0)));
-        assert!(range.contains(&SemanticVersion::new(1, 5, 0)));
-        assert!(range.contains(&SemanticVersion::new(2, 0, 0)));
-        assert!(!range.contains(&SemanticVersion::new(0, 9, 0)));
-        assert!(!range.contains(&SemanticVersion::new(2, 0, 1)));
+    fn test_version_range() {
+        let r = VersionRange::new(v(1, 0, 0), v(2, 0, 0));
+        assert!(r.contains(&v(1, 0, 0)) && r.contains(&v(1, 5, 0)) && r.contains(&v(2, 0, 0)));
+        assert!(!r.contains(&v(0, 9, 0)) && !r.contains(&v(2, 0, 1)));
     }
-
     #[test]
-    fn test_registry_register_and_sort() {
-        let mut registry = VersionRegistry::new();
-        registry.register(ModelVersion {
-            name: "test".to_string(),
-            version: SemanticVersion::new(2, 0, 0),
-            status: VersionStatus::Stable,
-            parent_version: None,
-            changes: "v2".to_string(),
-        });
-        registry.register(ModelVersion {
-            name: "test".to_string(),
-            version: SemanticVersion::new(1, 0, 0),
-            status: VersionStatus::Stable,
-            parent_version: None,
-            changes: "v1".to_string(),
-        });
-
-        let versions = &registry.versions["test"];
-        assert_eq!(versions.len(), 2);
-        assert_eq!(versions[0].version, SemanticVersion::new(1, 0, 0));
-        assert_eq!(versions[1].version, SemanticVersion::new(2, 0, 0));
-    }
-
-    #[test]
-    fn test_compatibility_check_positive() {
-        let mut registry = VersionRegistry::new();
-        registry.add_compatibility_rule(CompatibilityRule {
-            source_model: "A".to_string(),
-            source_range: VersionRange::new(
-                SemanticVersion::new(1, 0, 0),
-                SemanticVersion::new(1, 9, 0),
-            ),
-            target_model: "B".to_string(),
-            target_range: VersionRange::new(
-                SemanticVersion::new(2, 0, 0),
-                SemanticVersion::new(2, 5, 0),
-            ),
+    fn test_registry_sort_and_compat() {
+        let mut reg = VersionRegistry::new();
+        reg.register(mv("t", v(2, 0, 0), VersionStatus::Stable, None, "v2"));
+        reg.register(mv("t", v(1, 0, 0), VersionStatus::Stable, None, "v1"));
+        assert_eq!(reg.versions["t"][0].version, v(1, 0, 0));
+        reg.add_compatibility_rule(CompatibilityRule {
+            source_model: "A".into(),
+            source_range: VersionRange::new(v(1, 0, 0), v(1, 9, 0)),
+            target_model: "B".into(),
+            target_range: VersionRange::new(v(2, 0, 0), v(2, 5, 0)),
             compatible: true,
         });
-
-        assert!(registry.check_compatibility(
-            "A",
-            &SemanticVersion::new(1, 3, 0),
-            "B",
-            &SemanticVersion::new(2, 1, 0)
-        ));
+        assert!(reg.check_compatibility("A", &v(1, 3, 0), "B", &v(2, 1, 0)));
+        assert!(!reg.check_compatibility("A", &v(1, 0, 0), "B", &v(1, 0, 0)));
     }
-
-    #[test]
-    fn test_compatibility_check_negative() {
-        let registry = VersionRegistry::new();
-        // No rules -> not compatible
-        assert!(!registry.check_compatibility(
-            "A",
-            &SemanticVersion::new(1, 0, 0),
-            "B",
-            &SemanticVersion::new(1, 0, 0)
-        ));
-    }
-
     #[test]
     fn test_dependency_resolution() {
-        let mut registry = VersionRegistry::new();
-        registry.register(ModelVersion {
-            name: "encoder".to_string(),
-            version: SemanticVersion::new(2, 0, 0),
-            status: VersionStatus::Stable,
-            parent_version: None,
-            changes: "release".to_string(),
-        });
-        registry.register(ModelVersion {
-            name: "encoder".to_string(),
-            version: SemanticVersion::new(2, 1, 0),
-            status: VersionStatus::Stable,
-            parent_version: None,
-            changes: "update".to_string(),
-        });
-        registry.add_dependency(
-            "detector",
-            &SemanticVersion::new(3, 0, 0),
-            "encoder",
-            VersionRange::new(SemanticVersion::new(2, 0, 0), SemanticVersion::new(2, 1, 0)),
+        let mut reg = VersionRegistry::new();
+        reg.register(mv("enc", v(2, 0, 0), VersionStatus::Stable, None, "r"));
+        reg.register(mv("enc", v(2, 1, 0), VersionStatus::Stable, None, "u"));
+        reg.add_dependency(
+            "det",
+            &v(3, 0, 0),
+            "enc",
+            VersionRange::new(v(2, 0, 0), v(2, 1, 0)),
         );
-
-        let resolved = registry.resolve_dependencies("detector", &SemanticVersion::new(3, 0, 0));
-        assert_eq!(resolved.len(), 1);
-        assert_eq!(resolved[0].0, "encoder");
-        assert_eq!(resolved[0].1, SemanticVersion::new(2, 1, 0));
+        let res = reg.resolve_dependencies("det", &v(3, 0, 0));
+        assert_eq!(res.len(), 1);
+        assert_eq!(res[0].1, v(2, 1, 0));
+        assert!(reg.resolve_dependencies("m", &v(1, 0, 0)).is_empty());
     }
-
-    #[test]
-    fn test_dependency_resolution_no_deps() {
-        let registry = VersionRegistry::new();
-        let resolved = registry.resolve_dependencies("model", &SemanticVersion::new(1, 0, 0));
-        assert!(resolved.is_empty());
-    }
-
     #[test]
     fn test_upgrade_path() {
-        let mut registry = VersionRegistry::new();
-        for (major, minor) in [(1, 0), (1, 1), (2, 0), (2, 1)] {
-            registry.register(ModelVersion {
-                name: "m".to_string(),
-                version: SemanticVersion::new(major, minor, 0),
-                status: VersionStatus::Stable,
-                parent_version: if major == 1 && minor == 0 {
-                    None
-                } else {
-                    Some(SemanticVersion::new(
-                        if minor == 0 { major - 1 } else { major },
-                        if minor == 0 { 1 } else { minor - 1 },
-                        0,
-                    ))
-                },
-                changes: format!("v{}.{}", major, minor),
-            });
+        let mut reg = VersionRegistry::new();
+        for (maj, min) in [(1, 0), (1, 1), (2, 0), (2, 1)] {
+            let parent = if maj == 1 && min == 0 {
+                None
+            } else {
+                Some(v(
+                    if min == 0 { maj - 1 } else { maj },
+                    if min == 0 { 1 } else { min - 1 },
+                    0,
+                ))
+            };
+            reg.register(mv(
+                "m",
+                v(maj, min, 0),
+                VersionStatus::Stable,
+                parent,
+                &format!("v{maj}.{min}"),
+            ));
         }
-
-        let path = registry.find_upgrade_path(
-            "m",
-            &SemanticVersion::new(1, 0, 0),
-            &SemanticVersion::new(2, 1, 0),
-        );
-        assert!(path.is_some());
-        let path = path.expect("path should exist");
+        let path = reg
+            .find_upgrade_path("m", &v(1, 0, 0), &v(2, 1, 0))
+            .expect("path");
         assert_eq!(path.steps.len(), 4);
         assert_eq!(path.breaking_changes, 1);
+        assert!(reg
+            .find_upgrade_path("x", &v(1, 0, 0), &v(2, 0, 0))
+            .is_none());
     }
-
     #[test]
-    fn test_upgrade_path_no_path() {
-        let registry = VersionRegistry::new();
-        let path = registry.find_upgrade_path(
-            "missing",
-            &SemanticVersion::new(1, 0, 0),
-            &SemanticVersion::new(2, 0, 0),
-        );
-        assert!(path.is_none());
-    }
-
-    #[test]
-    fn test_transition_status_valid() {
-        let mut registry = VersionRegistry::new();
-        registry.register(ModelVersion {
-            name: "m".to_string(),
-            version: SemanticVersion::new(1, 0, 0),
-            status: VersionStatus::Alpha,
-            parent_version: None,
-            changes: "init".to_string(),
-        });
-
-        let result =
-            registry.transition_status("m", &SemanticVersion::new(1, 0, 0), VersionStatus::Beta);
-        assert!(result.is_ok());
-
-        let mv = &registry.versions["m"][0];
-        assert_eq!(mv.status, VersionStatus::Beta);
-    }
-
-    #[test]
-    fn test_transition_status_invalid() {
-        let mut registry = VersionRegistry::new();
-        registry.register(ModelVersion {
-            name: "m".to_string(),
-            version: SemanticVersion::new(1, 0, 0),
-            status: VersionStatus::Archived,
-            parent_version: None,
-            changes: "init".to_string(),
-        });
-
-        let result =
-            registry.transition_status("m", &SemanticVersion::new(1, 0, 0), VersionStatus::Stable);
-        assert!(result.is_err());
-    }
-
-    #[test]
-    fn test_version_diff() {
-        let mut registry = VersionRegistry::new();
-        registry.register(ModelVersion {
-            name: "m".to_string(),
-            version: SemanticVersion::new(1, 0, 0),
-            status: VersionStatus::Archived,
-            parent_version: None,
-            changes: "init".to_string(),
-        });
-        registry.register(ModelVersion {
-            name: "m".to_string(),
-            version: SemanticVersion::new(1, 1, 0),
-            status: VersionStatus::Deprecated,
-            parent_version: Some(SemanticVersion::new(1, 0, 0)),
-            changes: "patch".to_string(),
-        });
-        registry.register(ModelVersion {
-            name: "m".to_string(),
-            version: SemanticVersion::new(2, 0, 0),
-            status: VersionStatus::Stable,
-            parent_version: Some(SemanticVersion::new(1, 1, 0)),
-            changes: "breaking".to_string(),
-        });
-
-        let diff = registry.version_diff(
+    fn test_transition_and_diff() {
+        let mut reg = VersionRegistry::new();
+        reg.register(mv("m", v(1, 0, 0), VersionStatus::Alpha, None, "init"));
+        assert!(reg
+            .transition_status("m", &v(1, 0, 0), VersionStatus::Beta)
+            .is_ok());
+        assert_eq!(reg.versions["m"][0].status, VersionStatus::Beta);
+        let mut reg2 = VersionRegistry::new();
+        reg2.register(mv("m", v(1, 0, 0), VersionStatus::Archived, None, "i"));
+        assert!(reg2
+            .transition_status("m", &v(1, 0, 0), VersionStatus::Stable)
+            .is_err());
+        let mut reg3 = VersionRegistry::new();
+        reg3.register(mv("m", v(1, 0, 0), VersionStatus::Archived, None, "i"));
+        reg3.register(mv(
             "m",
-            &SemanticVersion::new(1, 0, 0),
-            &SemanticVersion::new(2, 0, 0),
-        );
-        assert_eq!(diff.intermediate_count, 1);
-        assert_eq!(diff.breaking_count, 1);
-        assert_eq!(diff.from_status, VersionStatus::Archived);
-        assert_eq!(diff.to_status, VersionStatus::Stable);
+            v(1, 1, 0),
+            VersionStatus::Deprecated,
+            Some(v(1, 0, 0)),
+            "p",
+        ));
+        reg3.register(mv(
+            "m",
+            v(2, 0, 0),
+            VersionStatus::Stable,
+            Some(v(1, 1, 0)),
+            "b",
+        ));
+        let d = reg3.version_diff("m", &v(1, 0, 0), &v(2, 0, 0));
+        assert_eq!(d.intermediate_count, 1);
+        assert_eq!(d.breaking_count, 1);
     }
-
     #[test]
-    fn test_version_diff_missing_model() {
-        let registry = VersionRegistry::new();
-        let diff = registry.version_diff(
-            "missing",
-            &SemanticVersion::new(1, 0, 0),
-            &SemanticVersion::new(2, 0, 0),
-        );
-        assert_eq!(diff.intermediate_count, 0);
-        assert_eq!(diff.breaking_count, 0);
-    }
-
-    #[test]
-    fn test_main_runs_successfully() {
-        // Verify the main function completes without error
+    fn test_main_runs() {
         assert!(main().is_ok());
     }
 }
@@ -1183,77 +763,24 @@ mod tests {
 mod proptests {
     use super::*;
     use proptest::prelude::*;
-
     proptest! {
         #![proptest_config(ProptestConfig::with_cases(50))]
-
         #[test]
-        fn prop_version_ordering_is_total(
-            a_major in 0u32..10,
-            a_minor in 0u32..20,
-            a_patch in 0u32..30,
-            b_major in 0u32..10,
-            b_minor in 0u32..20,
-            b_patch in 0u32..30,
-        ) {
-            let a = SemanticVersion::new(a_major, a_minor, a_patch);
-            let b = SemanticVersion::new(b_major, b_minor, b_patch);
-
-            // Total ordering: exactly one of <, =, > holds
-            let lt = a < b;
-            let eq = a == b;
-            let gt = a > b;
-            prop_assert_eq!(
-                lt as u8 + eq as u8 + gt as u8,
-                1,
-                "exactly one of <, ==, > must hold"
-            );
+        fn prop_version_ordering_total(a0 in 0u32..10, a1 in 0u32..20, a2 in 0u32..30, b0 in 0u32..10, b1 in 0u32..20, b2 in 0u32..30) {
+            let (a, b) = (SemanticVersion::new(a0,a1,a2), SemanticVersion::new(b0,b1,b2));
+            prop_assert_eq!((a<b) as u8 + (a==b) as u8 + (a>b) as u8, 1);
         }
-
         #[test]
-        fn prop_version_parse_roundtrip(
-            major in 0u32..100,
-            minor in 0u32..100,
-            patch in 0u32..100,
-        ) {
-            let v = SemanticVersion::new(major, minor, patch);
-            let s = format!("{}", v);
-            let parsed = SemanticVersion::parse(&s);
-            prop_assert_eq!(parsed, Some(v));
+        fn prop_parse_roundtrip(maj in 0u32..100, min in 0u32..100, pat in 0u32..100) {
+            let v = SemanticVersion::new(maj, min, pat);
+            prop_assert_eq!(SemanticVersion::parse(&format!("{v}")), Some(v));
         }
-
         #[test]
-        fn prop_range_contains_endpoints(
-            min_major in 0u32..5,
-            min_minor in 0u32..5,
-            span_major in 0u32..5,
-            span_minor in 0u32..5,
-        ) {
-            let min = SemanticVersion::new(min_major, min_minor, 0);
-            let max = SemanticVersion::new(min_major + span_major, min_minor + span_minor, 0);
-            let range = VersionRange::new(min.clone(), max.clone());
-
-            prop_assert!(range.contains(&min), "range must contain its min");
-            prop_assert!(range.contains(&max), "range must contain its max");
-        }
-
-        #[test]
-        fn prop_register_preserves_sort_order(n in 1usize..15) {
-            let mut registry = VersionRegistry::new();
-            // Register in reverse order
-            for i in (0..n).rev() {
-                registry.register(ModelVersion {
-                    name: "model".to_string(),
-                    version: SemanticVersion::new(1, i as u32, 0),
-                    status: VersionStatus::Stable,
-                    parent_version: None,
-                    changes: "test".to_string(),
-                });
-            }
-            let versions = &registry.versions["model"];
-            for w in versions.windows(2) {
-                prop_assert!(w[0].version <= w[1].version, "versions must be sorted");
-            }
+        fn prop_register_sorted(n in 1usize..15) {
+            let mut reg = VersionRegistry::new();
+            for i in (0..n).rev() { reg.register(ModelVersion { name: "m".into(), version: SemanticVersion::new(1, i as u32, 0), status: VersionStatus::Stable, parent_version: None, changes: "t".into() }); }
+            let vs = &reg.versions["m"];
+            for w in vs.windows(2) { prop_assert!(w[0].version <= w[1].version); }
         }
     }
 }

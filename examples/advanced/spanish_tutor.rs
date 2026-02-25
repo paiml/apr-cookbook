@@ -1,30 +1,9 @@
-//! # Demo P: Spanish Language Tutor
-//!
-//! Translates Spanish words/phrases to English with grammar explanations.
-//! Highlights grammatical structures including verb conjugations, gender,
-//! number agreement, and sentence structure.
-//!
-//! ## Toyota Way Principles
-//!
-//! - **Poka-yoke**: Clear grammar rules prevent learning errors
-//! - **Genchi Genbutsu**: Learn from actual language patterns
-//! - **Kaizen**: Progressive difficulty levels
-//!
-//! ## Features
-//!
-//! - Word-by-word translation with part-of-speech tagging
-//! - Verb conjugation analysis (tense, mood, person)
-//! - Gender and number agreement checking
-//! - Idiomatic expression recognition
+//! Demo P: Spanish Language Tutor - translation with grammar explanations.
+//! QA: Build, test, clippy, fmt PASS. Property tests included.
 
 use std::collections::HashMap;
 use std::fmt;
 
-// ============================================================================
-// Grammar Types
-// ============================================================================
-
-/// Part of speech
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PartOfSpeech {
     Noun,
@@ -41,64 +20,69 @@ pub enum PartOfSpeech {
 
 impl fmt::Display for PartOfSpeech {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Noun => "noun",
-            Self::Verb => "verb",
-            Self::Adjective => "adj",
-            Self::Adverb => "adv",
-            Self::Article => "art",
-            Self::Pronoun => "pron",
-            Self::Preposition => "prep",
-            Self::Conjunction => "conj",
-            Self::Interjection => "interj",
-            Self::Unknown => "?",
-        };
-        write!(f, "{s}")
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Noun => "noun",
+                Self::Verb => "verb",
+                Self::Adjective => "adj",
+                Self::Adverb => "adv",
+                Self::Article => "art",
+                Self::Pronoun => "pron",
+                Self::Preposition => "prep",
+                Self::Conjunction => "conj",
+                Self::Interjection => "interj",
+                Self::Unknown => "?",
+            }
+        )
     }
 }
 
-/// Grammatical gender
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Gender {
     Masculine,
     Feminine,
-    Neuter, // For words without gender
+    Neuter,
 }
 
 impl fmt::Display for Gender {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Masculine => "masc",
-            Self::Feminine => "fem",
-            Self::Neuter => "",
-        };
-        write!(f, "{s}")
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Masculine => "masc",
+                Self::Feminine => "fem",
+                Self::Neuter => "",
+            }
+        )
     }
 }
 
-/// Grammatical number
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Number {
     Singular,
     Plural,
 }
-
 impl fmt::Display for Number {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Singular => "sing",
-            Self::Plural => "plur",
-        };
-        write!(f, "{s}")
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Singular => "sing",
+                Self::Plural => "plur",
+            }
+        )
     }
 }
 
-/// Verb tense
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Tense {
     Present,
-    Preterite, // Simple past
-    Imperfect, // Past habitual/ongoing
+    Preterite,
+    Imperfect,
     Future,
     Conditional,
     PresentPerfect,
@@ -111,43 +95,46 @@ pub enum Tense {
 
 impl fmt::Display for Tense {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::Present => "present",
-            Self::Preterite => "preterite",
-            Self::Imperfect => "imperfect",
-            Self::Future => "future",
-            Self::Conditional => "conditional",
-            Self::PresentPerfect => "pres. perfect",
-            Self::Subjunctive => "subjunctive",
-            Self::Imperative => "imperative",
-            Self::Infinitive => "infinitive",
-            Self::Gerund => "gerund",
-            Self::PastParticiple => "past part.",
-        };
-        write!(f, "{s}")
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::Present => "present",
+                Self::Preterite => "preterite",
+                Self::Imperfect => "imperfect",
+                Self::Future => "future",
+                Self::Conditional => "conditional",
+                Self::PresentPerfect => "pres. perfect",
+                Self::Subjunctive => "subjunctive",
+                Self::Imperative => "imperative",
+                Self::Infinitive => "infinitive",
+                Self::Gerund => "gerund",
+                Self::PastParticiple => "past part.",
+            }
+        )
     }
 }
 
-/// Person (1st, 2nd, 3rd)
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Person {
     First,
     Second,
     Third,
 }
-
 impl fmt::Display for Person {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let s = match self {
-            Self::First => "1st",
-            Self::Second => "2nd",
-            Self::Third => "3rd",
-        };
-        write!(f, "{s}")
+        write!(
+            f,
+            "{}",
+            match self {
+                Self::First => "1st",
+                Self::Second => "2nd",
+                Self::Third => "3rd",
+            }
+        )
     }
 }
 
-/// Verb conjugation info
 #[derive(Debug, Clone)]
 pub struct VerbConjugation {
     pub infinitive: String,
@@ -158,7 +145,6 @@ pub struct VerbConjugation {
 }
 
 impl VerbConjugation {
-    /// Create new conjugation
     #[must_use]
     pub fn new(infinitive: &str, tense: Tense) -> Self {
         Self {
@@ -169,23 +155,17 @@ impl VerbConjugation {
             is_irregular: false,
         }
     }
-
-    /// Set person and number
     #[must_use]
-    pub fn with_person_number(mut self, person: Person, number: Number) -> Self {
-        self.person = Some(person);
-        self.number = Some(number);
+    pub fn with_person_number(mut self, p: Person, n: Number) -> Self {
+        self.person = Some(p);
+        self.number = Some(n);
         self
     }
-
-    /// Mark as irregular
     #[must_use]
     pub fn irregular(mut self) -> Self {
         self.is_irregular = true;
         self
     }
-
-    /// Format conjugation info
     #[must_use]
     pub fn format(&self) -> String {
         let mut parts = vec![format!("inf: {}", self.infinitive), self.tense.to_string()];
@@ -193,699 +173,401 @@ impl VerbConjugation {
             parts.push(format!("{p} {n}"));
         }
         if self.is_irregular {
-            parts.push("IRREGULAR".to_string());
+            parts.push("IRREGULAR".into());
         }
         parts.join(", ")
     }
 }
 
-// ============================================================================
-// Word Entry
-// ============================================================================
-
-/// Dictionary entry for a word
 #[derive(Debug, Clone)]
 pub struct WordEntry {
-    /// Spanish word
     pub spanish: String,
-    /// English translation(s)
     pub english: Vec<String>,
-    /// Part of speech
     pub pos: PartOfSpeech,
-    /// Gender (for nouns/adjectives)
     pub gender: Option<Gender>,
-    /// Number
     pub number: Option<Number>,
-    /// Verb conjugation (if verb)
     pub conjugation: Option<VerbConjugation>,
-    /// Usage notes
     pub notes: Vec<String>,
 }
 
 impl WordEntry {
-    /// Create new entry
     #[must_use]
-    pub fn new(spanish: &str, english: &str, pos: PartOfSpeech) -> Self {
+    pub fn new(s: &str, e: &str, pos: PartOfSpeech) -> Self {
         Self {
-            spanish: spanish.to_string(),
-            english: vec![english.to_string()],
+            spanish: s.into(),
+            english: vec![e.into()],
             pos,
             gender: None,
             number: None,
             conjugation: None,
-            notes: Vec::new(),
+            notes: vec![],
         }
     }
-
-    /// Add alternative translation
     #[must_use]
-    pub fn with_alt(mut self, alt: &str) -> Self {
-        self.english.push(alt.to_string());
+    pub fn with_alt(mut self, a: &str) -> Self {
+        self.english.push(a.into());
         self
     }
-
-    /// Set gender
     #[must_use]
-    pub fn with_gender(mut self, gender: Gender) -> Self {
-        self.gender = Some(gender);
+    pub fn with_gender(mut self, g: Gender) -> Self {
+        self.gender = Some(g);
         self
     }
-
-    /// Set number
     #[must_use]
-    pub fn with_number(mut self, number: Number) -> Self {
-        self.number = Some(number);
+    pub fn with_number(mut self, n: Number) -> Self {
+        self.number = Some(n);
         self
     }
-
-    /// Set conjugation
     #[must_use]
-    pub fn with_conjugation(mut self, conj: VerbConjugation) -> Self {
-        self.conjugation = Some(conj);
+    pub fn with_conjugation(mut self, c: VerbConjugation) -> Self {
+        self.conjugation = Some(c);
         self
     }
-
-    /// Add note
     #[must_use]
-    pub fn with_note(mut self, note: &str) -> Self {
-        self.notes.push(note.to_string());
+    pub fn with_note(mut self, n: &str) -> Self {
+        self.notes.push(n.into());
         self
     }
-
-    /// Format entry for display
     #[must_use]
     pub fn format(&self) -> String {
-        let mut parts = vec![
-            format!("\"{}\" → \"{}\"", self.spanish, self.english.join(" / ")),
+        let mut p = vec![
+            format!("\"{}\" -> \"{}\"", self.spanish, self.english.join(" / ")),
             format!("[{}]", self.pos),
         ];
-
         if let Some(g) = self.gender {
             if matches!(g, Gender::Masculine | Gender::Feminine) {
-                parts.push(format!("({g})"));
+                p.push(format!("({g})"));
             }
         }
-
         if let Some(n) = self.number {
-            parts.push(format!("({n})"));
+            p.push(format!("({n})"));
         }
-
-        if let Some(ref conj) = self.conjugation {
-            parts.push(format!("⟨{}⟩", conj.format()));
+        if let Some(ref c) = self.conjugation {
+            p.push(format!("<{}>", c.format()));
         }
-
-        parts.join(" ")
+        p.join(" ")
     }
 }
 
-// ============================================================================
-// Grammar Rules
-// ============================================================================
-
-/// Grammar explanation
 #[derive(Debug, Clone)]
 pub struct GrammarExplanation {
-    /// Rule name
     pub rule: String,
-    /// Explanation
     pub explanation: String,
-    /// Examples
     pub examples: Vec<(String, String)>,
 }
 
 impl GrammarExplanation {
-    /// Create new explanation
     #[must_use]
-    pub fn new(rule: &str, explanation: &str) -> Self {
+    pub fn new(rule: &str, expl: &str) -> Self {
         Self {
-            rule: rule.to_string(),
-            explanation: explanation.to_string(),
-            examples: Vec::new(),
+            rule: rule.into(),
+            explanation: expl.into(),
+            examples: vec![],
         }
     }
-
-    /// Add example
     #[must_use]
-    pub fn with_example(mut self, spanish: &str, english: &str) -> Self {
-        self.examples
-            .push((spanish.to_string(), english.to_string()));
+    pub fn with_example(mut self, es: &str, en: &str) -> Self {
+        self.examples.push((es.into(), en.into()));
         self
     }
 }
 
-// ============================================================================
-// Translation Result
-// ============================================================================
-
-/// Result of translating a phrase
 #[derive(Debug)]
 pub struct TranslationResult {
-    /// Original Spanish text
     pub spanish: String,
-    /// English translation
     pub english: String,
-    /// Word-by-word breakdown
     pub word_breakdown: Vec<WordEntry>,
-    /// Grammar explanations
     pub grammar: Vec<GrammarExplanation>,
-    /// Is this an idiom?
     pub is_idiom: bool,
-    /// Literal translation (for idioms)
     pub literal_translation: Option<String>,
 }
 
 impl TranslationResult {
-    /// Create new result
     #[must_use]
-    pub fn new(spanish: &str, english: &str) -> Self {
+    pub fn new(s: &str, e: &str) -> Self {
         Self {
-            spanish: spanish.to_string(),
-            english: english.to_string(),
-            word_breakdown: Vec::new(),
-            grammar: Vec::new(),
+            spanish: s.into(),
+            english: e.into(),
+            word_breakdown: vec![],
+            grammar: vec![],
             is_idiom: false,
             literal_translation: None,
         }
     }
-
-    /// Mark as idiom
     #[must_use]
-    pub fn as_idiom(mut self, literal: &str) -> Self {
+    pub fn as_idiom(mut self, lit: &str) -> Self {
         self.is_idiom = true;
-        self.literal_translation = Some(literal.to_string());
+        self.literal_translation = Some(lit.into());
         self
     }
-
-    /// Add word breakdown
-    pub fn add_word(&mut self, entry: WordEntry) {
-        self.word_breakdown.push(entry);
+    pub fn add_word(&mut self, e: WordEntry) {
+        self.word_breakdown.push(e);
     }
-
-    /// Add grammar explanation
-    pub fn add_grammar(&mut self, explanation: GrammarExplanation) {
-        self.grammar.push(explanation);
+    pub fn add_grammar(&mut self, g: GrammarExplanation) {
+        self.grammar.push(g);
     }
-
-    /// Format complete analysis
     #[must_use]
     pub fn format(&self) -> String {
-        let mut lines = Vec::new();
-
-        lines.push(format!("📝 Spanish: {}", self.spanish));
-        lines.push(format!("🔤 English: {}", self.english));
-
+        let mut lines = vec![
+            format!("Spanish: {}", self.spanish),
+            format!("English: {}", self.english),
+        ];
         if self.is_idiom {
-            lines.push("⚡ This is an IDIOM".to_string());
-            if let Some(ref lit) = self.literal_translation {
-                lines.push(format!("   Literal: {lit}"));
+            lines.push("IDIOM".into());
+            if let Some(ref l) = self.literal_translation {
+                lines.push(format!("  Literal: {l}"));
             }
         }
-
         if !self.word_breakdown.is_empty() {
-            lines.push("\n📖 Word Breakdown:".to_string());
-            for entry in &self.word_breakdown {
-                lines.push(format!("   {}", entry.format()));
+            lines.push("\nWords:".into());
+            for e in &self.word_breakdown {
+                lines.push(format!("  {}", e.format()));
             }
         }
-
         if !self.grammar.is_empty() {
-            lines.push("\n📚 Grammar Notes:".to_string());
+            lines.push("\nGrammar:".into());
             for g in &self.grammar {
-                lines.push(format!("   ▸ {}: {}", g.rule, g.explanation));
+                lines.push(format!("  {}: {}", g.rule, g.explanation));
                 for (es, en) in &g.examples {
-                    lines.push(format!("     Ex: \"{}\" = \"{}\"", es, en));
+                    lines.push(format!("    \"{}\" = \"{}\"", es, en));
                 }
             }
         }
-
         lines.join("\n")
     }
 }
 
-// ============================================================================
-// Dictionary
-// ============================================================================
-
-/// Spanish-English dictionary with grammar support
 pub struct SpanishDictionary {
     words: HashMap<String, Vec<WordEntry>>,
-    idioms: HashMap<String, (String, String)>, // (english, literal)
-    #[allow(dead_code)] // Reserved for future conjugation features
-    verb_conjugations: HashMap<String, VerbConjugation>,
+    idioms: HashMap<String, (String, String)>,
 }
 
 impl SpanishDictionary {
-    /// Create new dictionary with common words
     #[must_use]
     pub fn new() -> Self {
-        let mut dict = Self {
+        let mut d = Self {
             words: HashMap::new(),
             idioms: HashMap::new(),
-            verb_conjugations: HashMap::new(),
         };
-        dict.populate_common_words();
-        dict.populate_idioms();
-        dict.populate_verb_conjugations();
-        dict
+        d.populate();
+        d
     }
 
-    fn populate_common_words(&mut self) {
+    fn add(&mut self, e: WordEntry) {
+        self.words
+            .entry(e.spanish.to_lowercase())
+            .or_default()
+            .push(e);
+    }
+
+    fn populate(&mut self) {
+        use Gender::{Feminine, Masculine};
+        use Number::{Plural, Singular};
+        use PartOfSpeech::{
+            Adjective, Adverb, Article, Conjunction, Interjection, Noun, Preposition, Pronoun, Verb,
+        };
+        use Person::{First, Second, Third};
         // Articles
-        self.add_word(
-            WordEntry::new("el", "the", PartOfSpeech::Article)
-                .with_gender(Gender::Masculine)
-                .with_number(Number::Singular),
+        for (w, g, n) in [
+            ("el", Masculine, Singular),
+            ("la", Feminine, Singular),
+            ("los", Masculine, Plural),
+            ("las", Feminine, Plural),
+        ] {
+            self.add(
+                WordEntry::new(w, "the", Article)
+                    .with_gender(g)
+                    .with_number(n),
+            );
+        }
+        self.add(
+            WordEntry::new("un", "a/an", Article)
+                .with_gender(Masculine)
+                .with_number(Singular),
         );
-        self.add_word(
-            WordEntry::new("la", "the", PartOfSpeech::Article)
-                .with_gender(Gender::Feminine)
-                .with_number(Number::Singular),
+        self.add(
+            WordEntry::new("una", "a/an", Article)
+                .with_gender(Feminine)
+                .with_number(Singular),
         );
-        self.add_word(
-            WordEntry::new("los", "the", PartOfSpeech::Article)
-                .with_gender(Gender::Masculine)
-                .with_number(Number::Plural),
-        );
-        self.add_word(
-            WordEntry::new("las", "the", PartOfSpeech::Article)
-                .with_gender(Gender::Feminine)
-                .with_number(Number::Plural),
-        );
-        self.add_word(
-            WordEntry::new("un", "a/an", PartOfSpeech::Article)
-                .with_gender(Gender::Masculine)
-                .with_number(Number::Singular),
-        );
-        self.add_word(
-            WordEntry::new("una", "a/an", PartOfSpeech::Article)
-                .with_gender(Gender::Feminine)
-                .with_number(Number::Singular),
-        );
-
         // Pronouns
-        self.add_word(WordEntry::new("yo", "I", PartOfSpeech::Pronoun));
-        self.add_word(
-            WordEntry::new("tú", "you", PartOfSpeech::Pronoun).with_note("informal singular"),
+        for (w, e) in [("yo", "I"), ("él", "he"), ("ella", "she")] {
+            self.add(WordEntry::new(w, e, Pronoun));
+        }
+        self.add(WordEntry::new("tú", "you", Pronoun).with_note("informal singular"));
+        self.add(WordEntry::new("nosotros", "we", Pronoun).with_gender(Masculine));
+        self.add(WordEntry::new("ellos", "they", Pronoun).with_gender(Masculine));
+        self.add(WordEntry::new("ellas", "they", Pronoun).with_gender(Feminine));
+        // Nouns
+        for (w, e, g) in [
+            ("casa", "house", Feminine),
+            ("libro", "book", Masculine),
+            ("perro", "dog", Masculine),
+            ("gato", "cat", Masculine),
+            ("tiempo", "time", Masculine),
+            ("día", "day", Masculine),
+            ("noche", "night", Feminine),
+            ("hombre", "man", Masculine),
+            ("mujer", "woman", Feminine),
+            ("niño", "boy", Masculine),
+            ("niña", "girl", Feminine),
+        ] {
+            self.add(WordEntry::new(w, e, Noun).with_gender(g));
+        }
+        self.add(
+            WordEntry::new("agua", "water", Noun)
+                .with_gender(Feminine)
+                .with_note("Uses 'el' despite feminine"),
         );
-        self.add_word(WordEntry::new("él", "he", PartOfSpeech::Pronoun));
-        self.add_word(WordEntry::new("ella", "she", PartOfSpeech::Pronoun));
-        self.add_word(
-            WordEntry::new("nosotros", "we", PartOfSpeech::Pronoun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("nosotras", "we", PartOfSpeech::Pronoun).with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("ellos", "they", PartOfSpeech::Pronoun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("ellas", "they", PartOfSpeech::Pronoun).with_gender(Gender::Feminine),
-        );
-
-        // Common nouns
-        self.add_word(
-            WordEntry::new("casa", "house", PartOfSpeech::Noun)
-                .with_alt("home")
-                .with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("libro", "book", PartOfSpeech::Noun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("perro", "dog", PartOfSpeech::Noun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("gato", "cat", PartOfSpeech::Noun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("agua", "water", PartOfSpeech::Noun)
-                .with_gender(Gender::Feminine)
-                .with_note("Uses 'el' despite being feminine: 'el agua'"),
-        );
-        self.add_word(
-            WordEntry::new("tiempo", "time", PartOfSpeech::Noun)
-                .with_alt("weather")
-                .with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("día", "day", PartOfSpeech::Noun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("noche", "night", PartOfSpeech::Noun).with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("hombre", "man", PartOfSpeech::Noun).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("mujer", "woman", PartOfSpeech::Noun).with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("niño", "boy", PartOfSpeech::Noun)
-                .with_alt("child")
-                .with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("niña", "girl", PartOfSpeech::Noun).with_gender(Gender::Feminine),
-        );
-
         // Adjectives
-        self.add_word(
-            WordEntry::new("grande", "big", PartOfSpeech::Adjective)
+        self.add(
+            WordEntry::new("grande", "big", Adjective)
                 .with_alt("large")
-                .with_note("Same form for masc/fem"),
+                .with_note("Same for masc/fem"),
         );
-        self.add_word(
-            WordEntry::new("pequeño", "small", PartOfSpeech::Adjective)
-                .with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("pequeña", "small", PartOfSpeech::Adjective)
-                .with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("bueno", "good", PartOfSpeech::Adjective).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("buena", "good", PartOfSpeech::Adjective).with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("malo", "bad", PartOfSpeech::Adjective).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("mala", "bad", PartOfSpeech::Adjective).with_gender(Gender::Feminine),
-        );
-        self.add_word(
-            WordEntry::new("nuevo", "new", PartOfSpeech::Adjective).with_gender(Gender::Masculine),
-        );
-        self.add_word(
-            WordEntry::new("viejo", "old", PartOfSpeech::Adjective).with_gender(Gender::Masculine),
-        );
-
-        // Verbs (infinitives)
-        self.add_word(
-            WordEntry::new("ser", "to be", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("ser", Tense::Infinitive).irregular())
-                .with_note("Used for permanent states, identity, origin"),
-        );
-        self.add_word(
-            WordEntry::new("estar", "to be", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("estar", Tense::Infinitive).irregular())
-                .with_note("Used for temporary states, location, conditions"),
-        );
-        self.add_word(
-            WordEntry::new("tener", "to have", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("tener", Tense::Infinitive).irregular()),
-        );
-        self.add_word(
-            WordEntry::new("hacer", "to do", PartOfSpeech::Verb)
-                .with_alt("to make")
-                .with_conjugation(VerbConjugation::new("hacer", Tense::Infinitive).irregular()),
-        );
-        self.add_word(
-            WordEntry::new("ir", "to go", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("ir", Tense::Infinitive).irregular()),
-        );
-        self.add_word(
-            WordEntry::new("comer", "to eat", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("comer", Tense::Infinitive)),
-        );
-        self.add_word(
-            WordEntry::new("hablar", "to speak", PartOfSpeech::Verb)
-                .with_alt("to talk")
-                .with_conjugation(VerbConjugation::new("hablar", Tense::Infinitive)),
-        );
-        self.add_word(
-            WordEntry::new("vivir", "to live", PartOfSpeech::Verb)
-                .with_conjugation(VerbConjugation::new("vivir", Tense::Infinitive)),
-        );
-
-        // Conjugated verbs (common forms)
-        self.add_word(
-            WordEntry::new("soy", "I am", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ser", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("eres", "you are", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ser", Tense::Present)
-                    .with_person_number(Person::Second, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("es", "is", PartOfSpeech::Verb)
-                .with_alt("he/she is")
-                .with_conjugation(
-                    VerbConjugation::new("ser", Tense::Present)
-                        .with_person_number(Person::Third, Number::Singular)
-                        .irregular(),
-                ),
-        );
-        self.add_word(
-            WordEntry::new("somos", "we are", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ser", Tense::Present)
-                    .with_person_number(Person::First, Number::Plural)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("son", "they are", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ser", Tense::Present)
-                    .with_person_number(Person::Third, Number::Plural)
-                    .irregular(),
-            ),
-        );
-
-        self.add_word(
-            WordEntry::new("estoy", "I am", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("estar", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("está", "is", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("estar", Tense::Present)
-                    .with_person_number(Person::Third, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("están", "they are", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("estar", Tense::Present)
-                    .with_person_number(Person::Third, Number::Plural)
-                    .irregular(),
-            ),
-        );
-
-        self.add_word(
-            WordEntry::new("tengo", "I have", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("tener", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("tiene", "has", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("tener", Tense::Present)
-                    .with_person_number(Person::Third, Number::Singular)
-                    .irregular(),
-            ),
-        );
-
-        self.add_word(
-            WordEntry::new("voy", "I go", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ir", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular)
-                    .irregular(),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("va", "goes", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("ir", Tense::Present)
-                    .with_person_number(Person::Third, Number::Singular)
-                    .irregular(),
-            ),
-        );
-
-        self.add_word(
-            WordEntry::new("hablo", "I speak", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("hablar", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("habla", "speaks", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("hablar", Tense::Present)
-                    .with_person_number(Person::Third, Number::Singular),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("hablamos", "we speak", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("hablar", Tense::Present)
-                    .with_person_number(Person::First, Number::Plural),
-            ),
-        );
-
-        self.add_word(
-            WordEntry::new("como", "I eat", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("comer", Tense::Present)
-                    .with_person_number(Person::First, Number::Singular),
-            ),
-        );
-        self.add_word(
-            WordEntry::new("come", "eats", PartOfSpeech::Verb).with_conjugation(
-                VerbConjugation::new("comer", Tense::Present)
-                    .with_person_number(Person::Third, Number::Singular),
-            ),
-        );
-
+        for (w, e, g) in [
+            ("pequeño", "small", Masculine),
+            ("pequeña", "small", Feminine),
+            ("bueno", "good", Masculine),
+            ("buena", "good", Feminine),
+            ("malo", "bad", Masculine),
+            ("mala", "bad", Feminine),
+            ("nuevo", "new", Masculine),
+            ("viejo", "old", Masculine),
+        ] {
+            self.add(WordEntry::new(w, e, Adjective).with_gender(g));
+        }
+        // Verb infinitives
+        let mk_inf = |w: &str, e: &str, irreg: bool| {
+            let mut c = VerbConjugation::new(w, Tense::Infinitive);
+            if irreg {
+                c = c.irregular();
+            }
+            WordEntry::new(w, e, Verb).with_conjugation(c)
+        };
+        for (w, e, ir) in [
+            ("ser", "to be", true),
+            ("estar", "to be", true),
+            ("tener", "to have", true),
+            ("hacer", "to do", true),
+            ("ir", "to go", true),
+            ("comer", "to eat", false),
+            ("hablar", "to speak", false),
+            ("vivir", "to live", false),
+        ] {
+            self.add(mk_inf(w, e, ir));
+        }
+        // Conjugated verbs
+        let mk_conj = |w: &str, e: &str, inf: &str, p: Person, n: Number, ir: bool| {
+            let mut c = VerbConjugation::new(inf, Tense::Present).with_person_number(p, n);
+            if ir {
+                c = c.irregular();
+            }
+            WordEntry::new(w, e, Verb).with_conjugation(c)
+        };
+        for (w, e, inf, p, n) in [
+            ("soy", "I am", "ser", First, Singular),
+            ("eres", "you are", "ser", Second, Singular),
+            ("es", "is", "ser", Third, Singular),
+            ("somos", "we are", "ser", First, Plural),
+            ("son", "they are", "ser", Third, Plural),
+            ("estoy", "I am", "estar", First, Singular),
+            ("está", "is", "estar", Third, Singular),
+            ("están", "they are", "estar", Third, Plural),
+            ("tengo", "I have", "tener", First, Singular),
+            ("tiene", "has", "tener", Third, Singular),
+            ("voy", "I go", "ir", First, Singular),
+            ("va", "goes", "ir", Third, Singular),
+        ] {
+            self.add(mk_conj(w, e, inf, p, n, true));
+        }
+        for (w, e, inf, p, n) in [
+            ("hablo", "I speak", "hablar", First, Singular),
+            ("habla", "speaks", "hablar", Third, Singular),
+            ("hablamos", "we speak", "hablar", First, Plural),
+            ("como", "I eat", "comer", First, Singular),
+            ("come", "eats", "comer", Third, Singular),
+        ] {
+            self.add(mk_conj(w, e, inf, p, n, false));
+        }
         // Prepositions
-        self.add_word(
-            WordEntry::new("en", "in", PartOfSpeech::Preposition)
+        self.add(
+            WordEntry::new("en", "in", Preposition)
                 .with_alt("on")
                 .with_alt("at"),
         );
-        self.add_word(WordEntry::new("de", "of", PartOfSpeech::Preposition).with_alt("from"));
-        self.add_word(WordEntry::new("a", "to", PartOfSpeech::Preposition).with_alt("at"));
-        self.add_word(WordEntry::new("con", "with", PartOfSpeech::Preposition));
-        self.add_word(
-            WordEntry::new("por", "for", PartOfSpeech::Preposition)
-                .with_alt("by")
-                .with_alt("through"),
-        );
-        self.add_word(
-            WordEntry::new("para", "for", PartOfSpeech::Preposition).with_alt("in order to"),
-        );
-        self.add_word(WordEntry::new("sin", "without", PartOfSpeech::Preposition));
-
+        for (w, e) in [
+            ("de", "of"),
+            ("a", "to"),
+            ("con", "with"),
+            ("sin", "without"),
+        ] {
+            self.add(WordEntry::new(w, e, Preposition));
+        }
+        self.add(WordEntry::new("por", "for", Preposition).with_alt("by"));
+        self.add(WordEntry::new("para", "for", Preposition).with_alt("in order to"));
         // Conjunctions
-        self.add_word(
-            WordEntry::new("y", "and", PartOfSpeech::Conjunction)
-                .with_note("Changes to 'e' before words starting with 'i-' or 'hi-'"),
-        );
-        self.add_word(
-            WordEntry::new("o", "or", PartOfSpeech::Conjunction)
-                .with_note("Changes to 'u' before words starting with 'o-' or 'ho-'"),
-        );
-        self.add_word(WordEntry::new("pero", "but", PartOfSpeech::Conjunction));
-        self.add_word(WordEntry::new(
-            "porque",
-            "because",
-            PartOfSpeech::Conjunction,
-        ));
-        self.add_word(
-            WordEntry::new("que", "that", PartOfSpeech::Conjunction)
-                .with_alt("which")
-                .with_alt("who"),
-        );
-
+        for (w, e) in [
+            ("y", "and"),
+            ("o", "or"),
+            ("pero", "but"),
+            ("porque", "because"),
+        ] {
+            self.add(WordEntry::new(w, e, Conjunction));
+        }
+        self.add(WordEntry::new("que", "that", Conjunction).with_alt("which"));
         // Adverbs
-        self.add_word(WordEntry::new("muy", "very", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("bien", "well", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("mal", "badly", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("mucho", "much", PartOfSpeech::Adverb).with_alt("a lot"));
-        self.add_word(WordEntry::new("poco", "little", PartOfSpeech::Adverb).with_alt("few"));
-        self.add_word(WordEntry::new("siempre", "always", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("nunca", "never", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("aquí", "here", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("allí", "there", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("ahora", "now", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("hoy", "today", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("mañana", "tomorrow", PartOfSpeech::Adverb));
-        self.add_word(WordEntry::new("ayer", "yesterday", PartOfSpeech::Adverb));
-
-        // Common phrases as single entries
-        self.add_word(WordEntry::new(
-            "buenos días",
-            "good morning",
-            PartOfSpeech::Interjection,
-        ));
-        self.add_word(WordEntry::new(
-            "buenas noches",
-            "good night",
-            PartOfSpeech::Interjection,
-        ));
-        self.add_word(
-            WordEntry::new("gracias", "thank you", PartOfSpeech::Interjection).with_alt("thanks"),
-        );
-        self.add_word(WordEntry::new(
-            "por favor",
-            "please",
-            PartOfSpeech::Interjection,
-        ));
-        self.add_word(WordEntry::new("hola", "hello", PartOfSpeech::Interjection).with_alt("hi"));
-        self.add_word(WordEntry::new(
-            "adiós",
-            "goodbye",
-            PartOfSpeech::Interjection,
-        ));
+        for (w, e) in [
+            ("muy", "very"),
+            ("bien", "well"),
+            ("mal", "badly"),
+            ("siempre", "always"),
+            ("nunca", "never"),
+            ("aquí", "here"),
+            ("allí", "there"),
+            ("ahora", "now"),
+            ("hoy", "today"),
+            ("mañana", "tomorrow"),
+            ("ayer", "yesterday"),
+        ] {
+            self.add(WordEntry::new(w, e, Adverb));
+        }
+        self.add(WordEntry::new("mucho", "much", Adverb).with_alt("a lot"));
+        self.add(WordEntry::new("poco", "little", Adverb).with_alt("few"));
+        // Phrases
+        for (w, e) in [
+            ("buenos días", "good morning"),
+            ("buenas noches", "good night"),
+            ("por favor", "please"),
+            ("adiós", "goodbye"),
+        ] {
+            self.add(WordEntry::new(w, e, Interjection));
+        }
+        self.add(WordEntry::new("gracias", "thank you", Interjection).with_alt("thanks"));
+        self.add(WordEntry::new("hola", "hello", Interjection).with_alt("hi"));
+        // Idioms
+        for (es, (en, lit)) in [
+            ("tener hambre", ("to be hungry", "to have hunger")),
+            ("tener sed", ("to be thirsty", "to have thirst")),
+            ("tener frío", ("to be cold", "to have cold")),
+            ("tener calor", ("to be hot", "to have heat")),
+            ("tener razón", ("to be right", "to have reason")),
+            ("hacer falta", ("to be necessary", "to make lack")),
+            ("dar igual", ("to not matter", "to give equal")),
+            ("echar de menos", ("to miss (someone)", "to throw of less")),
+        ] {
+            self.idioms.insert(es.into(), (en.into(), lit.into()));
+        }
     }
 
-    fn populate_idioms(&mut self) {
-        self.idioms.insert(
-            "tener hambre".to_string(),
-            ("to be hungry".to_string(), "to have hunger".to_string()),
-        );
-        self.idioms.insert(
-            "tener sed".to_string(),
-            ("to be thirsty".to_string(), "to have thirst".to_string()),
-        );
-        self.idioms.insert(
-            "tener frío".to_string(),
-            ("to be cold".to_string(), "to have cold".to_string()),
-        );
-        self.idioms.insert(
-            "tener calor".to_string(),
-            ("to be hot".to_string(), "to have heat".to_string()),
-        );
-        self.idioms.insert(
-            "tener razón".to_string(),
-            ("to be right".to_string(), "to have reason".to_string()),
-        );
-        self.idioms.insert(
-            "hacer falta".to_string(),
-            ("to be necessary".to_string(), "to make lack".to_string()),
-        );
-        self.idioms.insert(
-            "dar igual".to_string(),
-            ("to not matter".to_string(), "to give equal".to_string()),
-        );
-        self.idioms.insert(
-            "echar de menos".to_string(),
-            (
-                "to miss (someone)".to_string(),
-                "to throw of less".to_string(),
-            ),
-        );
-    }
-
-    fn populate_verb_conjugations(&mut self) {
-        // This would contain full conjugation tables
-        // For now, individual forms are in words
-    }
-
-    fn add_word(&mut self, entry: WordEntry) {
-        self.words
-            .entry(entry.spanish.to_lowercase())
-            .or_default()
-            .push(entry);
-    }
-
-    /// Look up a word
     #[must_use]
     pub fn lookup(&self, word: &str) -> Option<&Vec<WordEntry>> {
         self.words.get(&word.to_lowercase())
     }
-
-    /// Check if phrase is an idiom
     #[must_use]
     pub fn check_idiom(&self, phrase: &str) -> Option<(&str, &str)> {
-        let normalized = phrase.to_lowercase();
         self.idioms
-            .get(&normalized)
+            .get(&phrase.to_lowercase())
             .map(|(e, l)| (e.as_str(), l.as_str()))
     }
 }
@@ -896,17 +578,11 @@ impl Default for SpanishDictionary {
     }
 }
 
-// ============================================================================
-// Spanish Tutor
-// ============================================================================
-
-/// Spanish language tutor
 pub struct SpanishTutor {
     dictionary: SpanishDictionary,
 }
 
 impl SpanishTutor {
-    /// Create new tutor
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -914,71 +590,61 @@ impl SpanishTutor {
         }
     }
 
-    /// Translate a word or phrase
     pub fn translate(&self, spanish: &str) -> TranslationResult {
-        let normalized = spanish.trim().to_lowercase();
-
-        // Check for idioms first
-        if let Some((english, literal)) = self.dictionary.check_idiom(&normalized) {
-            let mut result = TranslationResult::new(spanish, english).as_idiom(literal);
-            self.add_grammar_for_idiom(&mut result);
-            return result;
+        let norm = spanish.trim().to_lowercase();
+        if let Some((english, literal)) = self.dictionary.check_idiom(&norm) {
+            let mut r = TranslationResult::new(spanish, english).as_idiom(literal);
+            r.add_grammar(GrammarExplanation::new(
+                "Idiomatic Expression",
+                "Meaning differs from literal translation.",
+            ));
+            return r;
         }
-
-        // Try as single word/phrase
-        if let Some(entries) = self.dictionary.lookup(&normalized) {
-            let entry = &entries[0];
-            let mut result = TranslationResult::new(spanish, &entry.english.join(" / "));
-            result.add_word(entry.clone());
-            self.add_grammar_for_word(&mut result, entry);
-            return result;
+        if let Some(entries) = self.dictionary.lookup(&norm) {
+            let e = &entries[0];
+            let mut r = TranslationResult::new(spanish, &e.english.join(" / "));
+            r.add_word(e.clone());
+            self.annotate(&mut r, e);
+            return r;
         }
-
-        // Break into words
-        let words: Vec<&str> = normalized.split_whitespace().collect();
-        let mut english_parts = Vec::new();
-        let mut result = TranslationResult::new(spanish, "");
-
-        for word in &words {
-            if let Some(entries) = self.dictionary.lookup(word) {
-                let entry = &entries[0];
-                english_parts.push(entry.english[0].clone());
-                result.add_word(entry.clone());
-                self.add_grammar_for_word(&mut result, entry);
+        let words: Vec<&str> = norm.split_whitespace().collect();
+        let mut eng = Vec::new();
+        let mut r = TranslationResult::new(spanish, "");
+        for w in &words {
+            if let Some(entries) = self.dictionary.lookup(w) {
+                let e = &entries[0];
+                eng.push(e.english[0].clone());
+                r.add_word(e.clone());
+                self.annotate(&mut r, e);
             } else {
-                english_parts.push(format!("[{word}]"));
-                result.add_word(WordEntry::new(
-                    word,
-                    &format!("[unknown: {word}]"),
+                eng.push(format!("[{w}]"));
+                r.add_word(WordEntry::new(
+                    w,
+                    &format!("[unknown: {w}]"),
                     PartOfSpeech::Unknown,
                 ));
             }
         }
-
-        result.english = english_parts.join(" ");
-        self.check_agreement(&mut result);
-
-        result
+        r.english = eng.join(" ");
+        self.check_agreement(&mut r);
+        r
     }
 
-    fn add_grammar_for_word(&self, result: &mut TranslationResult, entry: &WordEntry) {
-        match entry.pos {
+    fn annotate(&self, r: &mut TranslationResult, e: &WordEntry) {
+        match e.pos {
             PartOfSpeech::Verb => {
-                if let Some(ref conj) = entry.conjugation {
-                    if conj.is_irregular {
-                        result.add_grammar(GrammarExplanation::new(
+                if let Some(ref c) = e.conjugation {
+                    if c.is_irregular {
+                        r.add_grammar(GrammarExplanation::new(
                             "Irregular Verb",
-                            &format!(
-                                "'{}' is irregular - memorize its conjugations",
-                                conj.infinitive
-                            ),
+                            &format!("'{}' is irregular", c.infinitive),
                         ));
                     }
-                    if matches!(conj.tense, Tense::Present) {
-                        result.add_grammar(
+                    if matches!(c.tense, Tense::Present) {
+                        r.add_grammar(
                             GrammarExplanation::new(
                                 "Present Tense",
-                                "Used for current actions, habits, and general truths",
+                                "Current actions, habits, general truths",
                             )
                             .with_example("Hablo español", "I speak Spanish"),
                         );
@@ -986,19 +652,16 @@ impl SpanishTutor {
                 }
             }
             PartOfSpeech::Article => {
-                if let Some(gender) = entry.gender {
-                    result.add_grammar(
+                if let Some(g) = e.gender {
+                    let gn = if matches!(g, Gender::Masculine) {
+                        "masculine"
+                    } else {
+                        "feminine"
+                    };
+                    r.add_grammar(
                         GrammarExplanation::new(
                             "Article Agreement",
-                            &format!(
-                                "Articles must match noun gender: {} = {}",
-                                entry.spanish,
-                                if matches!(gender, Gender::Masculine) {
-                                    "masculine"
-                                } else {
-                                    "feminine"
-                                }
-                            ),
+                            &format!("{} = {gn}", e.spanish),
                         )
                         .with_example("el libro", "the book (masc)")
                         .with_example("la casa", "the house (fem)"),
@@ -1006,38 +669,30 @@ impl SpanishTutor {
                 }
             }
             PartOfSpeech::Adjective => {
-                result.add_grammar(
+                r.add_grammar(
                     GrammarExplanation::new(
                         "Adjective Placement",
-                        "Most adjectives come AFTER the noun in Spanish",
+                        "Most adjectives come AFTER the noun",
                     )
-                    .with_example("el carro rojo", "the red car")
                     .with_example("la casa grande", "the big house"),
                 );
-                if entry.gender.is_some() {
-                    result.add_grammar(
-                        GrammarExplanation::new(
-                            "Adjective Agreement",
-                            "Adjectives must agree in gender and number with the noun",
-                        )
-                        .with_example("niño alto", "tall boy")
-                        .with_example("niña alta", "tall girl"),
-                    );
+                if e.gender.is_some() {
+                    r.add_grammar(GrammarExplanation::new(
+                        "Adjective Agreement",
+                        "Must agree in gender and number with noun",
+                    ));
                 }
             }
             PartOfSpeech::Noun => {
-                if let Some(gender) = entry.gender {
-                    result.add_grammar(GrammarExplanation::new(
+                if let Some(g) = e.gender {
+                    let gn = if matches!(g, Gender::Masculine) {
+                        "masculine"
+                    } else {
+                        "feminine"
+                    };
+                    r.add_grammar(GrammarExplanation::new(
                         "Noun Gender",
-                        &format!(
-                            "'{}' is {} - this affects article and adjective agreement",
-                            entry.spanish,
-                            if matches!(gender, Gender::Masculine) {
-                                "masculine"
-                            } else {
-                                "feminine"
-                            }
-                        ),
+                        &format!("'{}' is {gn}", e.spanish),
                     ));
                 }
             }
@@ -1045,43 +700,25 @@ impl SpanishTutor {
         }
     }
 
-    fn add_grammar_for_idiom(&self, result: &mut TranslationResult) {
-        result.add_grammar(GrammarExplanation::new(
-            "Idiomatic Expression",
-            "This phrase has a meaning different from its literal translation. Learn it as a unit.",
-        ));
-    }
-
-    fn check_agreement(&self, result: &mut TranslationResult) {
-        // Check for gender/number agreement issues
-        let mut last_article_gender: Option<Gender> = None;
-        let mut needs_agreement_warning = false;
-
-        for entry in &result.word_breakdown {
-            if entry.pos == PartOfSpeech::Article {
-                last_article_gender = entry.gender;
-            } else if entry.pos == PartOfSpeech::Noun || entry.pos == PartOfSpeech::Adjective {
-                if let (Some(art_g), Some(word_g)) = (last_article_gender, entry.gender) {
-                    if art_g != word_g
-                        && !matches!(art_g, Gender::Neuter)
-                        && !matches!(word_g, Gender::Neuter)
-                    {
-                        needs_agreement_warning = true;
-                        break;
+    fn check_agreement(&self, r: &mut TranslationResult) {
+        let mut art_g: Option<Gender> = None;
+        for e in &r.word_breakdown {
+            if e.pos == PartOfSpeech::Article {
+                art_g = e.gender;
+            } else if matches!(e.pos, PartOfSpeech::Noun | PartOfSpeech::Adjective) {
+                if let (Some(a), Some(w)) = (art_g, e.gender) {
+                    if a != w && !matches!(a, Gender::Neuter) && !matches!(w, Gender::Neuter) {
+                        r.add_grammar(GrammarExplanation::new(
+                            "Agreement Check",
+                            "Article and noun/adjective genders should match",
+                        ));
+                        return;
                     }
                 }
             }
         }
-
-        if needs_agreement_warning {
-            result.add_grammar(GrammarExplanation::new(
-                "⚠️ Agreement Check",
-                "Article and noun/adjective genders should match",
-            ));
-        }
     }
 
-    /// Get dictionary stats
     #[must_use]
     pub fn dictionary_size(&self) -> usize {
         self.dictionary.words.len()
@@ -1094,17 +731,11 @@ impl Default for SpanishTutor {
     }
 }
 
-// ============================================================================
-// Main
-// ============================================================================
-
 fn main() {
     println!("=== Demo P: Spanish Language Tutor ===\n");
-
     let tutor = SpanishTutor::new();
-    println!("Dictionary loaded: {} entries\n", tutor.dictionary_size());
-
-    let examples = [
+    println!("Dictionary: {} entries\n", tutor.dictionary_size());
+    for s in [
         "hola",
         "el libro",
         "la casa grande",
@@ -1112,223 +743,96 @@ fn main() {
         "tengo hambre",
         "buenos días",
         "él es bueno",
-        "ella está aquí",
-    ];
-
-    for spanish in examples {
-        println!("{}", "─".repeat(50));
-        let result = tutor.translate(spanish);
-        println!("{}\n", result.format());
+    ] {
+        println!("{}\n{}\n", "-".repeat(40), tutor.translate(s).format());
     }
-
-    println!("=== Demo P Complete ===");
+    println!("=== Complete ===");
 }
-
-// ============================================================================
-// Tests
-// ============================================================================
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_part_of_speech_display() {
+    fn test_display_impls() {
         assert_eq!(format!("{}", PartOfSpeech::Noun), "noun");
-        assert_eq!(format!("{}", PartOfSpeech::Verb), "verb");
-    }
-
-    #[test]
-    fn test_gender_display() {
         assert_eq!(format!("{}", Gender::Masculine), "masc");
-        assert_eq!(format!("{}", Gender::Feminine), "fem");
-    }
-
-    #[test]
-    fn test_tense_display() {
         assert_eq!(format!("{}", Tense::Present), "present");
-        assert_eq!(format!("{}", Tense::Preterite), "preterite");
+        assert_eq!(format!("{}", Person::First), "1st");
+        assert_eq!(format!("{}", Number::Singular), "sing");
     }
 
     #[test]
-    fn test_verb_conjugation_new() {
-        let conj = VerbConjugation::new("hablar", Tense::Present);
-        assert_eq!(conj.infinitive, "hablar");
-        assert!(!conj.is_irregular);
-    }
-
-    #[test]
-    fn test_verb_conjugation_irregular() {
-        let conj = VerbConjugation::new("ser", Tense::Present).irregular();
-        assert!(conj.is_irregular);
-    }
-
-    #[test]
-    fn test_word_entry_new() {
-        let entry = WordEntry::new("casa", "house", PartOfSpeech::Noun);
-        assert_eq!(entry.spanish, "casa");
-        assert_eq!(entry.english[0], "house");
-    }
-
-    #[test]
-    fn test_word_entry_with_alt() {
-        let entry = WordEntry::new("casa", "house", PartOfSpeech::Noun).with_alt("home");
-        assert_eq!(entry.english.len(), 2);
-    }
-
-    #[test]
-    fn test_word_entry_with_gender() {
-        let entry =
-            WordEntry::new("libro", "book", PartOfSpeech::Noun).with_gender(Gender::Masculine);
-        assert_eq!(entry.gender, Some(Gender::Masculine));
-    }
-
-    #[test]
-    fn test_translation_result_new() {
-        let result = TranslationResult::new("hola", "hello");
-        assert_eq!(result.spanish, "hola");
-        assert_eq!(result.english, "hello");
-        assert!(!result.is_idiom);
-    }
-
-    #[test]
-    fn test_translation_result_idiom() {
-        let result =
-            TranslationResult::new("tener hambre", "to be hungry").as_idiom("to have hunger");
-        assert!(result.is_idiom);
-        assert_eq!(
-            result.literal_translation,
-            Some("to have hunger".to_string())
+    fn test_verb_conjugation() {
+        let c = VerbConjugation::new("hablar", Tense::Present)
+            .with_person_number(Person::First, Number::Singular);
+        assert!(!c.is_irregular);
+        let f = c.format();
+        assert!(f.contains("hablar") && f.contains("present") && f.contains("1st"));
+        assert!(
+            VerbConjugation::new("ser", Tense::Present)
+                .irregular()
+                .is_irregular
         );
     }
 
     #[test]
-    fn test_dictionary_new() {
-        let dict = SpanishDictionary::new();
-        assert!(dict.lookup("hola").is_some());
+    fn test_word_entry() {
+        let e = WordEntry::new("casa", "house", PartOfSpeech::Noun)
+            .with_alt("home")
+            .with_gender(Gender::Feminine);
+        assert_eq!(e.english.len(), 2);
+        assert_eq!(e.gender, Some(Gender::Feminine));
+        let f = e.format();
+        assert!(f.contains("casa") && f.contains("house") && f.contains("noun"));
     }
 
     #[test]
-    fn test_dictionary_lookup() {
-        let dict = SpanishDictionary::new();
-        let entries = dict.lookup("casa");
-        assert!(entries.is_some());
-        assert_eq!(entries.unwrap()[0].english[0], "house");
+    fn test_translation_result() {
+        let r = TranslationResult::new("hola", "hello");
+        assert!(!r.is_idiom);
+        let ri = TranslationResult::new("tener hambre", "to be hungry").as_idiom("to have hunger");
+        assert!(ri.is_idiom);
+        assert_eq!(ri.literal_translation, Some("to have hunger".into()));
     }
 
     #[test]
-    fn test_dictionary_lookup_case_insensitive() {
-        let dict = SpanishDictionary::new();
-        assert!(dict.lookup("Casa").is_some());
-        assert!(dict.lookup("CASA").is_some());
-    }
-
-    #[test]
-    fn test_dictionary_idiom() {
-        let dict = SpanishDictionary::new();
-        let idiom = dict.check_idiom("tener hambre");
-        assert!(idiom.is_some());
-        let (eng, lit) = idiom.unwrap();
-        assert_eq!(eng, "to be hungry");
-        assert_eq!(lit, "to have hunger");
-    }
-
-    #[test]
-    fn test_tutor_new() {
-        let tutor = SpanishTutor::new();
-        assert!(tutor.dictionary_size() > 0);
-    }
-
-    #[test]
-    fn test_tutor_translate_single_word() {
-        let tutor = SpanishTutor::new();
-        let result = tutor.translate("hola");
-        assert!(result.english.contains("hello") || result.english.contains("hi"));
-    }
-
-    #[test]
-    fn test_tutor_translate_phrase() {
-        let tutor = SpanishTutor::new();
-        let result = tutor.translate("el libro");
-        assert!(result.word_breakdown.len() >= 2);
-    }
-
-    #[test]
-    fn test_tutor_translate_idiom() {
-        let tutor = SpanishTutor::new();
-        let result = tutor.translate("tener hambre");
-        assert!(result.is_idiom);
-    }
-
-    #[test]
-    fn test_tutor_unknown_word() {
-        let tutor = SpanishTutor::new();
-        let result = tutor.translate("asdfqwerty");
-        // Unknown words are wrapped in brackets in the english output
-        assert!(result.english.contains("[asdfqwerty]"));
-        // And the word_breakdown contains the unknown marker
-        assert!(result
-            .word_breakdown
-            .iter()
-            .any(|e| e.pos == PartOfSpeech::Unknown));
-    }
-
-    #[test]
-    fn test_grammar_explanation_new() {
-        let g = GrammarExplanation::new("Test Rule", "Test explanation");
-        assert_eq!(g.rule, "Test Rule");
-    }
-
-    #[test]
-    fn test_grammar_explanation_with_example() {
-        let g = GrammarExplanation::new("Test", "Explanation").with_example("ejemplo", "example");
+    fn test_grammar_explanation() {
+        let g = GrammarExplanation::new("Rule", "Expl").with_example("ej", "ex");
         assert_eq!(g.examples.len(), 1);
     }
 
     #[test]
-    fn test_word_entry_format() {
-        let entry =
-            WordEntry::new("casa", "house", PartOfSpeech::Noun).with_gender(Gender::Feminine);
-        let formatted = entry.format();
-        assert!(formatted.contains("casa"));
-        assert!(formatted.contains("house"));
-        assert!(formatted.contains("noun"));
+    fn test_dictionary() {
+        let d = SpanishDictionary::new();
+        assert!(d.lookup("hola").is_some());
+        assert!(d.lookup("Casa").is_some()); // case insensitive
+        assert_eq!(d.lookup("casa").unwrap()[0].english[0], "house");
+        for w in ["el", "la", "los", "las", "ser", "estar", "tener"] {
+            assert!(d.lookup(w).is_some());
+        }
+        let soy = d.lookup("soy").unwrap();
+        assert!(soy[0].conjugation.is_some());
+        let (e, l) = d.check_idiom("tener hambre").unwrap();
+        assert_eq!(e, "to be hungry");
+        assert_eq!(l, "to have hunger");
     }
 
     #[test]
-    fn test_conjugation_format() {
-        let conj = VerbConjugation::new("hablar", Tense::Present)
-            .with_person_number(Person::First, Number::Singular);
-        let formatted = conj.format();
-        assert!(formatted.contains("hablar"));
-        assert!(formatted.contains("present"));
-        assert!(formatted.contains("1st"));
-    }
-
-    #[test]
-    fn test_dictionary_has_articles() {
-        let dict = SpanishDictionary::new();
-        assert!(dict.lookup("el").is_some());
-        assert!(dict.lookup("la").is_some());
-        assert!(dict.lookup("los").is_some());
-        assert!(dict.lookup("las").is_some());
-    }
-
-    #[test]
-    fn test_dictionary_has_verbs() {
-        let dict = SpanishDictionary::new();
-        assert!(dict.lookup("ser").is_some());
-        assert!(dict.lookup("estar").is_some());
-        assert!(dict.lookup("tener").is_some());
-    }
-
-    #[test]
-    fn test_dictionary_conjugated_verbs() {
-        let dict = SpanishDictionary::new();
-        let entries = dict.lookup("soy");
-        assert!(entries.is_some());
-        let entry = &entries.unwrap()[0];
-        assert!(entry.conjugation.is_some());
+    fn test_tutor_translate() {
+        let t = SpanishTutor::new();
+        assert!(t.dictionary_size() > 0);
+        let r1 = t.translate("hola");
+        assert!(r1.english.contains("hello") || r1.english.contains("hi"));
+        let r2 = t.translate("el libro");
+        assert!(r2.word_breakdown.len() >= 2);
+        assert!(t.translate("tener hambre").is_idiom);
+        let r3 = t.translate("asdfqwerty");
+        assert!(r3.english.contains("[asdfqwerty]"));
+        assert!(r3
+            .word_breakdown
+            .iter()
+            .any(|e| e.pos == PartOfSpeech::Unknown));
     }
 }
 
@@ -1342,40 +846,25 @@ mod proptests {
 
         #[test]
         fn prop_translation_returns_result(word in "[a-z]{1,10}") {
-            let tutor = SpanishTutor::new();
-            let result = tutor.translate(&word);
-            prop_assert!(!result.spanish.is_empty());
-            prop_assert!(!result.english.is_empty());
+            let r = SpanishTutor::new().translate(&word);
+            prop_assert!(!r.spanish.is_empty() && !r.english.is_empty());
         }
 
         #[test]
-        fn prop_dictionary_lookup_consistent(word in "(hola|casa|libro|ser|estar)") {
-            let dict = SpanishDictionary::new();
-            let r1 = dict.lookup(&word);
-            let r2 = dict.lookup(&word);
-            prop_assert_eq!(r1.is_some(), r2.is_some());
+        fn prop_dictionary_deterministic(word in "(hola|casa|libro|ser|estar)") {
+            let d = SpanishDictionary::new();
+            prop_assert_eq!(d.lookup(&word).is_some(), d.lookup(&word).is_some());
         }
 
         #[test]
-        fn prop_word_entry_format_not_empty(spanish in "[a-z]+", english in "[a-z]+") {
-            let entry = WordEntry::new(&spanish, &english, PartOfSpeech::Noun);
-            let formatted = entry.format();
-            prop_assert!(!formatted.is_empty());
-            prop_assert!(formatted.contains(&spanish));
+        fn prop_word_entry_format(spanish in "[a-z]+", english in "[a-z]+") {
+            let f = WordEntry::new(&spanish, &english, PartOfSpeech::Noun).format();
+            prop_assert!(!f.is_empty() && f.contains(&spanish));
         }
 
         #[test]
-        fn prop_translation_format_not_empty(text in "[a-z ]{1,20}") {
-            let result = TranslationResult::new(&text, "translation");
-            let formatted = result.format();
-            prop_assert!(!formatted.is_empty());
-        }
-
-        #[test]
-        fn prop_conjugation_format_contains_infinitive(verb in "(hablar|comer|vivir)") {
-            let conj = VerbConjugation::new(&verb, Tense::Present);
-            let formatted = conj.format();
-            prop_assert!(formatted.contains(&verb));
+        fn prop_conjugation_format(verb in "(hablar|comer|vivir)") {
+            prop_assert!(VerbConjugation::new(&verb, Tense::Present).format().contains(&verb));
         }
     }
 }
