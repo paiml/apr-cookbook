@@ -13,7 +13,7 @@
 
 ![](.github/apr-cookbook-hero.svg)
 
-199 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
+202 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
 
 ## Installation
 
@@ -60,7 +60,7 @@ cargo run --example 2>&1 | head -50
 |----------|-------|------------|
 | [Creation](examples/creation/) | 6 | Linear regression, decision trees, clustering, neural networks |
 | [Bundling](examples/bundling/) | 7 | Static embedding, quantized, encrypted, signed, Lambda |
-| [Training](examples/training/) | 13 | Autograd, mixed-precision, few-shot, gradient accumulation, LR schedules |
+| [Training](examples/training/) | 16 | Autograd, custom ops, gradient clipping, backprop viz, mixed-precision |
 | [Conversion](examples/conversion/) | 5 | SafeTensors, GGUF, ONNX, Phi |
 | [Registry](examples/registry/) | 5 | Versioning, lineage, comparison, rollback |
 | [API](examples/api/) | 5 | REST inference, streaming, batch, auth middleware |

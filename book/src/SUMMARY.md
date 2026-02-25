@@ -58,6 +58,9 @@
 - [Gradient Accumulation](./recipes/c-training/gradient-accumulation.md)
 - [Learning Rate Schedules](./recipes/c-training/lr-schedule.md)
 - [Data Preprocessing](./recipes/c-training/data-preprocessing.md)
+- [Custom Autograd Ops](./recipes/c-training/autograd-custom-ops.md)
+- [Gradient Clipping](./recipes/c-training/autograd-gradient-clipping.md)
+- [Backprop Visualization](./recipes/c-training/autograd-backprop-viz.md)
 
 # Category D: Format Conversion
 
