@@ -256,6 +256,18 @@ path = "examples/training/learning_rate_schedule.rs"
 name = "gradient_accumulation"
 path = "examples/training/gradient_accumulation.rs"
 
+[[example]]
+name = "autograd_custom_ops"
+path = "examples/training/autograd_custom_ops.rs"
+
+[[example]]
+name = "autograd_backprop_viz"
+path = "examples/training/autograd_backprop_viz.rs"
+
+[[example]]
+name = "autograd_gradient_clipping"
+path = "examples/training/autograd_gradient_clipping.rs"
+
 # Category D: Format Conversion (additional)
 [[example]]
 name = "convert_phi_to_apr"
