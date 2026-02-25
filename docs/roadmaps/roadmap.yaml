@@ -176,11 +176,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Training integration with entrenar
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:14Z
   spec: null
   acceptance_criteria:
   - train_and_export example
@@ -218,11 +218,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: WASM compilation target
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:53Z
   spec: null
   acceptance_criteria:
   - cargo build --target wasm32-unknown-unknown
@@ -239,11 +239,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Browser inference example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:53Z
   spec: null
   acceptance_criteria:
   - wasm_inference example
@@ -283,11 +283,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Custom Model Architecture example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:59:06Z
   spec: null
   acceptance_criteria:
   - Custom struct implementation
@@ -304,11 +304,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: HTTP Inference Server example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:53Z
   spec: null
   acceptance_criteria:
   - Server setup with realizar
@@ -326,11 +326,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: RAG/Pipeline Workflow example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:53Z
   spec: null
   acceptance_criteria:
   - Embedding model usage
@@ -348,11 +348,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Knowledge Distillation example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:58:14Z
   spec: null
   acceptance_criteria:
   - Teacher model loading
@@ -371,11 +371,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Computer Vision example with presentar
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:59:06Z
   spec: null
   acceptance_criteria:
   - Image loading/preprocessing
@@ -393,11 +393,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Single-shot Defect Finder example
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 1970-01-01T00:00:00Z
-  updated: 1970-01-01T00:00:00Z
+  updated: 2026-02-25T11:59:06Z
   spec: null
   acceptance_criteria:
   - Codebase traversal/analysis
@@ -439,11 +439,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Zero quality-gate violations
-  status: inprogress
+  status: completed
   priority: critical
   assigned_to: null
   created: 2025-12-06T00:00:00Z
-  updated: 2025-12-06T17:25:00Z
+  updated: 2026-02-25T11:57:59Z
   spec: null
   acceptance_criteria:
   - '[DONE] Fix 2 complexity violations (bundle_apr_quantized_q4.rs, cli_apr_convert.rs)'
@@ -515,11 +515,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: GPU inference with realizar examples
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2025-01-04T00:00:00Z
-  updated: 2025-01-04T00:00:00Z
+  updated: 2026-02-25T11:58:42Z
   spec: docs/specifications/cookbook-spec.md
   acceptance_criteria:
   - examples/gpu/gpu_inference.rs with FlashAttention
@@ -538,11 +538,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Distributed computing with repartir examples
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2025-01-04T00:00:00Z
-  updated: 2025-01-04T00:00:00Z
+  updated: 2026-02-25T11:58:53Z
   spec: docs/specifications/cookbook-spec.md
   acceptance_criteria:
   - examples/distributed/distributed_inference.rs
