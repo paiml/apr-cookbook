@@ -378,6 +378,10 @@ path = "examples/gpu/gpu_memory_management.rs"
 name = "gpu_memory_pool"
 path = "examples/gpu/gpu_memory_pool.rs"
 
+[[example]]
+name = "gpu_ptx_analysis"
+path = "examples/gpu/gpu_ptx_analysis.rs"
+
 # Category J: SIMD Acceleration (additional)
 [[example]]
 name = "trueno_simd_ops"
@@ -440,6 +444,10 @@ path = "examples/cli/cli_apr_serve.rs"
 [[example]]
 name = "cli_apr_diff"
 path = "examples/cli/cli_apr_diff.rs"
+
+[[example]]
+name = "cli_apr_tui"
+path = "examples/cli/cli_apr_tui.rs"
 
 # --- Benchmarks ---
 
@@ -512,6 +520,10 @@ path = "examples/advanced/spanish_tutor.rs"
 name = "code_defect_oracle"
 path = "examples/advanced/code_defect_oracle.rs"
 
+[[example]]
+name = "model_showcase"
+path = "examples/advanced/model_showcase.rs"
+
 # --- Category M: Inference Monitoring ---
 
 [[example]]
@@ -533,6 +545,10 @@ path = "examples/monitoring/latency_histogram.rs"
 [[example]]
 name = "inference_cost_tracking"
 path = "examples/monitoring/inference_cost_tracking.rs"
+
+[[example]]
+name = "cbtop_headless"
+path = "examples/monitoring/cbtop_headless.rs"
 
 # --- Category N: Speech Recognition ---
 
@@ -589,6 +605,10 @@ path = "examples/inference/quantized_inference_comparison.rs"
 [[example]]
 name = "dynamic_batch_with_sla"
 path = "examples/inference/dynamic_batch_with_sla.rs"
+
+[[example]]
+name = "inference_apr_run"
+path = "examples/inference/inference_apr_run.rs"
 
 # --- Category Q: Model Serving ---
 
@@ -712,6 +732,10 @@ path = "examples/optimize/quantize_4bit.rs"
 name = "quantize_fake_qat"
 path = "examples/optimize/quantize_fake_qat.rs"
 
+[[example]]
+name = "optimize_tune"
+path = "examples/optimize/optimize_tune.rs"
+
 # --- Category: Chat Templates ---
 
 [[example]]
@@ -777,6 +801,58 @@ path = "examples/analysis/analysis_profile.rs"
 [[example]]
 name = "analysis_qa_gates"
 path = "examples/analysis/analysis_qa_gates.rs"
+
+[[example]]
+name = "analysis_check"
+path = "examples/analysis/analysis_check.rs"
+
+[[example]]
+name = "analysis_trace"
+path = "examples/analysis/analysis_trace.rs"
+
+[[example]]
+name = "analysis_eval"
+path = "examples/analysis/analysis_eval.rs"
+
+[[example]]
+name = "analysis_debug"
+path = "examples/analysis/analysis_debug.rs"
+
+[[example]]
+name = "analysis_lint"
+path = "examples/analysis/analysis_lint.rs"
+
+[[example]]
+name = "analysis_flow"
+path = "examples/analysis/analysis_flow.rs"
+
+[[example]]
+name = "analysis_qualify"
+path = "examples/analysis/analysis_qualify.rs"
+
+[[example]]
+name = "analysis_parity"
+path = "examples/analysis/analysis_parity.rs"
+
+[[example]]
+name = "analysis_compare_hf"
+path = "examples/analysis/analysis_compare_hf.rs"
+
+[[example]]
+name = "analysis_probar"
+path = "examples/analysis/analysis_probar.rs"
+
+[[example]]
+name = "analysis_slice"
+path = "examples/analysis/analysis_slice.rs"
+
+[[example]]
+name = "analysis_tensors"
+path = "examples/analysis/analysis_tensors.rs"
+
+[[example]]
+name = "analysis_qa_capability"
+path = "examples/analysis/analysis_qa_capability.rs"
 
 [[example]]
 name = "format_import_hf"
