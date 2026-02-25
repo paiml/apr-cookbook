@@ -1,25 +1,10 @@
 //! # Recipe: Adapter Merge and Unmerge Lifecycle
 //!
-//! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune --merge --adapter`
 //!
-//! Demonstrates the complete LoRA adapter lifecycle: creation, training,
-//! merge for inference deployment, unmerge for continued training, and
-//! saving both adapter-only and fully-merged models to APR v2.
+//! LoRA adapter lifecycle: create, train, merge for inference, unmerge for
+//! continued training, save adapter-only and merged models to APR v2.
 //!
-//! ## QA Checklist
-//! 1. [x] `cargo run` succeeds (Exit Code 0)
-//! 2. [x] `cargo test` passes
-//! 3. [x] Deterministic output (Verified)
-//! 4. [x] No temp files leaked
-//! 5. [x] Clippy clean
-//! 6. [x] No `unwrap()` in logic
-//!
-//! ## Learning Objective
-//! Understand the merge/unmerge lifecycle: merge adapters into base weights
-//! for zero-overhead inference, then unmerge to continue LoRA training.
-//!
-//! ## Run Command
 //! ```bash
 //! cargo run --example finetune_merge_adapter
 //! ```
@@ -181,7 +166,7 @@ fn main() -> Result<()> {
             let loss = mse_loss(&pred, t);
             epoch_loss += loss;
 
-            let grad_scale = loss * 0.01;
+            let grad_scale = (loss * 0.01).min(0.1);
             for param in lora_layer.trainable_params() {
                 let grad = Array1::from_elem(param.len(), grad_scale);
                 param.set_grad(grad);
@@ -358,13 +343,10 @@ mod tests {
         let base_data = det_weights(D_OUT * D_IN, 42);
         let base = Tensor::from_vec(base_data.clone(), false);
         let mut layer = LoRALayer::new(base, D_OUT, D_IN, RANK, ALPHA);
-
         let before = layer.base_weight().data().to_vec();
         assert_eq!(before, base_data);
-
         layer.merge();
         let after = layer.base_weight().data().to_vec();
-
         // After merge, base should have the same length
         assert_eq!(after.len(), before.len());
         assert!(after.iter().all(|w| w.is_finite()));
@@ -425,38 +407,31 @@ mod tests {
     }
 
     #[test]
-    fn test_adapter_save_to_apr() {
+    fn test_adapter_and_merged_save_to_apr() {
         let base = Tensor::from_vec(det_weights(D_OUT * D_IN, 42), false);
-        let layer = LoRALayer::new(base, D_OUT, D_IN, RANK, ALPHA);
-
+        let mut layer = LoRALayer::new(base, D_OUT, D_IN, RANK, ALPHA);
+        // Adapter-only bundle
         let a_bytes = tensor_to_bytes(layer.lora_a());
         let b_bytes = tensor_to_bytes(layer.lora_b());
-
-        let bundle = ModelBundleV2::new()
+        let adapter_bundle = ModelBundleV2::new()
             .with_name("test-adapter")
             .with_compression(Compression::Lz4)
             .add_tensor("lora_a", vec![RANK, D_IN], a_bytes)
             .add_tensor("lora_b", vec![D_OUT, RANK], b_bytes)
             .build();
-
-        assert_eq!(&bundle[0..4], b"APR2");
-    }
-
-    #[test]
-    fn test_merged_save_to_apr() {
-        let base = Tensor::from_vec(det_weights(D_OUT * D_IN, 42), false);
-        let mut layer = LoRALayer::new(base, D_OUT, D_IN, RANK, ALPHA);
+        assert_eq!(&adapter_bundle[0..4], b"APR2");
+        // Merged bundle
         layer.merge();
-
-        let bytes = tensor_to_bytes(layer.base_weight());
-
-        let bundle = ModelBundleV2::new()
+        let merged_bundle = ModelBundleV2::new()
             .with_name("test-merged")
             .with_compression(Compression::Lz4)
-            .add_tensor("weight", vec![D_OUT, D_IN], bytes)
+            .add_tensor(
+                "weight",
+                vec![D_OUT, D_IN],
+                tensor_to_bytes(layer.base_weight()),
+            )
             .build();
-
-        assert_eq!(&bundle[0..4], b"APR2");
+        assert_eq!(&merged_bundle[0..4], b"APR2");
     }
 
     #[test]
@@ -483,7 +458,7 @@ mod tests {
             optimizer.zero_grad_refs(&mut layer.trainable_params());
             let pred = lora_forward(&layer, x, D_OUT, D_IN);
             let loss = mse_loss(&pred, t);
-            let grad_scale = loss * 0.01;
+            let grad_scale = (loss * 0.01).min(0.1);
             for param in layer.trainable_params() {
                 let grad = Array1::from_elem(param.len(), grad_scale);
                 param.set_grad(grad);

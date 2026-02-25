@@ -386,12 +386,8 @@ mod tests {
     }
 
     #[test]
-    fn test_detect_alpaca() {
+    fn test_detect_alpaca_and_chatml_default() {
         assert_eq!(detect_format("alpaca-7b"), TemplateFormat::Alpaca);
-    }
-
-    #[test]
-    fn test_detect_chatml_default() {
         assert_eq!(detect_format("qwen2-7b"), TemplateFormat::ChatML);
         assert_eq!(detect_format("yi-34b-chat"), TemplateFormat::ChatML);
         assert_eq!(detect_format("unknown-model"), TemplateFormat::ChatML);

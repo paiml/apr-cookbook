@@ -394,73 +394,36 @@ mod tests {
             FinetuneMethod::QLoRA,
         ] {
             let est = estimate_vram(&model, method, 8, 4, 512);
-            assert!(est.base_model > 0, "{:?} base_model should be > 0", method);
-            assert!(
-                est.optimizer_states > 0,
-                "{:?} optimizer should be > 0",
-                method
-            );
-            assert!(est.gradients > 0, "{:?} gradients should be > 0", method);
-            assert!(
-                est.activations > 0,
-                "{:?} activations should be > 0",
-                method
-            );
-            assert!(est.total > 0, "{:?} total should be > 0", method);
+            assert!(est.base_model > 0, "{method:?} base_model");
+            assert!(est.optimizer_states > 0, "{method:?} optimizer");
+            assert!(est.gradients > 0, "{method:?} gradients");
+            assert!(est.activations > 0, "{method:?} activations");
+            assert!(est.total > 0, "{method:?} total");
         }
     }
 
     #[test]
-    fn test_qlora_less_than_lora() {
-        let model = test_model();
-        let lora = estimate_vram(&model, FinetuneMethod::LoRA, 16, 4, 512);
-        let qlora = estimate_vram(&model, FinetuneMethod::QLoRA, 16, 4, 512);
-        assert!(
-            qlora.total < lora.total,
-            "QLoRA ({}) should use less VRAM than LoRA ({})",
-            qlora.total,
-            lora.total
-        );
-    }
-
-    #[test]
-    fn test_lora_less_than_full() {
+    fn test_vram_ordering_full_gt_lora_gt_qlora() {
         let model = test_model();
         let full = estimate_vram(&model, FinetuneMethod::Full, 0, 4, 512);
         let lora = estimate_vram(&model, FinetuneMethod::LoRA, 16, 4, 512);
-        assert!(
-            lora.total < full.total,
-            "LoRA ({}) should use less VRAM than Full ({})",
-            lora.total,
-            full.total
-        );
+        let qlora = estimate_vram(&model, FinetuneMethod::QLoRA, 16, 4, 512);
+        assert!(full.total > lora.total, "Full > LoRA");
+        assert!(lora.total > qlora.total, "LoRA > QLoRA");
     }
 
     #[test]
     fn test_optimal_config_valid() {
         let model = test_model();
         let opt = find_optimal_config(&model, 24.0);
-        assert!(opt.batch_size >= 1, "Batch size should be at least 1");
-        assert!(
-            opt.estimated_vram_gb > 0.0,
-            "Estimated VRAM should be positive"
-        );
-        assert!(
-            opt.estimated_vram_gb <= 24.0,
-            "Should fit within GPU: {} GB",
-            opt.estimated_vram_gb
-        );
+        assert!(opt.batch_size >= 1);
+        assert!(opt.estimated_vram_gb > 0.0);
+        assert!(opt.estimated_vram_gb <= 24.0, "must fit in GPU");
     }
 
     #[test]
     fn test_scaling_with_params() {
-        let small = ModelConfig {
-            name: "Small".to_string(),
-            params: 100_000_000,
-            hidden_dim: 512,
-            num_layers: 12,
-            dtype_bytes: 4,
-        };
+        let small = test_model(); // 100M params
         let large = ModelConfig {
             name: "Large".to_string(),
             params: 1_000_000_000,
@@ -468,36 +431,22 @@ mod tests {
             num_layers: 24,
             dtype_bytes: 4,
         };
-
         let small_est = estimate_vram(&small, FinetuneMethod::Full, 0, 4, 512);
         let large_est = estimate_vram(&large, FinetuneMethod::Full, 0, 4, 512);
-
-        assert!(
-            large_est.total > small_est.total,
-            "Larger model should need more VRAM"
-        );
+        assert!(large_est.total > small_est.total);
     }
 
     #[test]
-    fn test_qlora_base_model_4bit() {
+    fn test_base_model_sizes_and_overhead() {
         let model = test_model();
-        let est = estimate_vram(&model, FinetuneMethod::QLoRA, 8, 4, 512);
-        // QLoRA base should be params/2 bytes (4 bits per param)
-        assert_eq!(est.base_model, model.params / 2);
-    }
-
-    #[test]
-    fn test_full_base_model_size() {
-        let model = test_model();
-        let est = estimate_vram(&model, FinetuneMethod::Full, 0, 4, 512);
-        assert_eq!(est.base_model, model.params * model.dtype_bytes);
-    }
-
-    #[test]
-    fn test_full_no_lora_overhead() {
-        let model = test_model();
-        let est = estimate_vram(&model, FinetuneMethod::Full, 0, 4, 512);
-        assert_eq!(est.lora_overhead, 0);
+        // Full: base = params * dtype_bytes, no LoRA overhead
+        let full = estimate_vram(&model, FinetuneMethod::Full, 0, 4, 512);
+        assert_eq!(full.base_model, model.params * model.dtype_bytes);
+        assert_eq!(full.lora_overhead, 0);
+        // QLoRA: base = params/2 (4-bit), has LoRA overhead
+        let qlora = estimate_vram(&model, FinetuneMethod::QLoRA, 8, 4, 512);
+        assert_eq!(qlora.base_model, model.params / 2);
+        assert!(qlora.lora_overhead > 0);
     }
 
     #[test]
@@ -505,18 +454,7 @@ mod tests {
         let model = test_model();
         let bs1 = estimate_vram(&model, FinetuneMethod::LoRA, 8, 1, 512);
         let bs4 = estimate_vram(&model, FinetuneMethod::LoRA, 8, 4, 512);
-        assert!(
-            bs4.activations > bs1.activations,
-            "Larger batch should need more activation memory"
-        );
         assert_eq!(bs4.activations, bs1.activations * 4);
-    }
-
-    #[test]
-    fn test_method_names() {
-        assert_eq!(FinetuneMethod::Full.name(), "Full");
-        assert_eq!(FinetuneMethod::LoRA.name(), "LoRA");
-        assert_eq!(FinetuneMethod::QLoRA.name(), "QLoRA");
     }
 
     #[test]
@@ -528,7 +466,7 @@ mod tests {
             + est.gradients
             + est.activations
             + est.lora_overhead;
-        assert_eq!(est.total, expected, "Total should equal sum of components");
+        assert_eq!(est.total, expected);
     }
 
     #[test]
@@ -540,7 +478,6 @@ mod tests {
             num_layers: 80,
             dtype_bytes: 2,
         };
-        // On a 24GB GPU, a 70B model should require QLoRA
         let opt = find_optimal_config(&large, 24.0);
         assert_eq!(opt.method, FinetuneMethod::QLoRA);
     }

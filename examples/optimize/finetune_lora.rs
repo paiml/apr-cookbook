@@ -51,7 +51,7 @@ impl Default for FinetuneConfig {
             d_in: 64,
             d_out: 32,
             epochs: 30,
-            lr: 0.001,
+            lr: 0.0001,
             n_samples: 100,
         }
     }
@@ -212,7 +212,8 @@ fn main() -> Result<()> {
             let loss = mse_loss(&pred, t);
             epoch_loss += loss;
 
-            let grad_scale = loss * 0.01;
+            // Gradient clipping prevents positive-feedback divergence
+            let grad_scale = (loss * 0.01).min(0.1);
             for param in lora_layer.trainable_params() {
                 let grad = Array1::from_elem(param.len(), grad_scale);
                 param.set_grad(grad);
@@ -429,7 +430,7 @@ mod tests {
                 let loss = mse_loss(&pred, t);
                 epoch_loss += loss;
 
-                let grad_scale = loss * 0.01;
+                let grad_scale = (loss * 0.01).min(0.1);
                 for param in lora_layer.trainable_params() {
                     let grad = Array1::from_elem(param.len(), grad_scale);
                     param.set_grad(grad);
