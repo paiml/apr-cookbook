@@ -1,3 +1,7 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/merge_*.rs`
+//! (merge_average, merge_weighted, merge_slerp, merge_ties, merge_dare, merge_hierarchical)
+//! which mirror the `apr merge --strategy <method>` CLI workflows.
+//!
 //! Entrenar Model Merging Example
 //!
 //! Demonstrates TIES, DARE, and SLERP model merging methods for combining

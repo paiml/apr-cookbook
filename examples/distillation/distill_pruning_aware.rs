@@ -1,3 +1,7 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/prune_*.rs`
+//! (prune_magnitude, prune_structured, prune_depth, prune_wanda, prune_gradual_schedule)
+//! which mirror the `apr prune --method <method>` CLI workflows.
+//!
 //! # Recipe: Pruning-Aware Distillation
 //!
 //! **Category**: Model Distillation

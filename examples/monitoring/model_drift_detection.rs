@@ -491,6 +491,11 @@ fn drifted_distribution() -> FeatureDistribution {
 }
 
 /// Sample `n` observations from a `FeatureDistribution`.
+/// Extract a single feature column from sample rows
+fn extract_feature(samples: &[[f64; NUM_FEATURES]], feature_idx: usize) -> Vec<f64> {
+    samples.iter().map(|s| s[feature_idx]).collect()
+}
+
 fn sample_features(
     dist: &FeatureDistribution,
     n: usize,
@@ -593,7 +598,7 @@ fn main() {
 
     println!("   Samples:  {}", baseline_samples.len());
     for (i, name) in FEATURE_NAMES.iter().enumerate() {
-        let values: Vec<f64> = baseline_samples.iter().map(|s| s[i]).collect();
+        let values = extract_feature(&baseline_samples, i);
         let mean = values.iter().sum::<f64>() / values.len() as f64;
         let variance = values.iter().map(|v| (v - mean).powi(2)).sum::<f64>() / values.len() as f64;
         println!(
@@ -620,8 +625,8 @@ fn main() {
 
     let mut psi_alerts: Vec<DriftAlert> = Vec::new();
     for (i, name) in FEATURE_NAMES.iter().enumerate() {
-        let baseline_feat: Vec<f64> = baseline_samples.iter().map(|s| s[i]).collect();
-        let production_feat: Vec<f64> = production_samples.iter().map(|s| s[i]).collect();
+        let baseline_feat = extract_feature(&baseline_samples, i);
+        let production_feat = extract_feature(&production_samples, i);
 
         let psi = compute_psi(&baseline_feat, &production_feat, PSI_NUM_BINS);
         let severity = psi_severity(psi);
@@ -648,8 +653,8 @@ fn main() {
 
     let mut ks_alerts: Vec<DriftAlert> = Vec::new();
     for (i, name) in FEATURE_NAMES.iter().enumerate() {
-        let baseline_feat: Vec<f64> = baseline_samples.iter().map(|s| s[i]).collect();
-        let production_feat: Vec<f64> = production_samples.iter().map(|s| s[i]).collect();
+        let baseline_feat = extract_feature(&baseline_samples, i);
+        let production_feat = extract_feature(&production_samples, i);
 
         let ks = compute_ks_statistic(&baseline_feat, &production_feat);
         let severity = ks_severity(ks);
@@ -744,8 +749,8 @@ fn main() {
         let mut psi_values = [0.0; NUM_FEATURES];
         let mut ks_values = [0.0; NUM_FEATURES];
         for i in 0..NUM_FEATURES {
-            let base_feat: Vec<f64> = baseline_samples.iter().map(|s| s[i]).collect();
-            let win_feat: Vec<f64> = window_samples.iter().map(|s| s[i]).collect();
+            let base_feat = extract_feature(&baseline_samples, i);
+            let win_feat = extract_feature(&window_samples, i);
             psi_values[i] = compute_psi(&base_feat, &win_feat, PSI_NUM_BINS);
             ks_values[i] = compute_ks_statistic(&base_feat, &win_feat);
         }

@@ -105,6 +105,11 @@ impl TensorStatus {
     }
 }
 
+/// Count tensor diffs matching a given status
+fn count_by_status(diffs: &[TensorDiff], status: &TensorStatus) -> usize {
+    diffs.iter().filter(|d| d.status == *status).count()
+}
+
 /// Diff result for a single tensor.
 #[derive(Debug, Clone)]
 #[allow(dead_code)]
@@ -275,14 +280,8 @@ fn run_diff(config: &DiffConfig) -> Result<()> {
     println!("Weight Drift Analysis");
     println!("---------------------");
 
-    let modified_count = tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Modified)
-        .count();
-    let unchanged_count = tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Unchanged)
-        .count();
+    let modified_count = count_by_status(&tensor_diffs, &TensorStatus::Modified);
+    let unchanged_count = count_by_status(&tensor_diffs, &TensorStatus::Unchanged);
 
     println!(
         "  Modified: {}  Unchanged: {}  (threshold: {:.4})",
@@ -639,26 +638,10 @@ fn print_summary(report: &DiffReport, snapshot_a: &ModelSnapshot, snapshot_b: &M
     println!("Diff Summary");
     println!("------------");
 
-    let added_count = report
-        .tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Added)
-        .count();
-    let removed_count = report
-        .tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Removed)
-        .count();
-    let modified_count = report
-        .tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Modified)
-        .count();
-    let unchanged_count = report
-        .tensor_diffs
-        .iter()
-        .filter(|d| d.status == TensorStatus::Unchanged)
-        .count();
+    let added_count = count_by_status(&report.tensor_diffs, &TensorStatus::Added);
+    let removed_count = count_by_status(&report.tensor_diffs, &TensorStatus::Removed);
+    let modified_count = count_by_status(&report.tensor_diffs, &TensorStatus::Modified);
+    let unchanged_count = count_by_status(&report.tensor_diffs, &TensorStatus::Unchanged);
 
     println!("  Metadata changes: {}", report.metadata_changes.len());
     println!(

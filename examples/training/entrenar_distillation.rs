@@ -1,3 +1,7 @@
+//! **DEPRECATED**: This example is superseded by `examples/optimize/distill_*.rs`
+//! (distill_standard_kl, distill_progressive, distill_ensemble, distill_checkpoint)
+//! which mirror the `apr distill --strategy <method>` CLI workflows.
+//!
 //! Entrenar Knowledge Distillation Example
 //!
 //! Demonstrates knowledge distillation using entrenar's distill module:
