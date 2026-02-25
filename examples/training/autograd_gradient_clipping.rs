@@ -383,19 +383,8 @@ fn train_with_clipping(
     }
 }
 
-fn main() -> Result<()> {
-    let mut ctx = RecipeContext::new("autograd_gradient_clipping")?;
-
-    println!("=== Autograd Gradient Clipping Example ===\n");
-
-    let seed = hash_name_to_seed("autograd_gradient_clipping");
-    let data = generate_data(48, seed);
-    let epochs = 15;
-    let lr = 0.001;
-
-    // =========================================================================
-    // Section 1: Clipping Strategies Overview
-    // =========================================================================
+/// Print the overview of clipping strategies and model configuration.
+fn print_strategies_overview(seed: u64, data_len: usize, epochs: usize, lr: f32) {
     println!("1. Gradient Clipping Strategies");
     println!("   ─────────────────────────────────────────");
     println!("   GlobalNorm: Scale all grads if total L2 norm > threshold");
@@ -410,15 +399,13 @@ fn main() -> Result<()> {
     );
     println!(
         "   Samples:    {}, Epochs: {}, LR: {}",
-        data.len(),
-        epochs,
-        lr
+        data_len, epochs, lr
     );
     println!();
+}
 
-    // =========================================================================
-    // Section 2: Exploding Gradient Demonstration
-    // =========================================================================
+/// Demonstrate how each clipping strategy bounds exploding gradients.
+fn print_exploding_gradient_demo(seed: u64) {
     println!("2. Exploding Gradient Demonstration");
     println!("   ─────────────────────────────────────────");
 
@@ -432,21 +419,17 @@ fn main() -> Result<()> {
     println!("   {}", "-".repeat(70));
 
     for &scale in &explode_scales {
-        // Unclipped norm
         set_exploding_grads(&demo_model.params, scale, seed);
         let pre_norm = global_gradient_norm(&demo_model.params);
 
-        // Global norm clip
         set_exploding_grads(&demo_model.params, scale, seed);
         clip_gradients(&demo_model.params, ClipStrategy::GlobalNorm(1.0));
         let gn_norm = global_gradient_norm(&demo_model.params);
 
-        // Per-param clip
         set_exploding_grads(&demo_model.params, scale, seed);
         clip_gradients(&demo_model.params, ClipStrategy::PerParam(1.0));
         let pp_norm = global_gradient_norm(&demo_model.params);
 
-        // Value clip
         set_exploding_grads(&demo_model.params, scale, seed);
         clip_gradients(&demo_model.params, ClipStrategy::Value(0.5));
         let vc_norm = global_gradient_norm(&demo_model.params);
@@ -457,24 +440,12 @@ fn main() -> Result<()> {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 3: Training Comparison
-    // =========================================================================
+/// Print the training comparison summary table.
+fn print_training_comparison(results: &[TrainResult]) {
     println!("3. Training with Different Clipping Strategies");
     println!("   ─────────────────────────────────────────");
-
-    let strategies = [
-        ClipStrategy::None,
-        ClipStrategy::GlobalNorm(1.0),
-        ClipStrategy::PerParam(0.5),
-        ClipStrategy::Value(0.1),
-    ];
-
-    let results: Vec<TrainResult> = strategies
-        .iter()
-        .map(|&s| train_with_clipping(seed, &data, s, lr, epochs))
-        .collect();
 
     println!(
         "   {:>16} {:>10} {:>10} {:>12} {:>12}",
@@ -482,7 +453,7 @@ fn main() -> Result<()> {
     );
     println!("   {}", "-".repeat(64));
 
-    for r in &results {
+    for r in results {
         let avg_gn = r.grad_norms.iter().sum::<f32>() / r.grad_norms.len().max(1) as f32;
         let avg_cn = r.clipped_norms.iter().sum::<f32>() / r.clipped_norms.len().max(1) as f32;
         println!(
@@ -495,15 +466,20 @@ fn main() -> Result<()> {
         );
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 4: Gradient Norm Trajectories
-    // =========================================================================
-    println!("4. Gradient Norm Trajectories (per epoch)");
+/// Print an epoch-sampled trajectory table for a given metric extractor.
+fn print_epoch_table(
+    title: &str,
+    results: &[TrainResult],
+    epochs: usize,
+    extract: fn(&TrainResult) -> &[f32],
+) {
+    println!("{title}");
     println!("   ─────────────────────────────────────────");
 
     print!("   {:>6}", "Epoch");
-    for r in &results {
+    for r in results {
         print!(" {:>14}", r.strategy);
     }
     println!();
@@ -516,52 +492,26 @@ fn main() -> Result<()> {
     for &e in &sample_epochs {
         if e < epochs {
             print!("   {:>6}", e);
-            for r in &results {
-                if e < r.grad_norms.len() {
-                    print!(" {:>14.4}", r.grad_norms[e]);
+            for r in results {
+                let data = extract(r);
+                if e < data.len() {
+                    print!(" {:>14.4}", data[e]);
                 }
             }
             println!();
         }
     }
     println!();
+}
 
-    // =========================================================================
-    // Section 5: Loss Convergence Comparison
-    // =========================================================================
-    println!("5. Loss Convergence Comparison");
-    println!("   ─────────────────────────────────────────");
-
-    print!("   {:>6}", "Epoch");
-    for r in &results {
-        print!(" {:>14}", r.strategy);
-    }
-    println!();
-    println!("   {}", "-".repeat(6 + results.len() * 15));
-
-    for &e in &sample_epochs {
-        if e < epochs {
-            print!("   {:>6}", e);
-            for r in &results {
-                if e < r.losses.len() {
-                    print!(" {:>14.4}", r.losses[e]);
-                }
-            }
-            println!();
-        }
-    }
-    println!();
-
-    // =========================================================================
-    // Section 6: Convergence Improvement Analysis
-    // =========================================================================
+/// Print convergence improvement analysis for each strategy vs the baseline.
+fn print_convergence_analysis(results: &[TrainResult]) {
     println!("6. Convergence Improvement Analysis");
     println!("   ─────────────────────────────────────────");
 
-    let baseline = &results[0]; // No clipping
-    let baseline_last = baseline.final_loss;
+    let baseline_last = results[0].final_loss;
 
-    for r in &results {
+    for r in results {
         let first = r.losses.first().copied().unwrap_or(1.0);
         let loss_reduction = ((first - r.final_loss) / first) * 100.0;
         let vs_baseline = if baseline_last > 0.0 {
@@ -594,8 +544,16 @@ fn main() -> Result<()> {
         println!("     Final accuracy:    {:.1}%", r.accuracy * 100.0);
         println!();
     }
+}
 
-    // ── Record metrics ──
+/// Record all metrics into the recipe context.
+fn record_metrics(
+    ctx: &mut RecipeContext,
+    results: &[TrainResult],
+    seed: u64,
+    epochs: usize,
+    data_len: usize,
+) {
     ctx.record_float_metric("no_clip_loss", f64::from(results[0].final_loss));
     ctx.record_float_metric("global_norm_loss", f64::from(results[1].final_loss));
     ctx.record_float_metric("per_param_loss", f64::from(results[2].final_loss));
@@ -604,8 +562,47 @@ fn main() -> Result<()> {
     ctx.record_float_metric("global_norm_accuracy", f64::from(results[1].accuracy));
     ctx.record_metric("total_params", ClipModel::new(seed).param_count() as i64);
     ctx.record_metric("epochs", epochs as i64);
-    ctx.record_metric("samples", data.len() as i64);
+    ctx.record_metric("samples", data_len as i64);
+}
 
+fn main() -> Result<()> {
+    let mut ctx = RecipeContext::new("autograd_gradient_clipping")?;
+
+    println!("=== Autograd Gradient Clipping Example ===\n");
+
+    let seed = hash_name_to_seed("autograd_gradient_clipping");
+    let data = generate_data(48, seed);
+    let epochs = 15;
+    let lr = 0.001;
+
+    print_strategies_overview(seed, data.len(), epochs, lr);
+    print_exploding_gradient_demo(seed);
+
+    let strategies = [
+        ClipStrategy::None,
+        ClipStrategy::GlobalNorm(1.0),
+        ClipStrategy::PerParam(0.5),
+        ClipStrategy::Value(0.1),
+    ];
+
+    let results: Vec<TrainResult> = strategies
+        .iter()
+        .map(|&s| train_with_clipping(seed, &data, s, lr, epochs))
+        .collect();
+
+    print_training_comparison(&results);
+    print_epoch_table(
+        "4. Gradient Norm Trajectories (per epoch)",
+        &results,
+        epochs,
+        |r| &r.grad_norms,
+    );
+    print_epoch_table("5. Loss Convergence Comparison", &results, epochs, |r| {
+        &r.losses
+    });
+    print_convergence_analysis(&results);
+
+    record_metrics(&mut ctx, &results, seed, epochs, data.len());
     ctx.report()?;
     println!("\n=== Example Complete ===");
 

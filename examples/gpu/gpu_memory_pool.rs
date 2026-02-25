@@ -381,11 +381,8 @@ fn bench_strategy(
     );
 }
 
-fn main() {
-    println!("=== Recipe: GPU Memory Pool Allocation ===\n");
-    let (pool_size, slab_size, seed) = (1024 * 1024, 4096, 42u64);
-
-    // Section 1: Create pool
+/// Print pool creation info.
+fn print_pool_creation(pool_size: usize, slab_size: usize) {
     println!("--- 1. Pool Creation ---");
     let pool = MemoryPool::with_slab_size(pool_size, AllocationStrategy::Slab, slab_size);
     println!(
@@ -395,8 +392,10 @@ fn main() {
         pool.slab_size,
         pool.free_bytes()
     );
+}
 
-    // Section 2: Strategy comparison
+/// Run strategy comparison benchmarks.
+fn run_strategy_comparison(pool_size: usize, slab_size: usize, seed: u64) {
     println!("--- 2. Strategy Comparison ---");
     let mut slab_pool = MemoryPool::with_slab_size(pool_size, AllocationStrategy::Slab, slab_size);
     bench_strategy(&format!("Slab({slab_size})"), &mut slab_pool, 100, seed, 1);
@@ -405,8 +404,10 @@ fn main() {
     let mut ff_pool = MemoryPool::new(pool_size, AllocationStrategy::FirstFit);
     bench_strategy("FirstFit(64)", &mut ff_pool, 100, seed, 64);
     println!();
+}
 
-    // Section 3: Fragmentation
+/// Run fragmentation analysis with allocate/free/defragment cycle.
+fn run_fragmentation_analysis() {
     println!("--- 3. Fragmentation Analysis ---");
     let mut frag_pool = MemoryPool::new(64 * 1024, AllocationStrategy::FirstFit);
     let mut offsets = Vec::new();
@@ -429,8 +430,10 @@ fn main() {
         "  After defrag ({moved} moved): {}\n",
         frag_pool.fragmentation_stats()
     );
+}
 
-    // Section 4: Multi-tenant budgets
+/// Run multi-tenant budget enforcement demo.
+fn run_multi_tenant_demo() {
     println!("--- 4. Multi-Tenant Budgets ---");
     let mut mt_pool = MemoryPool::new(256 * 1024, AllocationStrategy::BestFit);
     mt_pool.register_tenant("alpha", 128 * 1024);
@@ -461,8 +464,10 @@ fn main() {
         Err(e) => println!("  Budget enforced: {e}"),
     }
     println!();
+}
 
-    // Section 5: Watermark tracking
+/// Run watermark tracking demo with allocation waves.
+fn run_watermark_tracking(seed: u64) {
     println!("--- 5. Watermark Tracking ---");
     let mut wm_pool = MemoryPool::new(128 * 1024, AllocationStrategy::FirstFit);
     let mut wm_offsets = Vec::new();
@@ -488,8 +493,10 @@ fn main() {
         wm_pool.watermarks,
         wm_pool.used_bytes() as f64 / wm_pool.total_bytes as f64 * 100.0
     );
+}
 
-    // Section 6: Summary table
+/// Print final strategy summary table with benchmarks.
+fn print_strategy_summary(seed: u64) {
     println!("--- 6. Strategy Summary ---");
     let bench_pool_size: usize = 512 * 1024;
     println!(
@@ -538,6 +545,18 @@ fn main() {
             bp.watermarks.peak_bytes
         );
     }
+}
+
+fn main() {
+    println!("=== Recipe: GPU Memory Pool Allocation ===\n");
+    let (pool_size, slab_size, seed) = (1024 * 1024, 4096, 42u64);
+
+    print_pool_creation(pool_size, slab_size);
+    run_strategy_comparison(pool_size, slab_size, seed);
+    run_fragmentation_analysis();
+    run_multi_tenant_demo();
+    run_watermark_tracking(seed);
+    print_strategy_summary(seed);
     println!("\n=== GPU Memory Pool Recipe Complete ===");
 }
 
