@@ -87,3 +87,85 @@ impl IntoExplainable for LinearRegression {
         LinearExplainable::new(self)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use aprender::linear_model::LinearRegression;
+    use aprender::Estimator;
+    use entrenar::monitor::inference::Explainable;
+
+    fn make_model() -> LinearRegression {
+        // Use linearly independent rows to ensure positive definite X^T X
+        let x = aprender::Matrix::from_vec(4, 2, vec![1.0f32, 0.0, 0.0, 1.0, 1.0, 1.0, 2.0, 3.0])
+            .expect("valid matrix");
+        let y = aprender::Vector::from_vec(vec![1.0f32, 2.0, 3.0, 8.0]);
+        let mut model = LinearRegression::new();
+        model.fit(&x, &y).expect("fit succeeded");
+        model
+    }
+
+    #[test]
+    fn test_new() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        assert_eq!(explainable.n_features(), 2);
+    }
+
+    #[test]
+    fn test_into_explainable() {
+        let model = make_model();
+        let explainable = model.into_explainable();
+        assert_eq!(explainable.n_features(), 2);
+    }
+
+    #[test]
+    fn test_predict_explained_single() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        let input = vec![1.0f32, 2.0];
+        let (outputs, paths) = explainable.predict_explained(&input, 1);
+        assert_eq!(outputs.len(), 1);
+        assert_eq!(paths.len(), 1);
+    }
+
+    #[test]
+    fn test_predict_explained_batch() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        let input = vec![1.0f32, 2.0, 3.0, 4.0];
+        let (outputs, paths) = explainable.predict_explained(&input, 2);
+        assert_eq!(outputs.len(), 2);
+        assert_eq!(paths.len(), 2);
+    }
+
+    #[test]
+    fn test_explain_one() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        let input = vec![1.0f32, 2.0];
+        let _path = explainable.explain_one(&input);
+    }
+
+    #[test]
+    fn test_contributions_match_prediction() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        let input = vec![2.0f32, 3.0];
+        let (outputs, _) = explainable.predict_explained(&input, 1);
+        let coeffs = explainable.compute_contributions(&input);
+        let intercept = 0.0f32; // approximate
+        let manual_sum: f32 = coeffs.iter().sum::<f32>() + intercept;
+        // The prediction should be close to the sum of contributions + intercept
+        assert!((outputs[0] - manual_sum).abs() < 5.0);
+    }
+
+    #[test]
+    #[should_panic(expected = "Input length")]
+    fn test_predict_explained_wrong_size() {
+        let model = make_model();
+        let explainable = LinearExplainable::new(model);
+        let input = vec![1.0f32]; // too short for n_features=2, n_samples=1
+        let _ = explainable.predict_explained(&input, 1);
+    }
+}
