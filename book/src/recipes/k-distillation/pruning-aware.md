@@ -5,11 +5,11 @@
 ## Run Command
 
 ```bash
-cargo run --example distill_pruning_aware
+cargo run --example prune_magnitude
 ```
 
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/distillation/distill_pruning_aware.rs}}
+{{#include ../../../../examples/optimize/prune_magnitude.rs}}
 ```
