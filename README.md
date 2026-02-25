@@ -13,7 +13,7 @@
 
 ![](.github/apr-cookbook-hero.svg)
 
-169 executable examples across 24 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
+199 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
 
 ## Installation
 
@@ -60,26 +60,27 @@ cargo run --example 2>&1 | head -50
 |----------|-------|------------|
 | [Creation](examples/creation/) | 6 | Linear regression, decision trees, clustering, neural networks |
 | [Bundling](examples/bundling/) | 7 | Static embedding, quantized, encrypted, signed, Lambda |
-| [Training](examples/training/) | 17 | Autograd, LoRA, QLoRA, mixed-precision, few-shot, gradient accumulation |
+| [Training](examples/training/) | 13 | Autograd, mixed-precision, few-shot, gradient accumulation, LR schedules |
 | [Conversion](examples/conversion/) | 5 | SafeTensors, GGUF, ONNX, Phi |
 | [Registry](examples/registry/) | 5 | Versioning, lineage, comparison, rollback |
 | [API](examples/api/) | 5 | REST inference, streaming, batch, auth middleware |
 | [Serverless](examples/serverless/) | 5 | Lambda, cold start, edge, containers, warmup |
 | [WASM](examples/wasm/) | 6 | Browser inference, Web Workers, WebGPU, progressive loading |
-| [GPU](examples/gpu/) | 6 | FlashAttention, CUDA, tensor cores, multi-GPU, memory pool |
+| [GPU](examples/gpu/) | 7 | FlashAttention, CUDA, tensor cores, multi-GPU, memory pool, PTX |
 | [SIMD](examples/simd/) | 5 | trueno ops, matrix operations, vectorized inference |
-| [Distillation](examples/distillation/) | 5 | Knowledge transfer, pruning, quantization-aware |
-| [CLI](examples/cli/) | 7 | apr-info, apr-bench, apr-convert, apr-serve, apr-diff |
-| [Monitoring](examples/monitoring/) | 5 | Explainability, audit trail, cost tracking, drift detection |
-| [Speech](examples/speech/) | 2 | whisper.apr transcription, streaming ASR |
-| [Distributed](examples/distributed/) | 2 | Multi-node inference, model sharding |
-| [Inference](examples/inference/) | 11 | Speculative decode, KV-cache, streaming, ensemble, tool use |
-| [Serving](examples/serve/) | 5 | HTTP server, A/B testing, canary deploy, rate limiting |
-| [Optimize](examples/optimize/) | 22 | Full pipeline, LoRA, QLoRA, pruning, distillation, merge, quantize |
+| [Distillation](examples/distillation/) | 5 | Knowledge transfer, attention transfer, self-distillation |
+| [CLI](examples/cli/) | 8 | apr-info, apr-bench, apr-convert, apr-serve, apr-diff, apr-tui |
+| [Monitoring](examples/monitoring/) | 6 | Explainability, audit trail, cost tracking, drift detection, cbtop |
+| [Speech](examples/speech/) | 5 | Whisper transcription, streaming ASR, VAD, diarization, multilingual |
+| [Distributed](examples/distributed/) | 5 | Multi-node inference, sharding, ring-allreduce, pipeline parallel, gossip |
+| [Inference](examples/inference/) | 12 | Speculative decode, KV-cache, streaming, ensemble, tool use, apr-run |
+| [Serving](examples/serve/) | 5 | HTTP server, A/B testing, canary deploy, rate limiting, selection router |
+| [Optimize](examples/optimize/) | 23 | Full pipeline, LoRA, QLoRA, pruning, distillation, merge, quantize, tune |
 | [Chat](examples/chat/) | 5 | ChatML, LLaMA 2, Mistral, multi-format, injection defense |
-| [Analysis](examples/analysis/) | 11 | Inspect, validate, diff, bench, profile, QA gates, oracle |
-| [Format](examples/format/) | 10 | Import, export, Rosetta convert/chain/verify, batch export |
-| [Advanced](examples/advanced/) | 16 | RAG pipeline, style transfer, voice recognition, and more |
+| [Analysis](examples/analysis/) | 24 | Inspect, validate, diff, bench, profile, QA gates, oracle, trace, lint |
+| [Format](examples/format/) | 11 | Import, export, Rosetta convert/chain/verify, batch export, migration |
+| [Advanced](examples/advanced/) | 21 | RAG, CI/CD pipeline, A/B experiment, compliance audit, and more |
+| [Acceleration](examples/acceleration/) | 5 | Autotuner, kernel fusion, mmap inference, quantized matmul |
 
 Run any example:
 
