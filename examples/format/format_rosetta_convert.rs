@@ -251,15 +251,11 @@ fn convert(data: ModelData, path: &ConversionPath) -> ModelData {
 }
 
 // ---------------------------------------------------------------------------
-// Main
+// Section helpers
 // ---------------------------------------------------------------------------
 
-fn main() -> Result<()> {
-    let ctx = RecipeContext::new("format_rosetta_convert")?;
-
-    let registry = FormatRegistry::new();
-
-    // Section 1: Format registry
+/// Section 1: Display the format registry — all formats and their direct targets.
+fn print_format_registry(registry: &FormatRegistry) {
     println!("=== Format Registry ===");
     let all_formats = [Format::Apr, Format::SafeTensors, Format::Gguf, Format::Onnx];
     for fmt in &all_formats {
@@ -271,8 +267,21 @@ fn main() -> Result<()> {
         println!("  {fmt} → [{}]", targets.join(", "));
     }
     println!();
+}
 
-    // Section 2: Path finding
+/// Classify a conversion path as identity, direct, or transitive.
+fn path_kind(path: &ConversionPath) -> &'static str {
+    if path.is_identity() {
+        "identity"
+    } else if path.is_direct() {
+        "direct"
+    } else {
+        "transitive"
+    }
+}
+
+/// Section 2: Find and display conversion paths for representative format pairs.
+fn print_conversion_paths(registry: &FormatRegistry) {
     println!("=== Conversion Paths ===");
     let test_pairs = [
         (Format::SafeTensors, Format::Apr),
@@ -284,13 +293,7 @@ fn main() -> Result<()> {
     for (from, to) in &test_pairs {
         match registry.find_path(*from, *to) {
             Some(path) => {
-                let kind = if path.is_identity() {
-                    "identity"
-                } else if path.is_direct() {
-                    "direct"
-                } else {
-                    "transitive"
-                };
+                let kind = path_kind(&path);
                 let lossy = if path.is_lossy() { " (lossy)" } else { "" };
                 println!(
                     "  {from} → {to}: {kind}{lossy}, {} step(s)",
@@ -304,8 +307,10 @@ fn main() -> Result<()> {
         }
     }
     println!();
+}
 
-    // Section 3: Execute SafeTensors → APR conversion
+/// Section 3: Execute a direct SafeTensors → APR conversion and print results.
+fn run_direct_conversion(registry: &FormatRegistry) {
     println!("=== Conversion Execution: SafeTensors → APR ===");
     let source = ModelData {
         format: Format::SafeTensors,
@@ -331,28 +336,45 @@ fn main() -> Result<()> {
     );
     assert_eq!(result.format, Format::Apr);
     println!();
+}
 
-    // Section 4: Transitive conversion SafeTensors → GGUF (via APR)
+/// Section 4: Execute a transitive SafeTensors → GGUF conversion (via APR hub).
+fn run_transitive_conversion(registry: &FormatRegistry) {
     println!("=== Transitive Conversion: SafeTensors → GGUF ===");
-    let source2 = ModelData {
+    let source = ModelData {
         format: Format::SafeTensors,
         payload: generate_model_payload(43, 2048),
         tensor_count: 3,
     };
-    let path2 = registry
+    let path = registry
         .find_path(Format::SafeTensors, Format::Gguf)
         .unwrap();
-    println!("Steps: {}", path2.steps.len());
-    for step in &path2.steps {
+    println!("Steps: {}", path.steps.len());
+    for step in &path.steps {
         println!("  {} → {}", step.from, step.to);
     }
-    let result2 = convert(source2, &path2);
-    assert_eq!(result2.format, Format::Gguf);
+    let result = convert(source, &path);
+    assert_eq!(result.format, Format::Gguf);
     println!(
         "Output format: {} ({} bytes)",
-        result2.format,
-        result2.payload.len()
+        result.format,
+        result.payload.len()
     );
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+fn main() -> Result<()> {
+    let ctx = RecipeContext::new("format_rosetta_convert")?;
+
+    let registry = FormatRegistry::new();
+
+    print_format_registry(&registry);
+    print_conversion_paths(&registry);
+    run_direct_conversion(&registry);
+    run_transitive_conversion(&registry);
 
     ctx.report()?;
     Ok(())
