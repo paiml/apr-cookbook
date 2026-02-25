@@ -618,17 +618,11 @@ fn simulate_request(
 }
 
 // ============================================================================
-// Main
+// Section Helpers (extracted from main to reduce cyclomatic complexity)
 // ============================================================================
 
-fn main() {
-    println!("=== Inference Cost Tracking & Resource Monitoring Example ===\n");
-
-    let mut rng = DeterministicRng::new(42);
-
-    // =========================================================================
-    // 1. Define Cost Model
-    // =========================================================================
+/// Section 1: Define and display the cost model with per-model breakdowns.
+fn define_cost_model(rng: &mut DeterministicRng) -> CostModel {
     println!("1. Define Cost Model");
     println!("   -----------------------------------------------");
 
@@ -645,16 +639,18 @@ fn main() {
     // Show example cost breakdown for each model
     println!("   Example cost breakdown (single request per model):");
     for (i, name) in MODEL_NAMES.iter().enumerate() {
-        let record = simulate_request(i, 0, 0, &cost_model, &mut rng);
+        let record = simulate_request(i, 0, 0, &cost_model, rng);
         let breakdown =
             cost_model.cost_breakdown(record.latency_ms, record.memory_mb, record.tokens);
         println!("     {name}: {breakdown}");
     }
     println!();
 
-    // =========================================================================
-    // 2. Track Individual Inference Requests
-    // =========================================================================
+    cost_model
+}
+
+/// Section 2: Generate and track simulated inference requests.
+fn track_inference_requests(cost_model: &CostModel, rng: &mut DeterministicRng) -> CostTracker {
     println!("2. Track Individual Inference Requests");
     println!("   -----------------------------------------------");
 
@@ -665,7 +661,7 @@ fn main() {
         let model_idx = rng.next_usize(NUM_MODELS);
         let client_idx = rng.next_usize(NUM_CLIENTS);
         let timestamp = 1_700_000_000 + (i as u64) * 60; // 1 request per minute
-        let record = simulate_request(model_idx, client_idx, timestamp, &cost_model, &mut rng);
+        let record = simulate_request(model_idx, client_idx, timestamp, cost_model, rng);
         tracker.add(record);
     }
 
@@ -685,9 +681,11 @@ fn main() {
     }
     println!();
 
-    // =========================================================================
-    // 3. Per-Model Cost Aggregation
-    // =========================================================================
+    tracker
+}
+
+/// Section 3: Aggregate and display costs by model with ASCII chart.
+fn print_model_cost_aggregation(tracker: &CostTracker) {
     println!("3. Per-Model Cost Aggregation");
     println!("   -----------------------------------------------");
 
@@ -713,10 +711,10 @@ fn main() {
         .collect();
     print!("{}", CostTracker::ascii_cost_chart(&chart_entries));
     println!();
+}
 
-    // =========================================================================
-    // 4. Per-Client Billing Summary
-    // =========================================================================
+/// Section 4: Aggregate and display costs by client with ASCII chart.
+fn print_client_billing_summary(tracker: &CostTracker) {
     println!("4. Per-Client Billing Summary");
     println!("   -----------------------------------------------");
 
@@ -742,10 +740,10 @@ fn main() {
         .collect();
     print!("{}", CostTracker::ascii_cost_chart(&chart_entries));
     println!();
+}
 
-    // =========================================================================
-    // 5. Budget Monitoring with Alert Thresholds
-    // =========================================================================
+/// Section 5: Monitor budget utilization and emit alerts.
+fn run_budget_monitoring(tracker: &CostTracker) {
     println!("5. Budget Monitoring with Alert Thresholds");
     println!("   -----------------------------------------------");
 
@@ -776,41 +774,42 @@ fn main() {
     }
     println!();
 
-    let final_level = budget_monitor.alert_level();
-    match final_level {
+    print_budget_alert(&budget_monitor);
+    println!();
+}
+
+/// Print the appropriate budget alert message based on the current alert level.
+fn print_budget_alert(monitor: &BudgetMonitor) {
+    match monitor.alert_level() {
         AlertLevel::Exceeded => {
-            println!(
-                "   ALERT: Budget exceeded by ${:.4}!",
-                -budget_monitor.remaining()
-            );
+            println!("   ALERT: Budget exceeded by ${:.4}!", -monitor.remaining());
             println!("   Action: Review high-cost models and consider rate limiting");
         }
         AlertLevel::Critical => {
             println!(
                 "   ALERT: Budget nearly exhausted ({:.1}% used)",
-                budget_monitor.utilization() * 100.0
+                monitor.utilization() * 100.0
             );
             println!("   Action: Throttle non-critical workloads immediately");
         }
         AlertLevel::Warn => {
             println!(
                 "   WARNING: Budget consumption elevated ({:.1}% used)",
-                budget_monitor.utilization() * 100.0
+                monitor.utilization() * 100.0
             );
             println!("   Action: Monitor closely and prepare contingency");
         }
         AlertLevel::Ok => {
             println!(
                 "   Budget status: healthy ({:.1}% used)",
-                budget_monitor.utilization() * 100.0
+                monitor.utilization() * 100.0
             );
         }
     }
-    println!();
+}
 
-    // =========================================================================
-    // 6. Cost Trend Analysis and Forecasting
-    // =========================================================================
+/// Section 6: Analyze cost trends and project future spend.
+fn run_cost_trend_analysis(cost_model: &CostModel) {
     println!("6. Cost Trend Analysis and Forecasting");
     println!("   -----------------------------------------------");
 
@@ -825,7 +824,7 @@ fn main() {
         for _ in 0..REQUESTS_PER_WINDOW {
             let model_idx = rng_trend.next_usize(NUM_MODELS);
             let client_idx = rng_trend.next_usize(NUM_CLIENTS);
-            let record = simulate_request(model_idx, client_idx, 0, &cost_model, &mut rng_trend);
+            let record = simulate_request(model_idx, client_idx, 0, cost_model, &mut rng_trend);
             window_total += record.total_cost * traffic_multiplier;
         }
 
@@ -856,6 +855,23 @@ fn main() {
     } else {
         println!("   Recommendation: Costs are stable or decreasing; no action needed");
     }
+}
+
+// ============================================================================
+// Main
+// ============================================================================
+
+fn main() {
+    println!("=== Inference Cost Tracking & Resource Monitoring Example ===\n");
+
+    let mut rng = DeterministicRng::new(42);
+
+    let cost_model = define_cost_model(&mut rng);
+    let tracker = track_inference_requests(&cost_model, &mut rng);
+    print_model_cost_aggregation(&tracker);
+    print_client_billing_summary(&tracker);
+    run_budget_monitoring(&tracker);
+    run_cost_trend_analysis(&cost_model);
 
     println!("\n=== Example Complete ===");
 }
