@@ -129,6 +129,86 @@ pub fn quantize_and_measure(weights: &[f32], target: QuantFormat) -> Result<Quan
     })
 }
 
+/// Compute scale and its inverse from an absolute maximum, with a fallback for zero.
+fn scale_and_inv(abs_max: f32, divisor: f32) -> (f32, f32) {
+    let scale = if abs_max > 0.0 {
+        abs_max / divisor
+    } else {
+        1.0
+    };
+    let inv = if scale > 0.0 { 1.0 / scale } else { 0.0 };
+    (scale, inv)
+}
+
+/// Look up a quantized nibble value from a block, returning `default` for out-of-bounds indices.
+fn nibble_val(
+    block: &[f32],
+    idx: usize,
+    inv: f32,
+    offset: f32,
+    lo: f32,
+    hi: f32,
+    default: u8,
+) -> u8 {
+    if idx < block.len() {
+        ((block[idx] - offset) * inv).round().clamp(lo, hi) as i8 as u8
+    } else {
+        default
+    }
+}
+
+/// Pack pairs of nibble-quantized values from a block into bytes.
+fn pack_nibble_pairs(
+    block: &[f32],
+    inv: f32,
+    offset: f32,
+    lo: f32,
+    hi: f32,
+    bias: u8,
+    default: u8,
+    bytes: &mut Vec<u8>,
+) {
+    let mut i = 0;
+    while i < 32 {
+        let q0 = nibble_val(block, i, inv, offset, lo, hi, default).wrapping_add(bias);
+        let q1 = nibble_val(block, i + 1, inv, offset, lo, hi, default).wrapping_add(bias);
+        bytes.push((q0 & 0x0F) | ((q1 & 0x0F) << 4));
+        i += 2;
+    }
+}
+
+/// Quantize a Q8_0 block: 4-byte scale + 32 signed 8-bit values.
+fn quantize_q8_block(block: &[f32], bytes: &mut Vec<u8>) {
+    let abs_max = block.iter().map(|&x| x.abs()).fold(0.0_f32, f32::max);
+    let (scale, inv) = scale_and_inv(abs_max, 127.0);
+    bytes.extend_from_slice(&scale.to_le_bytes());
+    for &w in block {
+        bytes.push((w * inv).round().clamp(-128.0, 127.0) as i8 as u8);
+    }
+    for _ in block.len()..32 {
+        bytes.push(0);
+    }
+}
+
+/// Quantize a Q4_0 block: 4-byte scale + 16 packed nibble pairs (symmetric around zero).
+fn quantize_q4_0_block(block: &[f32], bytes: &mut Vec<u8>) {
+    let abs_max = block.iter().map(|&x| x.abs()).fold(0.0_f32, f32::max);
+    let (scale, inv) = scale_and_inv(abs_max, 7.0);
+    bytes.extend_from_slice(&scale.to_le_bytes());
+    pack_nibble_pairs(block, inv, 0.0, -8.0, 7.0, 8, 8, bytes);
+}
+
+/// Quantize a Q4_1 block: 4-byte scale + 4-byte min + 16 packed nibble pairs (asymmetric).
+fn quantize_q4_1_block(block: &[f32], bytes: &mut Vec<u8>) {
+    let min = block.iter().copied().fold(f32::INFINITY, f32::min);
+    let max = block.iter().copied().fold(f32::NEG_INFINITY, f32::max);
+    let range = max - min;
+    let (scale, inv) = scale_and_inv(range, 15.0);
+    bytes.extend_from_slice(&scale.to_le_bytes());
+    bytes.extend_from_slice(&min.to_le_bytes());
+    pack_nibble_pairs(block, inv, min, 0.0, 15.0, 0, 0, bytes);
+}
+
 fn quantize_weights(weights: &[f32], target: QuantFormat) -> Result<Vec<u8>> {
     match target {
         QuantFormat::F32 => Ok(weights.iter().flat_map(|&f| f.to_le_bytes()).collect()),
@@ -140,63 +220,9 @@ fn quantize_weights(weights: &[f32], target: QuantFormat) -> Result<Vec<u8>> {
             .iter()
             .flat_map(|&w| ((w.to_bits() >> 16) as u16).to_le_bytes())
             .collect()),
-        QuantFormat::Q8_0 => quantize_block(weights, 32, |block, bytes| {
-            let abs_max = block.iter().map(|&x| x.abs()).fold(0.0_f32, f32::max);
-            let scale = if abs_max > 0.0 { abs_max / 127.0 } else { 1.0 };
-            let inv = if scale > 0.0 { 1.0 / scale } else { 0.0 };
-            bytes.extend_from_slice(&scale.to_le_bytes());
-            for &w in block {
-                bytes.push((w * inv).round().clamp(-128.0, 127.0) as i8 as u8);
-            }
-            for _ in block.len()..32 {
-                bytes.push(0);
-            }
-        }),
-        QuantFormat::Q4_0 => quantize_block(weights, 32, |block, bytes| {
-            let abs_max = block.iter().map(|&x| x.abs()).fold(0.0_f32, f32::max);
-            let scale = if abs_max > 0.0 { abs_max / 7.0 } else { 1.0 };
-            let inv = if scale > 0.0 { 1.0 / scale } else { 0.0 };
-            bytes.extend_from_slice(&scale.to_le_bytes());
-            let mut i = 0;
-            while i < 32 {
-                let q0 = if i < block.len() {
-                    ((block[i] * inv).round().clamp(-8.0, 7.0) as i8 + 8) as u8
-                } else {
-                    8
-                };
-                let q1 = if i + 1 < block.len() {
-                    ((block[i + 1] * inv).round().clamp(-8.0, 7.0) as i8 + 8) as u8
-                } else {
-                    8
-                };
-                bytes.push((q0 & 0x0F) | ((q1 & 0x0F) << 4));
-                i += 2;
-            }
-        }),
-        QuantFormat::Q4_1 => quantize_block(weights, 32, |block, bytes| {
-            let min = block.iter().copied().fold(f32::INFINITY, f32::min);
-            let max = block.iter().copied().fold(f32::NEG_INFINITY, f32::max);
-            let range = max - min;
-            let scale = if range > 0.0 { range / 15.0 } else { 1.0 };
-            let inv = if scale > 0.0 { 1.0 / scale } else { 0.0 };
-            bytes.extend_from_slice(&scale.to_le_bytes());
-            bytes.extend_from_slice(&min.to_le_bytes());
-            let mut i = 0;
-            while i < 32 {
-                let q0 = if i < block.len() {
-                    ((block[i] - min) * inv).round().clamp(0.0, 15.0) as u8
-                } else {
-                    0
-                };
-                let q1 = if i + 1 < block.len() {
-                    ((block[i + 1] - min) * inv).round().clamp(0.0, 15.0) as u8
-                } else {
-                    0
-                };
-                bytes.push((q0 & 0x0F) | ((q1 & 0x0F) << 4));
-                i += 2;
-            }
-        }),
+        QuantFormat::Q8_0 => quantize_block(weights, 32, quantize_q8_block),
+        QuantFormat::Q4_0 => quantize_block(weights, 32, quantize_q4_0_block),
+        QuantFormat::Q4_1 => quantize_block(weights, 32, quantize_q4_1_block),
     }
 }
 
