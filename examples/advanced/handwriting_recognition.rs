@@ -703,6 +703,36 @@ impl LeNetClassifier {
         })
     }
 
+    /// Compute convolution kernel sum for a single output position
+    #[allow(clippy::needless_range_loop)]
+    fn conv_kernel_sum(
+        &self,
+        input: &[f32],
+        weights: &[f32],
+        in_h: usize,
+        in_w: usize,
+        in_c: usize,
+        oc: usize,
+        oy: usize,
+        ox: usize,
+        kernel_size: usize,
+    ) -> f32 {
+        let mut sum = 0.0_f32;
+        for ic in 0..in_c {
+            for ky in 0..kernel_size {
+                for kx in 0..kernel_size {
+                    let input_idx = (ic * in_h + oy + ky) * in_w + ox + kx;
+                    let weight_idx = ((oc * in_c + ic) * kernel_size + ky) * kernel_size + kx;
+
+                    if input_idx < input.len() && weight_idx < weights.len() {
+                        sum += input[input_idx] * weights[weight_idx];
+                    }
+                }
+            }
+        }
+        sum
+    }
+
     /// 2D convolution with ReLU
     #[allow(clippy::needless_range_loop)]
     fn conv2d(
@@ -723,24 +753,18 @@ impl LeNetClassifier {
         for oc in 0..out_c {
             for oy in 0..out_h {
                 for ox in 0..out_w {
-                    let mut sum = bias[oc];
-
-                    for ic in 0..in_c {
-                        for ky in 0..kernel_size {
-                            for kx in 0..kernel_size {
-                                let iy = oy + ky;
-                                let ix = ox + kx;
-                                let input_idx = (ic * in_h + iy) * in_w + ix;
-                                let weight_idx =
-                                    ((oc * in_c + ic) * kernel_size + ky) * kernel_size + kx;
-
-                                // Bounds check to avoid panic
-                                if input_idx < input.len() && weight_idx < weights.len() {
-                                    sum += input[input_idx] * weights[weight_idx];
-                                }
-                            }
-                        }
-                    }
+                    let sum = bias[oc]
+                        + self.conv_kernel_sum(
+                            input,
+                            weights,
+                            in_h,
+                            in_w,
+                            in_c,
+                            oc,
+                            oy,
+                            ox,
+                            kernel_size,
+                        );
 
                     // ReLU activation
                     let output_idx = (oc * out_h + oy) * out_w + ox;
@@ -936,6 +960,25 @@ impl ConfusionMatrix {
     }
 }
 
+/// Stamp a digit pattern onto a pixel buffer, centered in the image
+fn stamp_pattern(pixels: &mut [f32], pattern: &[u8], pattern_w: usize, pattern_h: usize) {
+    let offset_x = (IMAGE_WIDTH - pattern_w) / 2;
+    let offset_y = (IMAGE_HEIGHT - pattern_h) / 2;
+
+    for py in 0..pattern_h {
+        for px in 0..pattern_w {
+            let idx = py * pattern_w + px;
+            if idx < pattern.len() && pattern[idx] == 1 {
+                let x = offset_x + px;
+                let y = offset_y + py;
+                if x < IMAGE_WIDTH && y < IMAGE_HEIGHT {
+                    pixels[y * IMAGE_WIDTH + x] = 1.0;
+                }
+            }
+        }
+    }
+}
+
 /// Generate a simple test digit (for demo purposes)
 pub fn generate_test_digit(digit: u8, seed: u64) -> Result<GrayscaleImage> {
     if digit > 9 {
@@ -999,27 +1042,9 @@ pub fn generate_test_digit(digit: u8, seed: u64) -> Result<GrayscaleImage> {
     ];
 
     let pattern = patterns[digit as usize];
-    let pattern_w = 5;
-    let pattern_h = 6;
-
     let mut pixels = vec![0.0_f32; IMAGE_SIZE];
 
-    // Center the pattern
-    let offset_x = (IMAGE_WIDTH - pattern_w) / 2;
-    let offset_y = (IMAGE_HEIGHT - pattern_h) / 2;
-
-    for py in 0..pattern_h {
-        for px in 0..pattern_w {
-            let idx = py * pattern_w + px;
-            if idx < pattern.len() && pattern[idx] == 1 {
-                let x = offset_x + px;
-                let y = offset_y + py;
-                if x < IMAGE_WIDTH && y < IMAGE_HEIGHT {
-                    pixels[y * IMAGE_WIDTH + x] = 1.0;
-                }
-            }
-        }
-    }
+    stamp_pattern(&mut pixels, pattern, 5, 6);
 
     // Add slight variation based on seed
     let mut rng = SimpleRng::new(seed);

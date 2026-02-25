@@ -50,30 +50,34 @@ struct TrainResult {
     early_stopped: bool,
 }
 
+/// Compute a single feature value from deterministic hash
+fn hash_feature(seed: u64, i: usize, j: usize) -> f64 {
+    let mut h = DefaultHasher::new();
+    (seed, "data", i, j).hash(&mut h);
+    h.finish() as f64 / u64::MAX as f64 - 0.5
+}
+
+/// Derive class label from feature scores
+fn label_from_score(score: f64) -> usize {
+    if score > 0.2 {
+        0
+    } else if score < -0.2 {
+        2
+    } else {
+        1
+    }
+}
+
 /// Generate synthetic dataset
 fn generate_data(n: usize, seed: u64) -> (Vec<Vec<f64>>, Vec<usize>) {
     let mut inputs = Vec::with_capacity(n);
     let mut labels = Vec::with_capacity(n);
 
     for i in 0..n {
-        let mut row = Vec::with_capacity(INPUT_DIM);
-        for j in 0..INPUT_DIM {
-            let mut h = DefaultHasher::new();
-            (seed, "data", i, j).hash(&mut h);
-            let val = h.finish() as f64 / u64::MAX as f64 - 0.5;
-            row.push(val);
-        }
-        // Label derived from first features
+        let row: Vec<f64> = (0..INPUT_DIM).map(|j| hash_feature(seed, i, j)).collect();
         let label_score = row[0] + row[1] * 0.5 - row[2] * 0.3;
-        let label = if label_score > 0.2 {
-            0
-        } else if label_score < -0.2 {
-            2
-        } else {
-            1
-        };
+        labels.push(label_from_score(label_score));
         inputs.push(row);
-        labels.push(label);
     }
 
     (inputs, labels)
@@ -160,6 +164,23 @@ impl LinearModel {
     }
 }
 
+/// Check validation loss and update early stopping state.
+/// Returns `true` if training should stop.
+fn check_early_stop(
+    val_loss: f64,
+    best_val_loss: &mut f64,
+    patience_counter: &mut usize,
+    patience: usize,
+) -> bool {
+    if val_loss < *best_val_loss - 1e-4 {
+        *best_val_loss = val_loss;
+        *patience_counter = 0;
+        return false;
+    }
+    *patience_counter += 1;
+    *patience_counter >= patience
+}
+
 /// Train a model with given hyperparameters and early stopping
 fn train_model(
     hp: &HyperParams,
@@ -189,17 +210,17 @@ fn train_model(
         epochs_run = epoch + 1;
 
         // Validate periodically
-        if epoch % 5 == 0 || epoch == hp.epochs - 1 {
+        let should_validate = epoch % 5 == 0 || epoch == hp.epochs - 1;
+        if should_validate {
             let val_loss = model.cross_entropy_loss(val_inputs, val_labels);
-            if val_loss < best_val_loss - 1e-4 {
-                best_val_loss = val_loss;
-                patience_counter = 0;
-            } else {
-                patience_counter += 1;
-                if patience_counter >= patience {
-                    early_stopped = true;
-                    break;
-                }
+            early_stopped = check_early_stop(
+                val_loss,
+                &mut best_val_loss,
+                &mut patience_counter,
+                patience,
+            );
+            if early_stopped {
+                break;
             }
         }
     }
@@ -215,6 +236,50 @@ fn train_model(
     }
 }
 
+/// Build the cross-product of hyperparameter grid values
+fn build_grid_configs(
+    learning_rates: &[f64],
+    batch_sizes: &[usize],
+    weight_decays: &[f64],
+) -> Vec<HyperParams> {
+    let mut configs = Vec::new();
+    for &lr in learning_rates {
+        for &bs in batch_sizes {
+            for &wd in weight_decays {
+                configs.push(HyperParams {
+                    learning_rate: lr,
+                    batch_size: bs,
+                    weight_decay: wd,
+                    epochs: 50,
+                });
+            }
+        }
+    }
+    configs
+}
+
+/// Sample hyperparameters for a single random trial
+fn sample_random_hp(trial: i32) -> HyperParams {
+    let mut h = DefaultHasher::new();
+    (42u64, "lr", trial).hash(&mut h);
+    let lr_log = h.finish() as f64 / u64::MAX as f64 * 3.0 - 4.0; // log-uniform [-4, -1]
+    let lr = 10.0f64.powf(lr_log);
+
+    (42u64, "bs", trial).hash(&mut h);
+    let bs_options = [4, 8, 16, 32, 64];
+    let bs = bs_options[(h.finish() as usize) % bs_options.len()];
+
+    (42u64, "wd", trial).hash(&mut h);
+    let wd = (h.finish() as f64 / u64::MAX as f64) * 0.05;
+
+    HyperParams {
+        learning_rate: lr,
+        batch_size: bs,
+        weight_decay: wd,
+        epochs: 50,
+    }
+}
+
 fn main() {
     println!("=== Hyperparameter Sweep Example ===\n");
 
@@ -227,9 +292,8 @@ fn main() {
     println!("1. Grid Search");
     println!("   ─────────────────────────────────────────");
 
-    let learning_rates = [0.001, 0.01, 0.05, 0.1];
-    let batch_sizes = [8, 16, 32];
-    let weight_decays = [0.0, 0.001, 0.01];
+    let grid_configs =
+        build_grid_configs(&[0.001, 0.01, 0.05, 0.1], &[8, 16, 32], &[0.0, 0.001, 0.01]);
 
     let mut grid_results: Vec<(HyperParams, TrainResult)> = Vec::new();
 
@@ -239,29 +303,19 @@ fn main() {
     );
     println!("   {}", "─".repeat(55));
 
-    for &lr in &learning_rates {
-        for &bs in &batch_sizes {
-            for &wd in &weight_decays {
-                let hp = HyperParams {
-                    learning_rate: lr,
-                    batch_size: bs,
-                    weight_decay: wd,
-                    epochs: 50,
-                };
-                let result = train_model(&hp, &train_data, &val_data, 42, 10);
-                println!(
-                    "   {:>8.4} {:>4} {:>8.4} {:>10.4} {:>10.4} {:>6} {:>5}",
-                    lr,
-                    bs,
-                    wd,
-                    result.train_loss,
-                    result.val_loss,
-                    result.epochs_run,
-                    if result.early_stopped { "yes" } else { "no" }
-                );
-                grid_results.push((hp, result));
-            }
-        }
+    for hp in &grid_configs {
+        let result = train_model(hp, &train_data, &val_data, 42, 10);
+        println!(
+            "   {:>8.4} {:>4} {:>8.4} {:>10.4} {:>10.4} {:>6} {:>5}",
+            hp.learning_rate,
+            hp.batch_size,
+            hp.weight_decay,
+            result.train_loss,
+            result.val_loss,
+            result.epochs_run,
+            if result.early_stopped { "yes" } else { "no" }
+        );
+        grid_results.push((hp.clone(), result));
     }
 
     // Best configuration
@@ -293,34 +347,16 @@ fn main() {
     println!("   {}", "─".repeat(50));
 
     for trial in 0..n_trials {
-        // Sample hyperparameters
-        let mut h = DefaultHasher::new();
-        (42u64, "lr", trial).hash(&mut h);
-        let lr_log = h.finish() as f64 / u64::MAX as f64 * 3.0 - 4.0; // log-uniform [-4, -1]
-        let lr = 10.0f64.powf(lr_log);
-
-        (42u64, "bs", trial).hash(&mut h);
-        let bs_options = [4, 8, 16, 32, 64];
-        let bs = bs_options[(h.finish() as usize) % bs_options.len()];
-
-        (42u64, "wd", trial).hash(&mut h);
-        let wd = (h.finish() as f64 / u64::MAX as f64) * 0.05;
-
-        let hp = HyperParams {
-            learning_rate: lr,
-            batch_size: bs,
-            weight_decay: wd,
-            epochs: 50,
-        };
+        let hp = sample_random_hp(trial);
         let result = train_model(&hp, &train_data, &val_data, 42, 10);
 
         if trial < 10 || trial == n_trials - 1 {
             println!(
                 "   {:>5} {:>8.5} {:>4} {:>8.4} {:>10.4} {:>10.4}",
                 trial + 1,
-                lr,
-                bs,
-                wd,
+                hp.learning_rate,
+                hp.batch_size,
+                hp.weight_decay,
                 result.train_loss,
                 result.val_loss
             );
