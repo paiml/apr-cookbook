@@ -688,11 +688,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'New task: Reduce complexity in gpu_memory_pool main() (Refs #3)'
-  status: inprogress
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-02-25T13:23:49.745934612+00:00
-  updated: 2026-02-25T13:23:49.745934612+00:00
+  updated: 2026-02-25T21:05:45Z
   spec: null
   acceptance_criteria: []
   phases: []
@@ -704,11 +704,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Merge distillation/ into optimize/ or add 2 examples
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:23.160438285+00:00
+  updated: 2026-02-25T18:01:41Z
   spec: null
   acceptance_criteria:
   - distillation/ has only 3 examples after deprecation (knowledge_transfer, layer_matching, quantization_aware). Either merge into optimize/ or add 2 more to hit the 5-example floor.
@@ -723,11 +723,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Push all local commits to remote
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:17Z
+  updated: 2026-02-25T18:01:46Z
   spec: null
   acceptance_criteria:
   - All housekeeping committed locally but not pushed to origin main.
@@ -741,11 +741,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Test coverage audit via pmat coverage-gaps
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:17Z
+  updated: 2026-02-25T18:06:03Z
   spec: null
   acceptance_criteria:
   - Run pmat query --coverage-gaps to find under-tested code paths in src/ (recipe.rs, bundle.rs, prelude). Target 95%.
@@ -759,11 +759,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Refresh README for 197 examples
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:17Z
+  updated: 2026-02-25T18:07:18Z
   spec: null
   acceptance_criteria:
   - README likely still references 121 examples. Update counts, category table, and any stale references.
@@ -777,11 +777,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: End-to-end dogfood all 197 examples
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:17Z
+  updated: 2026-02-25T18:14:58Z
   spec: null
   acceptance_criteria:
   - Run every example to verify no regressions after deprecation/refactor pass.
@@ -795,11 +795,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: Add MoE and autograd examples
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-02-25T17:51:17Z
-  updated: 2026-02-25T17:51:17Z
+  updated: 2026-02-25T18:24:14Z
   spec: null
   acceptance_criteria:
   - entrenar has MoeConfig, MoeLayer, Expert, Router APIs with zero cookbook coverage. Only 1 autograd example exists — add backprop visualization, custom ops, gradient clipping.
@@ -813,11 +813,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'Tech debt: 83 example files exceed 500-line limit'
-  status: planned
+  status: inprogress
   priority: low
   assigned_to: null
   created: 2026-02-25T18:00:29Z
-  updated: 2026-02-25T18:00:29Z
+  updated: 2026-02-25T21:06:12.420468726+00:00
   spec: null
   acceptance_criteria:
   - Pre-existing across all categories. Needs systematic file splitting with shared test modules.

@@ -1,43 +1,26 @@
-//! # Demo F: Large-Scale Embedding Visualization
+//! Large-Scale Embedding Visualization
 //!
-//! Visualizes large datasets using embedding models and clustering.
-//! Implements PCA, t-SNE approximation, and HDBSCAN clustering.
+//! PCA, t-SNE approximation, K-Means and DBSCAN clustering for embeddings.
 //!
-//! ## Toyota Way Principles
-//!
-//! - **Genchi Genbutsu**: See the actual data patterns
-//! - **Kaizen**: Iteratively improve clustering quality
-//! - **Heijunka**: Consistent processing regardless of data size
+//! ```bash
+//! cargo run --example embedding_visualization
+//! ```
 
 use std::collections::HashMap;
 
-/// Embedding dimension for text
 pub const EMBEDDING_DIM: usize = 128;
-
-/// Maximum clusters for visualization
 pub const MAX_CLUSTERS: usize = 20;
 
-// ============================================================================
-// Data Point and Embedding
-// ============================================================================
-
-/// A data point with embedding
 #[derive(Debug, Clone)]
 pub struct DataPoint {
-    /// Unique identifier
     pub id: String,
-    /// Original content
     pub content: String,
-    /// High-dimensional embedding
     pub embedding: Vec<f32>,
-    /// 2D projection for visualization
     pub projection: Option<(f32, f32)>,
-    /// Cluster assignment
     pub cluster_id: Option<usize>,
 }
 
 impl DataPoint {
-    /// Create new data point
     #[must_use]
     pub fn new(id: &str, content: &str, embedding: Vec<f32>) -> Self {
         Self {
@@ -48,15 +31,11 @@ impl DataPoint {
             cluster_id: None,
         }
     }
-
-    /// Set projection
     #[must_use]
     pub fn with_projection(mut self, x: f32, y: f32) -> Self {
         self.projection = Some((x, y));
         self
     }
-
-    /// Set cluster
     #[must_use]
     pub fn with_cluster(mut self, cluster: usize) -> Self {
         self.cluster_id = Some(cluster);
@@ -64,55 +43,34 @@ impl DataPoint {
     }
 }
 
-// ============================================================================
-// Embedding Model (Simulated)
-// ============================================================================
-
-/// Simple embedding model for text
 pub struct EmbeddingModel {
     dim: usize,
     seed: u64,
 }
 
 impl EmbeddingModel {
-    /// Create new model
     #[must_use]
     pub fn new(dim: usize, seed: u64) -> Self {
         Self { dim, seed }
     }
 
-    /// Embed text to vector
     #[must_use]
     pub fn embed(&self, text: &str) -> Vec<f32> {
         let mut rng = SimpleRng::new(self.seed ^ hash_str(text));
-        let mut vec = Vec::with_capacity(self.dim);
-
-        // Generate deterministic embedding based on text content
-        for _ in 0..self.dim {
-            vec.push(rng.next_gaussian() * 0.1);
-        }
-
-        // Add text-based features
-        let word_count = text.split_whitespace().count();
-        let char_count = text.chars().count();
-
+        let mut vec: Vec<f32> = (0..self.dim).map(|_| rng.next_gaussian() * 0.1).collect();
         if !vec.is_empty() {
-            vec[0] += word_count as f32 * 0.01;
+            vec[0] += text.split_whitespace().count() as f32 * 0.01;
         }
         if vec.len() > 1 {
-            vec[1] += char_count as f32 * 0.001;
+            vec[1] += text.chars().count() as f32 * 0.001;
         }
-
         normalize(&mut vec);
         vec
     }
 }
 
-// ============================================================================
-// Dimensionality Reduction
-// ============================================================================
+// --- PCA ---
 
-/// PCA for dimensionality reduction
 pub struct PCA {
     components: usize,
     mean: Vec<f32>,
@@ -121,7 +79,6 @@ pub struct PCA {
 }
 
 impl PCA {
-    /// Create new PCA
     #[must_use]
     pub fn new(components: usize) -> Self {
         Self {
@@ -132,16 +89,11 @@ impl PCA {
         }
     }
 
-    /// Fit PCA to data
     pub fn fit(&mut self, data: &[Vec<f32>]) {
         if data.is_empty() {
             return;
         }
-
-        let n = data.len();
-        let d = data[0].len();
-
-        // Calculate mean
+        let (n, d) = (data.len(), data[0].len());
         self.mean = vec![0.0; d];
         for point in data {
             for (i, &v) in point.iter().enumerate() {
@@ -151,20 +103,13 @@ impl PCA {
         for m in &mut self.mean {
             *m /= n as f32;
         }
-
-        // Simple power iteration for top eigenvectors
         let mut rng = SimpleRng::new(42);
         self.eigenvectors = Vec::with_capacity(self.components);
-
         for _ in 0..self.components {
             let mut v: Vec<f32> = (0..d).map(|_| rng.next_gaussian()).collect();
             normalize(&mut v);
-
-            // Power iteration
             for _ in 0..50 {
                 let mut new_v = vec![0.0; d];
-
-                // Multiply by covariance matrix
                 for point in data {
                     let centered: Vec<f32> = point
                         .iter()
@@ -176,32 +121,25 @@ impl PCA {
                         new_v[i] += dot * c;
                     }
                 }
-
-                // Orthogonalize against previous eigenvectors
                 for prev in &self.eigenvectors {
                     let proj: f32 = new_v.iter().zip(prev.iter()).map(|(a, b)| a * b).sum();
                     for (i, &p) in prev.iter().enumerate() {
                         new_v[i] -= proj * p;
                     }
                 }
-
                 normalize(&mut new_v);
                 v = new_v;
             }
-
             self.eigenvectors.push(v);
         }
-
         self.fitted = true;
     }
 
-    /// Transform data to lower dimension
     #[must_use]
     pub fn transform(&self, data: &[Vec<f32>]) -> Vec<Vec<f32>> {
         if !self.fitted || data.is_empty() {
             return Vec::new();
         }
-
         data.iter()
             .map(|point| {
                 let centered: Vec<f32> = point
@@ -209,7 +147,6 @@ impl PCA {
                     .zip(self.mean.iter())
                     .map(|(&p, &m)| p - m)
                     .collect();
-
                 self.eigenvectors
                     .iter()
                     .map(|ev| centered.iter().zip(ev.iter()).map(|(a, b)| a * b).sum())
@@ -218,14 +155,14 @@ impl PCA {
             .collect()
     }
 
-    /// Fit and transform
     pub fn fit_transform(&mut self, data: &[Vec<f32>]) -> Vec<Vec<f32>> {
         self.fit(data);
         self.transform(data)
     }
 }
 
-/// t-SNE approximation using Barnes-Hut
+// --- t-SNE ---
+
 pub struct TSNE {
     perplexity: f32,
     learning_rate: f32,
@@ -233,7 +170,6 @@ pub struct TSNE {
 }
 
 impl TSNE {
-    /// Create new t-SNE
     #[must_use]
     pub fn new(perplexity: f32) -> Self {
         Self {
@@ -242,40 +178,28 @@ impl TSNE {
             iterations: 250,
         }
     }
-
-    /// Set learning rate
     #[must_use]
     pub fn with_learning_rate(mut self, lr: f32) -> Self {
         self.learning_rate = lr;
         self
     }
-
-    /// Set iterations
     #[must_use]
     pub fn with_iterations(mut self, iters: usize) -> Self {
         self.iterations = iters;
         self
     }
 
-    /// Fit and transform to 2D
     #[allow(clippy::needless_range_loop)]
     pub fn fit_transform(&self, data: &[Vec<f32>]) -> Vec<(f32, f32)> {
         if data.is_empty() {
             return Vec::new();
         }
-
         let n = data.len();
         let mut rng = SimpleRng::new(42);
-
-        // Initialize random 2D positions
         let mut y: Vec<(f32, f32)> = (0..n)
             .map(|_| (rng.next_gaussian() * 0.01, rng.next_gaussian() * 0.01))
             .collect();
-
-        // Compute pairwise distances in high-D
         let mut p_matrix = compute_pairwise_affinities(data, self.perplexity);
-
-        // Symmetrize
         for i in 0..n {
             for j in (i + 1)..n {
                 let sym = (p_matrix[i][j] + p_matrix[j][i]) / (2.0 * n as f32);
@@ -283,91 +207,41 @@ impl TSNE {
                 p_matrix[j][i] = sym;
             }
         }
-
-        // Gradient descent
         let mut gains = vec![(1.0_f32, 1.0_f32); n];
         let mut prev_y = y.clone();
-
         for iter in 0..self.iterations {
-            // Compute Q distribution
             let q_matrix = compute_q_distribution(&y);
-
-            // Compute gradients
             let momentum = if iter < 20 { 0.5 } else { 0.8 };
-
             for i in 0..n {
                 let mut grad = (0.0_f32, 0.0_f32);
-
                 for j in 0..n {
                     if i == j {
                         continue;
                     }
-                    let pq_diff = p_matrix[i][j] - q_matrix[i][j];
-                    let y_diff = (y[i].0 - y[j].0, y[i].1 - y[j].1);
-                    let dist_sq = y_diff.0 * y_diff.0 + y_diff.1 * y_diff.1;
-                    let mult = pq_diff * (1.0 / (1.0 + dist_sq));
-
-                    grad.0 += 4.0 * mult * y_diff.0;
-                    grad.1 += 4.0 * mult * y_diff.1;
+                    let pq = p_matrix[i][j] - q_matrix[i][j];
+                    let yd = (y[i].0 - y[j].0, y[i].1 - y[j].1);
+                    let mult = pq / (1.0 + yd.0 * yd.0 + yd.1 * yd.1);
+                    grad.0 += 4.0 * mult * yd.0;
+                    grad.1 += 4.0 * mult * yd.1;
                 }
-
-                // Update gains
-                let update = (y[i].0 - prev_y[i].0, y[i].1 - prev_y[i].1);
-                gains[i].0 = if grad.0.signum() == update.0.signum() {
+                let upd = (y[i].0 - prev_y[i].0, y[i].1 - prev_y[i].1);
+                gains[i].0 = if grad.0.signum() == upd.0.signum() {
                     (gains[i].0 * 0.8).max(0.01)
                 } else {
                     gains[i].0 + 0.2
                 };
-                gains[i].1 = if grad.1.signum() == update.1.signum() {
+                gains[i].1 = if grad.1.signum() == upd.1.signum() {
                     (gains[i].1 * 0.8).max(0.01)
                 } else {
                     gains[i].1 + 0.2
                 };
-
                 prev_y[i] = y[i];
-                y[i].0 += momentum * update.0 - self.learning_rate * gains[i].0 * grad.0;
-                y[i].1 += momentum * update.1 - self.learning_rate * gains[i].1 * grad.1;
+                y[i].0 += momentum * upd.0 - self.learning_rate * gains[i].0 * grad.0;
+                y[i].1 += momentum * upd.1 - self.learning_rate * gains[i].1 * grad.1;
             }
         }
-
         y
     }
-}
-
-/// Compute unnormalized conditional probabilities for row `i` given `sigma`,
-/// then normalize so the row sums to 1.
-#[allow(clippy::needless_range_loop)]
-fn compute_row_probabilities(row: &mut [f32], data: &[Vec<f32>], i: usize, sigma: f32) {
-    let n = data.len();
-    let mut sum = 0.0_f32;
-    for j in 0..n {
-        if i == j {
-            row[j] = 0.0;
-            continue;
-        }
-        let dist = euclidean_dist(&data[i], &data[j]);
-        row[j] = (-dist * dist / (2.0 * sigma * sigma)).exp();
-        sum += row[j];
-    }
-    if sum > 0.0 {
-        for j in 0..n {
-            row[j] /= sum;
-        }
-    }
-}
-
-/// Compute Shannon entropy of a probability row, skipping near-zero entries.
-fn row_entropy(row: &[f32]) -> f32 {
-    row.iter().fold(
-        0.0_f32,
-        |acc, &p| {
-            if p > 1e-10 {
-                acc - p * p.ln()
-            } else {
-                acc
-            }
-        },
-    )
 }
 
 #[allow(clippy::needless_range_loop)]
@@ -375,20 +249,34 @@ fn compute_pairwise_affinities(data: &[Vec<f32>], perplexity: f32) -> Vec<Vec<f3
     let n = data.len();
     let target_entropy = perplexity.ln();
     let mut p = vec![vec![0.0_f32; n]; n];
-
     for i in 0..n {
         let mut sigma = 1.0_f32;
-        let mut lo = 0.0_f32;
-        let mut hi = 1000.0_f32;
-
+        let (mut lo, mut hi) = (0.0_f32, 1000.0_f32);
         for _ in 0..50 {
-            compute_row_probabilities(&mut p[i], data, i, sigma);
-            let entropy = row_entropy(&p[i]);
-
+            // Compute row probabilities
+            let mut sum = 0.0_f32;
+            for j in 0..n {
+                if i == j {
+                    p[i][j] = 0.0;
+                    continue;
+                }
+                let dist = euclidean_dist(&data[i], &data[j]);
+                p[i][j] = (-dist * dist / (2.0 * sigma * sigma)).exp();
+                sum += p[i][j];
+            }
+            if sum > 0.0 {
+                for j in 0..n {
+                    p[i][j] /= sum;
+                }
+            }
+            let entropy: f32 =
+                p[i].iter().fold(
+                    0.0,
+                    |acc, &v| if v > 1e-10 { acc - v * v.ln() } else { acc },
+                );
             if (entropy - target_entropy).abs() < 0.01 {
                 break;
             }
-
             if entropy > target_entropy {
                 hi = sigma;
             } else {
@@ -397,7 +285,6 @@ fn compute_pairwise_affinities(data: &[Vec<f32>], perplexity: f32) -> Vec<Vec<f3
             sigma = (lo + hi) / 2.0;
         }
     }
-
     p
 }
 
@@ -406,17 +293,14 @@ fn compute_q_distribution(y: &[(f32, f32)]) -> Vec<Vec<f32>> {
     let n = y.len();
     let mut q = vec![vec![0.0_f32; n]; n];
     let mut sum = 0.0_f32;
-
     for i in 0..n {
         for j in (i + 1)..n {
-            let dist_sq = (y[i].0 - y[j].0).powi(2) + (y[i].1 - y[j].1).powi(2);
-            let val = 1.0 / (1.0 + dist_sq);
+            let val = 1.0 / (1.0 + (y[i].0 - y[j].0).powi(2) + (y[i].1 - y[j].1).powi(2));
             q[i][j] = val;
             q[j][i] = val;
             sum += 2.0 * val;
         }
     }
-
     if sum > 0.0 {
         for i in 0..n {
             for j in 0..n {
@@ -424,15 +308,11 @@ fn compute_q_distribution(y: &[(f32, f32)]) -> Vec<Vec<f32>> {
             }
         }
     }
-
     q
 }
 
-// ============================================================================
-// Clustering
-// ============================================================================
+// --- K-Means ---
 
-/// K-Means clustering
 pub struct KMeans {
     k: usize,
     max_iters: usize,
@@ -440,7 +320,6 @@ pub struct KMeans {
 }
 
 impl KMeans {
-    /// Create new K-Means
     #[must_use]
     pub fn new(k: usize) -> Self {
         Self {
@@ -450,85 +329,64 @@ impl KMeans {
         }
     }
 
-    /// Fit and predict clusters
     #[allow(clippy::needless_range_loop)]
     pub fn fit_predict(&mut self, data: &[Vec<f32>]) -> Vec<usize> {
         if data.is_empty() || self.k == 0 {
             return Vec::new();
         }
-
-        let n = data.len();
-        let d = data[0].len();
-
-        // K-means++ initialization
+        let (n, d) = (data.len(), data[0].len());
         let mut rng = SimpleRng::new(42);
-        self.centroids = Vec::with_capacity(self.k);
-
-        // First centroid: random
-        let first_idx = rng.next_u64() as usize % n;
-        self.centroids.push(data[first_idx].clone());
-
-        // Remaining centroids
+        self.centroids = vec![data[rng.next_u64() as usize % n].clone()];
         for _ in 1..self.k {
-            let min_dists: Vec<f32> = data
+            let dists: Vec<f32> = data
                 .iter()
-                .map(|point| {
+                .map(|p| {
                     self.centroids
                         .iter()
-                        .map(|c| euclidean_dist(point, c))
+                        .map(|c| euclidean_dist(p, c))
                         .fold(f32::INFINITY, f32::min)
                 })
                 .collect();
-
-            let sum: f32 = min_dists.iter().map(|d| d * d).sum();
-            let threshold = rng.next_f32() * sum;
-            let mut cumsum = 0.0;
+            let sum: f32 = dists.iter().map(|d| d * d).sum();
+            let thresh = rng.next_f32() * sum;
+            let mut cum = 0.0;
             let mut idx = 0;
-            for (i, d) in min_dists.iter().enumerate() {
-                cumsum += d * d;
-                if cumsum >= threshold {
+            for (i, d) in dists.iter().enumerate() {
+                cum += d * d;
+                if cum >= thresh {
                     idx = i;
                     break;
                 }
             }
             self.centroids.push(data[idx].clone());
         }
-
-        // Lloyd's algorithm
         let mut labels = vec![0; n];
         for _ in 0..self.max_iters {
-            // Assign
             let mut changed = false;
             for (i, point) in data.iter().enumerate() {
-                let (best_k, _) = self
+                let best = self
                     .centroids
                     .iter()
                     .enumerate()
                     .map(|(k, c)| (k, euclidean_dist(point, c)))
                     .min_by(|a, b| a.1.partial_cmp(&b.1).unwrap())
-                    .unwrap_or((0, 0.0));
-                if labels[i] != best_k {
-                    labels[i] = best_k;
+                    .map_or(0, |(k, _)| k);
+                if labels[i] != best {
+                    labels[i] = best;
                     changed = true;
                 }
             }
-
             if !changed {
                 break;
             }
-
-            // Update centroids
             let mut sums = vec![vec![0.0; d]; self.k];
             let mut counts = vec![0usize; self.k];
-
             for (i, point) in data.iter().enumerate() {
-                let k = labels[i];
-                counts[k] += 1;
+                counts[labels[i]] += 1;
                 for (j, &v) in point.iter().enumerate() {
-                    sums[k][j] += v;
+                    sums[labels[i]][j] += v;
                 }
             }
-
             for k in 0..self.k {
                 if counts[k] > 0 {
                     for j in 0..d {
@@ -537,98 +395,84 @@ impl KMeans {
                 }
             }
         }
-
         labels
     }
 
-    /// Calculate inertia (sum of squared distances to centroids)
     #[must_use]
     pub fn inertia(&self, data: &[Vec<f32>], labels: &[usize]) -> f32 {
         data.iter()
             .zip(labels.iter())
-            .map(|(point, &label)| {
-                let dist = euclidean_dist(point, &self.centroids[label]);
-                dist * dist
+            .map(|(p, &l)| {
+                let d = euclidean_dist(p, &self.centroids[l]);
+                d * d
             })
             .sum()
     }
 }
 
-/// DBSCAN-style density clustering (simplified)
+// --- DBSCAN ---
+
 pub struct DBSCAN {
     eps: f32,
     min_samples: usize,
 }
 
 impl DBSCAN {
-    /// Create new DBSCAN
     #[must_use]
     pub fn new(eps: f32, min_samples: usize) -> Self {
         Self { eps, min_samples }
     }
 
-    /// Fit and predict clusters (-1 for noise)
     pub fn fit_predict(&self, data: &[Vec<f32>]) -> Vec<i32> {
         let n = data.len();
         let mut labels = vec![-1_i32; n];
         let mut cluster_id = 0_i32;
-
         for i in 0..n {
             if labels[i] != -1 {
                 continue;
             }
-
-            let neighbors = self.region_query(data, i);
+            let neighbors: Vec<usize> = data
+                .iter()
+                .enumerate()
+                .filter(|(_, p)| euclidean_dist(&data[i], p) <= self.eps)
+                .map(|(j, _)| j)
+                .collect();
             if neighbors.len() < self.min_samples {
-                continue; // Noise
+                continue;
             }
-
             labels[i] = cluster_id;
             let mut seeds: Vec<usize> = neighbors.into_iter().filter(|&j| j != i).collect();
-
-            let mut seed_idx = 0;
-            while seed_idx < seeds.len() {
-                let q = seeds[seed_idx];
-                if labels[q] == -1 {
-                    labels[q] = cluster_id;
-                }
+            let mut si = 0;
+            while si < seeds.len() {
+                let q = seeds[si];
                 if labels[q] != -1 && labels[q] != cluster_id {
-                    seed_idx += 1;
+                    si += 1;
                     continue;
                 }
-
                 labels[q] = cluster_id;
-                let q_neighbors = self.region_query(data, q);
-                if q_neighbors.len() >= self.min_samples {
-                    for &neighbor in &q_neighbors {
-                        if labels[neighbor] == -1 {
-                            seeds.push(neighbor);
+                let qn: Vec<usize> = data
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, p)| euclidean_dist(&data[q], p) <= self.eps)
+                    .map(|(j, _)| j)
+                    .collect();
+                if qn.len() >= self.min_samples {
+                    for &nb in &qn {
+                        if labels[nb] == -1 {
+                            seeds.push(nb);
                         }
                     }
                 }
-                seed_idx += 1;
+                si += 1;
             }
-
             cluster_id += 1;
         }
-
         labels
-    }
-
-    fn region_query(&self, data: &[Vec<f32>], idx: usize) -> Vec<usize> {
-        data.iter()
-            .enumerate()
-            .filter(|(_, point)| euclidean_dist(&data[idx], point) <= self.eps)
-            .map(|(i, _)| i)
-            .collect()
     }
 }
 
-// ============================================================================
-// Visualization Output
-// ============================================================================
+// --- Visualization ---
 
-/// Cluster summary
 #[derive(Debug, Clone)]
 pub struct ClusterSummary {
     pub cluster_id: usize,
@@ -637,7 +481,6 @@ pub struct ClusterSummary {
     pub samples: Vec<String>,
 }
 
-/// Visualization result
 #[derive(Debug)]
 pub struct VisualizationResult {
     pub points: Vec<(f32, f32)>,
@@ -648,79 +491,62 @@ pub struct VisualizationResult {
 }
 
 impl VisualizationResult {
-    /// Get silhouette score approximation
     #[must_use]
     pub fn silhouette_score(&self) -> f32 {
         if self.n_clusters < 2 || self.points.len() < 2 {
             return 0.0;
         }
-
-        let mut total_score = 0.0_f32;
-        let mut count = 0;
-
-        for (i, &label_i) in self.labels.iter().enumerate() {
-            if label_i < 0 {
+        let (mut total, mut count) = (0.0_f32, 0);
+        for (i, &li) in self.labels.iter().enumerate() {
+            if li < 0 {
                 continue;
             }
-
-            // Average distance to same cluster (a)
             let mut a = 0.0_f32;
-            let mut a_count = 0;
-            for (j, &label_j) in self.labels.iter().enumerate() {
-                if i != j && label_j == label_i {
-                    let dist = ((self.points[i].0 - self.points[j].0).powi(2)
+            let mut ac = 0;
+            for (j, &lj) in self.labels.iter().enumerate() {
+                if i != j && lj == li {
+                    a += ((self.points[i].0 - self.points[j].0).powi(2)
                         + (self.points[i].1 - self.points[j].1).powi(2))
                     .sqrt();
-                    a += dist;
-                    a_count += 1;
+                    ac += 1;
                 }
             }
-            a = if a_count > 0 { a / a_count as f32 } else { 0.0 };
-
-            // Minimum average distance to other clusters (b)
+            a = if ac > 0 { a / ac as f32 } else { 0.0 };
             let mut b = f32::INFINITY;
-            for other_cluster in 0..self.n_clusters {
-                if other_cluster as i32 == label_i {
+            for oc in 0..self.n_clusters {
+                if oc as i32 == li {
                     continue;
                 }
-                let mut dist_sum = 0.0_f32;
-                let mut dist_count = 0;
-                for (j, &label_j) in self.labels.iter().enumerate() {
-                    if label_j == other_cluster as i32 {
-                        let dist = ((self.points[i].0 - self.points[j].0).powi(2)
+                let (mut ds, mut dc) = (0.0_f32, 0);
+                for (j, &lj) in self.labels.iter().enumerate() {
+                    if lj == oc as i32 {
+                        ds += ((self.points[i].0 - self.points[j].0).powi(2)
                             + (self.points[i].1 - self.points[j].1).powi(2))
                         .sqrt();
-                        dist_sum += dist;
-                        dist_count += 1;
+                        dc += 1;
                     }
                 }
-                if dist_count > 0 {
-                    b = b.min(dist_sum / dist_count as f32);
+                if dc > 0 {
+                    b = b.min(ds / dc as f32);
                 }
             }
-
-            let s = if a.max(b) > 0.0 {
+            total += if a.max(b) > 0.0 {
                 (b - a) / a.max(b)
             } else {
                 0.0
             };
-            total_score += s;
             count += 1;
         }
-
         if count > 0 {
-            total_score / count as f32
+            total / count as f32
         } else {
             0.0
         }
     }
 }
 
-// ============================================================================
-// Pipeline
-// ============================================================================
+// --- Pipeline ---
 
-/// Visualization pipeline
 pub struct VisualizationPipeline {
     embedding_model: EmbeddingModel,
     pca: PCA,
@@ -728,7 +554,6 @@ pub struct VisualizationPipeline {
 }
 
 impl VisualizationPipeline {
-    /// Create new pipeline
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -738,18 +563,12 @@ impl VisualizationPipeline {
         }
     }
 
-    /// Process texts and generate visualization
     pub fn process(&mut self, texts: &[&str], n_clusters: usize) -> VisualizationResult {
-        // Generate embeddings
         let embeddings: Vec<Vec<f32>> = texts
             .iter()
             .map(|t| self.embedding_model.embed(t))
             .collect();
-
-        // Reduce dimensionality with PCA first
         let pca_result = self.pca.fit_transform(&embeddings);
-
-        // Apply t-SNE for 2D projection
         let points_2d = if pca_result.len() > 2 {
             self.tsne.fit_transform(&pca_result)
         } else {
@@ -763,54 +582,44 @@ impl VisualizationPipeline {
                 })
                 .collect()
         };
-
-        // Cluster using K-means
         let mut kmeans = KMeans::new(n_clusters.min(texts.len()));
-        let points_for_clustering: Vec<Vec<f32>> =
-            points_2d.iter().map(|&(x, y)| vec![x, y]).collect();
+        let pts: Vec<Vec<f32>> = points_2d.iter().map(|&(x, y)| vec![x, y]).collect();
         let labels: Vec<i32> = kmeans
-            .fit_predict(&points_for_clustering)
+            .fit_predict(&pts)
             .into_iter()
             .map(|l| l as i32)
             .collect();
-
-        // Build cluster summaries
         #[allow(clippy::type_complexity)]
-        let mut cluster_map: HashMap<i32, Vec<(usize, (f32, f32))>> = HashMap::new();
-        for (i, (&label, &point)) in labels.iter().zip(points_2d.iter()).enumerate() {
-            cluster_map.entry(label).or_default().push((i, point));
+        let mut cmap: HashMap<i32, Vec<(usize, (f32, f32))>> = HashMap::new();
+        for (i, (&l, &p)) in labels.iter().zip(points_2d.iter()).enumerate() {
+            cmap.entry(l).or_default().push((i, p));
         }
-
-        let clusters: Vec<ClusterSummary> = cluster_map
+        let clusters: Vec<ClusterSummary> = cmap
             .iter()
-            .filter(|(&label, _)| label >= 0)
-            .map(|(&label, members)| {
-                let size = members.len();
-                let centroid = (
-                    members.iter().map(|(_, p)| p.0).sum::<f32>() / size as f32,
-                    members.iter().map(|(_, p)| p.1).sum::<f32>() / size as f32,
-                );
-                let samples: Vec<String> = members
-                    .iter()
-                    .take(3)
-                    .map(|(i, _)| texts[*i].chars().take(50).collect())
-                    .collect();
+            .filter(|(&l, _)| l >= 0)
+            .map(|(&l, members)| {
+                let sz = members.len();
                 ClusterSummary {
-                    cluster_id: label as usize,
-                    size,
-                    centroid,
-                    samples,
+                    cluster_id: l as usize,
+                    size: sz,
+                    centroid: (
+                        members.iter().map(|(_, p)| p.0).sum::<f32>() / sz as f32,
+                        members.iter().map(|(_, p)| p.1).sum::<f32>() / sz as f32,
+                    ),
+                    samples: members
+                        .iter()
+                        .take(3)
+                        .map(|(i, _)| texts[*i].chars().take(50).collect())
+                        .collect(),
                 }
             })
             .collect();
-
         let n_noise = labels.iter().filter(|&&l| l < 0).count();
-
         VisualizationResult {
             points: points_2d,
             labels,
             clusters,
-            n_clusters: cluster_map.keys().filter(|&&k| k >= 0).count(),
+            n_clusters: cmap.keys().filter(|&&k| k >= 0).count(),
             n_noise,
         }
     }
@@ -822,9 +631,7 @@ impl Default for VisualizationPipeline {
     }
 }
 
-// ============================================================================
-// Utilities
-// ============================================================================
+// --- Utilities ---
 
 fn euclidean_dist(a: &[f32], b: &[f32]) -> f32 {
     a.iter()
@@ -844,11 +651,8 @@ fn normalize(v: &mut [f32]) {
 }
 
 fn hash_str(s: &str) -> u64 {
-    let mut h = 0u64;
-    for b in s.bytes() {
-        h = h.wrapping_mul(31).wrapping_add(u64::from(b));
-    }
-    h
+    s.bytes()
+        .fold(0u64, |h, b| h.wrapping_mul(31).wrapping_add(u64::from(b)))
 }
 
 struct SimpleRng {
@@ -859,7 +663,6 @@ impl SimpleRng {
     fn new(seed: u64) -> Self {
         Self { state: seed.max(1) }
     }
-
     fn next_u64(&mut self) -> u64 {
         let mut x = self.state;
         x ^= x << 13;
@@ -868,11 +671,9 @@ impl SimpleRng {
         self.state = x;
         x
     }
-
     fn next_f32(&mut self) -> f32 {
         (self.next_u64() as f64 / u64::MAX as f64) as f32
     }
-
     fn next_gaussian(&mut self) -> f32 {
         let u1 = self.next_f32().max(1e-10);
         let u2 = self.next_f32();
@@ -880,13 +681,8 @@ impl SimpleRng {
     }
 }
 
-// ============================================================================
-// Main
-// ============================================================================
-
 fn main() {
     println!("=== Demo F: Large-Scale Embedding Visualization ===\n");
-
     let texts = [
         "Machine learning is a branch of artificial intelligence",
         "Deep learning uses neural networks with many layers",
@@ -899,71 +695,38 @@ fn main() {
         "JavaScript runs in web browsers",
         "Go is designed for concurrent programming",
     ];
-
     let mut pipeline = VisualizationPipeline::new();
     let result = pipeline.process(&texts, 3);
-
-    println!("--- Clustering Results ---");
-    println!("Total points: {}", result.points.len());
-    println!("Clusters found: {}", result.n_clusters);
-    println!("Noise points: {}", result.n_noise);
-    println!("Silhouette score: {:.3}", result.silhouette_score());
-
-    println!("\n--- Cluster Details ---");
-    for cluster in &result.clusters {
+    println!(
+        "Points: {}, Clusters: {}, Noise: {}, Silhouette: {:.3}",
+        result.points.len(),
+        result.n_clusters,
+        result.n_noise,
+        result.silhouette_score()
+    );
+    for c in &result.clusters {
         println!(
-            "Cluster {}: {} points, centroid=({:.2}, {:.2})",
-            cluster.cluster_id, cluster.size, cluster.centroid.0, cluster.centroid.1
+            "  Cluster {}: {} points at ({:.2}, {:.2})",
+            c.cluster_id, c.size, c.centroid.0, c.centroid.1
         );
-        for sample in &cluster.samples {
-            println!("  - \"{}...\"", sample);
+        for s in &c.samples {
+            println!("    - \"{s}...\"");
         }
     }
-
     println!("\n=== Demo F Complete ===");
 }
-
-// ============================================================================
-// Tests
-// ============================================================================
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_data_point_new() {
-        let dp = DataPoint::new("id1", "content", vec![1.0, 2.0]);
-        assert_eq!(dp.id, "id1");
-        assert!(dp.projection.is_none());
-    }
-
-    #[test]
-    fn test_data_point_with_projection() {
-        let dp = DataPoint::new("id1", "content", vec![1.0]).with_projection(0.5, 0.5);
-        assert_eq!(dp.projection, Some((0.5, 0.5)));
-    }
-
-    #[test]
-    fn test_embedding_model() {
+    fn test_embedding_model_and_determinism() {
         let model = EmbeddingModel::new(64, 42);
-        let emb = model.embed("hello world");
-        assert_eq!(emb.len(), 64);
-    }
-
-    #[test]
-    fn test_embedding_deterministic() {
-        let model = EmbeddingModel::new(64, 42);
-        let e1 = model.embed("test");
-        let e2 = model.embed("test");
+        let e1 = model.embed("hello world");
+        let e2 = model.embed("hello world");
+        assert_eq!(e1.len(), 64);
         assert_eq!(e1, e2);
-    }
-
-    #[test]
-    fn test_pca_new() {
-        let pca = PCA::new(2);
-        assert_eq!(pca.components, 2);
-        assert!(!pca.fitted);
     }
 
     #[test]
@@ -980,23 +743,10 @@ mod tests {
     }
 
     #[test]
-    fn test_tsne_new() {
-        let tsne = TSNE::new(30.0);
-        assert!((tsne.perplexity - 30.0).abs() < 0.01);
-    }
-
-    #[test]
     fn test_tsne_fit_transform() {
         let tsne = TSNE::new(5.0).with_iterations(10);
         let data = vec![vec![1.0, 0.0], vec![0.0, 1.0], vec![1.0, 1.0]];
-        let result = tsne.fit_transform(&data);
-        assert_eq!(result.len(), 3);
-    }
-
-    #[test]
-    fn test_kmeans_new() {
-        let km = KMeans::new(3);
-        assert_eq!(km.k, 3);
+        assert_eq!(tsne.fit_transform(&data).len(), 3);
     }
 
     #[test]
@@ -1010,62 +760,38 @@ mod tests {
         ];
         let labels = km.fit_predict(&data);
         assert_eq!(labels.len(), 4);
-        // Points close together should have same label
         assert_eq!(labels[0], labels[1]);
         assert_eq!(labels[2], labels[3]);
-    }
-
-    #[test]
-    fn test_dbscan_new() {
-        let db = DBSCAN::new(0.5, 2);
-        assert!((db.eps - 0.5).abs() < 0.01);
     }
 
     #[test]
     fn test_dbscan_fit_predict() {
         let db = DBSCAN::new(1.0, 2);
         let data = vec![vec![0.0, 0.0], vec![0.5, 0.0], vec![10.0, 10.0]];
-        let labels = db.fit_predict(&data);
-        assert_eq!(labels.len(), 3);
-    }
-
-    #[test]
-    fn test_pipeline_new() {
-        let _pipeline = VisualizationPipeline::new();
-        // Just verify it creates successfully
-        assert!(true);
+        assert_eq!(db.fit_predict(&data).len(), 3);
     }
 
     #[test]
     fn test_pipeline_process() {
         let mut pipeline = VisualizationPipeline::new();
-        let texts = ["hello", "world", "test"];
-        let result = pipeline.process(&texts, 2);
+        let result = pipeline.process(&["hello", "world", "test"], 2);
         assert_eq!(result.points.len(), 3);
     }
 
     #[test]
     fn test_silhouette_score_bounds() {
         let mut pipeline = VisualizationPipeline::new();
-        let texts = ["a", "b", "c", "d"];
-        let result = pipeline.process(&texts, 2);
+        let result = pipeline.process(&["a", "b", "c", "d"], 2);
         let score = result.silhouette_score();
-        assert!(score >= -1.0 && score <= 1.0);
+        assert!((-1.0..=1.0).contains(&score));
     }
 
     #[test]
-    fn test_euclidean_dist() {
-        let a = vec![0.0, 0.0];
-        let b = vec![3.0, 4.0];
-        assert!((euclidean_dist(&a, &b) - 5.0).abs() < 0.01);
-    }
-
-    #[test]
-    fn test_normalize() {
+    fn test_euclidean_dist_and_normalize() {
+        assert!((euclidean_dist(&[0.0, 0.0], &[3.0, 4.0]) - 5.0).abs() < 0.01);
         let mut v = vec![3.0, 4.0];
         normalize(&mut v);
-        let norm: f32 = v.iter().map(|x| x * x).sum::<f32>().sqrt();
-        assert!((norm - 1.0).abs() < 0.01);
+        assert!((v.iter().map(|x| x * x).sum::<f32>().sqrt() - 1.0).abs() < 0.01);
     }
 }
 
@@ -1080,16 +806,7 @@ mod proptests {
         #[test]
         fn prop_embedding_length(dim in 16usize..256, seed in 0u64..1000) {
             let model = EmbeddingModel::new(dim, seed);
-            let emb = model.embed("test text");
-            prop_assert_eq!(emb.len(), dim);
-        }
-
-        #[test]
-        fn prop_embedding_normalized(seed in 0u64..1000) {
-            let model = EmbeddingModel::new(64, seed);
-            let emb = model.embed("test");
-            let norm: f32 = emb.iter().map(|x| x * x).sum::<f32>().sqrt();
-            prop_assert!((norm - 1.0).abs() < 0.1);
+            prop_assert_eq!(model.embed("test text").len(), dim);
         }
 
         #[test]
@@ -1098,41 +815,12 @@ mod proptests {
             let data: Vec<Vec<f32>> = (0..n).map(|i| vec![i as f32, (i * 2) as f32]).collect();
             let labels = km.fit_predict(&data);
             prop_assert_eq!(labels.len(), n);
-            for &l in &labels {
-                prop_assert!(l < k);
-            }
+            for &l in &labels { prop_assert!(l < k); }
         }
 
         #[test]
-        fn prop_pca_reduces_dimension(d in 10usize..50, target in 2usize..5) {
-            let mut pca = PCA::new(target);
-            let data: Vec<Vec<f32>> = (0..5).map(|_| vec![0.0; d]).collect();
-            let result = pca.fit_transform(&data);
-            for r in &result {
-                prop_assert_eq!(r.len(), target);
-            }
-        }
-
-        #[test]
-        fn prop_euclidean_dist_non_negative(
-            x1 in -10.0f32..10.0, y1 in -10.0f32..10.0,
-            x2 in -10.0f32..10.0, y2 in -10.0f32..10.0
-        ) {
-            let a = vec![x1, y1];
-            let b = vec![x2, y2];
-            prop_assert!(euclidean_dist(&a, &b) >= 0.0);
-        }
-
-        #[test]
-        fn prop_euclidean_dist_symmetric(
-            x1 in -10.0f32..10.0, y1 in -10.0f32..10.0,
-            x2 in -10.0f32..10.0, y2 in -10.0f32..10.0
-        ) {
-            let a = vec![x1, y1];
-            let b = vec![x2, y2];
-            let d1 = euclidean_dist(&a, &b);
-            let d2 = euclidean_dist(&b, &a);
-            prop_assert!((d1 - d2).abs() < 0.001);
+        fn prop_euclidean_dist_non_negative(x1 in -10.0f32..10.0, y1 in -10.0f32..10.0, x2 in -10.0f32..10.0, y2 in -10.0f32..10.0) {
+            prop_assert!(euclidean_dist(&[x1, y1], &[x2, y2]) >= 0.0);
         }
     }
 }

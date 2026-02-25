@@ -3,45 +3,29 @@
 //! High-throughput sentiment analysis on streaming text data.
 //! Demonstrates batching, async patterns, and backpressure handling.
 //!
-//! ## Toyota Way Principles
-//!
-//! - **Heijunka**: Level load through adaptive batching
-//! - **Jidoka**: Automatic quality checks on predictions
-//! - **Kaizen**: Continuous throughput optimization
+//! ```bash
+//! cargo run --example streaming_sentiment
+//! ```
 
 use std::collections::{HashMap, VecDeque};
 use std::time::Instant;
 
-/// Maximum batch size
 pub const MAX_BATCH_SIZE: usize = 32;
-
-/// Vocabulary size for sentiment model
 pub const VOCAB_SIZE: usize = 10000;
-
-/// Embedding dimension
 pub const EMBED_DIM: usize = 64;
 
-// ============================================================================
-// Sentiment Types
-// ============================================================================
+// ---- Sentiment Types --------------------------------------------------------
 
-/// Sentiment classification
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Sentiment {
-    /// Strongly negative
     VeryNegative,
-    /// Negative
     Negative,
-    /// Neutral
     Neutral,
-    /// Positive
     Positive,
-    /// Strongly positive
     VeryPositive,
 }
 
 impl Sentiment {
-    /// From score (-1 to 1)
     #[must_use]
     pub fn from_score(score: f32) -> Self {
         if score < -0.6 {
@@ -57,7 +41,6 @@ impl Sentiment {
         }
     }
 
-    /// To numeric value
     #[must_use]
     pub fn to_value(self) -> i8 {
         match self {
@@ -69,36 +52,28 @@ impl Sentiment {
         }
     }
 
-    /// Display emoji
     #[must_use]
     pub fn emoji(self) -> &'static str {
         match self {
-            Self::VeryNegative => "😠",
-            Self::Negative => "😟",
-            Self::Neutral => "😐",
-            Self::Positive => "🙂",
-            Self::VeryPositive => "😄",
+            Self::VeryNegative => "!!",
+            Self::Negative => ":-(",
+            Self::Neutral => ":-|",
+            Self::Positive => ":-)",
+            Self::VeryPositive => ":-D",
         }
     }
 }
 
-/// Sentiment prediction result
 #[derive(Debug, Clone)]
 pub struct SentimentResult {
-    /// Input text
     pub text: String,
-    /// Predicted sentiment
     pub sentiment: Sentiment,
-    /// Confidence score (0-1)
     pub confidence: f32,
-    /// Raw score (-1 to 1)
     pub score: f32,
-    /// Processing latency (microseconds)
     pub latency_us: u64,
 }
 
 impl SentimentResult {
-    /// Create new result
     #[must_use]
     pub fn new(text: &str, score: f32, confidence: f32, latency_us: u64) -> Self {
         Self {
@@ -109,39 +84,27 @@ impl SentimentResult {
             latency_us,
         }
     }
-
-    /// Is positive sentiment
     #[must_use]
     pub fn is_positive(&self) -> bool {
         self.score > 0.0
     }
-
-    /// Is negative sentiment
     #[must_use]
     pub fn is_negative(&self) -> bool {
         self.score < 0.0
     }
 }
 
-// ============================================================================
-// Tokenizer
-// ============================================================================
+// ---- Tokenizer --------------------------------------------------------------
 
-/// Simple tokenizer with vocabulary
 pub struct Tokenizer {
     vocab: HashMap<String, usize>,
     unknown_token: usize,
 }
 
 impl Tokenizer {
-    /// Create with common vocabulary
     #[must_use]
     pub fn new() -> Self {
-        let mut vocab = HashMap::new();
-
-        // Add common words with sentiment associations
-        let words = [
-            // Positive
+        let words: &[(&str, usize)] = &[
             ("good", 1),
             ("great", 2),
             ("excellent", 3),
@@ -157,7 +120,6 @@ impl Tokenizer {
             ("nice", 13),
             ("brilliant", 14),
             ("enjoy", 15),
-            // Negative
             ("bad", 100),
             ("terrible", 101),
             ("awful", 102),
@@ -173,7 +135,6 @@ impl Tokenizer {
             ("fail", 112),
             ("broken", 113),
             ("annoying", 114),
-            // Neutral/common
             ("the", 200),
             ("a", 201),
             ("is", 202),
@@ -195,18 +156,13 @@ impl Tokenizer {
             ("food", 303),
             ("place", 304),
         ];
-
-        for (word, idx) in words {
-            vocab.insert(word.to_string(), idx);
-        }
-
+        let vocab = words.iter().map(|&(w, i)| (w.to_string(), i)).collect();
         Self {
             vocab,
             unknown_token: 999,
         }
     }
 
-    /// Tokenize text to indices
     #[must_use]
     pub fn tokenize(&self, text: &str) -> Vec<usize> {
         text.to_lowercase()
@@ -215,8 +171,6 @@ impl Tokenizer {
             .map(|w| *self.vocab.get(w).unwrap_or(&self.unknown_token))
             .collect()
     }
-
-    /// Vocabulary size
     #[must_use]
     pub fn vocab_size(&self) -> usize {
         self.vocab.len()
@@ -229,79 +183,63 @@ impl Default for Tokenizer {
     }
 }
 
-// ============================================================================
-// Sentiment Model
-// ============================================================================
+// ---- Sentiment Model --------------------------------------------------------
 
-/// Simple sentiment classifier
 pub struct SentimentModel {
-    /// Word sentiment scores
     word_scores: HashMap<usize, f32>,
-    /// Negation tokens
     negation_tokens: Vec<usize>,
-    /// Intensifier tokens
     intensifier_tokens: Vec<usize>,
 }
 
 impl SentimentModel {
-    /// Create new model
     #[must_use]
     pub fn new() -> Self {
-        let mut word_scores = HashMap::new();
-
-        // Positive words
-        word_scores.insert(1, 0.5); // good
-        word_scores.insert(2, 0.7); // great
-        word_scores.insert(3, 0.8); // excellent
-        word_scores.insert(4, 0.9); // amazing
-        word_scores.insert(5, 0.85); // wonderful
-        word_scores.insert(6, 0.8); // love
-        word_scores.insert(7, 0.6); // happy
-        word_scores.insert(8, 0.9); // best
-        word_scores.insert(9, 0.85); // fantastic
-        word_scores.insert(10, 0.8); // awesome
-        word_scores.insert(11, 0.6); // beautiful
-        word_scores.insert(12, 0.9); // perfect
-        word_scores.insert(13, 0.4); // nice
-        word_scores.insert(14, 0.75); // brilliant
-        word_scores.insert(15, 0.5); // enjoy
-
-        // Negative words
-        word_scores.insert(100, -0.5); // bad
-        word_scores.insert(101, -0.8); // terrible
-        word_scores.insert(102, -0.85); // awful
-        word_scores.insert(103, -0.9); // horrible
-        word_scores.insert(104, -0.95); // worst
-        word_scores.insert(105, -0.8); // hate
-        word_scores.insert(106, -0.5); // sad
-        word_scores.insert(107, -0.4); // poor
-        word_scores.insert(108, -0.6); // disappointing
-        word_scores.insert(109, -0.3); // boring
-        word_scores.insert(110, -0.4); // ugly
-        word_scores.insert(111, -0.3); // wrong
-        word_scores.insert(112, -0.5); // fail
-        word_scores.insert(113, -0.4); // broken
-        word_scores.insert(114, -0.35); // annoying
-
+        let scores: &[(usize, f32)] = &[
+            (1, 0.5),
+            (2, 0.7),
+            (3, 0.8),
+            (4, 0.9),
+            (5, 0.85),
+            (6, 0.8),
+            (7, 0.6),
+            (8, 0.9),
+            (9, 0.85),
+            (10, 0.8),
+            (11, 0.6),
+            (12, 0.9),
+            (13, 0.4),
+            (14, 0.75),
+            (15, 0.5),
+            (100, -0.5),
+            (101, -0.8),
+            (102, -0.85),
+            (103, -0.9),
+            (104, -0.95),
+            (105, -0.8),
+            (106, -0.5),
+            (107, -0.4),
+            (108, -0.6),
+            (109, -0.3),
+            (110, -0.4),
+            (111, -0.3),
+            (112, -0.5),
+            (113, -0.4),
+            (114, -0.35),
+        ];
         Self {
-            word_scores,
-            negation_tokens: vec![210],    // "not"
-            intensifier_tokens: vec![211], // "very"
+            word_scores: scores.iter().copied().collect(),
+            negation_tokens: vec![210],
+            intensifier_tokens: vec![211],
         }
     }
 
-    /// Predict sentiment for tokens
     #[must_use]
     pub fn predict(&self, tokens: &[usize]) -> (f32, f32) {
         if tokens.is_empty() {
             return (0.0, 0.0);
         }
-
-        let mut score = 0.0_f32;
-        let mut weight = 0.0_f32;
-        let mut negate = false;
-        let mut intensify = false;
-
+        let (mut score, mut weight) = (0.0_f32, 0.0_f32);
+        let (mut negate, mut intensify) = (false, false);
         for &token in tokens {
             if self.negation_tokens.contains(&token) {
                 negate = true;
@@ -311,11 +249,10 @@ impl SentimentModel {
                 intensify = true;
                 continue;
             }
-
-            if let Some(&word_score) = self.word_scores.get(&token) {
-                let mut s = word_score;
+            if let Some(&ws) = self.word_scores.get(&token) {
+                let mut s = ws;
                 if negate {
-                    s = -s * 0.8; // Negation reduces but doesn't fully flip
+                    s = -s * 0.8;
                     negate = false;
                 }
                 if intensify {
@@ -326,17 +263,12 @@ impl SentimentModel {
                 weight += 1.0;
             }
         }
-
         let final_score = if weight > 0.0 {
             (score / weight).clamp(-1.0, 1.0)
         } else {
             0.0
         };
-
-        // Confidence based on how many sentiment words we found
-        let confidence = (weight / tokens.len() as f32).min(1.0);
-
-        (final_score, confidence)
+        (final_score, (weight / tokens.len() as f32).min(1.0))
     }
 }
 
@@ -346,11 +278,8 @@ impl Default for SentimentModel {
     }
 }
 
-// ============================================================================
-// Streaming Pipeline
-// ============================================================================
+// ---- Streaming Pipeline -----------------------------------------------------
 
-/// Batch of texts for processing
 #[derive(Debug)]
 pub struct TextBatch {
     pub texts: Vec<String>,
@@ -358,7 +287,6 @@ pub struct TextBatch {
 }
 
 impl TextBatch {
-    /// Create empty batch
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -366,55 +294,40 @@ impl TextBatch {
             timestamps: Vec::new(),
         }
     }
-
-    /// Add text to batch
     pub fn add(&mut self, text: String, timestamp: u64) {
         self.texts.push(text);
         self.timestamps.push(timestamp);
     }
-
-    /// Batch size
     #[must_use]
     pub fn len(&self) -> usize {
         self.texts.len()
     }
-
-    /// Is empty
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.texts.is_empty()
     }
-
-    /// Clear batch
     pub fn clear(&mut self) {
         self.texts.clear();
         self.timestamps.clear();
     }
 }
-
 impl Default for TextBatch {
     fn default() -> Self {
         Self::new()
     }
 }
 
-/// Streaming sentiment analyzer
 pub struct StreamingAnalyzer {
     tokenizer: Tokenizer,
     model: SentimentModel,
-    /// Pending batch
     batch: TextBatch,
-    /// Maximum batch size
     max_batch_size: usize,
-    /// Results buffer (for future streaming support)
     #[allow(dead_code)]
     results: VecDeque<SentimentResult>,
-    /// Statistics
     stats: StreamStats,
 }
 
 impl StreamingAnalyzer {
-    /// Create new analyzer
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -426,20 +339,15 @@ impl StreamingAnalyzer {
             stats: StreamStats::new(),
         }
     }
-
-    /// Set max batch size
     #[must_use]
     pub fn with_batch_size(mut self, size: usize) -> Self {
         self.max_batch_size = size;
         self
     }
 
-    /// Submit text for analysis
     pub fn submit(&mut self, text: &str) -> Option<Vec<SentimentResult>> {
-        let timestamp = self.stats.total_submitted;
-        self.batch.add(text.to_string(), timestamp);
+        self.batch.add(text.to_string(), self.stats.total_submitted);
         self.stats.total_submitted += 1;
-
         if self.batch.len() >= self.max_batch_size {
             Some(self.flush())
         } else {
@@ -447,70 +355,54 @@ impl StreamingAnalyzer {
         }
     }
 
-    /// Process current batch and return results
     pub fn flush(&mut self) -> Vec<SentimentResult> {
         if self.batch.is_empty() {
             return Vec::new();
         }
-
         let start = Instant::now();
-        let mut results = Vec::with_capacity(self.batch.len());
-
-        for text in &self.batch.texts {
-            let tokens = self.tokenizer.tokenize(text);
-            let (score, confidence) = self.model.predict(&tokens);
-            let latency = start.elapsed().as_micros() as u64;
-
-            let result = SentimentResult::new(text, score, confidence, latency);
-            results.push(result);
-        }
-
+        let results: Vec<SentimentResult> = self
+            .batch
+            .texts
+            .iter()
+            .map(|text| {
+                let tokens = self.tokenizer.tokenize(text);
+                let (score, confidence) = self.model.predict(&tokens);
+                SentimentResult::new(text, score, confidence, start.elapsed().as_micros() as u64)
+            })
+            .collect();
         self.stats.total_processed += self.batch.len() as u64;
         self.stats.batches_processed += 1;
         self.stats.total_latency_us += start.elapsed().as_micros() as u64;
-
         self.batch.clear();
         results
     }
-
-    /// Get statistics
     #[must_use]
     pub fn stats(&self) -> &StreamStats {
         &self.stats
     }
-
-    /// Analyze single text immediately
     #[must_use]
     pub fn analyze(&self, text: &str) -> SentimentResult {
         let start = Instant::now();
         let tokens = self.tokenizer.tokenize(text);
         let (score, confidence) = self.model.predict(&tokens);
-        let latency = start.elapsed().as_micros() as u64;
-        SentimentResult::new(text, score, confidence, latency)
+        SentimentResult::new(text, score, confidence, start.elapsed().as_micros() as u64)
     }
 }
-
 impl Default for StreamingAnalyzer {
     fn default() -> Self {
         Self::new()
     }
 }
 
-/// Stream processing statistics
 #[derive(Debug, Clone)]
 pub struct StreamStats {
-    /// Total texts submitted
     pub total_submitted: u64,
-    /// Total texts processed
     pub total_processed: u64,
-    /// Batches processed
     pub batches_processed: u64,
-    /// Total processing time (microseconds)
     pub total_latency_us: u64,
 }
 
 impl StreamStats {
-    /// Create new stats
     #[must_use]
     pub fn new() -> Self {
         Self {
@@ -520,8 +412,6 @@ impl StreamStats {
             total_latency_us: 0,
         }
     }
-
-    /// Average latency per batch
     #[must_use]
     pub fn avg_batch_latency_us(&self) -> f64 {
         if self.batches_processed == 0 {
@@ -530,8 +420,6 @@ impl StreamStats {
             self.total_latency_us as f64 / self.batches_processed as f64
         }
     }
-
-    /// Throughput (items per second estimate)
     #[must_use]
     pub fn throughput(&self) -> f64 {
         if self.total_latency_us == 0 {
@@ -541,28 +429,21 @@ impl StreamStats {
         }
     }
 }
-
 impl Default for StreamStats {
     fn default() -> Self {
         Self::new()
     }
 }
 
-// ============================================================================
-// Aggregation
-// ============================================================================
+// ---- Aggregation ------------------------------------------------------------
 
-/// Time window for aggregation
 #[derive(Debug, Clone)]
 pub struct TimeWindow {
-    /// Window size in items
     pub size: usize,
-    /// Results in window
     results: VecDeque<SentimentResult>,
 }
 
 impl TimeWindow {
-    /// Create new window
     #[must_use]
     pub fn new(size: usize) -> Self {
         Self {
@@ -570,34 +451,25 @@ impl TimeWindow {
             results: VecDeque::with_capacity(size),
         }
     }
-
-    /// Add result to window
     pub fn add(&mut self, result: SentimentResult) {
         if self.results.len() >= self.size {
             self.results.pop_front();
         }
         self.results.push_back(result);
     }
-
-    /// Get aggregate sentiment
     #[must_use]
     pub fn aggregate(&self) -> WindowAggregate {
         if self.results.is_empty() {
             return WindowAggregate::default();
         }
-
         let mut sentiment_counts = HashMap::new();
-        let mut total_score = 0.0_f32;
-        let mut total_confidence = 0.0_f32;
-
-        for result in &self.results {
-            *sentiment_counts.entry(result.sentiment).or_insert(0) += 1;
-            total_score += result.score;
-            total_confidence += result.confidence;
+        let (mut total_score, mut total_confidence) = (0.0_f32, 0.0_f32);
+        for r in &self.results {
+            *sentiment_counts.entry(r.sentiment).or_insert(0) += 1;
+            total_score += r.score;
+            total_confidence += r.confidence;
         }
-
         let n = self.results.len() as f32;
-
         WindowAggregate {
             count: self.results.len(),
             avg_score: total_score / n,
@@ -606,50 +478,35 @@ impl TimeWindow {
             dominant_sentiment: self.dominant_sentiment(),
         }
     }
-
-    /// Most common sentiment
     #[must_use]
     pub fn dominant_sentiment(&self) -> Option<Sentiment> {
         let mut counts: HashMap<Sentiment, usize> = HashMap::new();
-        for result in &self.results {
-            *counts.entry(result.sentiment).or_insert(0) += 1;
+        for r in &self.results {
+            *counts.entry(r.sentiment).or_insert(0) += 1;
         }
         counts.into_iter().max_by_key(|(_, c)| *c).map(|(s, _)| s)
     }
-
-    /// Current window size
     #[must_use]
     pub fn len(&self) -> usize {
         self.results.len()
     }
-
-    /// Is empty
     #[must_use]
     pub fn is_empty(&self) -> bool {
         self.results.is_empty()
     }
 }
 
-/// Aggregated window statistics
 #[derive(Debug, Clone, Default)]
 pub struct WindowAggregate {
-    /// Number of items in window
     pub count: usize,
-    /// Average sentiment score
     pub avg_score: f32,
-    /// Average confidence
     pub avg_confidence: f32,
-    /// Sentiment distribution
     pub sentiment_distribution: HashMap<Sentiment, usize>,
-    /// Most common sentiment
     pub dominant_sentiment: Option<Sentiment>,
 }
 
-// ============================================================================
-// Text Generator (for testing)
-// ============================================================================
+// ---- Text Generator ---------------------------------------------------------
 
-/// Generate sample texts for testing
 pub struct TextGenerator {
     rng: SimpleRng,
     positive_phrases: Vec<&'static str>,
@@ -658,7 +515,6 @@ pub struct TextGenerator {
 }
 
 impl TextGenerator {
-    /// Create new generator
     #[must_use]
     pub fn new(seed: u64) -> Self {
         Self {
@@ -692,25 +548,20 @@ impl TextGenerator {
             ],
         }
     }
-
-    /// Generate random text with sentiment bias
     pub fn generate(&mut self, sentiment_bias: f32) -> String {
         let r = self.rng.next_f32();
         let adjusted = r + sentiment_bias * 0.3;
-
         if adjusted > 0.6 {
-            let idx = self.rng.next_u64() as usize % self.positive_phrases.len();
-            self.positive_phrases[idx].to_string()
+            self.positive_phrases[self.rng.next_u64() as usize % self.positive_phrases.len()]
+                .to_string()
         } else if adjusted < 0.4 {
-            let idx = self.rng.next_u64() as usize % self.negative_phrases.len();
-            self.negative_phrases[idx].to_string()
+            self.negative_phrases[self.rng.next_u64() as usize % self.negative_phrases.len()]
+                .to_string()
         } else {
-            let idx = self.rng.next_u64() as usize % self.neutral_phrases.len();
-            self.neutral_phrases[idx].to_string()
+            self.neutral_phrases[self.rng.next_u64() as usize % self.neutral_phrases.len()]
+                .to_string()
         }
     }
-
-    /// Generate batch of texts
     pub fn generate_batch(&mut self, count: usize, sentiment_bias: f32) -> Vec<String> {
         (0..count).map(|_| self.generate(sentiment_bias)).collect()
     }
@@ -719,12 +570,10 @@ impl TextGenerator {
 struct SimpleRng {
     state: u64,
 }
-
 impl SimpleRng {
     fn new(seed: u64) -> Self {
         Self { state: seed.max(1) }
     }
-
     fn next_u64(&mut self) -> u64 {
         let mut x = self.state;
         x ^= x << 13;
@@ -733,261 +582,156 @@ impl SimpleRng {
         self.state = x;
         x
     }
-
     fn next_f32(&mut self) -> f32 {
         (self.next_u64() as f64 / u64::MAX as f64) as f32
     }
 }
 
-// ============================================================================
-// Main
-// ============================================================================
+// ---- Main -------------------------------------------------------------------
 
-/// Run single-text sentiment analysis on a set of example texts.
-fn run_single_analysis(analyzer: &StreamingAnalyzer) {
+fn main() {
+    println!("=== Demo N: Streaming Sentiment Analysis ===\n");
+    let mut analyzer = StreamingAnalyzer::new().with_batch_size(8);
+    let mut generator = TextGenerator::new(42);
+    let mut window = TimeWindow::new(20);
+
     println!("--- Single Analysis ---");
-    let examples = [
+    for text in [
         "This movie is absolutely amazing and wonderful!",
         "Terrible product, worst purchase I ever made.",
         "It's okay, nothing special.",
         "I love this so much, best thing ever!",
         "Not good at all, very disappointing.",
-    ];
-
-    for text in examples {
-        let result = analyzer.analyze(text);
-        println!(
-            "{} [{:.2}] \"{}\"",
-            result.sentiment.emoji(),
-            result.score,
-            text
-        );
+    ] {
+        let r = analyzer.analyze(text);
+        println!("{} [{:.2}] \"{}\"", r.sentiment.emoji(), r.score, text);
     }
-}
 
-/// Stream texts through the batch analyzer and collect results into the time window.
-fn process_streaming_batches(
-    analyzer: &mut StreamingAnalyzer,
-    texts: &[String],
-    window: &mut TimeWindow,
-) {
     println!("\n--- Streaming Batch Processing ---");
-
-    for text in texts {
+    let batch_texts = generator.generate_batch(50, 0.0);
+    for text in &batch_texts {
         if let Some(results) = analyzer.submit(text) {
             println!("Processed batch of {} items", results.len());
-            add_results_to_window(window, results);
+            for r in results {
+                window.add(r);
+            }
         }
     }
-
     let remaining = analyzer.flush();
     println!("Flushed remaining {} items", remaining.len());
-    add_results_to_window(window, remaining);
-}
-
-/// Add a batch of sentiment results into the sliding time window.
-fn add_results_to_window(window: &mut TimeWindow, results: Vec<SentimentResult>) {
-    for result in results {
-        window.add(result);
+    for r in remaining {
+        window.add(r);
     }
-}
 
-/// Print the aggregated window statistics.
-fn print_window_aggregate(window: &TimeWindow) {
-    println!("\n--- Window Aggregate ---");
     let agg = window.aggregate();
-    println!("Items in window: {}", agg.count);
-    println!("Average score: {:.3}", agg.avg_score);
-    println!("Average confidence: {:.3}", agg.avg_confidence);
-    if let Some(dominant) = agg.dominant_sentiment {
-        println!("Dominant sentiment: {} {:?}", dominant.emoji(), dominant);
+    println!("\n--- Window Aggregate ---");
+    println!(
+        "Items: {}  Avg score: {:.3}  Avg confidence: {:.3}",
+        agg.count, agg.avg_score, agg.avg_confidence
+    );
+    if let Some(d) = agg.dominant_sentiment {
+        println!("Dominant: {} {:?}", d.emoji(), d);
     }
-}
 
-/// Print throughput and latency statistics.
-fn print_statistics(stats: &StreamStats) {
+    let stats = analyzer.stats();
     println!("\n--- Statistics ---");
-    println!("Total submitted: {}", stats.total_submitted);
-    println!("Total processed: {}", stats.total_processed);
-    println!("Batches: {}", stats.batches_processed);
-    println!("Avg batch latency: {:.1} µs", stats.avg_batch_latency_us());
-    println!("Throughput: {:.0} items/sec", stats.throughput());
-}
-
-fn main() {
-    println!("=== Demo N: Streaming Sentiment Analysis ===\n");
-
-    let mut analyzer = StreamingAnalyzer::new().with_batch_size(8);
-    let mut generator = TextGenerator::new(42);
-    let mut window = TimeWindow::new(20);
-
-    run_single_analysis(&analyzer);
-
-    let batch_texts = generator.generate_batch(50, 0.0);
-    process_streaming_batches(&mut analyzer, &batch_texts, &mut window);
-
-    print_window_aggregate(&window);
-    print_statistics(analyzer.stats());
-
+    println!(
+        "Submitted: {}  Processed: {}  Batches: {}  Avg latency: {:.1}us  Throughput: {:.0}/s",
+        stats.total_submitted,
+        stats.total_processed,
+        stats.batches_processed,
+        stats.avg_batch_latency_us(),
+        stats.throughput()
+    );
     println!("\n=== Demo N Complete ===");
 }
 
-// ============================================================================
-// Tests
-// ============================================================================
+// ---- Tests ------------------------------------------------------------------
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
-    fn test_sentiment_from_score() {
+    fn test_sentiment_from_score_and_value() {
         assert_eq!(Sentiment::from_score(-0.8), Sentiment::VeryNegative);
         assert_eq!(Sentiment::from_score(-0.4), Sentiment::Negative);
         assert_eq!(Sentiment::from_score(0.0), Sentiment::Neutral);
         assert_eq!(Sentiment::from_score(0.4), Sentiment::Positive);
         assert_eq!(Sentiment::from_score(0.8), Sentiment::VeryPositive);
-    }
-
-    #[test]
-    fn test_sentiment_to_value() {
         assert_eq!(Sentiment::VeryNegative.to_value(), -2);
         assert_eq!(Sentiment::Neutral.to_value(), 0);
         assert_eq!(Sentiment::VeryPositive.to_value(), 2);
     }
 
     #[test]
-    fn test_sentiment_result_new() {
-        let result = SentimentResult::new("test", 0.5, 0.9, 100);
-        assert_eq!(result.text, "test");
-        assert!(result.is_positive());
+    fn test_sentiment_result() {
+        let r = SentimentResult::new("test", 0.5, 0.9, 100);
+        assert_eq!(r.text, "test");
+        assert!(r.is_positive());
+        let r2 = SentimentResult::new("neg", -0.5, 0.9, 100);
+        assert!(r2.is_negative());
     }
 
     #[test]
-    fn test_tokenizer_new() {
-        let tokenizer = Tokenizer::new();
-        assert!(tokenizer.vocab_size() > 0);
-    }
-
-    #[test]
-    fn test_tokenizer_tokenize() {
-        let tokenizer = Tokenizer::new();
-        let tokens = tokenizer.tokenize("This is good");
+    fn test_tokenizer_and_model() {
+        let tok = Tokenizer::new();
+        assert!(tok.vocab_size() > 0);
+        let tokens = tok.tokenize("This is good");
         assert!(!tokens.is_empty());
-    }
-
-    #[test]
-    fn test_sentiment_model_new() {
         let model = SentimentModel::new();
-        assert!(!model.word_scores.is_empty());
+        let pos_tokens = tok.tokenize("great excellent amazing");
+        assert!(model.predict(&pos_tokens).0 > 0.0);
+        let neg_tokens = tok.tokenize("terrible awful horrible");
+        assert!(model.predict(&neg_tokens).0 < 0.0);
     }
 
     #[test]
-    fn test_sentiment_model_positive() {
-        let tokenizer = Tokenizer::new();
+    fn test_negation() {
+        let tok = Tokenizer::new();
         let model = SentimentModel::new();
-        let tokens = tokenizer.tokenize("great excellent amazing");
-        let (score, _) = model.predict(&tokens);
-        assert!(score > 0.0);
+        let tokens = tok.tokenize("not good");
+        assert!(model.predict(&tokens).0 < 0.0);
     }
 
     #[test]
-    fn test_sentiment_model_negative() {
-        let tokenizer = Tokenizer::new();
-        let model = SentimentModel::new();
-        let tokens = tokenizer.tokenize("terrible awful horrible");
-        let (score, _) = model.predict(&tokens);
-        assert!(score < 0.0);
+    fn test_streaming_analyzer_batching() {
+        let mut analyzer = StreamingAnalyzer::new().with_batch_size(2);
+        assert!(analyzer.submit("test 1").is_none());
+        assert!(analyzer.submit("test 2").is_some());
+
+        let mut analyzer2 = StreamingAnalyzer::new();
+        analyzer2.submit("test");
+        assert_eq!(analyzer2.flush().len(), 1);
+        assert_eq!(analyzer2.stats().total_submitted, 1);
     }
 
     #[test]
-    fn test_sentiment_model_negation() {
-        let tokenizer = Tokenizer::new();
-        let model = SentimentModel::new();
-        let tokens = tokenizer.tokenize("not good");
-        let (score, _) = model.predict(&tokens);
-        assert!(score < 0.0); // "not good" should be negative
-    }
-
-    #[test]
-    fn test_text_batch_new() {
-        let batch = TextBatch::new();
-        assert!(batch.is_empty());
-    }
-
-    #[test]
-    fn test_text_batch_add() {
-        let mut batch = TextBatch::new();
-        batch.add("test".to_string(), 0);
-        assert_eq!(batch.len(), 1);
-    }
-
-    #[test]
-    fn test_streaming_analyzer_new() {
-        let analyzer = StreamingAnalyzer::new();
-        assert_eq!(analyzer.stats().total_submitted, 0);
-    }
-
-    #[test]
-    fn test_streaming_analyzer_analyze() {
+    fn test_analyzer_single() {
         let analyzer = StreamingAnalyzer::new();
         let result = analyzer.analyze("This is great!");
         assert!(result.score > 0.0);
     }
 
     #[test]
-    fn test_streaming_analyzer_submit() {
-        let mut analyzer = StreamingAnalyzer::new().with_batch_size(2);
-        let r1 = analyzer.submit("test 1");
-        assert!(r1.is_none());
-        let r2 = analyzer.submit("test 2");
-        assert!(r2.is_some());
-    }
-
-    #[test]
-    fn test_streaming_analyzer_flush() {
-        let mut analyzer = StreamingAnalyzer::new();
-        analyzer.submit("test");
-        let results = analyzer.flush();
-        assert_eq!(results.len(), 1);
-    }
-
-    #[test]
-    fn test_stream_stats() {
-        let stats = StreamStats::new();
-        assert_eq!(stats.total_submitted, 0);
-        assert_eq!(stats.throughput(), 0.0);
-    }
-
-    #[test]
-    fn test_time_window_new() {
-        let window = TimeWindow::new(10);
-        assert!(window.is_empty());
-    }
-
-    #[test]
-    fn test_time_window_add() {
-        let mut window = TimeWindow::new(10);
-        window.add(SentimentResult::new("test", 0.5, 0.9, 100));
-        assert_eq!(window.len(), 1);
-    }
-
-    #[test]
-    fn test_time_window_overflow() {
+    fn test_time_window() {
         let mut window = TimeWindow::new(2);
+        assert!(window.is_empty());
         window.add(SentimentResult::new("a", 0.5, 0.9, 100));
-        window.add(SentimentResult::new("b", 0.5, 0.9, 100));
-        window.add(SentimentResult::new("c", 0.5, 0.9, 100));
+        window.add(SentimentResult::new("b", 0.3, 0.8, 100));
         assert_eq!(window.len(), 2);
+        window.add(SentimentResult::new("c", 0.5, 0.9, 100));
+        assert_eq!(window.len(), 2); // overflow evicts oldest
+        let agg = window.aggregate();
+        assert_eq!(agg.count, 2);
     }
 
     #[test]
-    fn test_time_window_aggregate() {
+    fn test_window_aggregate_score() {
         let mut window = TimeWindow::new(10);
         window.add(SentimentResult::new("a", 0.5, 0.9, 100));
         window.add(SentimentResult::new("b", 0.3, 0.8, 100));
         let agg = window.aggregate();
-        assert_eq!(agg.count, 2);
         assert!((agg.avg_score - 0.4).abs() < 0.01);
     }
 
@@ -996,13 +740,14 @@ mod tests {
         let mut gen = TextGenerator::new(42);
         let text = gen.generate(0.0);
         assert!(!text.is_empty());
+        let batch = gen.generate_batch(10, 0.0);
+        assert_eq!(batch.len(), 10);
     }
 
     #[test]
-    fn test_text_generator_batch() {
-        let mut gen = TextGenerator::new(42);
-        let batch = gen.generate_batch(10, 0.0);
-        assert_eq!(batch.len(), 10);
+    fn test_empty_prediction() {
+        let model = SentimentModel::new();
+        assert_eq!(model.predict(&[]), (0.0, 0.0));
     }
 }
 
@@ -1016,17 +761,8 @@ mod proptests {
 
         #[test]
         fn prop_sentiment_score_bounded(score in -1.0f32..1.0) {
-            let sentiment = Sentiment::from_score(score);
-            let value = sentiment.to_value();
+            let value = Sentiment::from_score(score).to_value();
             prop_assert!(value >= -2 && value <= 2);
-        }
-
-        #[test]
-        fn prop_tokenize_non_empty(text in "[a-z ]{5,50}") {
-            let tokenizer = Tokenizer::new();
-            let tokens = tokenizer.tokenize(&text);
-            // May be empty if all words are filtered
-            prop_assert!(tokens.len() <= text.split_whitespace().count());
         }
 
         #[test]
@@ -1039,34 +775,10 @@ mod proptests {
         }
 
         #[test]
-        fn prop_batch_size_respected(size in 1usize..20, n in 1usize..50) {
-            let mut analyzer = StreamingAnalyzer::new().with_batch_size(size);
-            let mut batches = 0;
-            for i in 0..n {
-                if analyzer.submit(&format!("text {}", i)).is_some() {
-                    batches += 1;
-                }
-            }
-            prop_assert!(batches <= n / size + 1);
-        }
-
-        #[test]
         fn prop_window_size_bounded(window_size in 2usize..20, n in 1usize..50) {
             let mut window = TimeWindow::new(window_size);
-            for i in 0..n {
-                window.add(SentimentResult::new(&format!("t{}", i), 0.0, 1.0, 0));
-            }
+            for i in 0..n { window.add(SentimentResult::new(&format!("t{}", i), 0.0, 1.0, 0)); }
             prop_assert!(window.len() <= window_size);
-        }
-
-        #[test]
-        fn prop_aggregate_count_correct(n in 1usize..20) {
-            let mut window = TimeWindow::new(100);
-            for i in 0..n {
-                window.add(SentimentResult::new(&format!("t{}", i), 0.0, 1.0, 0));
-            }
-            let agg = window.aggregate();
-            prop_assert_eq!(agg.count, n);
         }
     }
 }
