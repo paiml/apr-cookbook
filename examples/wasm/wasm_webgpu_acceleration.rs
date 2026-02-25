@@ -328,8 +328,8 @@ mod proptests {
                 batch_size: 1024,
             });
 
-            let r1 = pipeline.benchmark_matmul(size1).unwrap();
-            let r2 = pipeline.benchmark_matmul(size2).unwrap();
+            let _r1 = pipeline.benchmark_matmul(size1).unwrap();
+            let _r2 = pipeline.benchmark_matmul(size2).unwrap();
 
             // Larger matrices have more operations
             let flops1 = 2.0 * (size1 as f64).powi(3);

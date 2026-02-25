@@ -212,7 +212,7 @@ mod tests {
         assert!(result2.is_ok());
     }
 
-    fn run_recipe() -> apr_cookbook::Result<()> {
+    fn run_recipe() -> Result<()> {
         let mut ctx = RecipeContext::new("idempotency_test")?;
         let weights = generate_weights(ctx.rng(), 32, 16);
 

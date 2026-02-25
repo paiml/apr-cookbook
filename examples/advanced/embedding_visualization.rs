@@ -1031,7 +1031,7 @@ mod tests {
 
     #[test]
     fn test_pipeline_new() {
-        let pipeline = VisualizationPipeline::new();
+        let _pipeline = VisualizationPipeline::new();
         // Just verify it creates successfully
         assert!(true);
     }

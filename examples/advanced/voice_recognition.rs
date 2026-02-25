@@ -859,7 +859,7 @@ mod tests {
 
     #[test]
     fn test_voice_recognizer_new() {
-        let recognizer = VoiceRecognizer::new(42);
+        let _recognizer = VoiceRecognizer::new(42);
         // Just verify it creates successfully
         assert!(true);
     }

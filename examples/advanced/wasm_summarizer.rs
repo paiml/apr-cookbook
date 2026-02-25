@@ -803,7 +803,7 @@ mod proptests {
         #[test]
         fn prop_word_count_non_negative(text in "[a-z ]{0,100}") {
             let doc = Document::new("T", &text);
-            prop_assert!(doc.word_count() >= 0);
+            let _ = doc.word_count();
         }
 
         #[test]
