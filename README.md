@@ -13,7 +13,7 @@
 
 ![](.github/apr-cookbook-hero.svg)
 
-202 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
+203 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
 
 ## Installation
 
@@ -69,7 +69,7 @@ cargo run --example 2>&1 | head -50
 | [GPU](examples/gpu/) | 7 | FlashAttention, CUDA, tensor cores, multi-GPU, memory pool, PTX |
 | [SIMD](examples/simd/) | 5 | trueno ops, matrix operations, vectorized inference |
 | [Distillation](examples/distillation/) | 5 | Knowledge transfer, attention transfer, self-distillation |
-| [CLI](examples/cli/) | 8 | apr-info, apr-bench, apr-convert, apr-serve, apr-diff, apr-tui |
+| [CLI](examples/cli/) | 9 | apr-info, apr-bench, apr-convert, apr-compile, apr-serve, apr-diff, apr-tui |
 | [Monitoring](examples/monitoring/) | 6 | Explainability, audit trail, cost tracking, drift detection, cbtop |
 | [Speech](examples/speech/) | 5 | Whisper transcription, streaming ASR, VAD, diarization, multilingual |
 | [Distributed](examples/distributed/) | 5 | Multi-node inference, sharding, ring-allreduce, pipeline parallel, gossip |

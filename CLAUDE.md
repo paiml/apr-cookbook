@@ -85,7 +85,7 @@ Framework Layer (dependencies)
 | gpu | `examples/gpu/` | FlashAttention, CUDA, multi-GPU |
 | simd | `examples/simd/` | trueno SIMD ops, vectorized inference |
 | distillation | `examples/distillation/` | Knowledge transfer, pruning |
-| cli | `examples/cli/` | apr-info, apr-bench, apr-convert, apr-serve |
+| cli | `examples/cli/` | apr-info, apr-bench, apr-convert, apr-compile, apr-serve |
 | monitoring | `examples/monitoring/` | Inference explainability, hash chain audit |
 | speech | `examples/speech/` | whisper.apr transcription |
 | distributed | `examples/distributed/` | repartir multi-node inference |
