@@ -458,6 +458,10 @@ name = "cli_apr_diff"
 path = "examples/cli/cli_apr_diff.rs"
 
 [[example]]
+name = "cli_apr_compile"
+path = "examples/cli/cli_apr_compile.rs"
+
+[[example]]
 name = "cli_apr_tui"
 path = "examples/cli/cli_apr_tui.rs"
 
