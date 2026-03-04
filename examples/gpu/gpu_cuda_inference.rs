@@ -338,8 +338,10 @@ mod proptests {
             let gpu_time = model.infer(&input).unwrap().inference_time_ms;
             let cpu_time = simulate_cpu_inference(&config);
 
-            // GPU is only faster for sufficiently large workloads
-            if layers * hidden * batch > 30000 && hidden > 256 {
+            // GPU is only faster when computation dominates kernel launch overhead (0.1ms).
+            // ops / 10e12 * 1000 < ops / 100e9 * 1000 requires ops >> 0.1 * 10e12 / 1000 = 1e9
+            let ops = layers * hidden * hidden * batch;
+            if ops > 1_000_000_000 {
                 prop_assert!(gpu_time < cpu_time);
             }
         }
