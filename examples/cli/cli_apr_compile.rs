@@ -76,7 +76,10 @@ struct CompileReport {
 /// Known compilation targets (APR-SPEC §4.16.4).
 const TARGETS: &[(&str, &str)] = &[
     ("x86_64-unknown-linux-gnu", "Linux x86_64 (glibc)"),
-    ("x86_64-unknown-linux-musl", "Linux x86_64 (musl, fully static)"),
+    (
+        "x86_64-unknown-linux-musl",
+        "Linux x86_64 (musl, fully static)",
+    ),
     ("aarch64-unknown-linux-gnu", "Linux ARM64"),
     ("x86_64-apple-darwin", "macOS x86_64"),
     ("aarch64-apple-darwin", "macOS ARM64 (Apple Silicon)"),
@@ -217,7 +220,11 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     println!("======================================");
     println!();
     println!("Model:        {}", model_name);
-    println!("Model size:   {} bytes ({:.2} KB)", model_bytes.len(), model_bytes.len() as f64 / 1024.0);
+    println!(
+        "Model size:   {} bytes ({:.2} KB)",
+        model_bytes.len(),
+        model_bytes.len() as f64 / 1024.0
+    );
     println!("Target:       {}", target);
     println!("Output:       {}", output_path);
     println!("Release:      {}", config.release);
@@ -277,10 +284,21 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     println!("Project dir:          {}", project_dir.display());
     println!("Estimated binary:     {}", estimated_size);
     let rustflags_str = rustflags.join(" ");
-    println!("RUSTFLAGS:            {}", if rustflags.is_empty() { "(none)" } else { &rustflags_str });
+    println!(
+        "RUSTFLAGS:            {}",
+        if rustflags.is_empty() {
+            "(none)"
+        } else {
+            &rustflags_str
+        }
+    );
     println!();
     println!("To actually build:");
-    println!("  cd {} && cargo build{}", project_dir.display(), if config.release { " --release" } else { "" });
+    println!(
+        "  cd {} && cargo build{}",
+        project_dir.display(),
+        if config.release { " --release" } else { "" }
+    );
 
     if config.verbose {
         println!();
@@ -356,7 +374,11 @@ fn main() {{
 fn estimate_binary_size(model_size: usize, release: bool, strip: bool) -> String {
     // Rough estimates based on observed behavior
     let overhead = if release {
-        if strip { 700_000 } else { 2_000_000 }
+        if strip {
+            700_000
+        } else {
+            2_000_000
+        }
     } else {
         12_000_000
     };
