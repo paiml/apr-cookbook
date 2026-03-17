@@ -154,6 +154,14 @@ name = "acceleration_quantized_matmul"
 path = "examples/acceleration/acceleration_quantized_matmul.rs"
 
 [[example]]
+name = "acceleration_compression_benchmark"
+path = "examples/acceleration/acceleration_compression_benchmark.rs"
+
+[[example]]
+name = "acceleration_cache_tiling"
+path = "examples/acceleration/acceleration_cache_tiling.rs"
+
+[[example]]
 name = "apr_info"
 path = "examples/cli/apr_info.rs"
 
@@ -394,6 +402,10 @@ path = "examples/gpu/gpu_memory_pool.rs"
 name = "gpu_ptx_analysis"
 path = "examples/gpu/gpu_ptx_analysis.rs"
 
+[[example]]
+name = "gpu_vulkan_inference"
+path = "examples/gpu/gpu_vulkan_inference.rs"
+
 # Category J: SIMD Acceleration (additional)
 [[example]]
 name = "trueno_simd_ops"
@@ -414,6 +426,10 @@ path = "examples/simd/simd_quantized_operations.rs"
 [[example]]
 name = "simd_auto_vectorization"
 path = "examples/simd/simd_auto_vectorization.rs"
+
+[[example]]
+name = "simd_avx_vnni_int8_inference"
+path = "examples/simd/simd_avx_vnni_int8_inference.rs"
 
 # Category K: Model Distillation
 [[example]]
@@ -464,6 +480,34 @@ path = "examples/cli/cli_apr_compile.rs"
 [[example]]
 name = "cli_apr_tui"
 path = "examples/cli/cli_apr_tui.rs"
+
+[[example]]
+name = "cli_apr_decrypt"
+path = "examples/cli/cli_apr_decrypt.rs"
+
+[[example]]
+name = "cli_apr_diagnose"
+path = "examples/cli/cli_apr_diagnose.rs"
+
+[[example]]
+name = "cli_apr_list"
+path = "examples/cli/cli_apr_list.rs"
+
+[[example]]
+name = "cli_apr_rm"
+path = "examples/cli/cli_apr_rm.rs"
+
+[[example]]
+name = "cli_apr_runs"
+path = "examples/cli/cli_apr_runs.rs"
+
+[[example]]
+name = "cli_apr_tokenize"
+path = "examples/cli/cli_apr_tokenize.rs"
+
+[[example]]
+name = "cli_apr_ptx_map"
+path = "examples/cli/cli_apr_ptx_map.rs"
 
 # --- Benchmarks ---
 
@@ -582,6 +626,14 @@ path = "examples/monitoring/inference_cost_tracking.rs"
 name = "cbtop_headless"
 path = "examples/monitoring/cbtop_headless.rs"
 
+[[example]]
+name = "monitoring_energy_estimation"
+path = "examples/monitoring/monitoring_energy_estimation.rs"
+
+[[example]]
+name = "monitoring_memory_profiler"
+path = "examples/monitoring/monitoring_memory_profiler.rs"
+
 # --- Category N: Speech Recognition ---
 
 [[example]]
@@ -653,6 +705,10 @@ path = "examples/inference/dynamic_batch_with_sla.rs"
 [[example]]
 name = "inference_apr_run"
 path = "examples/inference/inference_apr_run.rs"
+
+[[example]]
+name = "inference_mmap_lazy_load"
+path = "examples/inference/inference_mmap_lazy_load.rs"
 
 # --- Category Q: Model Serving ---
 
@@ -909,6 +965,10 @@ path = "examples/analysis/analysis_tensors.rs"
 [[example]]
 name = "analysis_qa_capability"
 path = "examples/analysis/analysis_qa_capability.rs"
+
+[[example]]
+name = "analysis_model_fingerprint"
+path = "examples/analysis/analysis_model_fingerprint.rs"
 
 [[example]]
 name = "format_import_hf"
