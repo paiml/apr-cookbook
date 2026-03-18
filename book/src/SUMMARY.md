@@ -118,6 +118,7 @@
 - [Memory Management](./recipes/i-gpu/memory-management.md)
 - [Memory Pool](./recipes/i-gpu/memory-pool.md)
 - [PTX Analysis](./recipes/i-gpu/ptx-analysis.md)
+- [Vulkan Inference (Intel Arc)](./recipes/i-gpu/vulkan-inference.md)
 
 # Category J: SIMD Acceleration
 
@@ -126,6 +127,7 @@
 - [Vectorized Inference](./recipes/j-simd/vectorized-inference.md)
 - [Quantized Operations](./recipes/j-simd/quantized-operations.md)
 - [Auto-Vectorization](./recipes/j-simd/auto-vectorization.md)
+- [AVX-VNNI Int8 Inference](./recipes/j-simd/avx-vnni-int8.md)
 
 # Category K: Model Distillation
 
@@ -147,6 +149,13 @@
 - [apr-serve](./recipes/l-cli/apr-serve.md)
 - [apr-diff](./recipes/l-cli/apr-diff.md)
 - [apr-tui](./recipes/l-cli/apr-tui.md)
+- [apr-decrypt](./recipes/l-cli/apr-decrypt.md)
+- [apr-diagnose](./recipes/l-cli/apr-diagnose.md)
+- [apr-list](./recipes/l-cli/apr-list.md)
+- [apr-rm](./recipes/l-cli/apr-rm.md)
+- [apr-runs](./recipes/l-cli/apr-runs.md)
+- [apr-tokenize](./recipes/l-cli/apr-tokenize.md)
+- [apr-ptx-map](./recipes/l-cli/apr-ptx-map.md)
 
 # Category M: Inference Monitoring
 
@@ -157,6 +166,8 @@
 - [Latency Histogram](./recipes/m-monitoring/latency-histogram.md)
 - [Drift Detection](./recipes/m-monitoring/drift-detection.md)
 - [Headless cbtop](./recipes/m-monitoring/cbtop-headless.md)
+- [Energy Estimation](./recipes/m-monitoring/energy-estimation.md)
+- [Memory Profiler](./recipes/m-monitoring/memory-profiler.md)
 
 # Category N: Speech Recognition
 
@@ -191,6 +202,7 @@
 - [Model Pipeline](./recipes/p-inference/pipeline.md)
 - [Quantized Comparison](./recipes/p-inference/quantized-comparison.md)
 - [APR Run](./recipes/p-inference/apr-run.md)
+- [Mmap Lazy Loading](./recipes/p-inference/mmap-lazy-load.md)
 
 # Category Q: Model Serving
 
@@ -264,6 +276,7 @@
 - [Tensors](./recipes/t-analysis/tensors.md)
 - [Slice](./recipes/t-analysis/slice.md)
 - [QA Capability](./recipes/t-analysis/qa-capability.md)
+- [Model Fingerprint](./recipes/t-analysis/model-fingerprint.md)
 
 # Category U: Format Operations
 
@@ -296,6 +309,8 @@
 - [Kernel Fusion](./recipes/y-acceleration/kernel-fusion.md)
 - [Memory-Mapped Inference](./recipes/y-acceleration/mmap-inference.md)
 - [Quantized MatMul](./recipes/y-acceleration/quantized-matmul.md)
+- [Compression Benchmark](./recipes/y-acceleration/compression-benchmark.md)
+- [Cache Tiling](./recipes/y-acceleration/cache-tiling.md)
 
 ---
 
