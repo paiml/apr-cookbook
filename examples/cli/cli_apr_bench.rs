@@ -27,30 +27,39 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = BenchConfig::parse();
     run_benchmark(&config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-bench", about = "Benchmark APR model inference")]
 struct BenchConfig {
+    /// Path to .apr model file
     model_path: Option<String>,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Number of iterations
+    #[arg(short = 'n', long, default_value_t = 100)]
     iterations: usize,
+
+    /// Warmup iterations
+    #[arg(short, long, default_value_t = 10)]
     warmup: usize,
+
+    /// Batch size
+    #[arg(short, long = "batch", default_value_t = 1)]
     batch_size: usize,
+
+    /// Output as JSON
+    #[arg(short, long)]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -86,70 +95,9 @@ struct MemoryStats {
     model_mb: f64,
 }
 
-fn parse_args(args: &[String]) -> Result<BenchConfig> {
-    let mut config = BenchConfig {
-        model_path: None,
-        demo: false,
-        iterations: 100,
-        warmup: 10,
-        batch_size: 1,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--json" | "-j" => config.json = true,
-            "--iterations" | "-n" => {
-                i += 1;
-                if i < args.len() {
-                    config.iterations = args[i].parse().unwrap_or(100);
-                }
-            }
-            "--warmup" | "-w" => {
-                i += 1;
-                if i < args.len() {
-                    config.warmup = args[i].parse().unwrap_or(10);
-                }
-            }
-            "--batch" | "-b" => {
-                i += 1;
-                if i < args.len() {
-                    config.batch_size = args[i].parse().unwrap_or(1);
-                }
-            }
-            path if !path.starts_with('-') => {
-                config.model_path = Some(path.to_string());
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-bench - Benchmark APR model inference");
-    println!();
-    println!("USAGE:");
-    println!("    apr-bench [OPTIONS] <MODEL_PATH>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help           Print help information");
-    println!("    -d, --demo           Run with demo model");
-    println!("    -n, --iterations N   Number of iterations (default: 100)");
-    println!("    -w, --warmup N       Warmup iterations (default: 10)");
-    println!("    -b, --batch N        Batch size (default: 1)");
-    println!("    -j, --json           Output as JSON");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-bench model.apr");
-    println!("    apr-bench --demo --iterations 1000");
-    println!("    apr-bench -n 100 -b 32 model.apr");
+#[cfg(test)]
+fn parse_args(args: &[String]) -> std::result::Result<BenchConfig, clap::Error> {
+    BenchConfig::try_parse_from(args)
 }
 
 fn run_benchmark(config: &BenchConfig) -> Result<()> {
@@ -161,7 +109,7 @@ fn run_benchmark(config: &BenchConfig) -> Result<()> {
     } else if let Some(path) = &config.model_path {
         path.clone()
     } else {
-        print_help();
+        println!("No model provided. Use --demo or specify a model path.");
         return Ok(());
     };
 
@@ -349,7 +297,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results("test", &times, &config).unwrap();
@@ -369,7 +316,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results("test", &times, &config).unwrap();
@@ -415,8 +361,7 @@ mod proptests {
                 warmup: 0,
                 batch_size: 1,
                 json: false,
-                help: false,
-            };
+                };
 
             let results = calculate_results("test", &times, &config).unwrap();
 

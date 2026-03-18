@@ -31,19 +31,13 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
-use std::env;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
+    let config = DiagnoseConfig::parse();
 
     run_diagnose(&config)
 }
@@ -52,59 +46,24 @@ fn main() -> Result<()> {
 // Configuration
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+/// Automated Five Whys diagnosis on a training checkpoint
+#[derive(Debug, Clone, Parser)]
+#[command(
+    name = "apr-diagnose",
+    about = "Automated Five Whys diagnosis on a training checkpoint"
+)]
 struct DiagnoseConfig {
+    /// Checkpoint file path
+    #[arg(value_name = "CHECKPOINT")]
     checkpoint_path: Option<String>,
+
+    /// Maximum Why depth (range: 1-5)
+    #[arg(long, default_value_t = 5)]
     depth: usize,
+
+    /// Run with synthetic checkpoint (high loss scenario)
+    #[arg(long)]
     demo: bool,
-    help: bool,
-}
-
-fn parse_args(args: &[String]) -> Result<DiagnoseConfig> {
-    let mut config = DiagnoseConfig {
-        checkpoint_path: None,
-        depth: 5,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--depth" => {
-                i += 1;
-                if i < args.len() {
-                    config.depth = args[i].parse().unwrap_or(5);
-                }
-            }
-            path if !path.starts_with('-') => {
-                config.checkpoint_path = Some(path.to_string());
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-diagnose - Automated Five Whys diagnosis on a training checkpoint");
-    println!();
-    println!("USAGE:");
-    println!("    apr-diagnose [OPTIONS] <CHECKPOINT>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help       Print help information");
-    println!("    -d, --demo       Run with synthetic checkpoint (high loss scenario)");
-    println!("    --depth N        Maximum Why depth (default: 5, range: 1-5)");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-diagnose checkpoint_epoch_10.apr");
-    println!("    apr-diagnose --demo");
-    println!("    apr-diagnose --demo --depth 3");
 }
 
 // ---------------------------------------------------------------------------
@@ -567,7 +526,7 @@ fn run_diagnose(config: &DiagnoseConfig) -> Result<()> {
     } else if let Some(path) = &config.checkpoint_path {
         load_checkpoint_from_file(path)?
     } else {
-        print_help();
+        println!("No checkpoint provided. Use --demo for a synthetic example or provide a checkpoint path.");
         return Ok(());
     };
 
@@ -615,44 +574,28 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_defaults() {
-        let args = vec!["apr-diagnose".to_string()];
-        let config = parse_args(&args).expect("should parse");
+    fn test_clap_parse_defaults() {
+        let config = DiagnoseConfig::parse_from(["apr-diagnose"]);
         assert!(config.checkpoint_path.is_none());
         assert!(!config.demo);
-        assert!(!config.help);
         assert_eq!(config.depth, 5);
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec!["apr-diagnose".to_string(), "--demo".to_string()];
-        let config = parse_args(&args).expect("should parse");
+    fn test_clap_parse_demo() {
+        let config = DiagnoseConfig::parse_from(["apr-diagnose", "--demo"]);
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_help() {
-        let args = vec!["apr-diagnose".to_string(), "-h".to_string()];
-        let config = parse_args(&args).expect("should parse");
-        assert!(config.help);
-    }
-
-    #[test]
-    fn test_parse_args_depth() {
-        let args = vec![
-            "apr-diagnose".to_string(),
-            "--depth".to_string(),
-            "3".to_string(),
-        ];
-        let config = parse_args(&args).expect("should parse");
+    fn test_clap_parse_depth() {
+        let config = DiagnoseConfig::parse_from(["apr-diagnose", "--depth", "3"]);
         assert_eq!(config.depth, 3);
     }
 
     #[test]
-    fn test_parse_args_checkpoint_path() {
-        let args = vec!["apr-diagnose".to_string(), "checkpoint.apr".to_string()];
-        let config = parse_args(&args).expect("should parse");
+    fn test_clap_parse_checkpoint_path() {
+        let config = DiagnoseConfig::parse_from(["apr-diagnose", "checkpoint.apr"]);
         assert_eq!(config.checkpoint_path, Some("checkpoint.apr".to_string()));
     }
 
@@ -893,7 +836,6 @@ mod tests {
             checkpoint_path: None,
             depth: 5,
             demo: true,
-            help: false,
         };
         assert!(run_diagnose(&config).is_ok());
     }
@@ -904,9 +846,8 @@ mod tests {
             checkpoint_path: None,
             depth: 5,
             demo: false,
-            help: false,
         };
-        // Should succeed (prints help and returns Ok)
+        // Should succeed (prints message and returns Ok)
         assert!(run_diagnose(&config).is_ok());
     }
 

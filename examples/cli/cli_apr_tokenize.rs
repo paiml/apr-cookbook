@@ -30,20 +30,13 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::env;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = TokenizeConfig::parse();
     run_tokenize(&config)
 }
 
@@ -51,13 +44,35 @@ fn main() -> Result<()> {
 // Configuration
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(
+    name = "apr-tokenize",
+    about = "Train a BPE tokenizer on a text corpus"
+)]
 struct TokenizeConfig {
+    /// Path to the text corpus file
     corpus_path: Option<String>,
+
+    /// Target vocabulary size
+    #[arg(short = 'n', long = "vocab-size", default_value_t = 64)]
     vocab_size: usize,
-    method: TokenMethod,
+
+    /// Tokenization method: bpe|unigram
+    #[arg(short, long, default_value = "bpe")]
+    method: String,
+
+    /// Run with built-in demo corpus
+    #[arg(long, short = 'd')]
     demo: bool,
-    help: bool,
+}
+
+impl TokenizeConfig {
+    fn token_method(&self) -> TokenMethod {
+        match self.method.as_str() {
+            "unigram" => TokenMethod::Unigram,
+            _ => TokenMethod::Bpe,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -100,70 +115,12 @@ impl BpeTrainer {
 }
 
 // ---------------------------------------------------------------------------
-// Argument parsing
+// Argument parsing (test helper)
 // ---------------------------------------------------------------------------
 
-fn parse_args(args: &[String]) -> Result<TokenizeConfig> {
-    let mut config = TokenizeConfig {
-        corpus_path: None,
-        vocab_size: 64,
-        method: TokenMethod::Bpe,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--vocab-size" | "-n" => {
-                i += 1;
-                if i < args.len() {
-                    config.vocab_size = args[i].parse().unwrap_or(64);
-                }
-            }
-            "--method" | "-m" => {
-                i += 1;
-                if i < args.len() {
-                    config.method = match args[i].as_str() {
-                        "unigram" => TokenMethod::Unigram,
-                        _ => TokenMethod::Bpe,
-                    };
-                }
-            }
-            path if !path.starts_with('-') => {
-                config.corpus_path = Some(path.to_string());
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-tokenize - Train a BPE tokenizer on a text corpus");
-    println!();
-    println!("USAGE:");
-    println!("    apr-tokenize [OPTIONS] [CORPUS_PATH]");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help             Print help information");
-    println!("    -d, --demo             Run with built-in demo corpus");
-    println!("    -n, --vocab-size N     Target vocabulary size (default: 64)");
-    println!("    -m, --method METHOD    Tokenization method: bpe|unigram (default: bpe)");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-tokenize --demo");
-    println!("    apr-tokenize --demo --vocab-size 80");
-    println!("    apr-tokenize corpus.txt --method bpe");
+#[cfg(test)]
+fn parse_args(args: &[String]) -> std::result::Result<TokenizeConfig, clap::Error> {
+    TokenizeConfig::try_parse_from(args)
 }
 
 // ---------------------------------------------------------------------------
@@ -404,7 +361,7 @@ fn run_tokenize(config: &TokenizeConfig) -> Result<()> {
             CookbookError::invalid_format(format!("Failed to read corpus {}: {}", path, e))
         })?
     } else {
-        print_help();
+        println!("No corpus provided. Use --demo or specify a corpus path.");
         return Ok(());
     };
 
@@ -426,7 +383,7 @@ fn run_tokenize(config: &TokenizeConfig) -> Result<()> {
     println!("  Characters:    {}", char_count);
     println!("  Words:         {}", word_count);
     println!("  Unique chars:  {}", unique_chars);
-    println!("  Method:        {}", config.method.as_str());
+    println!("  Method:        {}", config.token_method().as_str());
     println!("  Target vocab:  {}", config.vocab_size);
     println!();
 
@@ -564,7 +521,7 @@ mod tests {
             "unigram".to_string(),
         ];
         let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.method, TokenMethod::Unigram);
+        assert_eq!(config.token_method(), TokenMethod::Unigram);
     }
 
     #[test]
@@ -694,9 +651,8 @@ mod tests {
         let config = TokenizeConfig {
             corpus_path: None,
             vocab_size: 50,
-            method: TokenMethod::Bpe,
+            method: "bpe".to_string(),
             demo: true,
-            help: false,
         };
         assert!(run_tokenize(&config).is_ok());
     }

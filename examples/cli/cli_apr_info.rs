@@ -27,31 +27,28 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-
-    // Parse arguments
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
-    // Run the info command
+    let config = CliConfig::parse();
     run_info(&config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-info", about = "Inspect APR model files")]
 struct CliConfig {
+    /// Model file path
     model_path: Option<String>,
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+    /// Show detailed information
+    #[arg(long, short = 'v')]
     verbose: bool,
+    /// Output as JSON
+    #[arg(long, short = 'j')]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -76,56 +73,6 @@ struct ModelMetadata {
     parameters: usize,
 }
 
-fn parse_args(args: &[String]) -> Result<CliConfig> {
-    let mut config = CliConfig {
-        model_path: None,
-        demo: false,
-        verbose: false,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--verbose" | "-v" => config.verbose = true,
-            "--json" | "-j" => config.json = true,
-            path if !path.starts_with('-') => {
-                config.model_path = Some(path.to_string());
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-info - Inspect APR model files");
-    println!();
-    println!("USAGE:");
-    println!("    apr-info [OPTIONS] <MODEL_PATH>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help       Print help information");
-    println!("    -d, --demo       Run with demo model");
-    println!("    -v, --verbose    Show detailed information");
-    println!("    -j, --json       Output as JSON");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-info model.apr");
-    println!("    apr-info --demo");
-    println!("    apr-info --json model.apr");
-}
-
 fn run_info(config: &CliConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_info")?;
 
@@ -135,7 +82,7 @@ fn run_info(config: &CliConfig) -> Result<()> {
     } else if let Some(path) = &config.model_path {
         read_model_info(path)?
     } else {
-        print_help();
+        eprintln!("Error: provide a model path or use --demo");
         return Ok(());
     };
 
@@ -257,42 +204,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_empty() {
-        let args = vec!["apr-info".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_clap_empty() {
+        let config = CliConfig::try_parse_from(["apr-info"]).unwrap();
 
         assert!(config.model_path.is_none());
         assert!(!config.demo);
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec!["apr-info".to_string(), "--demo".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_clap_demo() {
+        let config = CliConfig::try_parse_from(["apr-info", "--demo"]).unwrap();
 
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_model_path() {
-        let args = vec!["apr-info".to_string(), "model.apr".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_clap_model_path() {
+        let config = CliConfig::try_parse_from(["apr-info", "model.apr"]).unwrap();
 
         assert_eq!(config.model_path, Some("model.apr".to_string()));
     }
 
     #[test]
-    fn test_parse_args_verbose() {
-        let args = vec!["apr-info".to_string(), "-v".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_clap_verbose() {
+        let config = CliConfig::try_parse_from(["apr-info", "-v"]).unwrap();
 
         assert!(config.verbose);
     }
 
     #[test]
-    fn test_parse_args_json() {
-        let args = vec!["apr-info".to_string(), "--json".to_string()];
-        let config = parse_args(&args).unwrap();
+    fn test_clap_json() {
+        let config = CliConfig::try_parse_from(["apr-info", "--json"]).unwrap();
 
         assert!(config.json);
     }
@@ -330,18 +272,10 @@ mod proptests {
         #![proptest_config(ProptestConfig::with_cases(50))]
 
         #[test]
-        fn prop_parse_help_flag(args in prop::collection::vec("[a-z]{1,5}", 0..5)) {
-            let mut all_args = vec!["apr-info".to_string()];
-            all_args.push("--help".to_string());
-            for a in args {
-                all_args.push(a);
-            }
-
-            let config = parse_args(&all_args);
-            // Should either succeed or fail gracefully
-            if let Ok(c) = config {
-                prop_assert!(c.help);
-            }
+        fn prop_parse_model_path(path in "[a-z]{1,10}\\.apr") {
+            let config = CliConfig::try_parse_from(["apr-info", &path]).unwrap();
+            prop_assert_eq!(config.model_path, Some(path));
+            prop_assert!(!config.demo);
         }
     }
 }

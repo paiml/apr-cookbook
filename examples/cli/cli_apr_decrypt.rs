@@ -29,18 +29,12 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
-use std::env;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
+    let config = DecryptConfig::parse();
 
     if config.demo {
         return run_demo();
@@ -53,80 +47,28 @@ fn main() -> Result<()> {
 // Configuration
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+/// Decrypt APR model weights (APR-SPEC encryption envelope)
+#[derive(Debug, Clone, Parser)]
+#[command(
+    name = "apr-decrypt",
+    about = "Decrypt .apr model weights (APR-SPEC encryption envelope)"
+)]
 struct DecryptConfig {
+    /// Input encrypted file
+    #[arg(value_name = "ENCRYPTED.apr")]
     input: Option<String>,
+
+    /// Output path for decrypted model
+    #[arg(short, long)]
     output: Option<String>,
+
+    /// Decryption password
+    #[arg(short, long)]
     password: Option<String>,
+
+    /// Run with demo encrypted payload
+    #[arg(long)]
     demo: bool,
-    help: bool,
-}
-
-fn parse_args(args: &[String]) -> Result<DecryptConfig> {
-    let mut config = DecryptConfig {
-        input: None,
-        output: None,
-        password: None,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--password" | "-p" => {
-                i += 1;
-                if i < args.len() {
-                    config.password = Some(args[i].clone());
-                }
-            }
-            "--output" | "-o" => {
-                i += 1;
-                if i < args.len() {
-                    config.output = Some(args[i].clone());
-                }
-            }
-            path if !path.starts_with('-') => {
-                if config.input.is_none() {
-                    config.input = Some(path.to_string());
-                }
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-decrypt - Decrypt .apr model weights (APR-SPEC encryption envelope)");
-    println!();
-    println!("USAGE:");
-    println!("    apr-decrypt [OPTIONS] <ENCRYPTED.apr>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help            Print help information");
-    println!("    -d, --demo            Run with demo encrypted payload");
-    println!("    -p, --password PASS   Decryption password");
-    println!("    -o, --output PATH     Output path for decrypted model");
-    println!();
-    println!("ENVELOPE FORMAT:");
-    println!("    [ciphertext (N bytes) || MAC (32 bytes)]");
-    println!("    Key derivation: blake3::derive_key(\"apr-encrypt-v1\", password)");
-    println!("    Keystream:      blake3(key || counter) for each 32-byte block");
-    println!("    MAC:            blake3 keyed hash of ciphertext");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-decrypt model.apr.enc -p my-secret -o model.apr");
-    println!("    apr-decrypt --demo");
 }
 
 // ---------------------------------------------------------------------------
@@ -332,8 +274,9 @@ fn run_demo() -> Result<()> {
 
 fn run_decrypt(config: &DecryptConfig) -> Result<()> {
     let Some(input_path) = config.input.clone() else {
-        print_help();
-        return Ok(());
+        return Err(CookbookError::invalid_format(
+            "Input file required: provide <ENCRYPTED.apr> path",
+        ));
     };
 
     let Some(password) = config.password.clone() else {
@@ -466,40 +409,29 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec!["apr-decrypt".to_string(), "--demo".to_string()];
-        let config = parse_args(&args).expect("parse");
+    fn test_clap_parse_demo() {
+        let config = DecryptConfig::parse_from(["apr-decrypt", "--demo"]);
         assert!(config.demo);
-        assert!(!config.help);
     }
 
     #[test]
-    fn test_parse_args_full() {
-        let args = vec![
-            "apr-decrypt".to_string(),
-            "model.apr.enc".to_string(),
-            "-p".to_string(),
-            "secret".to_string(),
-            "-o".to_string(),
-            "model.apr".to_string(),
-        ];
-        let config = parse_args(&args).expect("parse");
+    fn test_clap_parse_full() {
+        let config = DecryptConfig::parse_from([
+            "apr-decrypt",
+            "model.apr.enc",
+            "-p",
+            "secret",
+            "-o",
+            "model.apr",
+        ]);
         assert_eq!(config.input, Some("model.apr.enc".to_string()));
         assert_eq!(config.password, Some("secret".to_string()));
         assert_eq!(config.output, Some("model.apr".to_string()));
     }
 
     #[test]
-    fn test_parse_args_help() {
-        let args = vec!["apr-decrypt".to_string(), "-h".to_string()];
-        let config = parse_args(&args).expect("parse");
-        assert!(config.help);
-    }
-
-    #[test]
-    fn test_parse_args_unknown_flag() {
-        let args = vec!["apr-decrypt".to_string(), "--bogus".to_string()];
-        let result = parse_args(&args);
+    fn test_clap_parse_unknown_flag() {
+        let result = DecryptConfig::try_parse_from(["apr-decrypt", "--bogus"]);
         assert!(result.is_err());
     }
 

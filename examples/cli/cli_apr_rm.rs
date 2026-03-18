@@ -30,30 +30,36 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
-use std::env;
 use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
+    let config = RmConfig::parse();
 
     run_rm(&config)
 }
 
-#[derive(Debug, Clone)]
+/// Remove a cached APR model
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-rm", about = "Remove a cached APR model")]
 struct RmConfig {
+    /// Model name to remove
+    #[arg(value_name = "MODEL_NAME")]
     model_name: Option<String>,
+
+    /// Skip confirmation prompt
+    #[arg(short, long)]
     force: bool,
+
+    /// Show what would be removed without deleting
+    #[arg(short = 'n', long)]
     dry_run: bool,
+
+    /// Run demo with fake cache
+    #[arg(long)]
     demo: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -73,57 +79,6 @@ struct RemovalResult {
     remaining_bytes: u64,
 }
 
-fn parse_args(args: &[String]) -> Result<RmConfig> {
-    let mut config = RmConfig {
-        model_name: None,
-        force: false,
-        dry_run: false,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--force" | "-f" => config.force = true,
-            "--dry-run" | "-n" => config.dry_run = true,
-            name if !name.starts_with('-') => {
-                config.model_name = Some(name.to_string());
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-rm - Remove a cached APR model");
-    println!();
-    println!("USAGE:");
-    println!("    apr-rm [OPTIONS] <MODEL_NAME>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help       Print help information");
-    println!("    -d, --demo       Run demo with fake cache");
-    println!("    -f, --force      Skip confirmation prompt");
-    println!("    -n, --dry-run    Show what would be removed without deleting");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-rm whisper-tiny");
-    println!("    apr-rm --force llama-3.2-1b");
-    println!("    apr-rm --demo");
-    println!("    apr-rm --demo --dry-run");
-}
-
 fn run_rm(config: &RmConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_rm")?;
 
@@ -132,7 +87,7 @@ fn run_rm(config: &RmConfig) -> Result<()> {
     }
 
     let Some(model_name) = &config.model_name else {
-        print_help();
+        println!("No model specified. Use --demo to see a simulated removal.");
         return Ok(());
     };
 
@@ -320,9 +275,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_defaults() {
-        let args = vec!["apr-rm".to_string()];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_defaults() {
+        let config = RmConfig::parse_from(["apr-rm"]);
         assert!(!config.demo);
         assert!(!config.force);
         assert!(!config.dry_run);
@@ -330,35 +284,28 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec!["apr-rm".to_string(), "--demo".to_string()];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_demo() {
+        let config = RmConfig::parse_from(["apr-rm", "--demo"]);
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_force() {
-        let args = vec![
-            "apr-rm".to_string(),
-            "-f".to_string(),
-            "my-model".to_string(),
-        ];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_force() {
+        let config = RmConfig::parse_from(["apr-rm", "-f", "my-model"]);
         assert!(config.force);
         assert_eq!(config.model_name, Some("my-model".to_string()));
     }
 
     #[test]
-    fn test_parse_args_dry_run() {
-        let args = vec!["apr-rm".to_string(), "--dry-run".to_string()];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_dry_run() {
+        let config = RmConfig::parse_from(["apr-rm", "--dry-run"]);
         assert!(config.dry_run);
     }
 
     #[test]
-    fn test_parse_args_unknown() {
-        let args = vec!["apr-rm".to_string(), "--badarg".to_string()];
-        assert!(parse_args(&args).is_err());
+    fn test_clap_parse_unknown() {
+        let result = RmConfig::try_parse_from(["apr-rm", "--badarg"]);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -412,7 +359,6 @@ mod tests {
             force: true,
             dry_run: false,
             demo: true,
-            help: false,
         };
         assert!(run_rm(&config).is_ok());
     }
@@ -424,7 +370,6 @@ mod tests {
             force: false,
             dry_run: true,
             demo: true,
-            help: false,
         };
         assert!(run_rm(&config).is_ok());
     }

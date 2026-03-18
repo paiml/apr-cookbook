@@ -31,20 +31,13 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
-use std::env;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = PtxMapConfig::parse();
     run_ptx_map(&config)
 }
 
@@ -52,12 +45,22 @@ fn main() -> Result<()> {
 // Configuration
 // ---------------------------------------------------------------------------
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(
+    name = "apr-ptx-map",
+    about = "Map model layers to PTX kernel dispatches (Mieruka)"
+)]
 struct PtxMapConfig {
+    /// Path to .apr model file
     model_path: Option<String>,
+
+    /// Only show kernels matching this filter string
+    #[arg(short = 'k', long = "kernel-filter")]
     kernel_filter: Option<String>,
+
+    /// Run with synthetic demo model
+    #[arg(long, short = 'd')]
     demo: bool,
-    help: bool,
 }
 
 // ---------------------------------------------------------------------------
@@ -121,59 +124,12 @@ impl fmt::Display for InstructionCategory {
 }
 
 // ---------------------------------------------------------------------------
-// Argument parsing
+// Argument parsing (test helper)
 // ---------------------------------------------------------------------------
 
-fn parse_args(args: &[String]) -> Result<PtxMapConfig> {
-    let mut config = PtxMapConfig {
-        model_path: None,
-        kernel_filter: None,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--kernel-filter" | "-k" => {
-                i += 1;
-                if i < args.len() {
-                    config.kernel_filter = Some(args[i].clone());
-                }
-            }
-            path if !path.starts_with('-') => {
-                config.model_path = Some(path.to_string());
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-ptx-map - Map model layers to PTX kernel dispatches (Mieruka)");
-    println!();
-    println!("USAGE:");
-    println!("    apr-ptx-map [OPTIONS] [MODEL_PATH]");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help                Print help information");
-    println!("    -d, --demo                Run with synthetic demo model");
-    println!("    -k, --kernel-filter STR   Only show kernels matching STR");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-ptx-map --demo");
-    println!("    apr-ptx-map --demo --kernel-filter attention");
-    println!("    apr-ptx-map model.apr");
+#[cfg(test)]
+fn parse_args(args: &[String]) -> std::result::Result<PtxMapConfig, clap::Error> {
+    PtxMapConfig::try_parse_from(args)
 }
 
 // ---------------------------------------------------------------------------
@@ -452,7 +408,7 @@ fn run_ptx_map(config: &PtxMapConfig) -> Result<()> {
     } else if let Some(path) = &config.model_path {
         create_file_mappings(path)?
     } else {
-        print_help();
+        println!("No model provided. Use --demo or specify a model path.");
         return Ok(());
     };
 
@@ -793,7 +749,6 @@ mod tests {
             model_path: None,
             kernel_filter: None,
             demo: true,
-            help: false,
         };
         assert!(run_ptx_map(&config).is_ok());
     }
@@ -804,7 +759,6 @@ mod tests {
             model_path: None,
             kernel_filter: Some("attention".to_string()),
             demo: true,
-            help: false,
         };
         assert!(run_ptx_map(&config).is_ok());
     }
