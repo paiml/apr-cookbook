@@ -31,38 +31,33 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::env;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = RunsConfig::parse();
     run_runs(&config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-runs", about = "List, show, and compare training runs")]
 struct RunsConfig {
-    subcommand: Subcommand,
-    run_id: Option<String>,
-    compare_id: Option<String>,
-    demo: bool,
-    help: bool,
-}
+    /// Subcommand: list, show, compare
+    #[arg(default_value = "list")]
+    subcommand: String,
 
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum Subcommand {
-    List,
-    Show,
-    Compare,
+    /// First run ID (for show/compare)
+    run_id: Option<String>,
+
+    /// Second run ID (for compare)
+    compare_id: Option<String>,
+
+    /// Generate demo training runs
+    #[arg(long, short)]
+    demo: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -77,73 +72,9 @@ struct TrainingRun {
     hyperparams: HashMap<String, String>,
 }
 
-fn parse_args(args: &[String]) -> Result<RunsConfig> {
-    let mut config = RunsConfig {
-        subcommand: Subcommand::List,
-        run_id: None,
-        compare_id: None,
-        demo: false,
-        help: false,
-    };
-
-    let mut positional = 0;
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "list" if positional == 0 => {
-                config.subcommand = Subcommand::List;
-                positional += 1;
-            }
-            "show" if positional == 0 => {
-                config.subcommand = Subcommand::Show;
-                positional += 1;
-            }
-            "compare" if positional == 0 => {
-                config.subcommand = Subcommand::Compare;
-                positional += 1;
-            }
-            arg if !arg.starts_with('-') => {
-                if config.run_id.is_none() {
-                    config.run_id = Some(arg.to_string());
-                } else if config.compare_id.is_none() {
-                    config.compare_id = Some(arg.to_string());
-                }
-                positional += 1;
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-runs - List, show, and compare training runs");
-    println!();
-    println!("USAGE:");
-    println!("    apr-runs [OPTIONS] [SUBCOMMAND] [ARGS]");
-    println!();
-    println!("SUBCOMMANDS:");
-    println!("    list                    List all training runs (default)");
-    println!("    show <RUN_ID>           Show detailed view of a run");
-    println!("    compare <ID_A> <ID_B>   Side-by-side comparison of two runs");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help    Print help information");
-    println!("    -d, --demo    Generate demo training runs");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-runs --demo");
-    println!("    apr-runs --demo show run-001");
-    println!("    apr-runs --demo compare run-001 run-003");
+#[cfg(test)]
+fn parse_args(args: &[String]) -> std::result::Result<RunsConfig, clap::Error> {
+    RunsConfig::try_parse_from(args)
 }
 
 fn run_runs(config: &RunsConfig) -> Result<()> {
@@ -158,20 +89,20 @@ fn run_runs(config: &RunsConfig) -> Result<()> {
 
     ctx.record_metric("run_count", runs.len() as i64);
 
-    match config.subcommand {
-        Subcommand::List => print_run_list(&runs),
-        Subcommand::Show => {
+    match config.subcommand.as_str() {
+        "show" => {
             let run_id = config
                 .run_id
                 .as_deref()
                 .unwrap_or_else(|| runs.first().map_or("run-001", |r| r.id.as_str()));
             print_run_detail(&runs, run_id)?;
         }
-        Subcommand::Compare => {
+        "compare" => {
             let id_a = config.run_id.as_deref().unwrap_or("run-001");
             let id_b = config.compare_id.as_deref().unwrap_or("run-003");
             print_run_comparison(&runs, id_a, id_b)?;
         }
+        _ => print_run_list(&runs),
     }
 
     Ok(())
@@ -487,7 +418,7 @@ mod tests {
     fn test_parse_args_defaults() {
         let args = vec!["apr-runs".to_string()];
         let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.subcommand, Subcommand::List);
+        assert_eq!(config.subcommand, "list");
         assert!(!config.demo);
         assert!(config.run_id.is_none());
     }
@@ -507,7 +438,7 @@ mod tests {
             "run-001".to_string(),
         ];
         let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.subcommand, Subcommand::Show);
+        assert_eq!(config.subcommand, "show");
         assert_eq!(config.run_id, Some("run-001".to_string()));
     }
 
@@ -520,7 +451,7 @@ mod tests {
             "run-003".to_string(),
         ];
         let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.subcommand, Subcommand::Compare);
+        assert_eq!(config.subcommand, "compare");
         assert_eq!(config.run_id, Some("run-001".to_string()));
         assert_eq!(config.compare_id, Some("run-003".to_string()));
     }
@@ -593,11 +524,10 @@ mod tests {
     #[test]
     fn test_run_list_demo() {
         let config = RunsConfig {
-            subcommand: Subcommand::List,
+            subcommand: "list".to_string(),
             run_id: None,
             compare_id: None,
             demo: true,
-            help: false,
         };
         assert!(run_runs(&config).is_ok());
     }
@@ -605,11 +535,10 @@ mod tests {
     #[test]
     fn test_run_show_demo() {
         let config = RunsConfig {
-            subcommand: Subcommand::Show,
+            subcommand: "show".to_string(),
             run_id: Some("run-001".to_string()),
             compare_id: None,
             demo: true,
-            help: false,
         };
         assert!(run_runs(&config).is_ok());
     }
@@ -617,11 +546,10 @@ mod tests {
     #[test]
     fn test_run_compare_demo() {
         let config = RunsConfig {
-            subcommand: Subcommand::Compare,
+            subcommand: "compare".to_string(),
             run_id: Some("run-001".to_string()),
             compare_id: Some("run-003".to_string()),
             demo: true,
-            help: false,
         };
         assert!(run_runs(&config).is_ok());
     }
@@ -629,11 +557,10 @@ mod tests {
     #[test]
     fn test_run_show_missing_id() {
         let config = RunsConfig {
-            subcommand: Subcommand::Show,
+            subcommand: "show".to_string(),
             run_id: Some("run-999".to_string()),
             compare_id: None,
             demo: true,
-            help: false,
         };
         assert!(run_runs(&config).is_ok());
     }

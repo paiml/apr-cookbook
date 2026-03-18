@@ -27,30 +27,45 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = ConvertConfig::parse();
     run_convert(&config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-convert", about = "Convert between model formats")]
 struct ConvertConfig {
+    /// Input model file path
     input_path: Option<String>,
+
+    /// Output file path
+    #[arg(short = 'o', long = "output")]
     output_path: Option<String>,
-    output_format: OutputFormat,
+
+    /// Output format (apr, gguf, safetensors)
+    #[arg(short = 'f', long = "format", default_value = "apr")]
+    output_format_str: String,
+
+    /// Quantization level (q4_0, q8_0, fp16)
+    #[arg(short, long)]
     quantize: Option<String>,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Verbose output
+    #[arg(short, long)]
     verbose: bool,
-    help: bool,
+}
+
+impl ConvertConfig {
+    fn output_format(&self) -> OutputFormat {
+        parse_output_format(&self.output_format_str)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -96,81 +111,9 @@ fn parse_output_format(s: &str) -> OutputFormat {
     }
 }
 
-/// Get the next argument value safely
-fn get_next_arg(args: &[String], i: usize) -> Option<String> {
-    args.get(i + 1).cloned()
-}
-
-fn parse_args(args: &[String]) -> Result<ConvertConfig> {
-    let mut config = ConvertConfig {
-        input_path: None,
-        output_path: None,
-        output_format: OutputFormat::Apr,
-        quantize: None,
-        demo: false,
-        verbose: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        let arg = args[i].as_str();
-        match arg {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--verbose" | "-v" => config.verbose = true,
-            "--format" | "-f" => {
-                if let Some(val) = get_next_arg(args, i) {
-                    config.output_format = parse_output_format(&val);
-                    i += 1;
-                }
-            }
-            "--quantize" | "-q" => {
-                config.quantize = get_next_arg(args, i);
-                if config.quantize.is_some() {
-                    i += 1;
-                }
-            }
-            "--output" | "-o" => {
-                config.output_path = get_next_arg(args, i);
-                if config.output_path.is_some() {
-                    i += 1;
-                }
-            }
-            _ if !arg.starts_with('-') && config.input_path.is_none() => {
-                config.input_path = Some(arg.to_string());
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!("apr-convert - Convert between model formats");
-    println!();
-    println!("USAGE:");
-    println!("    apr-convert [OPTIONS] <INPUT>");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help             Print help information");
-    println!("    -d, --demo             Run with demo model");
-    println!("    -v, --verbose          Verbose output");
-    println!("    -f, --format FORMAT    Output format (apr, gguf, safetensors)");
-    println!("    -o, --output PATH      Output file path");
-    println!("    -q, --quantize LEVEL   Quantization (q4_0, q8_0, fp16)");
-    println!();
-    println!("SUPPORTED FORMATS:");
-    println!("    apr         - APR native format");
-    println!("    gguf        - GGML Universal Format");
-    println!("    safetensors - HuggingFace SafeTensors");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-convert model.safetensors -f apr");
-    println!("    apr-convert model.apr -f gguf -q q4_0");
-    println!("    apr-convert --demo -f gguf");
+#[cfg(test)]
+fn parse_args(args: &[String]) -> std::result::Result<ConvertConfig, clap::Error> {
+    ConvertConfig::try_parse_from(args)
 }
 
 /// Load input bytes from config (demo mode or file)
@@ -221,7 +164,7 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
 
     // Load input
     let Some((input_path, input_bytes)) = load_input(config) else {
-        print_help();
+        println!("No input provided. Use --demo or specify an input file.");
         return Ok(());
     };
 
@@ -239,7 +182,7 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
     // Convert
     let output_bytes = convert(
         &input_bytes,
-        config.output_format,
+        config.output_format(),
         config.quantize.as_deref(),
     )?;
 
@@ -247,7 +190,7 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
     let output_path = config
         .output_path
         .clone()
-        .unwrap_or_else(|| generate_output_path(&input_path, config.output_format));
+        .unwrap_or_else(|| generate_output_path(&input_path, config.output_format()));
     let actual_output_path = write_output(&mut ctx, &output_path, &output_bytes, config.demo)?;
 
     // Record metrics
@@ -285,7 +228,7 @@ fn print_result(
     println!(
         "Output: {} ({})",
         output_path,
-        config.output_format.as_str()
+        config.output_format().as_str()
     );
     println!();
     println!("Input size:  {} bytes", input_bytes.len());
@@ -373,7 +316,7 @@ mod tests {
         ];
         let config = parse_args(&args).unwrap();
 
-        assert_eq!(config.output_format, OutputFormat::Gguf);
+        assert_eq!(config.output_format(), OutputFormat::Gguf);
     }
 
     #[test]

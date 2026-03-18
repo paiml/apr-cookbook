@@ -6,29 +6,32 @@
 //! ## QA: Build, test, clippy, fmt PASS. Proptests (100+ cases).
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
-use std::env;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-    if config.help {
-        print_help();
-        return Ok(());
-    }
+    let config = DiffConfig::parse();
     run_diff(&config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-diff", about = "Compare two APR model files")]
 struct DiffConfig {
+    /// First model path
     model_a: Option<String>,
+    /// Second model path
     model_b: Option<String>,
+    /// Demo mode
+    #[arg(long, short = 'd')]
     demo: bool,
+    /// Detailed info
+    #[arg(long, short = 'v')]
     verbose: bool,
+    /// Drift threshold
+    #[arg(long, short = 't', default_value_t = 0.01)]
     threshold: f64,
-    help: bool,
 }
 
 #[derive(Debug, Clone)]
@@ -98,49 +101,6 @@ fn count_by_status(diffs: &[TensorDiff], status: &TensorStatus) -> usize {
     diffs.iter().filter(|d| d.status == *status).count()
 }
 
-fn parse_args(args: &[String]) -> Result<DiffConfig> {
-    let mut c = DiffConfig {
-        model_a: None,
-        model_b: None,
-        demo: false,
-        verbose: false,
-        threshold: 0.01,
-        help: false,
-    };
-    let (mut pc, mut i) = (0, 1);
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => c.help = true,
-            "--demo" | "-d" => c.demo = true,
-            "--verbose" | "-v" => c.verbose = true,
-            "--threshold" | "-t" => {
-                i += 1;
-                if i < args.len() {
-                    c.threshold = args[i].parse().unwrap_or(0.01);
-                }
-            }
-            p if !p.starts_with('-') => {
-                if pc == 0 {
-                    c.model_a = Some(p.into());
-                } else if pc == 1 {
-                    c.model_b = Some(p.into());
-                }
-                pc += 1;
-            }
-            _ => {}
-        }
-        i += 1;
-    }
-    Ok(c)
-}
-
-fn print_help() {
-    println!(
-        "apr-diff - Compare two APR model files\n\nUSAGE: apr-diff [OPTIONS] <MODEL_A> <MODEL_B>\n"
-    );
-    println!("OPTIONS:\n  -h, --help      Print help\n  -d, --demo      Demo models\n  -v, --verbose   Detailed info\n  -t, --threshold Drift threshold (default: 0.01)");
-}
-
 fn run_diff(config: &DiffConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_diff")?;
     let (sa, sb) = if config.demo {
@@ -148,7 +108,7 @@ fn run_diff(config: &DiffConfig) -> Result<()> {
     } else if let (Some(a), Some(b)) = (&config.model_a, &config.model_b) {
         (load_snapshot(a)?, load_snapshot(b)?)
     } else {
-        print_help();
+        eprintln!("Error: provide two model paths or use --demo");
         return Ok(());
     };
     println!(
@@ -467,20 +427,30 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_args() {
-        let c1 = parse_args(&["x".into()]).expect("ok");
-        assert!(c1.model_a.is_none() && !c1.demo);
-        let c2 = parse_args(&["x".into(), "--demo".into()]).expect("ok");
-        assert!(c2.demo);
-        let c3 = parse_args(&["x".into(), "a.apr".into(), "b.apr".into()]).expect("ok");
-        assert_eq!(c3.model_a, Some("a.apr".into()));
-        assert_eq!(c3.model_b, Some("b.apr".into()));
-        let c4 = parse_args(&["x".into(), "--threshold".into(), "0.05".into()]).expect("ok");
-        assert!((c4.threshold - 0.05).abs() < 1e-10);
-        let c5 = parse_args(&["x".into(), "-v".into()]).expect("ok");
-        assert!(c5.verbose);
-        let c6 = parse_args(&["x".into(), "-h".into()]).expect("ok");
-        assert!(c6.help);
+    fn test_clap_defaults() {
+        let c = DiffConfig::try_parse_from(["apr-diff"]).expect("ok");
+        assert!(c.model_a.is_none() && !c.demo);
+    }
+    #[test]
+    fn test_clap_demo() {
+        let c = DiffConfig::try_parse_from(["apr-diff", "--demo"]).expect("ok");
+        assert!(c.demo);
+    }
+    #[test]
+    fn test_clap_positional_paths() {
+        let c = DiffConfig::try_parse_from(["apr-diff", "a.apr", "b.apr"]).expect("ok");
+        assert_eq!(c.model_a, Some("a.apr".into()));
+        assert_eq!(c.model_b, Some("b.apr".into()));
+    }
+    #[test]
+    fn test_clap_threshold() {
+        let c = DiffConfig::try_parse_from(["apr-diff", "--threshold", "0.05"]).expect("ok");
+        assert!((c.threshold - 0.05).abs() < 1e-10);
+    }
+    #[test]
+    fn test_clap_verbose() {
+        let c = DiffConfig::try_parse_from(["apr-diff", "-v"]).expect("ok");
+        assert!(c.verbose);
     }
     #[test]
     fn test_demo_snapshots() {

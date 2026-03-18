@@ -29,29 +29,42 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 use std::collections::hash_map::DefaultHasher;
-use std::env;
 use std::hash::{Hash, Hasher};
 
 fn main() -> Result<()> {
-    let args: Vec<String> = env::args().collect();
-    let config = parse_args(&args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
+    let config = ListConfig::parse();
 
     run_list(&config)
 }
 
-#[derive(Debug, Clone)]
+/// List cached APR models (Ollama-like UX)
+#[derive(Debug, Clone, Parser)]
+#[command(name = "apr-list", about = "List cached APR models (Ollama-like UX)")]
 struct ListConfig {
-    format: OutputFormat,
-    sort_by: SortField,
+    /// Output in JSON format
+    #[arg(long)]
+    json: bool,
+
+    /// Sort by field: name, size, downloaded, last-used
+    #[arg(short, long, value_enum, default_value_t = SortField::Name)]
+    sort: SortField,
+
+    /// Show demo cached models
+    #[arg(long)]
     demo: bool,
-    help: bool,
+}
+
+impl ListConfig {
+    fn format(&self) -> OutputFormat {
+        if self.json {
+            OutputFormat::Json
+        } else {
+            OutputFormat::Table
+        }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -60,11 +73,12 @@ enum OutputFormat {
     Json,
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, clap::ValueEnum)]
 enum SortField {
     Name,
     Size,
     Downloaded,
+    #[value(name = "last-used")]
     LastUsed,
 }
 
@@ -78,66 +92,6 @@ struct CachedModel {
     path: String,
 }
 
-fn parse_args(args: &[String]) -> Result<ListConfig> {
-    let mut config = ListConfig {
-        format: OutputFormat::Table,
-        sort_by: SortField::Name,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i < args.len() {
-        match args[i].as_str() {
-            "--help" | "-h" => config.help = true,
-            "--demo" | "-d" => config.demo = true,
-            "--json" => config.format = OutputFormat::Json,
-            "--sort" | "-s" => {
-                i += 1;
-                if i < args.len() {
-                    config.sort_by = parse_sort_field(&args[i]);
-                }
-            }
-            _ => {
-                return Err(CookbookError::invalid_format(format!(
-                    "Unknown argument: {}",
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn parse_sort_field(s: &str) -> SortField {
-    match s {
-        "size" => SortField::Size,
-        "downloaded" => SortField::Downloaded,
-        "last-used" | "last_used" => SortField::LastUsed,
-        _ => SortField::Name,
-    }
-}
-
-fn print_help() {
-    println!("apr-list - List cached APR models (Ollama-like UX)");
-    println!();
-    println!("USAGE:");
-    println!("    apr-list [OPTIONS]");
-    println!();
-    println!("OPTIONS:");
-    println!("    -h, --help          Print help information");
-    println!("    -d, --demo          Show demo cached models");
-    println!("    --json              Output in JSON format");
-    println!("    -s, --sort FIELD    Sort by: name, size, downloaded, last-used");
-    println!();
-    println!("EXAMPLES:");
-    println!("    apr-list --demo");
-    println!("    apr-list --demo --json");
-    println!("    apr-list --demo --sort size");
-}
-
 fn run_list(config: &ListConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_list")?;
 
@@ -149,9 +103,10 @@ fn run_list(config: &ListConfig) -> Result<()> {
         return Ok(());
     };
 
-    sort_models(&mut models, config.sort_by);
+    sort_models(&mut models, config.sort);
 
-    match config.format {
+    let format = config.format();
+    match format {
         OutputFormat::Table => print_table(&models),
         OutputFormat::Json => print_json(&models)?,
     }
@@ -160,7 +115,7 @@ fn run_list(config: &ListConfig) -> Result<()> {
     ctx.record_metric("model_count", models.len() as i64);
     ctx.record_metric("total_size_bytes", total_size as i64);
 
-    if config.format == OutputFormat::Table {
+    if format == OutputFormat::Table {
         println!();
         println!(
             "Total: {} model(s), {}",
@@ -275,48 +230,35 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_defaults() {
-        let args = vec!["apr-list".to_string()];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_defaults() {
+        let config = ListConfig::parse_from(["apr-list"]);
         assert!(!config.demo);
-        assert!(!config.help);
-        assert_eq!(config.format, OutputFormat::Table);
-        assert_eq!(config.sort_by, SortField::Name);
+        assert_eq!(config.format(), OutputFormat::Table);
+        assert_eq!(config.sort, SortField::Name);
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec!["apr-list".to_string(), "--demo".to_string()];
-        let config = parse_args(&args).expect("parse ok");
+    fn test_clap_parse_demo() {
+        let config = ListConfig::parse_from(["apr-list", "--demo"]);
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_json() {
-        let args = vec![
-            "apr-list".to_string(),
-            "--demo".to_string(),
-            "--json".to_string(),
-        ];
-        let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.format, OutputFormat::Json);
+    fn test_clap_parse_json() {
+        let config = ListConfig::parse_from(["apr-list", "--demo", "--json"]);
+        assert_eq!(config.format(), OutputFormat::Json);
     }
 
     #[test]
-    fn test_parse_args_sort() {
-        let args = vec![
-            "apr-list".to_string(),
-            "--sort".to_string(),
-            "size".to_string(),
-        ];
-        let config = parse_args(&args).expect("parse ok");
-        assert_eq!(config.sort_by, SortField::Size);
+    fn test_clap_parse_sort() {
+        let config = ListConfig::parse_from(["apr-list", "--sort", "size"]);
+        assert_eq!(config.sort, SortField::Size);
     }
 
     #[test]
-    fn test_parse_args_unknown() {
-        let args = vec!["apr-list".to_string(), "--badarg".to_string()];
-        assert!(parse_args(&args).is_err());
+    fn test_clap_parse_unknown() {
+        let result = ListConfig::try_parse_from(["apr-list", "--badarg"]);
+        assert!(result.is_err());
     }
 
     #[test]
@@ -388,10 +330,9 @@ mod tests {
     #[test]
     fn test_run_list_demo_table() {
         let config = ListConfig {
-            format: OutputFormat::Table,
-            sort_by: SortField::Name,
+            json: false,
+            sort: SortField::Name,
             demo: true,
-            help: false,
         };
         assert!(run_list(&config).is_ok());
     }
@@ -399,10 +340,9 @@ mod tests {
     #[test]
     fn test_run_list_demo_json() {
         let config = ListConfig {
-            format: OutputFormat::Json,
-            sort_by: SortField::Name,
+            json: true,
+            sort: SortField::Name,
             demo: true,
-            help: false,
         };
         assert!(run_list(&config).is_ok());
     }
