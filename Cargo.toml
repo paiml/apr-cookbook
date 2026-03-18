@@ -175,6 +175,10 @@ name = "create_apr_from_scratch"
 path = "examples/creation/create_apr_from_scratch.rs"
 
 [[example]]
+name = "create_demo_model"
+path = "examples/creation/create_demo_model.rs"
+
+[[example]]
 name = "create_apr_linear_regression"
 path = "examples/creation/create_apr_linear_regression.rs"
 
