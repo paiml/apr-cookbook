@@ -1,0 +1,495 @@
+{
+  "tree_hash": "c4dd3034f8f26a1f947ac34756ffa2ba139f6805",
+  "pmat_version": "3.5.1",
+  "timestamp": "2026-02-25T18:01:18.448499639Z",
+  "report": {
+    "files_with_dead_code": [
+      {
+        "file_path": "examples/speech/speech_vad.rs",
+        "dead_items": [
+          {
+            "name": "VadFrame",
+            "kind": "Suppressed",
+            "line": 87,
+            "column": 1,
+            "message": "struct `VadFrame` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.6700167504187605
+      },
+      {
+        "file_path": "examples/speech/whisper_streaming.rs",
+        "dead_items": [
+          {
+            "name": "StreamingTranscriber",
+            "kind": "Suppressed",
+            "line": 52,
+            "column": 1,
+            "message": "struct `StreamingTranscriber` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.7782101167315175
+      },
+      {
+        "file_path": "examples/format/format_migration_pipeline.rs",
+        "dead_items": [
+          {
+            "name": "TensorMapping",
+            "kind": "Suppressed",
+            "line": 100,
+            "column": 1,
+            "message": "struct `TensorMapping` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "ExportManifest",
+            "kind": "Suppressed",
+            "line": 542,
+            "column": 1,
+            "message": "struct `ExportManifest` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.9259259259259258
+      },
+      {
+        "file_path": "examples/analysis/analysis_diff.rs",
+        "dead_items": [
+          {
+            "name": "DiffResult",
+            "kind": "Suppressed",
+            "line": 52,
+            "column": 1,
+            "message": "struct `DiffResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.881057268722467
+      },
+      {
+        "file_path": "examples/monitoring/inference_cost_tracking.rs",
+        "dead_items": [
+          {
+            "name": "InferenceRecord",
+            "kind": "Suppressed",
+            "line": 216,
+            "column": 1,
+            "message": "struct `InferenceRecord` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "spent",
+            "kind": "Suppressed",
+            "line": 424,
+            "column": 1,
+            "message": "fn `spent` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.63441712926249
+      },
+      {
+        "file_path": "examples/api/api_streaming_inference.rs",
+        "dead_items": [
+          {
+            "name": "StreamConfig",
+            "kind": "Suppressed",
+            "line": 88,
+            "column": 1,
+            "message": "struct `StreamConfig` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.384083044982699
+      },
+      {
+        "file_path": "examples/wasm/wasm_web_worker.rs",
+        "dead_items": [
+          {
+            "name": "Worker",
+            "kind": "Suppressed",
+            "line": 153,
+            "column": 1,
+            "message": "struct `Worker` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.13314447592068
+      },
+      {
+        "file_path": "examples/analysis/analysis_tree.rs",
+        "dead_items": [
+          {
+            "name": "new_leaf",
+            "kind": "Suppressed",
+            "line": 44,
+            "column": 1,
+            "message": "fn `new_leaf` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.092896174863388
+      },
+      {
+        "file_path": "examples/inference/chat_kv_cache.rs",
+        "dead_items": [
+          {
+            "name": "KVEntry",
+            "kind": "Suppressed",
+            "line": 39,
+            "column": 1,
+            "message": "struct `KVEntry` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.7532956685499058
+      },
+      {
+        "file_path": "examples/gpu/gpu_cuda_inference.rs",
+        "dead_items": [
+          {
+            "name": "CudaInput",
+            "kind": "Suppressed",
+            "line": 129,
+            "column": 1,
+            "message": "struct `CudaInput` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.098901098901099
+      },
+      {
+        "file_path": "examples/format/format_publish.rs",
+        "dead_items": [
+          {
+            "name": "PublishManifest",
+            "kind": "Suppressed",
+            "line": 21,
+            "column": 1,
+            "message": "struct `PublishManifest` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.8146639511201629
+      },
+      {
+        "file_path": "examples/inference/dynamic_batch_with_sla.rs",
+        "dead_items": [
+          {
+            "name": "InferenceRequest",
+            "kind": "Suppressed",
+            "line": 79,
+            "column": 1,
+            "message": "struct `InferenceRequest` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "queue_len",
+            "kind": "Suppressed",
+            "line": 153,
+            "column": 1,
+            "message": "fn `queue_len` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.9029345372460496
+      },
+      {
+        "file_path": "examples/distributed/distributed_model_sharding.rs",
+        "dead_items": [
+          {
+            "name": "remove_shard",
+            "kind": "Suppressed",
+            "line": 84,
+            "column": 1,
+            "message": "fn `remove_shard` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.5063291139240507
+      },
+      {
+        "file_path": "examples/inference/streaming_token_generator.rs",
+        "dead_items": [
+          {
+            "name": "GenerationStats",
+            "kind": "Suppressed",
+            "line": 190,
+            "column": 1,
+            "message": "struct `GenerationStats` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.936768149882904
+      },
+      {
+        "file_path": "examples/speech/whisper_transcribe.rs",
+        "dead_items": [
+          {
+            "name": "MAX_AUDIO_SECONDS",
+            "kind": "Suppressed",
+            "line": 53,
+            "column": 1,
+            "message": "const `MAX_AUDIO_SECONDS` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "WhisperModel",
+            "kind": "Suppressed",
+            "line": 58,
+            "column": 1,
+            "message": "struct `WhisperModel` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.6736401673640167
+      },
+      {
+        "file_path": "examples/analysis/analysis_probar.rs",
+        "dead_items": [
+          {
+            "name": "ProbarManifest",
+            "kind": "Suppressed",
+            "line": 48,
+            "column": 1,
+            "message": "struct `ProbarManifest` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.6884681583476765
+      },
+      {
+        "file_path": "examples/creation/create_apr_ngram_language_model.rs",
+        "dead_items": [
+          {
+            "name": "calculate_perplexity",
+            "kind": "Suppressed",
+            "line": 167,
+            "column": 1,
+            "message": "fn `calculate_perplexity` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.2658227848101267
+      },
+      {
+        "file_path": "examples/training/entrenar_autograd_training.rs",
+        "dead_items": [
+          {
+            "name": "TrainingResult",
+            "kind": "Suppressed",
+            "line": 250,
+            "column": 1,
+            "message": "struct `TrainingResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.7104795737122558
+      },
+      {
+        "file_path": "examples/registry/registry_model_comparison.rs",
+        "dead_items": [
+          {
+            "name": "ModelVersion",
+            "kind": "Suppressed",
+            "line": 150,
+            "column": 1,
+            "message": "struct `ModelVersion` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.0752688172043012
+      },
+      {
+        "file_path": "examples/cli/cli_apr_tui.rs",
+        "dead_items": [
+          {
+            "name": "next",
+            "kind": "Suppressed",
+            "line": 91,
+            "column": 1,
+            "message": "fn `next` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "navigate_next",
+            "kind": "Suppressed",
+            "line": 171,
+            "column": 1,
+            "message": "fn `navigate_next` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.7575757575757576
+      },
+      {
+        "file_path": "examples/cli/cli_apr_diff.rs",
+        "dead_items": [
+          {
+            "name": "TensorDiff",
+            "kind": "Suppressed",
+            "line": 116,
+            "column": 1,
+            "message": "struct `TensorDiff` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.33557046979865773
+      },
+      {
+        "file_path": "examples/analysis/analysis_trace.rs",
+        "dead_items": [
+          {
+            "name": "TensorStats",
+            "kind": "Suppressed",
+            "line": 20,
+            "column": 1,
+            "message": "struct `TensorStats` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.5830903790087464
+      },
+      {
+        "file_path": "examples/conversion/convert_gguf_to_apr.rs",
+        "dead_items": [
+          {
+            "name": "GgmlType",
+            "kind": "Suppressed",
+            "line": 41,
+            "column": 1,
+            "message": "enum `GgmlType` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "from_u32",
+            "kind": "Suppressed",
+            "line": 54,
+            "column": 1,
+            "message": "fn `from_u32` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.805869074492099
+      },
+      {
+        "file_path": "examples/cli/cli_apr_convert.rs",
+        "dead_items": [
+          {
+            "name": "ConversionResult",
+            "kind": "Suppressed",
+            "line": 79,
+            "column": 1,
+            "message": "struct `ConversionResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.8869179600886918
+      },
+      {
+        "file_path": "examples/inference/inference_apr_run.rs",
+        "dead_items": [
+          {
+            "name": "RunResult",
+            "kind": "Suppressed",
+            "line": 84,
+            "column": 1,
+            "message": "struct `RunResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.4241781548250266
+      },
+      {
+        "file_path": "examples/inference/adaptive_batch_inference.rs",
+        "dead_items": [
+          {
+            "name": "InferenceRequest",
+            "kind": "Suppressed",
+            "line": 81,
+            "column": 1,
+            "message": "struct `InferenceRequest` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.8456659619450317
+      },
+      {
+        "file_path": "examples/format/format_batch_export.rs",
+        "dead_items": [
+          {
+            "name": "ExportResult",
+            "kind": "Suppressed",
+            "line": 58,
+            "column": 1,
+            "message": "struct `ExportResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.8333333333333334
+      },
+      {
+        "file_path": "examples/analysis/analysis_canary.rs",
+        "dead_items": [
+          {
+            "name": "CanaryReport",
+            "kind": "Suppressed",
+            "line": 34,
+            "column": 1,
+            "message": "struct `CanaryReport` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.078167115902965
+      },
+      {
+        "file_path": "examples/format/format_export_gguf.rs",
+        "dead_items": [
+          {
+            "name": "GgufValue",
+            "kind": "Suppressed",
+            "line": 39,
+            "column": 1,
+            "message": "enum `GgufValue` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "GgufQuantType",
+            "kind": "Suppressed",
+            "line": 60,
+            "column": 1,
+            "message": "enum `GgufQuantType` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.75054704595186
+      },
+      {
+        "file_path": "examples/format/format_rosetta_convert.rs",
+        "dead_items": [
+          {
+            "name": "ConversionPath",
+            "kind": "Suppressed",
+            "line": 55,
+            "column": 1,
+            "message": "struct `ConversionPath` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 0.8048289738430584
+      },
+      {
+        "file_path": "examples/conversion/convert_onnx_to_apr.rs",
+        "dead_items": [
+          {
+            "name": "OnnxNode",
+            "kind": "Suppressed",
+            "line": 110,
+            "column": 1,
+            "message": "struct `OnnxNode` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "OnnxValueInfo",
+            "kind": "Suppressed",
+            "line": 119,
+            "column": 1,
+            "message": "struct `OnnxValueInfo` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 2.711864406779661
+      },
+      {
+        "file_path": "examples/format/format_convert_quantize.rs",
+        "dead_items": [
+          {
+            "name": "dequantize_payload",
+            "kind": "Suppressed",
+            "line": 78,
+            "column": 1,
+            "message": "fn `dequantize_payload` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          },
+          {
+            "name": "ConversionResult",
+            "kind": "Suppressed",
+            "line": 160,
+            "column": 1,
+            "message": "struct `ConversionResult` has #[allow(dead_code)] suppression (explicit dead code admission)"
+          }
+        ],
+        "file_dead_percentage": 1.8561484918793503
+      }
+    ],
+    "total_dead_items": 41,
+    "dead_code_percentage": 0.07049336760571856,
+    "total_lines": 116323,
+    "dead_lines": 82,
+    "dead_by_type": {
+      "suppressed": 41
+    }
+  }
+}

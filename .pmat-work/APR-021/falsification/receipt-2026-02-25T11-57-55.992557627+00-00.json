@@ -1,0 +1,212 @@
+{
+  "id": "019c94a9-b598-7273-a5c7-a2af7576054f",
+  "git_sha": "203dc88d992e2ba15a5666d831768f4ad23d1918",
+  "timestamp": "2026-02-25T11:57:55.992557627+00:00",
+  "trigger": "WorkComplete",
+  "work_item_id": "APR-021",
+  "verdicts": [
+    {
+      "hypothesis": "All baseline files still exist",
+      "method": "ManifestIntegrity",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "All 181 files present",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "The falsifier is active and detecting (Meta-Check)",
+      "method": "MetaFalsification",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "Detected dummy gaming pattern correctly",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No coverage exclusion gaming",
+      "method": "CoverageGaming",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No gaming patterns found in 181 files",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "All changed lines are covered",
+      "method": "DifferentialCoverage",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "56 changed files (coverage check requires llvm-cov data)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "Total coverage >= 95%",
+      "method": "AbsoluteCoverage",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No coverage data (run 'make coverage' to establish baseline), threshold: 95.0%",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "TDG score >= baseline",
+      "method": "TdgRegression",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No TDG data (baseline: 0.0)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No function exceeds complexity 20",
+      "method": "ComplexityRegression",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "Complexity check passed",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No vulnerable dependencies added",
+      "method": "SupplyChainIntegrity",
+      "falsified": true,
+      "is_blocking": true,
+      "explanation": "No deny cache. Run 'cargo deny check' first (O(1) requirement)",
+      "evidence_summary": "BooleanCheck(false)"
+    },
+    {
+      "hypothesis": "No file exceeds 500 lines",
+      "method": "FileSizeRegression",
+      "falsified": true,
+      "is_blocking": true,
+      "explanation": "58 file(s) exceed 500 lines: src/bundle.rs (986 lines), src/recipe.rs (540 lines), tests/falsification.rs (707 lines), examples/registry/registry_model_versioning.rs (1245 lines), examples/speech/whisper_streaming.rs (514 lines), examples/serve/model_canary_deploy.rs (744 lines), examples/serve/model_selection_router.rs (1125 lines), examples/serve/model_ab_testing.rs (501 lines), examples/serve/model_rate_limiter.rs (922 lines), examples/serve/http_model_server.rs (642 lines), examples/optimize/finetune_merge_adapter.rs (512 lines), examples/optimize/finetune_plan_vram.rs (547 lines), examples/optimize/finetune_qlora.rs (529 lines), examples/optimize/optimize_full_pipeline.rs (562 lines), examples/training/entrenar_autograd_training.rs (563 lines), examples/training/hyperparameter_sweep.rs (531 lines), examples/training/entrenar_lora_finetune.rs (516 lines), examples/training/gradient_accumulation.rs (812 lines), examples/training/entrenar_qlora_finetune.rs (577 lines), examples/training/few_shot_finetune.rs (522 lines), examples/training/mixed_precision_training.rs (525 lines), examples/training/learning_rate_schedule.rs (773 lines), examples/analysis/analysis_validate.rs (646 lines), examples/analysis/analysis_qa_gates.rs (643 lines), examples/gpu/flash_attention_inference.rs (629 lines), examples/gpu/gpu_memory_pool.rs (1175 lines), examples/chat/chat_multi_format.rs (503 lines), examples/monitoring/model_drift_detection.rs (1165 lines), examples/monitoring/latency_histogram.rs (921 lines), examples/monitoring/inference_cost_tracking.rs (1245 lines), examples/wasm/wasm_model_loader.rs (909 lines), examples/distillation/distill_structured_pruning.rs (873 lines), examples/cli/cli_apr_diff.rs (1192 lines), examples/distributed/distributed_model_sharding.rs (790 lines), examples/creation/create_apr_neural_network.rs (729 lines), examples/advanced/code_defect_oracle.rs (1719 lines), examples/advanced/image_classification.rs (1289 lines), examples/advanced/embedding_visualization.rs (1124 lines), examples/advanced/handwriting_recognition.rs (1506 lines), examples/advanced/quantization_quality_tradeoff.rs (1203 lines), examples/advanced/voice_recognition.rs (960 lines), examples/advanced/style_transfer.rs (888 lines), examples/advanced/wasm_summarizer.rs (856 lines), examples/advanced/hierarchical_cache_benchmark.rs (1176 lines), examples/advanced/clip_search.rs (1364 lines), examples/advanced/online_training_defect.rs (1095 lines), examples/advanced/model_inspection_scoring.rs (970 lines), examples/advanced/rag_pipeline.rs (1444 lines), examples/advanced/spanish_tutor.rs (1381 lines), examples/advanced/edge_anomaly_detection.rs (1565 lines), examples/advanced/streaming_sentiment.rs (1048 lines), examples/serverless/serverless_model_warmup.rs (840 lines), examples/format/format_publish.rs (549 lines), examples/simd/trueno_simd_ops.rs (505 lines), examples/api/api_auth_middleware.rs (1043 lines), examples/inference/chat_kv_cache.rs (531 lines), examples/inference/dynamic_batch_with_sla.rs (886 lines), examples/inference/chat_tool_use.rs (718 lines)",
+      "evidence_summary": "FileList([\"src/bundle.rs\", \"src/recipe.rs\", \"tests/falsification.rs\", \"examples/registry/registry_model_versioning.rs\", \"examples/speech/whisper_streaming.rs\", \"examples/serve/model_canary_deploy.rs\", \"examples/serve/model_selection_router.rs\", \"examples/serve/model_ab_testing.rs\", \"examples/serve/model_rate_limiter.rs\", \"examples/serve/http_model_server.rs\", \"examples/optimize/finetune_merge_adapter.rs\", \"examples/optimize/finetune_plan_vram.rs\", \"examples/optimize/finetune_qlora.rs\", \"examples/optimize/optimize_full_pipeline.rs\", \"examples/training/entrenar_autograd_training.rs\", \"examples/training/hyperparameter_sweep.rs\", \"examples/training/entrenar_lora_finetune.rs\", \"examples/training/gradient_accumulation.rs\", \"examples/training/entrenar_qlora_finetune.rs\", \"examples/training/few_shot_finetune.rs\", \"examples/training/mixed_precision_training.rs\", \"examples/training/learning_rate_schedule.rs\", \"examples/analysis/analysis_validate.rs\", \"examples/analysis/analysis_qa_gates.rs\", \"examples/gpu/flash_attention_inference.rs\", \"examples/gpu/gpu_memory_pool.rs\", \"examples/chat/chat_multi_format.rs\", \"examples/monitoring/model_drift_detection.rs\", \"examples/monitoring/latency_histogram.rs\", \"examples/monitoring/inference_cost_tracking.rs\", \"examples/wasm/wasm_model_loader.rs\", \"examples/distillation/distill_structured_pruning.rs\", \"examples/cli/cli_apr_diff.rs\", \"examples/distributed/distributed_model_sharding.rs\", \"examples/creation/create_apr_neural_network.rs\", \"examples/advanced/code_defect_oracle.rs\", \"examples/advanced/image_classification.rs\", \"examples/advanced/embedding_visualization.rs\", \"examples/advanced/handwriting_recognition.rs\", \"examples/advanced/quantization_quality_tradeoff.rs\", \"examples/advanced/voice_recognition.rs\", \"examples/advanced/style_transfer.rs\", \"examples/advanced/wasm_summarizer.rs\", \"examples/advanced/hierarchical_cache_benchmark.rs\", \"examples/advanced/clip_search.rs\", \"examples/advanced/online_training_defect.rs\", \"examples/advanced/model_inspection_scoring.rs\", \"examples/advanced/rag_pipeline.rs\", \"examples/advanced/spanish_tutor.rs\", \"examples/advanced/edge_anomaly_detection.rs\", \"examples/advanced/streaming_sentiment.rs\", \"examples/serverless/serverless_model_warmup.rs\", \"examples/format/format_publish.rs\", \"examples/simd/trueno_simd_ops.rs\", \"examples/api/api_auth_middleware.rs\", \"examples/inference/chat_kv_cache.rs\", \"examples/inference/dynamic_batch_with_sla.rs\", \"examples/inference/chat_tool_use.rs\"])"
+    },
+    {
+      "hypothesis": "Spec & Roadmap Quality",
+      "method": "SpecQuality",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No spec file found (optional)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "All changes pushed",
+      "method": "GitHubSync",
+      "falsified": true,
+      "is_blocking": true,
+      "explanation": "6 uncommitted file(s)",
+      "evidence_summary": "GitState { unpushed_commits: 0, dirty_files: 6 }"
+    },
+    {
+      "hypothesis": "All examples compile and run",
+      "method": "ExamplesCompile",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No examples cache (run 'cargo build --examples' to populate)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "pmat-book validation passes",
+      "method": "BookValidation",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "pmat-book not found (skipping validation)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No new SATD markers (TODO/FIXME/HACK)",
+      "method": "SatdDetection",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No new SATD markers (0 existing)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No new dead code introduced",
+      "method": "DeadCodeDetection",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No dead code detected",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "All files have >= 95% coverage",
+      "method": "PerFileCoverage",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No per-file coverage data (run 'make coverage'), threshold: 95.0%",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "make lint passes",
+      "method": "LintPass",
+      "falsified": true,
+      "is_blocking": true,
+      "explanation": "No lint cache. Run 'make lint' first (O(1) requirement)",
+      "evidence_summary": "BooleanCheck(false)"
+    },
+    {
+      "hypothesis": "All match arm variants have test coverage",
+      "method": "VariantCoverage",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "56 changed file(s) -- all match variants tested",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No fix-after-fix chains exceed limit",
+      "method": "FixChainLimit",
+      "falsified": false,
+      "is_blocking": true,
+      "explanation": "No fix chains > 3 consecutive commits",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "Cross-crate integration tests pass",
+      "method": "CrossCrateParity",
+      "falsified": false,
+      "is_blocking": false,
+      "explanation": "No cross-crate config (create .pmat-work/cross-crate.json to enable)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No performance regressions detected",
+      "method": "RegressionGate",
+      "falsified": false,
+      "is_blocking": false,
+      "explanation": "No benchmark cache (run benchmarks to populate .pmat-metrics/benchmark-status.json)",
+      "evidence_summary": null
+    },
+    {
+      "hypothesis": "No incomplete proofs (sorry) introduced",
+      "method": "FormalProofVerification",
+      "falsified": false,
+      "is_blocking": false,
+      "explanation": "No .lean files with sorry found",
+      "evidence_summary": null
+    }
+  ],
+  "overrides": [
+    {
+      "claim_id": "file-size",
+      "ticket": "APR-021",
+      "reason": "Override approved via --override-claims (ticket: APR-021)"
+    },
+    {
+      "claim_id": "github-sync",
+      "ticket": "APR-021",
+      "reason": "Override approved via --override-claims (ticket: APR-021)"
+    },
+    {
+      "claim_id": "lint",
+      "ticket": "APR-021",
+      "reason": "Override approved via --override-claims (ticket: APR-021)"
+    }
+  ],
+  "summary": {
+    "total": 22,
+    "passed": 18,
+    "failed": 4,
+    "warnings": 0,
+    "overridden": 3,
+    "allows_completion": false,
+    "health_score": 0.8181818181818182
+  },
+  "content_hash": "4ff39e38832bc6c6c9c1180c80591f05f7280951df5936e9ca29396fd9f2f466"
+}
