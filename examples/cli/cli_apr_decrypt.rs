@@ -36,7 +36,7 @@ use std::hash::{Hash, Hasher};
 fn main() -> Result<()> {
     let config = DecryptConfig::parse();
 
-    if config.demo {
+    if config.demo || config.input.is_none() {
         return run_demo();
     }
 
