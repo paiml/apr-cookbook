@@ -21,3 +21,10 @@ target
 #.idea/
 book/book/
 examples/advanced/rag_pipeline.proptest-regressions
+
+# PMAT
+.pmat/backup/
+.pmat-qa/
+.pmat/context.idx/
+.pmat/workspace.idx/
+.pmat/deps-cache.json
