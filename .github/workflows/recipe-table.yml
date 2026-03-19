@@ -22,7 +22,7 @@ jobs:
     name: Verify recipe table is deterministic
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Verify recipe table matches source
         run: ./scripts/generate-recipe-table.sh --check
