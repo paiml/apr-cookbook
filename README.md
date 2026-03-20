@@ -1,4 +1,4 @@
-<div align="center">
+<p align="center">
 
 # APR Cookbook
 
@@ -10,11 +10,22 @@
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange.svg)](https://www.rust-lang.org/)
 [![Book](https://img.shields.io/badge/book-online-blue)](https://paiml.github.io/apr-cookbook/)
 
-</div>
+</p>
 
 ![](.github/apr-cookbook-hero.svg)
 
 218 executable examples across 23 categories covering model bundling, format conversion, training, optimization, inference, and deployment with the APR v2 format.
+
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Stack](#stack)
+- [Examples](#examples)
+- [APR v2 Format](#apr-v2-format)
+- [Development](#development)
+- [Contributing](#contributing)
+- [License](#license)
 
 ## Installation
 
