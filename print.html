@@ -21289,31 +21289,28 @@ mod proptests {
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-
-    // Parse arguments
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
-    // Run the info command
+    let config = CliConfig::parse();
     run_info(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-info&quot;, about = &quot;Inspect APR model files&quot;)]
 struct CliConfig {
+    /// Model file path
     model_path: Option&lt;String&gt;,
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+    /// Show detailed information
+    #[arg(long, short = 'v')]
     verbose: bool,
+    /// Output as JSON
+    #[arg(long, short = 'j')]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21338,56 +21335,6 @@ struct ModelMetadata {
     parameters: usize,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;CliConfig&gt; {
-    let mut config = CliConfig {
-        model_path: None,
-        demo: false,
-        verbose: false,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--verbose&quot; | &quot;-v&quot; =&gt; config.verbose = true,
-            &quot;--json&quot; | &quot;-j&quot; =&gt; config.json = true,
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {
-                return Err(CookbookError::invalid_format(format!(
-                    &quot;Unknown argument: {}&quot;,
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-info - Inspect APR model files&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-info [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help       Print help information&quot;);
-    println!(&quot;    -d, --demo       Run with demo model&quot;);
-    println!(&quot;    -v, --verbose    Show detailed information&quot;);
-    println!(&quot;    -j, --json       Output as JSON&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-info model.apr&quot;);
-    println!(&quot;    apr-info --demo&quot;);
-    println!(&quot;    apr-info --json model.apr&quot;);
-}
-
 fn run_info(config: &amp;CliConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_info&quot;)?;
 
@@ -21397,7 +21344,7 @@ fn run_info(config: &amp;CliConfig) -&gt; Result&lt;()&gt; {
     } else if let Some(path) = &amp;config.model_path {
         read_model_info(path)?
     } else {
-        print_help();
+        eprintln!(&quot;Error: provide a model path or use --demo&quot;);
         return Ok(());
     };
 
@@ -21519,42 +21466,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_empty() {
-        let args = vec![&quot;apr-info&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_empty() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;]).unwrap();
 
         assert!(config.model_path.is_none());
         assert!(!config.demo);
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;--demo&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_demo() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;--demo&quot;]).unwrap();
 
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_model_path() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;model.apr&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_model_path() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;model.apr&quot;]).unwrap();
 
         assert_eq!(config.model_path, Some(&quot;model.apr&quot;.to_string()));
     }
 
     #[test]
-    fn test_parse_args_verbose() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;-v&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_verbose() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;-v&quot;]).unwrap();
 
         assert!(config.verbose);
     }
 
     #[test]
-    fn test_parse_args_json() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;--json&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_json() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;--json&quot;]).unwrap();
 
         assert!(config.json);
     }
@@ -21592,18 +21534,10 @@ mod proptests {
         #![proptest_config(ProptestConfig::with_cases(50))]
 
         #[test]
-        fn prop_parse_help_flag(args in prop::collection::vec(&quot;[a-z]{1,5}&quot;, 0..5)) {
-            let mut all_args = vec![&quot;apr-info&quot;.to_string()];
-            all_args.push(&quot;--help&quot;.to_string());
-            for a in args {
-                all_args.push(a);
-            }
-
-            let config = parse_args(&amp;all_args);
-            // Should either succeed or fail gracefully
-            if let Ok(c) = config {
-                prop_assert!(c.help);
-            }
+        fn prop_parse_model_path(path in &quot;[a-z]{1,10}\\.apr&quot;) {
+            let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &amp;path]).unwrap();
+            prop_assert_eq!(config.model_path, Some(path));
+            prop_assert!(!config.demo);
         }
     }
 }</code></pre>
@@ -21650,30 +21584,39 @@ apr-info --json model.apr    # JSON output
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = BenchConfig::parse();
     run_benchmark(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-bench&quot;, about = &quot;Benchmark APR model inference&quot;)]
 struct BenchConfig {
+    /// Path to .apr model file
     model_path: Option&lt;String&gt;,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Number of iterations
+    #[arg(short = 'n', long, default_value_t = 100)]
     iterations: usize,
+
+    /// Warmup iterations
+    #[arg(short, long, default_value_t = 10)]
     warmup: usize,
+
+    /// Batch size
+    #[arg(short, long = &quot;batch&quot;, default_value_t = 1)]
     batch_size: usize,
+
+    /// Output as JSON
+    #[arg(short, long)]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -21709,70 +21652,9 @@ struct MemoryStats {
     model_mb: f64,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;BenchConfig&gt; {
-    let mut config = BenchConfig {
-        model_path: None,
-        demo: false,
-        iterations: 100,
-        warmup: 10,
-        batch_size: 1,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--json&quot; | &quot;-j&quot; =&gt; config.json = true,
-            &quot;--iterations&quot; | &quot;-n&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.iterations = args[i].parse().unwrap_or(100);
-                }
-            }
-            &quot;--warmup&quot; | &quot;-w&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.warmup = args[i].parse().unwrap_or(10);
-                }
-            }
-            &quot;--batch&quot; | &quot;-b&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.batch_size = args[i].parse().unwrap_or(1);
-                }
-            }
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-bench - Benchmark APR model inference&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-bench [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help           Print help information&quot;);
-    println!(&quot;    -d, --demo           Run with demo model&quot;);
-    println!(&quot;    -n, --iterations N   Number of iterations (default: 100)&quot;);
-    println!(&quot;    -w, --warmup N       Warmup iterations (default: 10)&quot;);
-    println!(&quot;    -b, --batch N        Batch size (default: 1)&quot;);
-    println!(&quot;    -j, --json           Output as JSON&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-bench model.apr&quot;);
-    println!(&quot;    apr-bench --demo --iterations 1000&quot;);
-    println!(&quot;    apr-bench -n 100 -b 32 model.apr&quot;);
+#[cfg(test)]
+fn parse_args(args: &amp;[String]) -&gt; std::result::Result&lt;BenchConfig, clap::Error&gt; {
+    BenchConfig::try_parse_from(args)
 }
 
 fn run_benchmark(config: &amp;BenchConfig) -&gt; Result&lt;()&gt; {
@@ -21784,7 +21666,7 @@ fn run_benchmark(config: &amp;BenchConfig) -&gt; Result&lt;()&gt; {
     } else if let Some(path) = &amp;config.model_path {
         path.clone()
     } else {
-        print_help();
+        println!(&quot;No model provided. Use --demo or specify a model path.&quot;);
         return Ok(());
     };
 
@@ -21972,7 +21854,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
@@ -21992,7 +21873,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
@@ -22038,8 +21918,7 @@ mod proptests {
                 warmup: 0,
                 batch_size: 1,
                 json: false,
-                help: false,
-            };
+                };
 
             let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
 
@@ -22091,30 +21970,45 @@ apr-bench --batch 32 model.apr   # Batch size 32
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = ConvertConfig::parse();
     run_convert(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-convert&quot;, about = &quot;Convert between model formats&quot;)]
 struct ConvertConfig {
+    /// Input model file path
     input_path: Option&lt;String&gt;,
+
+    /// Output file path
+    #[arg(short = 'o', long = &quot;output&quot;)]
     output_path: Option&lt;String&gt;,
-    output_format: OutputFormat,
+
+    /// Output format (apr, gguf, safetensors)
+    #[arg(short = 'f', long = &quot;format&quot;, default_value = &quot;apr&quot;)]
+    output_format_str: String,
+
+    /// Quantization level (q4_0, q8_0, fp16)
+    #[arg(short, long)]
     quantize: Option&lt;String&gt;,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Verbose output
+    #[arg(short, long)]
     verbose: bool,
-    help: bool,
+}
+
+impl ConvertConfig {
+    fn output_format(&amp;self) -&gt; OutputFormat {
+        parse_output_format(&amp;self.output_format_str)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -22160,81 +22054,9 @@ fn parse_output_format(s: &amp;str) -&gt; OutputFormat {
     }
 }
 
-/// Get the next argument value safely
-fn get_next_arg(args: &amp;[String], i: usize) -&gt; Option&lt;String&gt; {
-    args.get(i + 1).cloned()
-}
-
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;ConvertConfig&gt; {
-    let mut config = ConvertConfig {
-        input_path: None,
-        output_path: None,
-        output_format: OutputFormat::Apr,
-        quantize: None,
-        demo: false,
-        verbose: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        let arg = args[i].as_str();
-        match arg {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--verbose&quot; | &quot;-v&quot; =&gt; config.verbose = true,
-            &quot;--format&quot; | &quot;-f&quot; =&gt; {
-                if let Some(val) = get_next_arg(args, i) {
-                    config.output_format = parse_output_format(&amp;val);
-                    i += 1;
-                }
-            }
-            &quot;--quantize&quot; | &quot;-q&quot; =&gt; {
-                config.quantize = get_next_arg(args, i);
-                if config.quantize.is_some() {
-                    i += 1;
-                }
-            }
-            &quot;--output&quot; | &quot;-o&quot; =&gt; {
-                config.output_path = get_next_arg(args, i);
-                if config.output_path.is_some() {
-                    i += 1;
-                }
-            }
-            _ if !arg.starts_with('-') &amp;&amp; config.input_path.is_none() =&gt; {
-                config.input_path = Some(arg.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-convert - Convert between model formats&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-convert [OPTIONS] &lt;INPUT&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help             Print help information&quot;);
-    println!(&quot;    -d, --demo             Run with demo model&quot;);
-    println!(&quot;    -v, --verbose          Verbose output&quot;);
-    println!(&quot;    -f, --format FORMAT    Output format (apr, gguf, safetensors)&quot;);
-    println!(&quot;    -o, --output PATH      Output file path&quot;);
-    println!(&quot;    -q, --quantize LEVEL   Quantization (q4_0, q8_0, fp16)&quot;);
-    println!();
-    println!(&quot;SUPPORTED FORMATS:&quot;);
-    println!(&quot;    apr         - APR native format&quot;);
-    println!(&quot;    gguf        - GGML Universal Format&quot;);
-    println!(&quot;    safetensors - HuggingFace SafeTensors&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-convert model.safetensors -f apr&quot;);
-    println!(&quot;    apr-convert model.apr -f gguf -q q4_0&quot;);
-    println!(&quot;    apr-convert --demo -f gguf&quot;);
+#[cfg(test)]
+fn parse_args(args: &amp;[String]) -&gt; std::result::Result&lt;ConvertConfig, clap::Error&gt; {
+    ConvertConfig::try_parse_from(args)
 }
 
 /// Load input bytes from config (demo mode or file)
@@ -22285,7 +22107,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
 
     // Load input
     let Some((input_path, input_bytes)) = load_input(config) else {
-        print_help();
+        println!(&quot;No input provided. Use --demo or specify an input file.&quot;);
         return Ok(());
     };
 
@@ -22303,7 +22125,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     // Convert
     let output_bytes = convert(
         &amp;input_bytes,
-        config.output_format,
+        config.output_format(),
         config.quantize.as_deref(),
     )?;
 
@@ -22311,7 +22133,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     let output_path = config
         .output_path
         .clone()
-        .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format));
+        .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format()));
     let actual_output_path = write_output(&amp;mut ctx, &amp;output_path, &amp;output_bytes, config.demo)?;
 
     // Record metrics
@@ -22349,7 +22171,7 @@ fn print_result(
     println!(
         &quot;Output: {} ({})&quot;,
         output_path,
-        config.output_format.as_str()
+        config.output_format().as_str()
     );
     println!();
     println!(&quot;Input size:  {} bytes&quot;, input_bytes.len());
@@ -22437,7 +22259,7 @@ mod tests {
         ];
         let config = parse_args(&amp;args).unwrap();
 
-        assert_eq!(config.output_format, OutputFormat::Gguf);
+        assert_eq!(config.output_format(), OutputFormat::Gguf);
     }
 
     #[test]
@@ -22556,29 +22378,31 @@ apr-convert --quantize q4 input.apr output.apr
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = ServerConfig::parse();
     run_server(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-serve&quot;, about = &quot;Serve APR model via HTTP API&quot;)]
 struct ServerConfig {
+    /// Model file path
     model_path: Option&lt;String&gt;,
+    /// Host address
+    #[arg(long, default_value = &quot;127.0.0.1&quot;)]
     host: String,
+    /// Port number
+    #[arg(short = 'p', long, default_value_t = 8080)]
     port: u16,
+    /// Number of workers
+    #[arg(short = 'w', long, default_value_t = 4)]
     workers: usize,
+    /// Demo mode
+    #[arg(long, short = 'd')]
     demo: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -22607,69 +22431,6 @@ struct ServerMetrics {
     uptime_seconds: u64,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;ServerConfig&gt; {
-    let mut config = ServerConfig {
-        model_path: None,
-        host: &quot;127.0.0.1&quot;.to_string(),
-        port: 8080,
-        workers: 4,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--host&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.host = args[i].clone();
-                }
-            }
-            &quot;--port&quot; | &quot;-p&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.port = args[i].parse().unwrap_or(8080);
-                }
-            }
-            &quot;--workers&quot; | &quot;-w&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.workers = args[i].parse().unwrap_or(4);
-                }
-            }
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-serve - Serve APR model via HTTP API&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-serve [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help          Print help information&quot;);
-    println!(&quot;    -d, --demo          Run with demo model&quot;);
-    println!(&quot;    --host HOST         Host address (default: 127.0.0.1)&quot;);
-    println!(&quot;    -p, --port PORT     Port number (default: 8080)&quot;);
-    println!(&quot;    -w, --workers N     Number of workers (default: 4)&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-serve model.apr&quot;);
-    println!(&quot;    apr-serve --demo --port 9000&quot;);
-    println!(&quot;    apr-serve -p 8080 -w 8 model.apr&quot;);
-}
-
 fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_serve&quot;)?;
 
@@ -22681,7 +22442,7 @@ fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
             .file_stem()
             .map_or_else(|| &quot;model&quot;.to_string(), |s| s.to_string_lossy().to_string())
     } else {
-        print_help();
+        eprintln!(&quot;Error: provide a model path or use --demo&quot;);
         return Ok(());
     };
 
@@ -22830,29 +22591,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;--demo&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_demo() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;--demo&quot;]).unwrap();
 
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_port() {
-        let args = vec![
-            &quot;apr-serve&quot;.to_string(),
-            &quot;-p&quot;.to_string(),
-            &quot;9000&quot;.to_string(),
-        ];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_port() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;-p&quot;, &quot;9000&quot;]).unwrap();
 
         assert_eq!(config.port, 9000);
     }
 
     #[test]
-    fn test_parse_args_workers() {
-        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;-w&quot;.to_string(), &quot;8&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_workers() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;-w&quot;, &quot;8&quot;]).unwrap();
 
         assert_eq!(config.workers, 8);
     }
@@ -22865,7 +22619,6 @@ mod tests {
             port: 8080,
             workers: 4,
             demo: true,
-            help: false,
         };
 
         let status = simulate_server_startup(&amp;config, &quot;test-model&quot;).unwrap();
@@ -22916,24 +22669,22 @@ mod proptests {
 
         #[test]
         fn prop_port_in_range(port in 1u16..65535) {
-            let args = vec![
-                &quot;apr-serve&quot;.to_string(),
-                &quot;-p&quot;.to_string(),
-                port.to_string(),
-            ];
-            let config = parse_args(&amp;args).unwrap();
+            let config = ServerConfig::try_parse_from([
+                &quot;apr-serve&quot;,
+                &quot;-p&quot;,
+                &amp;port.to_string(),
+            ]).unwrap();
 
             prop_assert!(config.port &gt; 0);
         }
 
         #[test]
         fn prop_workers_positive(workers in 1usize..32) {
-            let args = vec![
-                &quot;apr-serve&quot;.to_string(),
-                &quot;-w&quot;.to_string(),
-                workers.to_string(),
-            ];
-            let config = parse_args(&amp;args).unwrap();
+            let config = ServerConfig::try_parse_from([
+                &quot;apr-serve&quot;,
+                &quot;-w&quot;,
+                &amp;workers.to_string(),
+            ]).unwrap();
 
             prop_assert!(config.workers &gt; 0);
         }
@@ -23992,7 +23743,7 @@ fn test_work_stealing_load_balance() {
 <li><code>Quantization::Int4</code> -- quantize to 4-bit integers</li>
 </ul>
 <h2 id="source-10"><a class="header" href="#source-10">Source</a></h2>
-<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/full_pipeline.rs"><code>examples/optimize/full_pipeline.rs</code></a></p>
+<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/optimize_full_pipeline.rs"><code>examples/optimize/optimize_full_pipeline.rs</code></a></p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="lora-fine-tuning-1"><a class="header" href="#lora-fine-tuning-1">LoRA Fine-Tuning</a></h1>
 <p><strong>CLI Equivalent:</strong> <code>apr finetune --method lora --rank 8 --alpha 16 model.apr</code></p>
 <h2 id="what-this-demonstrates-1"><a class="header" href="#what-this-demonstrates-1">What This Demonstrates</a></h2>
@@ -32336,11 +32087,7 @@ pub trait IntoExplainable { ... }</code></pre>
 <pre><code class="language-rust">pub enum CookbookError { ... }
 pub type Result&lt;T&gt; = std::result::Result&lt;T, CookbookError&gt;;</code></pre>
 <h2 id="full-documentation"><a class="header" href="#full-documentation">Full Documentation</a></h2>
-<p>Generated API docs are available at:</p>
-<ul>
-<li><a href="https://docs.rs/apr-cookbook">docs.rs/apr-cookbook</a></li>
-</ul>
-<p>Or generate locally:</p>
+<p>apr-cookbook is an examples workspace, not a published library — generate API docs locally:</p>
 <pre><code class="language-bash">cargo doc --all-features --open
 </code></pre>
 <h2 id="stability"><a class="header" href="#stability">Stability</a></h2>

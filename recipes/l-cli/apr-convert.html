@@ -217,30 +217,45 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = ConvertConfig::parse();
     run_convert(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-convert&quot;, about = &quot;Convert between model formats&quot;)]
 struct ConvertConfig {
+    /// Input model file path
     input_path: Option&lt;String&gt;,
+
+    /// Output file path
+    #[arg(short = 'o', long = &quot;output&quot;)]
     output_path: Option&lt;String&gt;,
-    output_format: OutputFormat,
+
+    /// Output format (apr, gguf, safetensors)
+    #[arg(short = 'f', long = &quot;format&quot;, default_value = &quot;apr&quot;)]
+    output_format_str: String,
+
+    /// Quantization level (q4_0, q8_0, fp16)
+    #[arg(short, long)]
     quantize: Option&lt;String&gt;,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Verbose output
+    #[arg(short, long)]
     verbose: bool,
-    help: bool,
+}
+
+impl ConvertConfig {
+    fn output_format(&amp;self) -&gt; OutputFormat {
+        parse_output_format(&amp;self.output_format_str)
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -286,81 +301,9 @@ fn parse_output_format(s: &amp;str) -&gt; OutputFormat {
     }
 }
 
-/// Get the next argument value safely
-fn get_next_arg(args: &amp;[String], i: usize) -&gt; Option&lt;String&gt; {
-    args.get(i + 1).cloned()
-}
-
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;ConvertConfig&gt; {
-    let mut config = ConvertConfig {
-        input_path: None,
-        output_path: None,
-        output_format: OutputFormat::Apr,
-        quantize: None,
-        demo: false,
-        verbose: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        let arg = args[i].as_str();
-        match arg {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--verbose&quot; | &quot;-v&quot; =&gt; config.verbose = true,
-            &quot;--format&quot; | &quot;-f&quot; =&gt; {
-                if let Some(val) = get_next_arg(args, i) {
-                    config.output_format = parse_output_format(&amp;val);
-                    i += 1;
-                }
-            }
-            &quot;--quantize&quot; | &quot;-q&quot; =&gt; {
-                config.quantize = get_next_arg(args, i);
-                if config.quantize.is_some() {
-                    i += 1;
-                }
-            }
-            &quot;--output&quot; | &quot;-o&quot; =&gt; {
-                config.output_path = get_next_arg(args, i);
-                if config.output_path.is_some() {
-                    i += 1;
-                }
-            }
-            _ if !arg.starts_with('-') &amp;&amp; config.input_path.is_none() =&gt; {
-                config.input_path = Some(arg.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-convert - Convert between model formats&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-convert [OPTIONS] &lt;INPUT&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help             Print help information&quot;);
-    println!(&quot;    -d, --demo             Run with demo model&quot;);
-    println!(&quot;    -v, --verbose          Verbose output&quot;);
-    println!(&quot;    -f, --format FORMAT    Output format (apr, gguf, safetensors)&quot;);
-    println!(&quot;    -o, --output PATH      Output file path&quot;);
-    println!(&quot;    -q, --quantize LEVEL   Quantization (q4_0, q8_0, fp16)&quot;);
-    println!();
-    println!(&quot;SUPPORTED FORMATS:&quot;);
-    println!(&quot;    apr         - APR native format&quot;);
-    println!(&quot;    gguf        - GGML Universal Format&quot;);
-    println!(&quot;    safetensors - HuggingFace SafeTensors&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-convert model.safetensors -f apr&quot;);
-    println!(&quot;    apr-convert model.apr -f gguf -q q4_0&quot;);
-    println!(&quot;    apr-convert --demo -f gguf&quot;);
+#[cfg(test)]
+fn parse_args(args: &amp;[String]) -&gt; std::result::Result&lt;ConvertConfig, clap::Error&gt; {
+    ConvertConfig::try_parse_from(args)
 }
 
 /// Load input bytes from config (demo mode or file)
@@ -411,7 +354,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
 
     // Load input
     let Some((input_path, input_bytes)) = load_input(config) else {
-        print_help();
+        println!(&quot;No input provided. Use --demo or specify an input file.&quot;);
         return Ok(());
     };
 
@@ -429,7 +372,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     // Convert
     let output_bytes = convert(
         &amp;input_bytes,
-        config.output_format,
+        config.output_format(),
         config.quantize.as_deref(),
     )?;
 
@@ -437,7 +380,7 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     let output_path = config
         .output_path
         .clone()
-        .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format));
+        .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format()));
     let actual_output_path = write_output(&amp;mut ctx, &amp;output_path, &amp;output_bytes, config.demo)?;
 
     // Record metrics
@@ -475,7 +418,7 @@ fn print_result(
     println!(
         &quot;Output: {} ({})&quot;,
         output_path,
-        config.output_format.as_str()
+        config.output_format().as_str()
     );
     println!();
     println!(&quot;Input size:  {} bytes&quot;, input_bytes.len());
@@ -563,7 +506,7 @@ mod tests {
         ];
         let config = parse_args(&amp;args).unwrap();
 
-        assert_eq!(config.output_format, OutputFormat::Gguf);
+        assert_eq!(config.output_format(), OutputFormat::Gguf);
     }
 
     #[test]

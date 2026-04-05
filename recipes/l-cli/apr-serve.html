@@ -217,29 +217,31 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = ServerConfig::parse();
     run_server(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-serve&quot;, about = &quot;Serve APR model via HTTP API&quot;)]
 struct ServerConfig {
+    /// Model file path
     model_path: Option&lt;String&gt;,
+    /// Host address
+    #[arg(long, default_value = &quot;127.0.0.1&quot;)]
     host: String,
+    /// Port number
+    #[arg(short = 'p', long, default_value_t = 8080)]
     port: u16,
+    /// Number of workers
+    #[arg(short = 'w', long, default_value_t = 4)]
     workers: usize,
+    /// Demo mode
+    #[arg(long, short = 'd')]
     demo: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -268,69 +270,6 @@ struct ServerMetrics {
     uptime_seconds: u64,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;ServerConfig&gt; {
-    let mut config = ServerConfig {
-        model_path: None,
-        host: &quot;127.0.0.1&quot;.to_string(),
-        port: 8080,
-        workers: 4,
-        demo: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--host&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.host = args[i].clone();
-                }
-            }
-            &quot;--port&quot; | &quot;-p&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.port = args[i].parse().unwrap_or(8080);
-                }
-            }
-            &quot;--workers&quot; | &quot;-w&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.workers = args[i].parse().unwrap_or(4);
-                }
-            }
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-serve - Serve APR model via HTTP API&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-serve [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help          Print help information&quot;);
-    println!(&quot;    -d, --demo          Run with demo model&quot;);
-    println!(&quot;    --host HOST         Host address (default: 127.0.0.1)&quot;);
-    println!(&quot;    -p, --port PORT     Port number (default: 8080)&quot;);
-    println!(&quot;    -w, --workers N     Number of workers (default: 4)&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-serve model.apr&quot;);
-    println!(&quot;    apr-serve --demo --port 9000&quot;);
-    println!(&quot;    apr-serve -p 8080 -w 8 model.apr&quot;);
-}
-
 fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_serve&quot;)?;
 
@@ -342,7 +281,7 @@ fn run_server(config: &amp;ServerConfig) -&gt; Result&lt;()&gt; {
             .file_stem()
             .map_or_else(|| &quot;model&quot;.to_string(), |s| s.to_string_lossy().to_string())
     } else {
-        print_help();
+        eprintln!(&quot;Error: provide a model path or use --demo&quot;);
         return Ok(());
     };
 
@@ -491,29 +430,22 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;--demo&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_demo() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;--demo&quot;]).unwrap();
 
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_port() {
-        let args = vec![
-            &quot;apr-serve&quot;.to_string(),
-            &quot;-p&quot;.to_string(),
-            &quot;9000&quot;.to_string(),
-        ];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_port() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;-p&quot;, &quot;9000&quot;]).unwrap();
 
         assert_eq!(config.port, 9000);
     }
 
     #[test]
-    fn test_parse_args_workers() {
-        let args = vec![&quot;apr-serve&quot;.to_string(), &quot;-w&quot;.to_string(), &quot;8&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_workers() {
+        let config = ServerConfig::try_parse_from([&quot;apr-serve&quot;, &quot;-w&quot;, &quot;8&quot;]).unwrap();
 
         assert_eq!(config.workers, 8);
     }
@@ -526,7 +458,6 @@ mod tests {
             port: 8080,
             workers: 4,
             demo: true,
-            help: false,
         };
 
         let status = simulate_server_startup(&amp;config, &quot;test-model&quot;).unwrap();
@@ -577,24 +508,22 @@ mod proptests {
 
         #[test]
         fn prop_port_in_range(port in 1u16..65535) {
-            let args = vec![
-                &quot;apr-serve&quot;.to_string(),
-                &quot;-p&quot;.to_string(),
-                port.to_string(),
-            ];
-            let config = parse_args(&amp;args).unwrap();
+            let config = ServerConfig::try_parse_from([
+                &quot;apr-serve&quot;,
+                &quot;-p&quot;,
+                &amp;port.to_string(),
+            ]).unwrap();
 
             prop_assert!(config.port &gt; 0);
         }
 
         #[test]
         fn prop_workers_positive(workers in 1usize..32) {
-            let args = vec![
-                &quot;apr-serve&quot;.to_string(),
-                &quot;-w&quot;.to_string(),
-                workers.to_string(),
-            ];
-            let config = parse_args(&amp;args).unwrap();
+            let config = ServerConfig::try_parse_from([
+                &quot;apr-serve&quot;,
+                &quot;-w&quot;,
+                &amp;workers.to_string(),
+            ]).unwrap();
 
             prop_assert!(config.workers &gt; 0);
         }

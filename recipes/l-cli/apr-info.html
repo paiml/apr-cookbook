@@ -217,31 +217,28 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-
-    // Parse arguments
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
-    // Run the info command
+    let config = CliConfig::parse();
     run_info(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-info&quot;, about = &quot;Inspect APR model files&quot;)]
 struct CliConfig {
+    /// Model file path
     model_path: Option&lt;String&gt;,
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+    /// Show detailed information
+    #[arg(long, short = 'v')]
     verbose: bool,
+    /// Output as JSON
+    #[arg(long, short = 'j')]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -266,56 +263,6 @@ struct ModelMetadata {
     parameters: usize,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;CliConfig&gt; {
-    let mut config = CliConfig {
-        model_path: None,
-        demo: false,
-        verbose: false,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--verbose&quot; | &quot;-v&quot; =&gt; config.verbose = true,
-            &quot;--json&quot; | &quot;-j&quot; =&gt; config.json = true,
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {
-                return Err(CookbookError::invalid_format(format!(
-                    &quot;Unknown argument: {}&quot;,
-                    args[i]
-                )));
-            }
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-info - Inspect APR model files&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-info [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help       Print help information&quot;);
-    println!(&quot;    -d, --demo       Run with demo model&quot;);
-    println!(&quot;    -v, --verbose    Show detailed information&quot;);
-    println!(&quot;    -j, --json       Output as JSON&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-info model.apr&quot;);
-    println!(&quot;    apr-info --demo&quot;);
-    println!(&quot;    apr-info --json model.apr&quot;);
-}
-
 fn run_info(config: &amp;CliConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_info&quot;)?;
 
@@ -325,7 +272,7 @@ fn run_info(config: &amp;CliConfig) -&gt; Result&lt;()&gt; {
     } else if let Some(path) = &amp;config.model_path {
         read_model_info(path)?
     } else {
-        print_help();
+        eprintln!(&quot;Error: provide a model path or use --demo&quot;);
         return Ok(());
     };
 
@@ -447,42 +394,37 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_args_empty() {
-        let args = vec![&quot;apr-info&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_empty() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;]).unwrap();
 
         assert!(config.model_path.is_none());
         assert!(!config.demo);
     }
 
     #[test]
-    fn test_parse_args_demo() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;--demo&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_demo() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;--demo&quot;]).unwrap();
 
         assert!(config.demo);
     }
 
     #[test]
-    fn test_parse_args_model_path() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;model.apr&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_model_path() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;model.apr&quot;]).unwrap();
 
         assert_eq!(config.model_path, Some(&quot;model.apr&quot;.to_string()));
     }
 
     #[test]
-    fn test_parse_args_verbose() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;-v&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_verbose() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;-v&quot;]).unwrap();
 
         assert!(config.verbose);
     }
 
     #[test]
-    fn test_parse_args_json() {
-        let args = vec![&quot;apr-info&quot;.to_string(), &quot;--json&quot;.to_string()];
-        let config = parse_args(&amp;args).unwrap();
+    fn test_clap_json() {
+        let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &quot;--json&quot;]).unwrap();
 
         assert!(config.json);
     }
@@ -520,18 +462,10 @@ mod proptests {
         #![proptest_config(ProptestConfig::with_cases(50))]
 
         #[test]
-        fn prop_parse_help_flag(args in prop::collection::vec(&quot;[a-z]{1,5}&quot;, 0..5)) {
-            let mut all_args = vec![&quot;apr-info&quot;.to_string()];
-            all_args.push(&quot;--help&quot;.to_string());
-            for a in args {
-                all_args.push(a);
-            }
-
-            let config = parse_args(&amp;all_args);
-            // Should either succeed or fail gracefully
-            if let Ok(c) = config {
-                prop_assert!(c.help);
-            }
+        fn prop_parse_model_path(path in &quot;[a-z]{1,10}\\.apr&quot;) {
+            let config = CliConfig::try_parse_from([&quot;apr-info&quot;, &amp;path]).unwrap();
+            prop_assert_eq!(config.model_path, Some(path));
+            prop_assert!(!config.demo);
         }
     }
 }</code></pre>

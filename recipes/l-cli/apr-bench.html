@@ -217,30 +217,39 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
-use std::env;
 
 fn main() -&gt; Result&lt;()&gt; {
-    let args: Vec&lt;String&gt; = env::args().collect();
-    let config = parse_args(&amp;args)?;
-
-    if config.help {
-        print_help();
-        return Ok(());
-    }
-
+    let config = BenchConfig::parse();
     run_benchmark(&amp;config)
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Parser)]
+#[command(name = &quot;apr-bench&quot;, about = &quot;Benchmark APR model inference&quot;)]
 struct BenchConfig {
+    /// Path to .apr model file
     model_path: Option&lt;String&gt;,
+
+    /// Run with demo model
+    #[arg(long, short = 'd')]
     demo: bool,
+
+    /// Number of iterations
+    #[arg(short = 'n', long, default_value_t = 100)]
     iterations: usize,
+
+    /// Warmup iterations
+    #[arg(short, long, default_value_t = 10)]
     warmup: usize,
+
+    /// Batch size
+    #[arg(short, long = &quot;batch&quot;, default_value_t = 1)]
     batch_size: usize,
+
+    /// Output as JSON
+    #[arg(short, long)]
     json: bool,
-    help: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -276,70 +285,9 @@ struct MemoryStats {
     model_mb: f64,
 }
 
-fn parse_args(args: &amp;[String]) -&gt; Result&lt;BenchConfig&gt; {
-    let mut config = BenchConfig {
-        model_path: None,
-        demo: false,
-        iterations: 100,
-        warmup: 10,
-        batch_size: 1,
-        json: false,
-        help: false,
-    };
-
-    let mut i = 1;
-    while i &lt; args.len() {
-        match args[i].as_str() {
-            &quot;--help&quot; | &quot;-h&quot; =&gt; config.help = true,
-            &quot;--demo&quot; | &quot;-d&quot; =&gt; config.demo = true,
-            &quot;--json&quot; | &quot;-j&quot; =&gt; config.json = true,
-            &quot;--iterations&quot; | &quot;-n&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.iterations = args[i].parse().unwrap_or(100);
-                }
-            }
-            &quot;--warmup&quot; | &quot;-w&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.warmup = args[i].parse().unwrap_or(10);
-                }
-            }
-            &quot;--batch&quot; | &quot;-b&quot; =&gt; {
-                i += 1;
-                if i &lt; args.len() {
-                    config.batch_size = args[i].parse().unwrap_or(1);
-                }
-            }
-            path if !path.starts_with('-') =&gt; {
-                config.model_path = Some(path.to_string());
-            }
-            _ =&gt; {}
-        }
-        i += 1;
-    }
-
-    Ok(config)
-}
-
-fn print_help() {
-    println!(&quot;apr-bench - Benchmark APR model inference&quot;);
-    println!();
-    println!(&quot;USAGE:&quot;);
-    println!(&quot;    apr-bench [OPTIONS] &lt;MODEL_PATH&gt;&quot;);
-    println!();
-    println!(&quot;OPTIONS:&quot;);
-    println!(&quot;    -h, --help           Print help information&quot;);
-    println!(&quot;    -d, --demo           Run with demo model&quot;);
-    println!(&quot;    -n, --iterations N   Number of iterations (default: 100)&quot;);
-    println!(&quot;    -w, --warmup N       Warmup iterations (default: 10)&quot;);
-    println!(&quot;    -b, --batch N        Batch size (default: 1)&quot;);
-    println!(&quot;    -j, --json           Output as JSON&quot;);
-    println!();
-    println!(&quot;EXAMPLES:&quot;);
-    println!(&quot;    apr-bench model.apr&quot;);
-    println!(&quot;    apr-bench --demo --iterations 1000&quot;);
-    println!(&quot;    apr-bench -n 100 -b 32 model.apr&quot;);
+#[cfg(test)]
+fn parse_args(args: &amp;[String]) -&gt; std::result::Result&lt;BenchConfig, clap::Error&gt; {
+    BenchConfig::try_parse_from(args)
 }
 
 fn run_benchmark(config: &amp;BenchConfig) -&gt; Result&lt;()&gt; {
@@ -351,7 +299,7 @@ fn run_benchmark(config: &amp;BenchConfig) -&gt; Result&lt;()&gt; {
     } else if let Some(path) = &amp;config.model_path {
         path.clone()
     } else {
-        print_help();
+        println!(&quot;No model provided. Use --demo or specify a model path.&quot;);
         return Ok(());
     };
 
@@ -539,7 +487,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
@@ -559,7 +506,6 @@ mod tests {
             warmup: 0,
             batch_size: 1,
             json: false,
-            help: false,
         };
 
         let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
@@ -605,8 +551,7 @@ mod proptests {
                 warmup: 0,
                 batch_size: 1,
                 json: false,
-                help: false,
-            };
+                };
 
             let results = calculate_results(&quot;test&quot;, &amp;times, &amp;config).unwrap();
 
