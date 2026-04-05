@@ -1,0 +1,75 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "Int4 quantization accuracy loss bound — F3 falsifiable claim"
+  references:
+    - "Dettmers et al. (2023) QLoRA: Efficient Finetuning of Quantized LLMs"
+    - "APR Cookbook Spec v3.0.0, Claim F3"
+  tags:
+    - quantization
+    - accuracy
+
+equations:
+  accuracy_loss:
+    formula: "ΔA = |accuracy(M_fp32) - accuracy(M_int4)|"
+    domain: "M_fp32: f32 model, M_int4: int4 quantized model, same architecture"
+    codomain: "ΔA ∈ [0, 1]"
+    invariants:
+      - "ΔA < 0.02 (F3 threshold: < 2% accuracy loss)"
+      - "ΔA decreases with model size (larger models quantize better)"
+
+  quantization_error:
+    formula: "E_q = ||W_fp32 - dequant(quant(W_fp32))||_F / ||W_fp32||_F"
+    domain: "W_fp32 ∈ ℝ^{m×n}, quant maps to int4"
+    codomain: "E_q ∈ [0, ∞)"
+    invariants:
+      - "E_q bounded by quantization step size: E_q <= scale / (2 * ||W||_F)"
+      - "E_q(Q4_K) < E_q(Q4_0) (K-quant uses per-block scales)"
+
+proof_obligations:
+  - type: bound
+    property: "Accuracy loss under 2%"
+    formal: "ΔA < 0.02 on standard benchmarks"
+    applies_to: accuracy_loss
+  - type: bound
+    property: "Quantization error bounded"
+    formal: "E_q < 0.05 for typical weight distributions"
+    applies_to: quantization_error
+  - type: roundtrip
+    property: "Quant/dequant deterministic"
+    formal: "dequant(quant(W)) = dequant(quant(W)) for all W"
+    applies_to: quantization_error
+
+falsification_tests:
+  - id: FALSIFY-Q4-001
+    rule: "F3 accuracy threshold"
+    prediction: "Int4 quantized model accuracy within 2% of fp32 baseline"
+    test: "Compare perplexity on WikiText2: fp32 vs Q4_K_M, assert delta < 2%"
+    if_fails: "Quantization range miscalibrated or outlier weights clipped"
+  - id: FALSIFY-Q4-002
+    rule: "Quantization error bound"
+    prediction: "Frobenius norm error < 5% of original weight norm"
+    test: "proptest: random f32 tensors, quantize to int4, measure relative error"
+    if_fails: "Scale factor computation loses precision at extremes"
+  - id: FALSIFY-Q4-003
+    rule: "Deterministic roundtrip"
+    prediction: "dequant(quant(W)) is bitwise identical across runs"
+    test: "Quantize same tensor twice, compare dequantized outputs"
+    if_fails: "Non-deterministic rounding or threading race"
+
+kani_harnesses:
+  - id: KANI-Q4-001
+    obligation: "Quant/dequant deterministic"
+    bound: 16
+    strategy: bounded_int
+
+qa_gate:
+  id: F-Q4-001
+  name: "Int4 Quantization Contract"
+  description: "Quantization accuracy and correctness quality gate"
+  checks:
+    - "accuracy_f3"
+    - "error_bound"
+    - "deterministic_roundtrip"
+  pass_criteria: "Accuracy loss < 2% + Frobenius error < 5%"

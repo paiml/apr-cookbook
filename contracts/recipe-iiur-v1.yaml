@@ -1,0 +1,103 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "IIUR recipe invariants — Isolated, Idempotent, Useful, Reproducible"
+  references:
+    - "APR Cookbook Spec v3.0.0, IIUR Principles"
+    - "Ohno (1988) Toyota Production System"
+  registry: false
+  tags:
+    - recipe
+    - quality
+    - iiur
+
+equations:
+  isolation:
+    formula: "side_effects(recipe) = ∅"
+    domain: "recipe: fn(RecipeContext) -> Result<()>"
+    codomain: "{∅}"
+    invariants:
+      - "No files created outside RecipeContext temp directory"
+      - "No environment variables modified"
+      - "No global state mutated"
+      - "Temp directory cleaned up on drop"
+
+  idempotency:
+    formula: "output(run_1) = output(run_2) for same recipe"
+    domain: "recipe with deterministic RNG seed"
+    codomain: "bytes"
+    invariants:
+      - "RecipeContext seeds RNG from recipe name hash"
+      - "Sequential runs produce bitwise-identical output"
+      - "No dependence on wall clock, PID, or hostname"
+
+  reproducibility:
+    formula: "output(machine_A) = output(machine_B) for same recipe + deps"
+    domain: "same Cargo.lock, same MSRV, any supported platform"
+    codomain: "bytes"
+    invariants:
+      - "Pinned dependencies via Cargo.lock"
+      - "MSRV 1.75 enforced in CI"
+      - "Platform-independent results (no platform-specific float ops)"
+
+proof_obligations:
+  - type: invariant
+    property: "Isolation — no side effects"
+    formal: "Files outside temp dir unchanged after recipe execution"
+    applies_to: isolation
+  - type: determinism
+    property: "Idempotency — same output"
+    formal: "run(recipe) = run(recipe) for all recipes"
+    applies_to: idempotency
+  - type: invariant
+    property: "Cleanup — no temp leaks"
+    formal: "temp_dir does not exist after RecipeContext drops"
+    applies_to: isolation
+  - type: equivalence
+    property: "Cross-platform reproducibility"
+    formal: "output(linux) = output(macos) for all recipes"
+    applies_to: reproducibility
+
+falsification_tests:
+  - id: FALSIFY-IIUR-001
+    rule: "Isolation"
+    prediction: "No files outside temp dir after recipe run"
+    test: "Snapshot filesystem before/after recipe, diff, assert empty"
+    if_fails: "Recipe writes to CWD or home directory"
+  - id: FALSIFY-IIUR-002
+    rule: "Idempotency"
+    prediction: "Two sequential runs produce identical output"
+    test: "Run recipe twice, capture stdout, assert equal"
+    if_fails: "RNG not seeded deterministically or timestamp in output"
+  - id: FALSIFY-IIUR-003
+    rule: "Cleanup"
+    prediction: "Temp directory removed after RecipeContext drops"
+    test: "Run recipe, check temp path does not exist after completion"
+    if_fails: "Drop impl not called (panic before drop) or rmdir fails"
+  - id: FALSIFY-IIUR-004
+    rule: "Cross-platform"
+    prediction: "Same output on Linux and macOS CI runners"
+    test: "CI matrix runs same recipe on both, compare hashed output"
+    if_fails: "Platform-specific float formatting or path separator in output"
+
+kani_harnesses:
+  - id: KANI-IIUR-001
+    obligation: "Isolation — no side effects"
+    bound: 4
+    strategy: symbolic
+  - id: KANI-IIUR-002
+    obligation: "Cleanup — no temp leaks"
+    bound: 4
+    strategy: symbolic
+
+qa_gate:
+  id: F-IIUR-001
+  name: "Recipe IIUR Contract"
+  description: "Recipe isolation, idempotency, and reproducibility quality gate"
+  checks:
+    - "isolation"
+    - "idempotency"
+    - "cleanup"
+    - "cross_platform"
+  pass_criteria: "All 4 IIUR properties hold for every recipe in the catalog"

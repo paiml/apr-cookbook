@@ -1,0 +1,103 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "APR format conversion roundtrip correctness — GGUF, SafeTensors, ONNX"
+  references:
+    - "APR Cookbook Spec v3.0.0, Category D: Conversion Recipes"
+    - "Hugging Face SafeTensors Specification"
+    - "GGML GGUF Format Specification v3"
+  tags:
+    - format
+    - conversion
+    - correctness
+
+equations:
+  tensor_roundtrip:
+    formula: "||T_original - T_roundtrip||_∞ = 0 (lossless formats)"
+    domain: "T ∈ ℝ^shape, format ∈ {apr, safetensors, gguf_f32}"
+    codomain: "error ∈ {0}"
+    invariants:
+      - "Lossless for f32/f16/bf16 tensor data"
+      - "Tensor names preserved (possibly remapped via contract)"
+      - "Tensor shapes preserved exactly"
+      - "Tensor count preserved"
+
+  quantized_roundtrip:
+    formula: "||T_original - T_roundtrip||_∞ <= quant_step / 2"
+    domain: "T quantized (Q4_K, Q6_K, etc.)"
+    codomain: "error bounded by quantization step"
+    invariants:
+      - "Quantized weights preserved in native representation"
+      - "No double-quantization (quant→dequant→requant)"
+
+  metadata_preservation:
+    formula: "metadata(converted) ⊇ metadata(original) ∩ target_schema"
+    domain: "source model with metadata"
+    codomain: "target model with metadata"
+    invariants:
+      - "Architecture name preserved"
+      - "Vocab size preserved"
+      - "Layer count preserved"
+      - "Format-specific metadata may be added (not lost)"
+
+proof_obligations:
+  - type: roundtrip
+    property: "Lossless tensor roundtrip"
+    formal: "export(import(model)) preserves all tensor data exactly"
+    applies_to: tensor_roundtrip
+  - type: invariant
+    property: "Shape preservation"
+    formal: "shape(T_converted) = shape(T_original) for all tensors"
+    applies_to: tensor_roundtrip
+  - type: invariant
+    property: "Count preservation"
+    formal: "num_tensors(converted) = num_tensors(original)"
+    applies_to: tensor_roundtrip
+  - type: invariant
+    property: "Metadata preservation"
+    formal: "arch, vocab_size, n_layers preserved across conversions"
+    applies_to: metadata_preservation
+
+falsification_tests:
+  - id: FALSIFY-FMT-001
+    rule: "Lossless roundtrip (APR ↔ SafeTensors)"
+    prediction: "apr → safetensors → apr preserves all tensor bytes"
+    test: "Convert model both ways, compare tensor data byte-for-byte"
+    if_fails: "Endianness swap error or dtype mapping wrong"
+  - id: FALSIFY-FMT-002
+    rule: "Lossless roundtrip (APR ↔ GGUF f32)"
+    prediction: "apr → gguf → apr preserves all f32 tensor data"
+    test: "Convert model both ways, compare tensor data"
+    if_fails: "GGUF row-major vs column-major layout not transposed"
+  - id: FALSIFY-FMT-003
+    rule: "Shape preservation"
+    prediction: "All tensor shapes identical after conversion"
+    test: "Compare shapes of every tensor before and after roundtrip"
+    if_fails: "Dimension order swapped or squeezed during conversion"
+  - id: FALSIFY-FMT-004
+    rule: "Metadata preservation"
+    prediction: "architecture, vocab_size, n_layers match after conversion"
+    test: "apr inspect original vs converted, compare key metadata fields"
+    if_fails: "Metadata field name mapping missing for target format"
+
+kani_harnesses:
+  - id: KANI-FMT-001
+    obligation: "Shape preservation"
+    bound: 8
+    strategy: bounded_int
+  - id: KANI-FMT-002
+    obligation: "Count preservation"
+    bound: 4
+    strategy: symbolic
+
+qa_gate:
+  id: F-FMT-001
+  name: "Format Roundtrip Contract"
+  description: "Model format conversion correctness quality gate"
+  checks:
+    - "lossless_safetensors"
+    - "lossless_gguf"
+    - "shape_preservation"
+    - "metadata_preservation"
+  pass_criteria: "All roundtrip conversions lossless + metadata preserved"

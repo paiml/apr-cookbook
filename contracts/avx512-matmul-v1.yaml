@@ -1,0 +1,91 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "AVX-512 matrix multiplication throughput — F7 falsifiable claim"
+  references:
+    - "Goto & Van De Geijn (2008) Anatomy of High-Performance Matrix Multiplication"
+    - "Intel Intrinsics Guide — _mm512_fmadd_ps"
+    - "APR Cookbook Spec v3.0.0, Claim F7"
+  depends_on:
+    - "avx2-fma-dot-v1.yaml"
+  tags:
+    - simd
+    - matmul
+    - performance
+
+equations:
+  matmul:
+    formula: "C = A × B where C[i,j] = Σ_k A[i,k] · B[k,j]"
+    domain: "A ∈ ℝ^{M×K}, B ∈ ℝ^{K×N}"
+    codomain: "C ∈ ℝ^{M×N}"
+    invariants:
+      - "C is deterministic for same inputs"
+      - "(A × B) × C = A × (B × C) (associativity, modulo fp rounding)"
+
+  throughput:
+    formula: "GFLOPS = 2·M·N·K / (wall_time · 10^9)"
+    domain: "M, N, K ∈ ℕ, wall_time > 0"
+    codomain: "GFLOPS ∈ (0, ∞)"
+    invariants:
+      - "GFLOPS >= 80 for M=N=K=1024 on AVX-512 (F7 threshold)"
+      - "GFLOPS bounded by theoretical peak: cores × freq × FMA_width × 2"
+
+  scalar_equivalence:
+    formula: "||C_avx512 - C_scalar||_∞ < ε"
+    domain: "Same A, B inputs"
+    codomain: "ε ∈ [0, ∞)"
+    invariants:
+      - "ε < K · ε_mach (accumulation error bounded by inner dimension)"
+
+proof_obligations:
+  - type: bound
+    property: "Throughput meets F7 threshold"
+    formal: "GFLOPS >= 80 for 1024×1024 matmul on AVX-512"
+    applies_to: throughput
+  - type: equivalence
+    property: "SIMD matches scalar"
+    formal: "||C_avx512 - C_scalar||_∞ < K · ε_mach"
+    tolerance: 1.0e-3
+    applies_to: scalar_equivalence
+  - type: invariant
+    property: "Deterministic output"
+    formal: "matmul(A, B) = matmul(A, B) for all A, B"
+    applies_to: matmul
+
+falsification_tests:
+  - id: FALSIFY-MM-001
+    rule: "F7 throughput threshold"
+    prediction: "AVX-512 matmul >= 80 GFLOPS at 1024×1024"
+    test: "Benchmark 1024×1024 f32 matmul, 50 iterations, report median GFLOPS"
+    if_fails: "Cache tiling suboptimal or AVX-512 downclocking penalty"
+  - id: FALSIFY-MM-002
+    rule: "Scalar equivalence"
+    prediction: "max |C_avx512[i,j] - C_scalar[i,j]| < 0.001"
+    test: "proptest: random f32 matrices 64×64..512×512, compare outputs"
+    if_fails: "FMA accumulation order differs or tail handling wrong"
+  - id: FALSIFY-MM-003
+    rule: "Deterministic"
+    prediction: "Two calls with same input produce identical output"
+    test: "matmul twice on same input, assert bitwise equal"
+    if_fails: "Uninitialized accumulator or thread scheduling nondeterminism"
+
+kani_harnesses:
+  - id: KANI-MM-001
+    obligation: "Deterministic output"
+    bound: 4
+    strategy: bounded_int
+  - id: KANI-MM-002
+    obligation: "SIMD matches scalar"
+    bound: 8
+    strategy: stub_float
+
+qa_gate:
+  id: F-MM-001
+  name: "AVX-512 Matmul Contract"
+  description: "Matrix multiplication correctness and throughput quality gate"
+  checks:
+    - "throughput_f7"
+    - "scalar_equivalence"
+    - "deterministic"
+  pass_criteria: "GFLOPS >= 80 at 1024×1024 + max error < 0.001"

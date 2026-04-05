@@ -1,0 +1,81 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "LZ4 decompression throughput for .apr model loading — F1 falsifiable claim"
+  references:
+    - "Collet (2011) LZ4 — Extremely Fast Compression Algorithm"
+    - "APR Cookbook Spec v3.0.0, Claim F1"
+  tags:
+    - performance
+    - decompression
+    - model-loading
+
+equations:
+  throughput:
+    formula: "T = bytes_decompressed / wall_time_seconds"
+    domain: "bytes_decompressed ∈ ℕ, wall_time > 0"
+    codomain: "T ∈ (0, ∞) bytes/s"
+    invariants:
+      - "T >= 3 GB/s on AVX2-capable hardware (F1 threshold)"
+      - "T is bounded above by memory bandwidth"
+      - "T monotonically increases with SIMD width (scalar < SSE4 < AVX2)"
+
+  compression_ratio:
+    formula: "R = compressed_size / original_size"
+    domain: "compressed_size, original_size ∈ ℕ, original_size > 0"
+    codomain: "R ∈ (0, 1]"
+    invariants:
+      - "R < 1 for non-random weight data (compressible)"
+      - "decompress(compress(data)) = data (lossless roundtrip)"
+
+proof_obligations:
+  - type: bound
+    property: "Throughput meets F1 threshold"
+    formal: "T >= 3 * 10^9 bytes/s on x86_64 with AVX2"
+    applies_to: throughput
+  - type: roundtrip
+    property: "Lossless decompression"
+    formal: "decompress(compress(W)) = W for all weight tensors W"
+    applies_to: compression_ratio
+  - type: monotonicity
+    property: "SIMD speedup"
+    formal: "T(avx2) >= T(scalar) for all inputs"
+    applies_to: throughput
+
+falsification_tests:
+  - id: FALSIFY-LZ4-001
+    rule: "F1 throughput threshold"
+    prediction: "LZ4 decompression >= 3 GB/s on AVX2 hardware"
+    test: "Benchmark decompress on 100MB synthetic weight blob, measure wall time"
+    if_fails: "Memory bandwidth saturated, or LZ4 frame overhead dominates at small block sizes"
+  - id: FALSIFY-LZ4-002
+    rule: "Lossless roundtrip"
+    prediction: "decompress(compress(data)) == data for all inputs"
+    test: "proptest with random byte vectors 1..10MB, compare roundtrip"
+    if_fails: "Buffer overflow in decompression or truncation at block boundary"
+  - id: FALSIFY-LZ4-003
+    rule: "SIMD monotonicity"
+    prediction: "AVX2 path >= scalar path throughput"
+    test: "Benchmark both paths on identical input, compare"
+    if_fails: "AVX2 codepath has alignment penalty or branch misprediction"
+
+kani_harnesses:
+  - id: KANI-LZ4-001
+    obligation: "Lossless decompression"
+    bound: 64
+    strategy: bounded_bytes
+  - id: KANI-LZ4-002
+    obligation: "Throughput meets F1 threshold"
+    bound: 8
+    strategy: stub_float
+
+qa_gate:
+  id: F-LZ4-001
+  name: "LZ4 Decompression Contract"
+  description: "LZ4 decompression correctness and performance quality gate"
+  checks:
+    - "throughput_f1"
+    - "lossless_roundtrip"
+    - "simd_monotonicity"
+  pass_criteria: "All 3 falsification tests pass + throughput >= 3 GB/s"

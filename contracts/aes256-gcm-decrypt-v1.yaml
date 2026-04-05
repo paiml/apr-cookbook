@@ -1,0 +1,90 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "AES-256-GCM model decryption latency — F4 falsifiable claim"
+  references:
+    - "NIST SP 800-38D: Recommendation for GCM Mode"
+    - "McGrew & Viega (2004) The Galois/Counter Mode of Operation"
+    - "APR Cookbook Spec v3.0.0, Claim F4"
+  tags:
+    - encryption
+    - security
+    - performance
+
+equations:
+  decrypt_latency:
+    formula: "L = t_decrypt_complete - t_decrypt_start"
+    domain: "ciphertext ∈ bytes, key ∈ {0,1}^256, nonce ∈ {0,1}^96"
+    codomain: "L ∈ [0, ∞) seconds"
+    invariants:
+      - "L < 5ms for model header decryption (F4 threshold)"
+      - "L scales linearly with ciphertext size for full-model decrypt"
+
+  authenticity:
+    formula: "V = GHASH(ciphertext, AAD) == tag"
+    domain: "ciphertext, AAD, tag, key"
+    codomain: "V ∈ {true, false}"
+    invariants:
+      - "V = false for any bit flip in ciphertext (authentication)"
+      - "V = false for any bit flip in tag (forgery detection)"
+      - "Pr[forge] <= 2^{-128} (GCM security bound)"
+
+  roundtrip:
+    formula: "decrypt(encrypt(plaintext, key), key) = plaintext"
+    domain: "plaintext ∈ bytes, key ∈ {0,1}^256"
+    codomain: "bytes"
+    invariants:
+      - "Lossless: output = input for all valid key/plaintext pairs"
+      - "decrypt with wrong key → authentication failure, not garbage"
+
+proof_obligations:
+  - type: bound
+    property: "Decrypt latency under 5ms"
+    formal: "L < 0.005s for header decryption"
+    applies_to: decrypt_latency
+  - type: roundtrip
+    property: "Encrypt/decrypt lossless"
+    formal: "decrypt(encrypt(P, K), K) = P for all P, K"
+    applies_to: roundtrip
+  - type: invariant
+    property: "Tamper detection"
+    formal: "flip_bit(ciphertext) → authentication failure"
+    applies_to: authenticity
+
+falsification_tests:
+  - id: FALSIFY-AES-001
+    rule: "F4 latency threshold"
+    prediction: "AES-256-GCM header decrypt < 5ms"
+    test: "Encrypt/decrypt 4KB header, 1000 iterations, check p99 < 5ms"
+    if_fails: "AES-NI not available or key derivation dominates"
+  - id: FALSIFY-AES-002
+    rule: "Lossless roundtrip"
+    prediction: "decrypt(encrypt(data)) == data"
+    test: "proptest with random byte vectors 1..1MB and random keys"
+    if_fails: "Nonce reuse or padding error"
+  - id: FALSIFY-AES-003
+    rule: "Tamper detection"
+    prediction: "Single bit flip in ciphertext causes auth failure"
+    test: "Encrypt data, flip each byte position, verify decrypt fails"
+    if_fails: "Tag verification skipped or MAC truncated"
+
+kani_harnesses:
+  - id: KANI-AES-001
+    obligation: "Encrypt/decrypt lossless"
+    bound: 32
+    strategy: bounded_bytes
+  - id: KANI-AES-002
+    obligation: "Tamper detection"
+    bound: 16
+    strategy: symbolic
+
+qa_gate:
+  id: F-AES-001
+  name: "AES-256-GCM Decrypt Contract"
+  description: "Encryption correctness and latency quality gate"
+  checks:
+    - "latency_f4"
+    - "lossless_roundtrip"
+    - "tamper_detection"
+  pass_criteria: "p99 decrypt < 5ms + tamper detected on all bit positions"

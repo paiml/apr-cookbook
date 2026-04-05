@@ -1,0 +1,84 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "Zero-copy mmap model loading latency — F2 falsifiable claim"
+  references:
+    - "Kerrisk (2010) The Linux Programming Interface, Ch. 49: Memory Mappings"
+    - "APR Cookbook Spec v3.0.0, Claim F2"
+  tags:
+    - performance
+    - mmap
+    - zero-copy
+
+equations:
+  mmap_latency:
+    formula: "L = t_mmap_complete - t_mmap_start"
+    domain: "file_size ∈ [1 MB, 100 GB], file exists on disk"
+    codomain: "L ∈ [0, ∞) seconds"
+    invariants:
+      - "L < 1ms for any model size (F2 threshold) — mmap is O(1) in file size"
+      - "L is independent of file size (only page table setup, no I/O)"
+
+  first_access_latency:
+    formula: "L_access = t_first_byte_read - t_mmap_complete"
+    domain: "mmap'd region, page not yet faulted"
+    codomain: "L_access ∈ [0, ∞) seconds"
+    invariants:
+      - "L_access depends on storage I/O (SSD: ~10µs, HDD: ~5ms)"
+      - "Subsequent accesses to same page are L_cached ~ 0"
+
+  zero_copy:
+    formula: "allocations(mmap_load) = 0 heap allocations"
+    domain: "any .apr model file"
+    codomain: "{0}"
+    invariants:
+      - "No memcpy from kernel to userspace (data stays in page cache)"
+      - "Tensor slices are pointer offsets into mmap'd region"
+
+proof_obligations:
+  - type: bound
+    property: "mmap latency under 1ms"
+    formal: "L < 0.001s for all model sizes"
+    applies_to: mmap_latency
+  - type: invariant
+    property: "O(1) in file size"
+    formal: "|L(100MB) - L(10GB)| < 0.5ms"
+    applies_to: mmap_latency
+  - type: invariant
+    property: "Zero heap allocations"
+    formal: "allocations(mmap_load) = 0"
+    applies_to: zero_copy
+
+falsification_tests:
+  - id: FALSIFY-MMAP-001
+    rule: "F2 latency threshold"
+    prediction: "mmap() call completes in < 1ms for a 1GB model"
+    test: "Time mmap syscall on 1GB .apr file, 100 iterations, check p99 < 1ms"
+    if_fails: "Kernel page table allocation contention or TLB pressure"
+  - id: FALSIFY-MMAP-002
+    rule: "Size independence"
+    prediction: "|mmap_time(100MB) - mmap_time(10GB)| < 0.5ms"
+    test: "Compare mmap latency on small vs large model files"
+    if_fails: "mmap implementation is copying data or pre-faulting pages"
+  - id: FALSIFY-MMAP-003
+    rule: "Zero allocations"
+    prediction: "No heap allocations during mmap model load"
+    test: "Run under dhat/jemalloc profiler, assert 0 allocations in load path"
+    if_fails: "Intermediate buffer or metadata copy in load path"
+
+kani_harnesses:
+  - id: KANI-MMAP-001
+    obligation: "Zero heap allocations"
+    bound: 4
+    strategy: symbolic
+
+qa_gate:
+  id: F-MMAP-001
+  name: "Zero-Copy Mmap Contract"
+  description: "Model loading latency and zero-copy correctness quality gate"
+  checks:
+    - "latency_f2"
+    - "size_independence"
+    - "zero_allocations"
+  pass_criteria: "p99 mmap latency < 1ms + 0 heap allocations"

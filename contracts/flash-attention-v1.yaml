@@ -1,0 +1,95 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "FlashAttention speedup over naive attention — F6 falsifiable claim"
+  references:
+    - "Dao et al. (2022) FlashAttention: Fast and Memory-Efficient Exact Attention"
+    - "Dao (2023) FlashAttention-2: Faster Attention with Better Parallelism"
+    - "APR Cookbook Spec v3.0.0, Claim F6"
+  tags:
+    - gpu
+    - attention
+    - performance
+
+equations:
+  naive_attention:
+    formula: "O(N) = O(S²·d) compute, O(S²) memory"
+    domain: "S: sequence length, d: head dimension"
+    codomain: "FLOPS, bytes"
+    invariants:
+      - "Memory grows quadratically with sequence length"
+      - "Materializes full S×S attention matrix"
+
+  flash_attention:
+    formula: "O(F) = O(S²·d) compute, O(S) memory"
+    domain: "S: sequence length, d: head dimension, B_r, B_c: tile sizes"
+    codomain: "FLOPS, bytes"
+    invariants:
+      - "Same FLOP count as naive (exact, not approximate)"
+      - "Memory is O(S) — no S×S materialization"
+      - "Tiling makes it IO-aware: minimizes HBM reads/writes"
+
+  speedup:
+    formula: "Speedup = wall_time(naive) / wall_time(flash)"
+    domain: "S >= 1024, same Q/K/V inputs"
+    codomain: "Speedup ∈ (0, ∞)"
+    invariants:
+      - "Speedup >= 2x for S >= 1024 (F6 threshold)"
+      - "Speedup increases with sequence length (IO-bound regime)"
+
+  numerical_equivalence:
+    formula: "||O_flash - O_naive||_∞ < ε"
+    domain: "Same Q, K, V inputs"
+    codomain: "ε ∈ [0, ∞)"
+    invariants:
+      - "ε < 1e-3 for f32 (different summation order)"
+      - "Output is exact in infinite precision — error is purely floating-point"
+
+proof_obligations:
+  - type: bound
+    property: "Speedup >= 2x at seq >= 1024"
+    formal: "wall_time(naive) / wall_time(flash) >= 2.0 for S >= 1024"
+    applies_to: speedup
+  - type: equivalence
+    property: "Numerical equivalence"
+    formal: "||O_flash - O_naive||_∞ < 1e-3"
+    tolerance: 1.0e-3
+    applies_to: numerical_equivalence
+  - type: bound
+    property: "Linear memory"
+    formal: "peak_memory(flash) = O(S), not O(S²)"
+    applies_to: flash_attention
+
+falsification_tests:
+  - id: FALSIFY-FA-001
+    rule: "F6 speedup threshold"
+    prediction: "FlashAttention >= 2x speedup at S=1024"
+    test: "Benchmark naive vs flash on S={1024, 2048, 4096}, assert ratio >= 2.0"
+    if_fails: "Tile size misconfigured for GPU shared memory, or compute-bound at small S"
+  - id: FALSIFY-FA-002
+    rule: "Numerical equivalence"
+    prediction: "max |O_flash - O_naive| < 1e-3"
+    test: "Random Q/K/V at S=512, compare element-wise, check max abs diff"
+    if_fails: "Online softmax accumulator loses precision or rescaling error"
+  - id: FALSIFY-FA-003
+    rule: "Linear memory"
+    prediction: "Peak memory at S=4096 is < 2x peak memory at S=2048"
+    test: "Measure GPU memory at S={1024, 2048, 4096}, verify subquadratic growth"
+    if_fails: "Intermediate buffer not freed between tiles"
+
+kani_harnesses:
+  - id: KANI-FA-001
+    obligation: "Numerical equivalence"
+    bound: 8
+    strategy: stub_float
+
+qa_gate:
+  id: F-FA-001
+  name: "FlashAttention Contract"
+  description: "FlashAttention correctness and speedup quality gate"
+  checks:
+    - "speedup_f6"
+    - "numerical_equivalence"
+    - "linear_memory"
+  pass_criteria: "Speedup >= 2x at S=1024 + max error < 1e-3"
