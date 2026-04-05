@@ -243,6 +243,8 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 | `avx512-matmul-v1` | F7 | 3 | 3 |
 | `recipe-iiur-v1` | IIUR | 4 | 4 |
 | `apr-format-roundtrip-v1` | Conversion | 4 | 4 |
+| `cli-parity-v1` | F-CLIPARITY-001 | 5 | 5 |
+| `docs-schema-v1` | F-DOCS-001 | 5 | 5 |
 
 ### Provability Invariant
 
@@ -260,47 +262,123 @@ Every non-registry contract must satisfy:
 
 ## APR CLI QA Process
 
-The installed `apr` binary is tested via the `/qa` Claude Code skill (`.claude/skills/qa/SKILL.md`). This is an exhaustive, model-in-the-loop QA process that exercises every subcommand against a real model.
+The installed `apr` binary is tested via the `/qa` Claude Code skill (`.claude/skills/qa/SKILL.md`). This is an exhaustive, **fleet-wide**, model-in-the-loop QA process that exercises every subcommand against a real model on **every reachable hardware target**, then audits subcommand coverage against the `provable-contracts` registry.
 
 ### Process
 
-1. **Pull** a test model (default: Qwen2.5-Coder-1.5B Q4_K_M, ~1 GB)
-2. **Exercise** all 40+ subcommands across 7 categories
-3. **Detect** bugs matching the defect taxonomy below
-4. **File** GitHub issues via `gh` with reproduction steps
+1. **Audit** contract coverage: every apr subcommand → YAML contract + Lean proof (Phase 0)
+2. **Probe** all targets: intel, yoga, jetson, lambda-labs + local (Phase 1 setup)
+3. **Pull** a test model (default: Qwen2.5-Coder-1.5B Q4_K_M, ~1 GB) on each target
+4. **Exercise** all 40+ subcommands across 8 categories per target
+5. **Detect** bugs matching the defect taxonomy below (tag with target)
+6. **File** GitHub issues via `gh` with per-target reproduction steps
+
+### Target Fleet
+
+| Target | Access | Arch | Accelerator | Purpose |
+|--------|--------|------|-------------|---------|
+| `local` | (host) | discover | discover | Fast iteration, contract audit |
+| `intel` | `ssh intel` | x86_64 | AVX2/AVX-512 CPU | x86_64 SIMD parity |
+| `yoga` | `ssh yoga` | discover | CPU | Laptop-class baseline |
+| `jetson` | `ssh jetson` | aarch64 | NVIDIA GPU | ARM + CUDA parity |
+| `lambda-labs` | `ssh -p 2222 noahgift@localhost` | x86_64 | NVIDIA GPU | Cloud GPU parity |
+
+Arch-divergence bugs (works on x86_64 but panics on aarch64) are a first-class defect category. Every bug report must list the affected targets as checkboxes.
 
 ### Subcommand Test Matrix
 
-| Category | Commands | Timeout |
-|----------|----------|---------|
-| Inspection | inspect, tensors, tree, flow, debug, hex, explain, oracle | 30s |
-| Validation | validate, check, lint, qa, qualify | 90s |
-| Inference | run, bench, eval, serve plan, chat | 60s |
-| Transform | convert, import, export, quantize, merge, prune, compile, encrypt/decrypt | 30s |
-| Training | finetune, distill, train plan, data audit, tokenize plan | 15s |
-| Operational | list, rm, gpu, diff, trace, profile, parity, ptx-map, rosetta, compare-hf | 30s |
-| Edge Cases | nonexistent file, empty file, invalid file, unknown subcommand, duplicate flags | 5s |
+| Category | Commands | Timeout | Run on |
+|----------|----------|---------|--------|
+| Inspection | inspect, tensors, tree, flow, debug, hex, explain, oracle | 30s | all targets |
+| Validation | validate, check, lint, qa, qualify | 90s | all targets |
+| Inference | run, bench, eval, serve plan, chat | 60s | all targets |
+| Transform | convert, import, export, quantize, merge, prune, compile, encrypt/decrypt | 30s | all targets |
+| Training | finetune, distill, train plan, data audit, tokenize plan | 15s | all targets |
+| Operational | list, rm, gpu, diff, trace, profile, parity, ptx-map, rosetta, compare-hf | 30s | all targets |
+| GPU-specific | gpu, ptx-map, parity --gpu, bench --device gpu | 60s | jetson, lambda-labs |
+| Edge Cases | nonexistent file, empty file, invalid file, unknown subcommand, duplicate flags | 5s | local only |
 
 ### Defect Taxonomy
 
-| Type | Severity | Example |
-|------|----------|---------|
-| Panic/crash | P0 | `thread 'main' panicked` on any input |
-| Exit code lie | P1 | Output says `error` or `failed` but exit code is 0 |
-| Hang | P1 | Command does not complete within timeout |
-| Data corruption | P0 | Encrypt/decrypt roundtrip loses data |
-| Wrong output | P2 | Quantization shows `"0"` instead of `"Q4_K_M"` |
-| No-op flag | P2 | `--vocab` accepted but produces identical output |
-| Missing fallback | P1 | GPU failure with no CPU fallback path |
-| Cache inconsistency | P1 | `pull` says cached but `list` shows empty |
-| Misleading message | P3 | Valid model labeled "Garbage (model broken)" |
+Patterns distilled from 500 historical issues (paiml/aprender #24–#607, 500 issues analyzed 2026-04-05).
+
+| Type | Severity | Historical Freq | Example | Ref |
+|------|----------|-----------------|---------|-----|
+| Panic/crash | P0 | 2.6% (13) | `thread 'main' panicked` | #598 WGSL -inf |
+| Hang | P1 | 0.8% (4) | Spinner prints then blocks forever | #606 quantize/merge/prune/export/compile |
+| Data corruption | P0 | — | Encrypt/decrypt roundtrip loses data | #580 merge drops tokenizer |
+| NaN/Inf numerical | P0 | 7.0% (35) | Shader outputs NaN, training diverges | #563 CUDA NaN, #598 WGSL -inf |
+| Exit code lie | P1 | 0.2%+ | Output says `error`/`failed`/`✗`, exit=0 | #601 lint/parity/rm |
+| Silently ignored flag | P2 | 4.6% (23) | `--rank 16` → actually uses 256 | #568 --rank, #604 --vocab, #595 --quiet |
+| Hardcoded value | P2 | 3.0% (15) | `num_classes: 5` regardless of input | #500, #605 DType IDs |
+| Wrong output | P2 | 2.8% (14) | Q4_K_M → displays "0" | #603, #499 14.2B vs 1.8B |
+| JSON output bug | P2 | 2.4% (12) | Schema drop, f32 precision artifact | #596, #510, #508 |
+| Cross-subcmd divergence | P1 | — | `oracle` finds family, `serve plan` doesn't | #600, #605 |
+| Perf regression | P1 | — | `run --gpu` 391× slower than `serve run --gpu` | #573 |
+| Missing fallback | P1 | — | GPU failure with no CPU path | #598 + cascade |
+| Cache inconsistency | P1 | 1.2% (6) | `pull` says cached, `list` shows empty | #602 |
+| Misleading message | P3 | — | Valid model labeled "Garbage" | #599 |
+| Phantom subcommand | P2 | — | `--help` lists subcommand that errors | #587 |
+| Version sentinel bug | P3 | — | Version string shows `(unknown)` | #597 |
+| Arch divergence | P0/P1 | 2.0% (10) | Passes x86_64, panics aarch64/Blackwell | #557 Jetson, #550 sm_121, #556 gx10 |
+| GPU backend-specific | P0/P1 | 8.2% (41) | Works CPU+CUDA, panics WGPU | #598, #471, #573 |
+| Div-by-zero/underflow | P0 | 1.2% (6) | Unsigned subtraction underflow | #492, #497, #498 |
+| Build/CI breakage | P1 | 1.4% (7) | Nightly fails, check-cfg broken | #589, #590, #593 |
+| Contract drift | P1 | — | Benchmark contradicts YAML obligation | — |
+| Missing contract | P2 | — | apr subcommand with no YAML | — |
+| Missing Lean proof | P3 | — | Contract has no `pv lean-status` proof | — |
+| Contract schema | P1 | 8.2% (41) | YAML fails `pv lint` | #588 |
+
+### QA Protocols (from historical patterns)
+
+The skill MUST execute these **protocol-level** checks beyond the per-command grid, because bug patterns in the issue history map to systemic failures not caught by naive invocation.
+
+1. **Silent-Flag Protocol** — For every accepted flag, run the command with AND without the flag; if output is byte-identical, the flag is a no-op (P2). Catches 23+ historical issues.
+2. **Exit-Code Contradiction Protocol** — grep output for `\b(error|failed|FAIL|✗)\b`; if matched and exit code is 0, flag as exit-code lie (P1). Catches #601 family.
+3. **Flag-Echo Protocol** — When the user passes `--rank 16`, parse the command's own output; if it reports a different value ("Rank: 256"), the flag is silently overridden (P2). Catches #568.
+4. **Cross-Subcommand Consistency Protocol** — Run `{inspect, check, oracle, tensors, rosetta inspect, serve plan}` on the same model; diff detected `{family, dtype names, param count, tokenizer}`. Any mismatch is P1. Catches #600, #605.
+5. **Cache Registry Integrity Protocol** — `pull X` → `list` must contain X → `rm X` → `list` must not contain X. Catches #602.
+6. **GPU/CPU Parity Protocol** — Run same prompt on `--device cpu` vs `--device gpu`; output similarity ≥ 0.95 cosine AND tok/s ratio within 20×. Catches #573.
+7. **NaN/Inf Sentinel Protocol** — Grep inference output for `\b(NaN|nan|[+-]?[Ii]nf|[+-]?[Ii]nfinity)\b` in tensor/metric values. Any match is P0. Catches #598, #563.
+8. **Version Sanity Protocol** — `apr --version` must not contain `unknown`, `<empty>`, or `0000000`. Catches #597.
+9. **Phantom Subcommand Protocol** — Every subcommand listed in `apr --help` must execute without returning "unknown subcommand" or "not yet implemented". Catches #587.
+10. **JSON Schema Stability Protocol** — Every `--json` invocation must: (a) produce valid JSON, (b) not contain f32 precision artifacts on fields typed as integer/ratio, (c) preserve all CLI-output fields. Catches #596, #508, #510.
+11. **Default-Defamation Protocol** — Never emit "Garbage", "broken", "corrupt" labels when running with default flags on a known-good model. If defaults produce insufficient samples, warn instead of defame. Catches #599.
+12. **Hardware Cascade Protocol** — When GPU init fails, CPU fallback must engage silently AND correctness must be preserved. No CPU-fallback → NaN cascade (#568 → OOM → CPU fallback → NaN). P0 if cascade produces corrupt output.
+
+### Contract Coverage Invariant
+
+Every apr CLI subcommand must map to at least one provable-contract YAML in `contracts/`, and every contract must carry a Lean 4 proof verified by `pv lean-status`. Formally:
+
+```
+∀ subcommand s ∈ apr.subcommands:
+  ∃ contract C ∈ contracts/: s ∈ C.bindings
+
+∀ contract C ∈ contracts/:
+  pv lint C = PASS
+  pv lean-status C ≥ L2
+```
+
+This invariant is audited in **Phase 0** of the `/qa` skill before per-target testing. Current coverage (as of 2026-04-05): 9 contracts / ~48 subcommands. Target: 95%+ subcommand coverage, 80%+ Lean-proved contracts. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues against `apr-cookbook`.
+
+The audit uses the `pv` CLI from `../provable-contracts`:
+
+```bash
+pv lint contracts/              # 8-gate quality validation
+pv lean-status contracts/       # Lean 4 proof status per contract
+pv proof-status contracts/      # L1–L5 hierarchical proof levels
+pv coverage contracts/          # cross-contract obligation coverage
+pv audit contracts/             # traceability chain audit (paper → contract → test)
+```
 
 ### Invocation
 
 ```bash
 # From the apr-cookbook project directory:
-/qa                           # Default model
-/qa /path/to/model.gguf       # Specific model
+/qa                                      # Default model, all reachable targets
+/qa /path/to/model.gguf                  # Specific model, all targets
+/qa --targets=intel,jetson               # Subset of targets
+/qa --targets=local                      # Local-only (skip SSH)
 ```
 
 ### Issue Filing Convention
@@ -309,3 +387,132 @@ The installed `apr` binary is tested via the `/qa` Claude Code skill (`.claude/s
 - Title: `<subcommand>: <concise description>`
 - Body: Description, Reproduction (exact commands), Expected, Version
 - Severity label in body: P0/P1/P2/P3
+
+---
+
+## Docs Schema Enforcement
+
+All `*.md` files in the repository are enforced by **`pmat validate-readme`** (factual accuracy + hallucination detection) and carry a **provable-contract schema** (`contracts/docs-schema-v1.yaml`, F-DOCS-001).
+
+### What gets validated
+
+| Target | Tool | Enforcement |
+|--------|------|-------------|
+| `README.md` | `pmat validate-readme` | `--fail-on-contradiction --fail-on-unverified` |
+| `CLAUDE.md` | `pmat validate-readme` | Same |
+| `docs/specifications/**/*.md` | `pmat validate-readme` + `pv validate` | Same + schema frontmatter |
+| All `*.md` links | `pmat validate-docs` | `--fail-on-error` |
+| Every `apr <cmd>` reference in any `*.md` | CLI binding check | must exist in `apr --help` |
+
+### Invariants (from `contracts/docs-schema-v1.yaml`)
+
+```
+∀ m ∈ *.md: pmat.validate_readme(m) ⊨ {unverified = 0, contradictions = 0}
+∀ link ∈ *.md: link.target.exists
+∀ `apr <cmd>` ∈ docs: cmd ∈ apr.subcommands
+∀ m ∈ docs/specifications/**/*.md: validates(m.frontmatter, doc_schema)
+```
+
+### Verification
+
+```bash
+# Generate deep context once
+pmat context --output deep-context.md
+
+# Validate every *.md
+pmat validate-readme \
+    --targets README.md CLAUDE.md docs/specifications/**/*.md \
+    --deep-context deep-context.md \
+    --fail-on-contradiction \
+    --fail-on-unverified
+
+# Validate links + cross-references
+pmat validate-docs --root . --fail-on-error
+
+# Validate contract schema compliance
+pv validate contracts/docs-schema-v1.yaml
+pv lint contracts/
+```
+
+A `make docs-validate` target chains these. Docs validation is a **mandatory pre-commit gate**.
+
+---
+
+## CLI Parity Invariant
+
+Every apr-cli subcommand **and every variant** must have a corresponding cookbook recipe, a provable contract, and a Lean proof. Formalized in `contracts/cli-parity-v1.yaml` (F-CLIPARITY-001).
+
+### Invariants
+
+```
+∀ s ∈ apr.subcommands:
+  ∃ r ∈ recipes: r.cli_equivalent = s                    # subcommand coverage
+∀ (s, f, v) ∈ apr.variants:
+  ∃ r ∈ recipes: (s, f, v) ∈ r.demonstrates              # variant coverage
+∀ r ∈ recipes:
+  ∃ c ∈ contracts/: r.behavior ⊨ c.obligations           # contract binding
+∀ c ∈ contracts/:
+  pv lean-status(c) ≥ L2                                  # Lean proof
+```
+
+### Variant definition
+
+A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 58 subcommands, apr-cli exposes ~400 distinct variants.
+
+### Recipe doc-comment contract
+
+Every recipe `.rs` file **must** start with a doc comment containing the following fields (case-insensitive, `**` decoration allowed):
+
+```rust
+//! # <Recipe Name>
+//!
+//! CLI Equivalent: `apr <subcommand> [--flag value]`
+//! Demonstrates: <flag1>, <flag2>, ...
+//! Contract: contracts/<name>-v1.yaml
+//! Lean proof: L2+
+//! Run Command: cargo run --example <name>
+//! Learning Objective: <one-line summary>
+```
+
+The `make cli-parity` regex matches all of:
+- `CLI Equivalent: apr <cmd>`
+- `CLI equivalent: apr <cmd>`
+- `**CLI Equivalent**: \`apr <cmd>\``
+- `CLI Equivalent**: \`apr <cmd>\``
+
+### Coverage matrix
+
+The live coverage matrix is generated by `make cli-parity`:
+
+```bash
+# For each subcommand, enumerate flags and check recipe coverage
+apr --help 2>&1 | awk '/^  [a-z]/ {print $1}' | while read sub; do
+    flags=$(apr $sub --help 2>&1 | grep -E '^\s+--[a-z]' | awk '{print $1}')
+    recipes=$(grep -l "CLI Equivalent:.*apr $sub\b" examples/**/*.rs 2>/dev/null | wc -l)
+    printf "%-15s %3d flags  %3d recipes\n" "$sub" $(echo "$flags" | wc -l) "$recipes"
+done
+```
+
+### Current baseline (measured by `make cli-parity` on 2026-04-05)
+
+| Dimension | Actual | Target | Gap |
+|-----------|--------|--------|-----|
+| apr subcommands | 58 | 58 | — |
+| Subcommands with ≥1 recipe | 29 | 58 | **29 missing** (50% coverage) |
+| Estimated variants | ~400 | ~400 | — |
+| Variants with recipe | measured by `make variant-coverage` | ≥360 (90%) | large |
+| Contracts | 11 | ≥58 | 47+ missing |
+| Contracts with Lean proof ≥ L2 | 0 | ≥47 (80%) | all missing |
+| Contracts passing `pv lint` | 11/11 | 11/11 | **PASS** (fixed 2026-04-05) |
+
+**Missing subcommands** (run `make cli-parity` for live list): `canary`, `code`, `compare-hf`, `compile`, `data`, `decrypt`, `diagnose`, `encrypt`, `experiment`, `explain`, `flow`, `gpu`, `hex`, `list`, `monitor`, `oracle`, `pipeline`, `ptx`, `ptx-map`, `rm`, `run`, `runs`, `serve`, `showcase`, `tokenize`, `train`, `tree`, `tui`, `tune`.
+
+Gaps are tracked as individual P2 (missing recipe), P2 (missing contract), P3 (missing Lean proof) issues and actioned via kaizen-paiml.
+
+### Pre-commit enforcement
+
+```bash
+make cli-parity              # Enumerates gaps, exits non-zero if coverage regresses
+make variant-coverage        # Detailed per-subcommand matrix
+make docs-validate           # pmat + pv validation of all *.md
+```
