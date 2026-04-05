@@ -60,9 +60,9 @@ strip = "symbols"
 
 [dependencies]
 # Sovereign Stack - crates.io published versions (2026)
-aprender = { version = "0.25", features = ["format-compression"] }
-trueno = "0.14"
-entrenar = "0.5"  # Must match aprender's entrenar dependency
+aprender = { version = "0.27", features = ["format-compression"] }
+trueno = "0.16"
+entrenar = "0.7"
 ndarray = "0.16"  # For entrenar Tensor gradients
 
 # CLI
