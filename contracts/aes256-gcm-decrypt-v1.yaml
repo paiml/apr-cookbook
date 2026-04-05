@@ -73,11 +73,11 @@ kani_harnesses:
   - id: KANI-AES-001
     obligation: "Encrypt/decrypt lossless"
     bound: 32
-    strategy: bounded_bytes
+    strategy: bounded_int
   - id: KANI-AES-002
     obligation: "Tamper detection"
     bound: 16
-    strategy: symbolic
+    strategy: exhaustive
 
 qa_gate:
   id: F-AES-001

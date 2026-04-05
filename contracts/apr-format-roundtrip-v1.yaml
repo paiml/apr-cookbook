@@ -89,7 +89,7 @@ kani_harnesses:
   - id: KANI-FMT-002
     obligation: "Count preservation"
     bound: 4
-    strategy: symbolic
+    strategy: exhaustive
 
 qa_gate:
   id: F-FMT-001

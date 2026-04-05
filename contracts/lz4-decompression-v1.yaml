@@ -64,7 +64,7 @@ kani_harnesses:
   - id: KANI-LZ4-001
     obligation: "Lossless decompression"
     bound: 64
-    strategy: bounded_bytes
+    strategy: bounded_int
   - id: KANI-LZ4-002
     obligation: "Throughput meets F1 threshold"
     bound: 8

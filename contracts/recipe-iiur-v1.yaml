@@ -85,11 +85,11 @@ kani_harnesses:
   - id: KANI-IIUR-001
     obligation: "Isolation — no side effects"
     bound: 4
-    strategy: symbolic
+    strategy: exhaustive
   - id: KANI-IIUR-002
     obligation: "Cleanup — no temp leaks"
     bound: 4
-    strategy: symbolic
+    strategy: exhaustive
 
 qa_gate:
   id: F-IIUR-001
