@@ -22,4 +22,4 @@ cargo run --example optimize_full_pipeline
 
 ## Source
 
-[`examples/optimize/full_pipeline.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/full_pipeline.rs)
+[`examples/optimize/optimize_full_pipeline.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/optimize_full_pipeline.rs)

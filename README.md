@@ -9,17 +9,11 @@
 </p>
 
 <p align="center">
-  <a href="https://crates.io/crates/apr-cookbook">
-    <img src="https://img.shields.io/crates/v/apr-cookbook.svg" alt="crates.io">
-  </a>
-  <a href="https://docs.rs/apr-cookbook">
-    <img src="https://docs.rs/apr-cookbook/badge.svg" alt="docs.rs">
-  </a>
   <a href="https://github.com/paiml/apr-cookbook/actions/workflows/ci.yml">
     <img src="https://github.com/paiml/apr-cookbook/actions/workflows/ci.yml/badge.svg" alt="CI">
   </a>
-  <a href="https://paiml.github.io/apr-cookbook/">
-    <img src="https://img.shields.io/badge/book-online-blue" alt="Book">
+  <a href="book/src/introduction.md">
+    <img src="https://img.shields.io/badge/book-local-blue" alt="Book">
   </a>
   <a href="LICENSE">
     <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="MIT License">
@@ -173,9 +167,9 @@ Every example includes a doc header with QA checklist, uses
 
 ## Documentation
 
-- [The APR Cookbook](https://paiml.github.io/apr-cookbook/) -- Online book
-- [API Reference](https://docs.rs/apr-cookbook) -- Rust docs
+- [The APR Cookbook](book/src/introduction.md) -- mdBook source (build with `mdbook serve book/`)
 - [Specification](docs/specifications/apr-cookbook.md) -- Unified spec with component docs
+- [API Reference](book/src/reference/api.md) -- module-level API overview
 
 ## License
 
