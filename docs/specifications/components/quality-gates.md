@@ -210,3 +210,102 @@ jobs:
           name: benchmark-results
           path: target/criterion
 ```
+
+---
+
+## Provable Contracts
+
+All falsifiable claims (F1–F7) and structural invariants are formalized as YAML contracts in `contracts/`, following the [provable-contracts](https://github.com/paiml/provable-contracts) schema.
+
+### Contract Schema
+
+Each contract follows the chain: `metadata → equations → proof_obligations → falsification_tests → kani_harnesses → qa_gate`.
+
+| Section | Purpose |
+|---------|---------|
+| `metadata` | Version, author, academic references, tags |
+| `equations` | Formal domain/codomain/invariants for each property |
+| `proof_obligations` | Typed obligations (bound, roundtrip, equivalence, invariant, etc.) |
+| `falsification_tests` | FALSIFY-PREFIX-NNN tests with predictions and failure explanations |
+| `kani_harnesses` | KANI-PREFIX-NNN formal verification harnesses |
+| `qa_gate` | F-PREFIX-NNN quality gate tying checks to pass criteria |
+
+### Contract Inventory
+
+| Contract | F-Claim | Obligations | Tests |
+|----------|---------|-------------|-------|
+| `lz4-decompression-v1` | F1 | 3 | 3 |
+| `mmap-inference-v1` | F2 | 3 | 3 |
+| `int4-quantization-v1` | F3 | 3 | 3 |
+| `aes256-gcm-decrypt-v1` | F4 | 3 | 3 |
+| `whisper-wer-v1` | F5 | 3 | 3 |
+| `flash-attention-v1` | F6 | 3 | 3 |
+| `avx512-matmul-v1` | F7 | 3 | 3 |
+| `recipe-iiur-v1` | IIUR | 4 | 4 |
+| `apr-format-roundtrip-v1` | Conversion | 4 | 4 |
+
+### Provability Invariant
+
+Every non-registry contract must satisfy:
+
+```
+∀ contract C:
+  |C.proof_obligations| > 0
+  |C.falsification_tests| >= |C.proof_obligations|
+  |C.kani_harnesses| > 0
+  ∀ h ∈ C.kani_harnesses: h.obligation ∈ C.proof_obligations
+```
+
+---
+
+## APR CLI QA Process
+
+The installed `apr` binary is tested via the `/qa` Claude Code skill (`.claude/skills/qa/SKILL.md`). This is an exhaustive, model-in-the-loop QA process that exercises every subcommand against a real model.
+
+### Process
+
+1. **Pull** a test model (default: Qwen2.5-Coder-1.5B Q4_K_M, ~1 GB)
+2. **Exercise** all 40+ subcommands across 7 categories
+3. **Detect** bugs matching the defect taxonomy below
+4. **File** GitHub issues via `gh` with reproduction steps
+
+### Subcommand Test Matrix
+
+| Category | Commands | Timeout |
+|----------|----------|---------|
+| Inspection | inspect, tensors, tree, flow, debug, hex, explain, oracle | 30s |
+| Validation | validate, check, lint, qa, qualify | 90s |
+| Inference | run, bench, eval, serve plan, chat | 60s |
+| Transform | convert, import, export, quantize, merge, prune, compile, encrypt/decrypt | 30s |
+| Training | finetune, distill, train plan, data audit, tokenize plan | 15s |
+| Operational | list, rm, gpu, diff, trace, profile, parity, ptx-map, rosetta, compare-hf | 30s |
+| Edge Cases | nonexistent file, empty file, invalid file, unknown subcommand, duplicate flags | 5s |
+
+### Defect Taxonomy
+
+| Type | Severity | Example |
+|------|----------|---------|
+| Panic/crash | P0 | `thread 'main' panicked` on any input |
+| Exit code lie | P1 | Output says `error` or `failed` but exit code is 0 |
+| Hang | P1 | Command does not complete within timeout |
+| Data corruption | P0 | Encrypt/decrypt roundtrip loses data |
+| Wrong output | P2 | Quantization shows `"0"` instead of `"Q4_K_M"` |
+| No-op flag | P2 | `--vocab` accepted but produces identical output |
+| Missing fallback | P1 | GPU failure with no CPU fallback path |
+| Cache inconsistency | P1 | `pull` says cached but `list` shows empty |
+| Misleading message | P3 | Valid model labeled "Garbage (model broken)" |
+
+### Invocation
+
+```bash
+# From the apr-cookbook project directory:
+/qa                           # Default model
+/qa /path/to/model.gguf       # Specific model
+```
+
+### Issue Filing Convention
+
+- One issue per distinct bug (group related exit-code bugs)
+- Title: `<subcommand>: <concise description>`
+- Body: Description, Reproduction (exact commands), Expected, Version
+- Severity label in body: P0/P1/P2/P3

@@ -71,7 +71,7 @@ Each component specification is in `components/` and is self-contained (max 500 
 
 | # | Component | Description |
 |---|-----------|-------------|
-| 5 | [Quality Gates](components/quality-gates.md) | PMAT, falsification testing, CI pipeline, coverage |
+| 5 | [Quality Gates](components/quality-gates.md) | PMAT, falsification, provable contracts, CLI QA process |
 | 6 | [Implementation Guidelines](components/implementation.md) | Toyota Way compliance, code style, error handling |
 
 ### Reference
@@ -204,16 +204,22 @@ full = ["encryption", "gpu", "speech", "distributed"]
 
 ## Falsifiable Claims Summary
 
-| Code | Claim | Threshold | Refutation |
-|------|-------|-----------|------------|
-| F1 | LZ4 decompression throughput | >= 3 GB/s (AVX2) | < 2.5 GB/s |
-| F2 | Zero-copy mmap latency (<=100MB) | < 1ms | p95 > 2ms |
-| F3 | Int4 quantization accuracy loss | < 2% | > 2.5% |
-| F4 | AES-256-GCM decrypt latency (100MB) | < 5ms | p95 > 10ms |
-| F5 | whisper.apr WER (LibriSpeech) | < 10% | > 12% |
-| F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x |
-| F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 |
+| Code | Claim | Threshold | Refutation | Contract |
+|------|-------|-----------|------------|----------|
+| F1 | LZ4 decompression throughput | >= 3 GB/s (AVX2) | < 2.5 GB/s | `lz4-decompression-v1` |
+| F2 | Zero-copy mmap latency (<=100MB) | < 1ms | p95 > 2ms | `mmap-inference-v1` |
+| F3 | Int4 quantization accuracy loss | < 2% | > 2.5% | `int4-quantization-v1` |
+| F4 | AES-256-GCM decrypt latency (100MB) | < 5ms | p95 > 10ms | `aes256-gcm-decrypt-v1` |
+| F5 | whisper.apr WER (LibriSpeech) | < 10% | > 12% | `whisper-wer-v1` |
+| F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x | `flash-attention-v1` |
+| F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 | `avx512-matmul-v1` |
+
+All claims are backed by provable-contracts YAML in `contracts/` with formal equations, proof obligations, and falsification tests. See [Quality Gates](components/quality-gates.md) for the full contract schema.
+
+## CLI QA
+
+The installed `apr` binary is tested via `/qa` (Claude Code skill in `.claude/skills/qa/`). This exercises all 40+ subcommands against a real model, detects bugs (panics, exit code lies, hangs, wrong data, missing fallbacks), and files GitHub issues automatically. See [Quality Gates](components/quality-gates.md) for the defect taxonomy and test matrix.
 
 ---
 
-*Specification Version: 3.0.0 — Consolidated from v2.0 cookbook-spec, v2.2 IIUR spec, and CLI demos spec*
+*Specification Version: 3.1.0 — Added provable contracts (F1–F7) and CLI QA process*
