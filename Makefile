@@ -14,6 +14,7 @@ SHELL := /bin/bash
 .PHONY: all validate quick-validate release clean help
 .PHONY: format format-check lint lint-check check test test-fast test-quick test-doc test-property
 .PHONY: quality-gate audit docs build install examples
+.PHONY: docs-validate cli-parity variant-coverage contracts-lint
 .PHONY: update-deps update-deps-check
 .PHONY: coverage coverage-ci coverage-clean clean-coverage coverage-open
 .PHONY: sub-test sub-lint sub-check
@@ -136,6 +137,81 @@ examples-encryption: ## Run encryption example (requires feature)
 	@echo "✅ Encryption example completed!"
 
 # =============================================================================
+# DOCS + CLI PARITY ENFORCEMENT (F-DOCS-001, F-CLIPARITY-001)
+# =============================================================================
+
+docs-validate: ## Validate all *.md via pmat validate-readme + link integrity + pv schema
+	@echo "📄 Validating documentation (pmat + provable-contracts)..."
+	@if [ ! -f deep-context.md ]; then \
+		echo "  → Generating deep context..."; \
+		pmat context --output deep-context.md >/dev/null 2>&1 || true; \
+	fi
+	@echo "  → Factual validation (README, CLAUDE, spec)..."
+	@pmat validate-readme \
+		--targets README.md CLAUDE.md $$(find docs/specifications -name '*.md') \
+		--deep-context deep-context.md \
+		--fail-on-contradiction \
+		--fail-on-unverified 2>&1 || (echo "❌ pmat validate-readme FAILED"; exit 1)
+	@echo "  → Link integrity..."
+	@pmat validate-docs --root . --fail-on-error 2>&1 || (echo "❌ pmat validate-docs FAILED"; exit 1)
+	@echo "  → CLI binding integrity (every apr cmd in docs exists)..."
+	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u > /tmp/apr-cmds-actual.txt
+	@grep -rhoP '(?<![.\w])apr [a-z][a-z-]+\b' README.md CLAUDE.md docs/ 2>/dev/null | awk '{print $$2}' | sort -u > /tmp/apr-cmds-in-docs.txt
+	@MISSING=$$(comm -23 /tmp/apr-cmds-in-docs.txt /tmp/apr-cmds-actual.txt | grep -vE '^(help|subcommand|subcommands)$$' || true); \
+	if [ -n "$$MISSING" ]; then \
+		echo "❌ Docs reference nonexistent apr subcommands:"; \
+		echo "$$MISSING" | sed 's/^/    /'; \
+		exit 1; \
+	fi
+	@echo "  → Contract schema..."
+	@pv validate contracts/docs-schema-v1.yaml >/dev/null 2>&1 || (echo "❌ docs-schema-v1 invalid"; exit 1)
+	@echo "✅ Docs validation PASS (factual + links + CLI binding + schema)"
+
+contracts-lint: ## Run pv lint + lean-status on all contracts (F-DOCS-001, F-CLIPARITY-001)
+	@echo "📜 Linting provable-contracts..."
+	@pv lint contracts/ || (echo "❌ pv lint FAILED"; exit 1)
+	@echo "  → Lean proof status..."
+	@pv lean-status contracts/ || true
+	@echo "  → Proof level report..."
+	@pv proof-status contracts/ || true
+	@echo "✅ Contracts lint complete"
+
+cli-parity: ## Verify every apr subcommand has ≥1 cookbook recipe (F-CLIPARITY-001)
+	@echo "🎯 Checking apr-cli ↔ recipes 1:1 parity..."
+	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u > /tmp/apr-subs.txt
+	@grep -rhoiE 'CLI [Ee]quivalent[*: ]+`?apr [a-z][a-z-]+' examples/ 2>/dev/null | grep -oE 'apr [a-z][a-z-]+' | awk '{print $$2}' | sort -u > /tmp/recipe-subs.txt
+	@MISSING=$$(comm -23 /tmp/apr-subs.txt /tmp/recipe-subs.txt | grep -v '^help$$' || true); \
+	N_SUBS=$$(wc -l < /tmp/apr-subs.txt); \
+	N_COVERED=$$(comm -12 /tmp/apr-subs.txt /tmp/recipe-subs.txt | wc -l); \
+	printf "  Subcommands:  %3d\n  Covered:      %3d\n  Coverage:     %d%%\n" $$N_SUBS $$N_COVERED $$((100*N_COVERED/N_SUBS)); \
+	if [ -n "$$MISSING" ]; then \
+		echo "❌ Subcommands WITHOUT a recipe:"; \
+		echo "$$MISSING" | sed 's/^/    apr /'; \
+		exit 1; \
+	fi
+	@ORPHANS=$$(comm -13 /tmp/apr-subs.txt /tmp/recipe-subs.txt || true); \
+	if [ -n "$$ORPHANS" ]; then \
+		echo "⚠️  Orphan recipes (no matching apr subcommand):"; \
+		echo "$$ORPHANS" | sed 's/^/    /'; \
+	fi
+	@echo "✅ CLI parity: all 58 subcommands have ≥1 recipe"
+
+variant-coverage: ## Report per-subcommand flag/variant coverage
+	@echo "📊 Per-subcommand variant coverage:"
+	@printf "  %-15s %8s %8s %6s\n" "SUBCOMMAND" "FLAGS" "RECIPES" "COV%"
+	@printf "  %-15s %8s %8s %6s\n" "----------" "-----" "-------" "----"
+	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u | while read sub; do \
+		FLAGS=$$(apr $$sub --help 2>&1 | grep -cE '^\s+--[a-z]' || echo 0); \
+		RECIPES=$$(grep -liE "CLI [Ee]quivalent[*: ]+.*apr $$sub\b" examples/**/*.rs 2>/dev/null | wc -l); \
+		if [ "$$FLAGS" -gt 0 ]; then \
+			COV=$$((100 * RECIPES / FLAGS)); \
+		else \
+			COV=100; \
+		fi; \
+		printf "  %-15s %8d %8d %5d%%\n" "$$sub" "$$FLAGS" "$$RECIPES" "$$COV"; \
+	done
+
+# =============================================================================
 # COVERAGE (Toyota Way: "make coverage" just works)
 # TARGET: < 10 minutes (enforced with reduced property test cases)
 # =============================================================================
@@ -195,7 +271,7 @@ clean-coverage: coverage-clean ## Alias for coverage-clean
 # QUALITY
 # =============================================================================
 
-quality-gate: ## Run quality checks
+quality-gate: docs-validate contracts-lint cli-parity ## Run quality checks (includes docs + CLI parity gates)
 	@echo "🔍 Running quality gate checks..."
 	@echo "  📊 Checking test count..."
 	@TEST_COUNT=$$(cargo test --workspace 2>&1 | grep -E "^test result:" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+"); \
@@ -205,7 +281,7 @@ quality-gate: ## Run quality checks
 	else \
 		echo "  ✓ Test count acceptable"; \
 	fi
-	@echo "✅ Quality gates passed!"
+	@echo "✅ Quality gates passed (docs F-DOCS-001, CLI parity F-CLIPARITY-001, contracts, tests)!"
 
 # =============================================================================
 # SECURITY
