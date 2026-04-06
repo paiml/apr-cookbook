@@ -1,4 +1,5 @@
 //! Model Canary Deployment Example
+//! **CLI Equivalent**: `apr showcase`
 //!
 //! Demonstrates progressive canary deployment for ML model serving with
 //! gradual traffic shifting, health checks at each stage, and automatic

@@ -1,6 +1,7 @@
 //! # Recipe: APR Model Server CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr serve`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

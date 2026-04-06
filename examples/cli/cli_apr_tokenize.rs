@@ -1,6 +1,7 @@
 //! # Recipe: APR Tokenizer Training CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr tokenize`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

@@ -1,6 +1,7 @@
 //! # Recipe: APR Training Runs CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr runs`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

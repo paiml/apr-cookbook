@@ -1,6 +1,7 @@
 //! # Recipe: APR Model Remove CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr rm`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

@@ -1,6 +1,7 @@
 //! # Recipe: APR Checkpoint Diagnose CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr diagnose`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

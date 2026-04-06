@@ -1,4 +1,5 @@
 //! Entrenar Autograd Training Example
+//! **CLI Equivalent**: `apr train`
 //!
 //! Demonstrates training neural networks with entrenar's tape-based autograd
 //! and saving results to APR v2 format.

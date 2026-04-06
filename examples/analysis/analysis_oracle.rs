@@ -1,4 +1,5 @@
 //! # Model Family Oracle
+//! **CLI Equivalent**: `apr oracle`
 //!
 //! Identifies model architecture family from weight tensor names and shapes.
 //!

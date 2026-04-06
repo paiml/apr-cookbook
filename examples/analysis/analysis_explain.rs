@@ -1,4 +1,5 @@
 //! # APR Error Code Explanation System
+//! **CLI Equivalent**: `apr explain`
 //!
 //! Provides detailed explanations, causes, and solutions for APR error codes,
 //! similar to `rustc --explain`.

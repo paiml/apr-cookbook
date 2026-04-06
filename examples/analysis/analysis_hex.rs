@@ -1,4 +1,5 @@
 //! # Format-Aware Binary Forensics
+//! **CLI Equivalent**: `apr hex`
 //!
 //! Hex dump with APR format annotations, parsing magic bytes, version,
 //! metadata offsets, and tensor data regions.

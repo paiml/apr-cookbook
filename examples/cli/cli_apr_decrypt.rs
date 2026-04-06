@@ -1,6 +1,7 @@
 //! # Recipe: APR Model Decrypt CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr decrypt`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

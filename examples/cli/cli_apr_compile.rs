@@ -1,6 +1,7 @@
 //! # Recipe: APR Model Compiler CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr compile`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

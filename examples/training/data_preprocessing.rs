@@ -1,4 +1,5 @@
 //! Data Preprocessing Pipeline Example
+//! **CLI Equivalent**: `apr data`
 //!
 //! Demonstrates common data preprocessing steps for ML training:
 //! normalization, standardization, train/test splitting, data augmentation,

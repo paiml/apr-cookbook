@@ -1,6 +1,7 @@
 //! # Recipe: GPU PTX Kernel Analysis
 //!
 //! **Category**: GPU Acceleration
+//! **CLI Equivalent**: `apr ptx`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

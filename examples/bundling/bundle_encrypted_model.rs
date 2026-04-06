@@ -1,4 +1,5 @@
 //! Encrypted model bundling example.
+//! **CLI Equivalent**: `apr encrypt`
 //!
 //! This example demonstrates loading encrypted APR models with password-based
 //! decryption using Argon2id key derivation and AES-256-GCM encryption.

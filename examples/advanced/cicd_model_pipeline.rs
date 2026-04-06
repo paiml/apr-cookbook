@@ -1,6 +1,7 @@
 //! # Recipe: CI/CD Model Deployment Pipeline
 //!
 //! **Category**: Advanced - End-to-End Workflow
+//! **CLI Equivalent**: `apr pipeline`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

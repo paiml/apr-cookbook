@@ -1,6 +1,7 @@
 //! # Recipe: A/B Experiment Workflow
 //!
 //! **Category**: Advanced - End-to-End Workflow
+//! **CLI Equivalent**: `apr experiment`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

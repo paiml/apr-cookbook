@@ -1,6 +1,7 @@
 //! # Recipe: Inference Explainability
 //!
 //! **Category**: Inference Monitoring
+//! **CLI Equivalent**: `apr monitor`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: inference-monitoring feature (aprender)

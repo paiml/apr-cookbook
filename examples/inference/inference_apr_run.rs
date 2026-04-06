@@ -1,4 +1,5 @@
 //! Unified Model Inference Dispatch (`apr run`)
+//! **CLI Equivalent**: `apr run`
 //!
 //! Mirrors what `apr run model.apr --prompt "hello" --max-tokens 50` does:
 //! tokenize input, run a tiny 2-layer transformer forward pass, sample tokens

@@ -1,6 +1,7 @@
 //! # Recipe: APR PTX Source Mapping CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr ptx-map`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

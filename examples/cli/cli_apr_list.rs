@@ -1,6 +1,7 @@
 //! # Recipe: APR Model List CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr list`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

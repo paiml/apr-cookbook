@@ -1,4 +1,5 @@
 //! # Architecture Visualization as ASCII Tree
+//! **CLI Equivalent**: `apr tree`
 //!
 //! Renders model tensor hierarchy as an ASCII tree with parameter counts,
 //! grouping tensors by their dotted name paths.

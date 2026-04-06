@@ -1,4 +1,5 @@
 //! # Canary Tokens for Regression Testing
+//! **CLI Equivalent**: `apr canary`
 //!
 //! Embeds test vectors in a model and verifies outputs match expected values,
 //! detecting model drift and weight corruption.

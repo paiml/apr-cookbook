@@ -1,6 +1,7 @@
 //! # Recipe: CUDA GPU Inference
 //!
 //! **Category**: GPU Acceleration
+//! **CLI Equivalent**: `apr gpu`
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

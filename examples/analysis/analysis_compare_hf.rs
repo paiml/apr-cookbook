@@ -1,4 +1,5 @@
 //! # APR vs HuggingFace SafeTensors Comparison
+//! **CLI Equivalent**: `apr compare-hf`
 //!
 //! CLI equivalent: `apr compare_hf model.apr --repo my-org/my-model --threshold 1e-5`
 //!
