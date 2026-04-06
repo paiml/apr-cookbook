@@ -21,6 +21,13 @@
 //! - When flat merge of all models causes too much interference
 //! - When you want fine-grained control over how capabilities combine
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 

@@ -19,6 +19,13 @@
 //! - Combining a general model with a task-specific fine-tune
 //! - A/B testing merge ratios for optimal downstream performance
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr merge model.apr          # APR native format
+//! apr merge model.gguf         # GGUF (llama.cpp compatible)
+//! apr merge model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 

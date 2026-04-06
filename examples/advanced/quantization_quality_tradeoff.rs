@@ -5,6 +5,13 @@
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 

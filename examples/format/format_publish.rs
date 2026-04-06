@@ -12,6 +12,13 @@
 //! 3. File listing — final set of files to upload
 //! 4. Pre-publish validation — check for missing or invalid files
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 

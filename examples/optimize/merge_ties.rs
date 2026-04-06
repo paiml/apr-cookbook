@@ -20,6 +20,13 @@
 //! - When simple averaging degrades individual task performance
 //! - When models have conflicting gradient directions
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr merge model.apr          # APR native format
+//! apr merge model.gguf         # GGUF (llama.cpp compatible)
+//! apr merge model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 

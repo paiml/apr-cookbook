@@ -18,6 +18,13 @@
 //! 5. [x] Clippy clean
 //! 6. [x] No `unwrap()` in logic
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr prune model.apr          # APR native format
+//! apr prune model.gguf         # GGUF (llama.cpp compatible)
+//! apr prune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Frantar, E. & Alistarh, D. (2023). *SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot*. ICML. arXiv:2301.00774
 

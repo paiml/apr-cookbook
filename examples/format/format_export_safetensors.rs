@@ -12,6 +12,13 @@
 //! 3. Tensor data layout — compute contiguous offsets for each tensor
 //! 4. Format comparison — compare APR vs SafeTensors sizes and features
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr export model.apr          # APR native format
+//! apr export model.gguf         # GGUF (llama.cpp compatible)
+//! apr export model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 

@@ -25,6 +25,13 @@
 //! cargo run --example optimize_tune
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 

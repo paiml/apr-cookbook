@@ -6,6 +6,13 @@
 //! cargo run --example embedding_visualization
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - McInnes, L. et al. (2018). *UMAP: Uniform Manifold Approximation and Projection*. arXiv:1802.03426
 

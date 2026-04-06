@@ -16,6 +16,13 @@
 //! cargo run --example hyperparameter_sweep
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 

@@ -1,6 +1,13 @@
 //! Demo K: RAG Pipeline - chunking, embedding, vector search, context injection.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*. NeurIPS. arXiv:2005.11401
 

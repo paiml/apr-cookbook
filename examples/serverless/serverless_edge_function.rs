@@ -25,6 +25,13 @@
 //! cargo run --example serverless_edge_function
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 

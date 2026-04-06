@@ -16,6 +16,13 @@
 //! cargo run --example streaming_token_generator
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 

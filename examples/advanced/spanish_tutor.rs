@@ -1,6 +1,13 @@
 //! Demo P: Spanish Language Tutor - translation with grammar explanations.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 

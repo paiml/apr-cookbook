@@ -3,6 +3,13 @@
 //! Micro-autoencoder for sensor anomaly detection on resource-constrained edge devices.
 //! Fixed-point arithmetic (Q8.8), <1KB model, <100us inference.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 

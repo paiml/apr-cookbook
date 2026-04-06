@@ -32,6 +32,13 @@
 //! cargo run --example analysis_model_fingerprint
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 

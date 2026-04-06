@@ -12,6 +12,13 @@
 //! - f32 to f16 conversion with precision loss measurement
 //! - Per-slice descriptive statistics (mean, min, max, sum)
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr tensors model.apr          # APR native format
+//! apr tensors model.gguf         # GGUF (llama.cpp compatible)
+//! apr tensors model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 

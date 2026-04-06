@@ -12,6 +12,13 @@
 //! 3. LRU eviction — remove oldest entries when cache is full
 //! 4. Cache stats — summary of cache contents and utilization
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 

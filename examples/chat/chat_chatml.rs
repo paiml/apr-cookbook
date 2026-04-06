@@ -34,6 +34,13 @@
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 

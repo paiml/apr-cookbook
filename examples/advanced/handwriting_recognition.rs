@@ -3,6 +3,13 @@
 //! LeNet-5 CNN for digit recognition: 28x28 grayscale -> 10 classes.
 //! Image preprocessing, augmentation, convolutional inference, and evaluation.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - LeCun, Y. et al. (1998). *Gradient-Based Learning Applied to Document Recognition*. Proceedings of IEEE. DOI: 10.1109/5.726791
 

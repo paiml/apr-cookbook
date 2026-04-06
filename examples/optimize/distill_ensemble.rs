@@ -24,6 +24,13 @@
 //! cargo run --example distill_ensemble
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 

@@ -7,6 +7,13 @@
 //! cargo run --example streaming_sentiment
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Devlin, J. et al. (2019). *BERT: Pre-training of Deep Bidirectional Transformers*. NAACL. arXiv:1810.04805
 

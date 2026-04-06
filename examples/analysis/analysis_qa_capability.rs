@@ -4,6 +4,13 @@
 //! operations before loading weights. Prevents wasted time loading 70B models
 //! onto hardware that cannot run them.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr qa model.apr          # APR native format
+//! apr qa model.gguf         # GGUF (llama.cpp compatible)
+//! apr qa model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 

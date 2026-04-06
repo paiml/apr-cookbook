@@ -13,6 +13,13 @@
 //! - Pattern matching on tensor naming conventions
 //! - Confidence scoring with evidence accumulation
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr oracle model.apr          # APR native format
+//! apr oracle model.gguf         # GGUF (llama.cpp compatible)
+//! apr oracle model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 

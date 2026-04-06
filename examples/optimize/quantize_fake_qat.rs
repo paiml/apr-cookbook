@@ -23,6 +23,13 @@
 //! - For INT4/INT8 deployment where every bit of accuracy matters
 //! - When you can afford extra training compute for better quantized models
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 

@@ -40,6 +40,13 @@
 //! - **Dependencies**: trueno 0.14+, aprender 0.25+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 

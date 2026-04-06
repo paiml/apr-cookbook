@@ -31,6 +31,13 @@
 //! cargo run --example model_rate_limiter
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 

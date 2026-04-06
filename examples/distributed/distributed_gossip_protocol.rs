@@ -33,6 +33,13 @@
 //! - **Dependencies**: rand, apr_cookbook
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 

@@ -38,6 +38,13 @@
 //! - **Muda** (Waste elimination): Minimise idle bubble cycles
 //! - **Jidoka** (Quality built-in): Deterministic schedule, verifiable metrics
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 

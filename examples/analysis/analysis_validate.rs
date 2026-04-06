@@ -6,6 +6,13 @@
 //! Each check contributes to a pass/fail/warn score, giving a clear picture
 //! of model health before deployment.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr validate model.apr          # APR native format
+//! apr validate model.gguf         # GGUF (llama.cpp compatible)
+//! apr validate model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 

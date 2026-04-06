@@ -25,6 +25,13 @@
 //! cargo run --example create_apr_linear_regression
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 

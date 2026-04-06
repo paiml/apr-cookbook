@@ -25,6 +25,13 @@
 //! - Reducing model size for mobile / WASM inference
 //! - Trading small accuracy loss for 4-8x memory savings
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr quantize model.apr          # APR native format
+//! apr quantize model.gguf         # GGUF (llama.cpp compatible)
+//! apr quantize model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 

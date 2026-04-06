@@ -9,6 +9,13 @@
 //! - **Jidoka**: Quality detection for style strength
 //! - **Kaizen**: Iterative refinement of style application
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Gatys, L. et al. (2016). *Image Style Transfer Using Convolutional Neural Networks*. CVPR. DOI: 10.1109/CVPR.2016.265
 

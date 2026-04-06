@@ -29,6 +29,13 @@
 //! cargo run --example cli_apr_compile -- --demo
 //! ```
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr compile model.apr          # APR native format
+//! apr compile model.gguf         # GGUF (llama.cpp compatible)
+//! apr compile model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 

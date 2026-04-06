@@ -38,6 +38,13 @@
 //! AVX-VNNI Int8 matmul simulation achieves >=1.5x throughput vs scalar f32
 //! for 512x512 matrices.
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 

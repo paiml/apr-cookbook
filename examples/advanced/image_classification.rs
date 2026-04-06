@@ -5,6 +5,13 @@
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Property tests (100+ cases).
 //!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
 //! ## References
 //! - He, K. et al. (2016). *Deep Residual Learning for Image Recognition*. CVPR. arXiv:1512.03385
 
