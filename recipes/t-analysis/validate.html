@@ -197,10 +197,21 @@
 <pre><code class="language-rust ignore">//! # APR Model Validation
 //!
 //! CLI equivalent: `apr validate model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs a comprehensive 100-point model validation and integrity check.
 //! Each check contributes to a pass/fail/warn score, giving a clear picture
 //! of model health before deployment.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr validate model.apr          # APR native format
+//! apr validate model.gguf         # GGUF (llama.cpp compatible)
+//! apr validate model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::fmt;

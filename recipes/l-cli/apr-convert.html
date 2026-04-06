@@ -190,6 +190,7 @@
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: APR Format Converter CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Category**: CLI Tools
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -215,8 +216,19 @@
 //! cargo run --example cli_apr_convert
 //! cargo run --example cli_apr_convert -- --demo
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -351,13 +363,17 @@ fn write_output(
 
 fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_convert&quot;)?;
+    let output = AdaptiveOutput::new();
 
-    // Load input
+    // Phase 1: Load input
+    output.progress(1, 4, &quot;loading model&quot;);
     let Some((input_path, input_bytes)) = load_input(config) else {
         println!(&quot;No input provided. Use --demo or specify an input file.&quot;);
         return Ok(());
     };
 
+    // Phase 2: Detect format
+    output.progress(2, 4, &quot;detecting format&quot;);
     let input_format = detect_format(&amp;input_bytes);
 
     if config.verbose {
@@ -369,19 +385,26 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
         );
     }
 
-    // Convert
+    // Phase 3: Convert
+    output.progress(
+        3,
+        4,
+        &amp;format!(&quot;converting to {}&quot;, config.output_format().as_str()),
+    );
     let output_bytes = convert(
         &amp;input_bytes,
         config.output_format(),
         config.quantize.as_deref(),
     )?;
 
-    // Determine and write output
+    // Phase 4: Write output
+    output.progress(4, 4, &quot;writing output&quot;);
     let output_path = config
         .output_path
         .clone()
         .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format()));
     let actual_output_path = write_output(&amp;mut ctx, &amp;output_path, &amp;output_bytes, config.demo)?;
+    output.status(&quot;&quot;); // clear progress line
 
     // Record metrics
     let compression_ratio = input_bytes.len() as f64 / output_bytes.len() as f64;

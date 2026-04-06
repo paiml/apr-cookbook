@@ -182,7 +182,7 @@
                         <h1 id="migration-pipeline"><a class="header" href="#migration-pipeline">Migration Pipeline</a></h1>
 <p>Complete model migration pipeline composing four stages: import, lint, convert, and export. This is the workflow used when migrating a HuggingFace SafeTensors model into the APR v2 format with quality checks and round-trip verification.</p>
 <h2 id="cli-equivalent"><a class="header" href="#cli-equivalent">CLI Equivalent</a></h2>
-<pre><code class="language-bash">apr migrate model.safetensors --to apr2 --lint --verify
+<pre><code class="language-bash">apr convert model.safetensors --to apr2 --lint --verify
 </code></pre>
 <h2 id="key-concepts"><a class="header" href="#key-concepts">Key Concepts</a></h2>
 <ul>

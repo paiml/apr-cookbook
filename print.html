@@ -646,6 +646,7 @@ fn main() {
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Create APR Model from Scratch
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -678,6 +679,16 @@ fn main() {
 //! Saved to: /tmp/.../custom_model.apr (2360448 bytes)
 //! Roundtrip verification: PASSED
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -968,6 +979,7 @@ File size: 4,112 bytes
 <h2 id="code-1"><a class="header" href="#code-1">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Create APR Linear Regression Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -992,6 +1004,16 @@ File size: 4,112 bytes
 //! ```bash
 //! cargo run --example create_apr_linear_regression
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -1270,6 +1292,7 @@ mod proptests {
 <h2 id="code-2"><a class="header" href="#code-2">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Create APR Decision Tree Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -1294,6 +1317,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example create_apr_decision_tree
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -1753,6 +1786,7 @@ mod proptests {
 <h2 id="code-3"><a class="header" href="#code-3">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Create APR KMeans Clustering Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -1777,6 +1811,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example create_apr_kmeans_clustering
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -2114,6 +2158,7 @@ mod proptests {
 <h2 id="code-4"><a class="header" href="#code-4">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Create APR N-gram Language Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -2138,6 +2183,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example create_apr_ngram_language_model
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -2479,6 +2534,7 @@ mod proptests {
 <h2 id="code-5"><a class="header" href="#code-5">Code</a></h2>
 <pre><code class="language-rust ignore">//! Statically embedded model inference.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! This example demonstrates how to embed an ML model directly into
 //! a Rust binary using `include_bytes!()`, enabling zero-dependency
 //! deployment.
@@ -2495,6 +2551,16 @@ mod proptests {
 //! - External file dependencies
 //! - Runtime file I/O errors
 //! - Deployment complexity
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;
@@ -2572,6 +2638,7 @@ mod tests {
 <h2 id="code-6"><a class="header" href="#code-6">Code</a></h2>
 <pre><code class="language-rust ignore">//! Quantized model loading demonstration.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! This example shows how to work with quantized models (Q4_0, Q8_0)
 //! for reduced size and faster inference on edge devices.
 //!
@@ -2588,6 +2655,16 @@ mod tests {
 //! | F32    | Baseline      | None          |
 //! | Q8_0   | 75%           | &lt;1%           |
 //! | Q4_0   | 87.5%         | 1-3%          |
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;
@@ -2704,6 +2781,8 @@ mod tests {
 </code></pre>
 <h2 id="code-7"><a class="header" href="#code-7">Code</a></h2>
 <pre><code class="language-rust ignore">//! Encrypted model bundling example.
+//! **CLI Equivalent**: `apr encrypt`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/aes256-gcm-decrypt-v1.yaml
 //!
 //! This example demonstrates loading encrypted APR models with password-based
 //! decryption using Argon2id key derivation and AES-256-GCM encryption.
@@ -2725,6 +2804,16 @@ mod tests {
 //! - Protecting proprietary models in distribution
 //! - Compliance with data protection regulations
 //! - Secure model deployment in untrusted environments
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::Result;
 #[cfg(feature = &quot;encryption&quot;)]
@@ -3019,6 +3108,7 @@ mod tests {
 <h2 id="code-8"><a class="header" href="#code-8">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Bundle APR into Static Binary
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -3043,6 +3133,16 @@ mod tests {
 //! ```bash
 //! cargo run --example bundle_apr_static_binary
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 
@@ -3220,6 +3320,7 @@ mod proptests {
 <h2 id="code-9"><a class="header" href="#code-9">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Bundle Quantized Q4_0 Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -3244,6 +3345,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example bundle_apr_quantized_q4
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -3544,6 +3655,7 @@ mod proptests {
 <h2 id="code-10"><a class="header" href="#code-10">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Bundle Ed25519 Signed Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -3568,6 +3680,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example bundle_apr_signed
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -3817,6 +3939,7 @@ mod proptests {
 <h2 id="code-11"><a class="header" href="#code-11">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Bundle APR for Lambda Deployment
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -3841,6 +3964,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example bundle_apr_lambda_package
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use flate2::write::GzEncoder;
@@ -4111,6 +4244,7 @@ mod proptests {
 <h2 id="code-12"><a class="header" href="#code-12">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Continuous Incremental Training
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -4135,6 +4269,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example continuous_train_incremental
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -4419,6 +4563,7 @@ mod proptests {
 <h2 id="code-13"><a class="header" href="#code-13">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Online Learning with Single-Sample Updates
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -4443,6 +4588,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example continuous_train_online_learning
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -4717,6 +4872,7 @@ mod proptests {
 <h2 id="code-14"><a class="header" href="#code-14">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Federated Learning Simulation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -4741,6 +4897,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example continuous_train_federated_simulation
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -5040,6 +5206,7 @@ mod proptests {
 <h2 id="code-15"><a class="header" href="#code-15">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Curriculum Learning
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -5064,6 +5231,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example continuous_train_curriculum
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use rand::Rng;
@@ -5387,6 +5564,7 @@ mod proptests {
 <h2 id="code-16"><a class="header" href="#code-16">Code</a></h2>
 <pre><code class="language-rust ignore">//! Autograd Custom Operations Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates building custom differentiable operations using entrenar's
 //! autograd engine. Custom ops implement the `BackwardOp` trait to define
 //! how gradients flow backward through the computational graph.
@@ -5442,6 +5620,16 @@ mod proptests {
 //! - **Complexity**: Advanced
 //! - **Dependencies**: entrenar 0.5+, aprender 0.25+, ndarray 0.16+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::{backward, BackwardOp, Context, Tensor};
@@ -6302,6 +6490,7 @@ mod tests {
 <h2 id="code-17"><a class="header" href="#code-17">Code</a></h2>
 <pre><code class="language-rust ignore">//! Autograd Gradient Clipping Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! Demonstrates gradient clipping techniques for training stability using
 //! entrenar's autograd API. Gradient clipping prevents exploding gradients
 //! by bounding gradient magnitudes before the optimizer step.
@@ -6340,6 +6529,16 @@ mod tests {
 //! - **Complexity**: Intermediate
 //! - **Dependencies**: entrenar 0.5+, aprender 0.25+, ndarray 0.16+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;
@@ -7083,6 +7282,7 @@ mod tests {
 <h2 id="code-18"><a class="header" href="#code-18">Code</a></h2>
 <pre><code class="language-rust ignore">//! Autograd Backpropagation Visualization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Visualizes gradient flow through a multi-layer neural network.
 //! Detects vanishing/exploding gradients, compares ReLU vs sigmoid,
 //! and demonstrates skip connections and batch norm mitigations.
@@ -7090,6 +7290,16 @@ mod tests {
 //! ```bash
 //! cargo run --example autograd_backprop_viz
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;
@@ -7772,6 +7982,7 @@ mod tests {
 <h2 id="code-19"><a class="header" href="#code-19">Code</a></h2>
 <pre><code class="language-rust ignore">//! SafeTensors to APR format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting HuggingFace SafeTensors
 //! models to the native APR format.
 //!
@@ -7788,6 +7999,16 @@ mod tests {
 //! - Encryption (AES-256-GCM)
 //! - Digital signatures (Ed25519)
 //! - Quantization (Q4_0, Q8_0)
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
@@ -7906,6 +8127,7 @@ mod tests {
 <h2 id="code-20"><a class="header" href="#code-20">Code</a></h2>
 <pre><code class="language-rust ignore">//! APR to GGUF format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting APR models to GGUF format
 //! for use with llama.cpp and other GGML-based inference engines.
 //!
@@ -7922,6 +8144,16 @@ mod tests {
 //! - Ollama integration
 //! - Efficient quantization (Q4_K, Q5_K, Q8_0)
 //! - CPU/GPU hybrid execution
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{AprConverter, ConversionFormat, DataType, TensorData};
 use apr_cookbook::Result;
@@ -8081,6 +8313,7 @@ mod tests {
 <h2 id="code-21"><a class="header" href="#code-21">Code</a></h2>
 <pre><code class="language-rust ignore">//! GGUF to APR format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting GGUF models (llama.cpp format)
 //! to native APR format for use with the Sovereign AI Stack.
 //!
@@ -8102,6 +8335,16 @@ mod tests {
 //! - WASM deployment
 //! - Integration with trueno SIMD
 //! - Encryption and signing
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
@@ -8533,6 +8776,7 @@ mod tests {
 <h2 id="code-22"><a class="header" href="#code-22">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Convert Microsoft Phi to APR
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! **Category**: Format Conversion
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -8557,6 +8801,16 @@ mod tests {
 //! ```bash
 //! cargo run --example convert_phi_to_apr
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 
@@ -8808,6 +9062,7 @@ mod proptests {
 <h2 id="code-23"><a class="header" href="#code-23">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Convert ONNX to APR
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! **Category**: Format Conversion
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -8832,6 +9087,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example convert_onnx_to_apr
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 
@@ -9120,6 +9385,7 @@ mod proptests {
 <h2 id="code-24"><a class="header" href="#code-24">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Register APR Model in Registry
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -9144,6 +9410,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example registry_register_apr
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -9533,6 +9809,7 @@ mod proptests {
 <h2 id="code-25"><a class="header" href="#code-25">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Model Lineage Tracking
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -9557,6 +9834,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example registry_model_lineage
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -9937,6 +10224,7 @@ mod proptests {
 <h2 id="code-26"><a class="header" href="#code-26">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Model Version Comparison
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -9961,6 +10249,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example registry_model_comparison
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;
@@ -10317,6 +10615,7 @@ mod proptests {
 <h2 id="code-27"><a class="header" href="#code-27">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Model Rollback
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -10341,6 +10640,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example registry_model_rollback
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -10636,6 +10945,7 @@ mod proptests {
 <h2 id="code-28"><a class="header" href="#code-28">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: API Model Inference Call
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -10660,6 +10970,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example api_call_model_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -10939,6 +11259,7 @@ mod proptests {
 <h2 id="code-29"><a class="header" href="#code-29">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Streaming Model Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -10963,6 +11284,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example api_streaming_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use std::collections::VecDeque;
@@ -11236,6 +11567,7 @@ mod proptests {
 <h2 id="code-30"><a class="header" href="#code-30">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Batch Model Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -11260,6 +11592,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example api_batch_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -11551,6 +11893,7 @@ mod proptests {
 <h2 id="code-31"><a class="header" href="#code-31">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Model Health Check API
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -11575,6 +11918,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example api_model_health_check
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -11948,6 +12301,7 @@ mod proptests {
 <h2 id="code-32"><a class="header" href="#code-32">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Lambda Inference Function
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -11972,6 +12326,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example serverless_lambda_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -12299,6 +12663,7 @@ mod proptests {
 <h2 id="code-33"><a class="header" href="#code-33">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Cold Start Optimization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -12323,6 +12688,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example serverless_cold_start_optimization
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -12648,6 +13023,7 @@ mod proptests {
 <h2 id="code-34"><a class="header" href="#code-34">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Edge Function Deployment
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -12672,6 +13048,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example serverless_edge_function
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -12991,6 +13377,7 @@ mod proptests {
 <h2 id="code-35"><a class="header" href="#code-35">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Container Image for Lambda
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -13015,6 +13402,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example serverless_container_image
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -13385,6 +13782,7 @@ mod proptests {
 <h2 id="code-36"><a class="header" href="#code-36">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Browser Inference with WASM
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -13409,6 +13807,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example wasm_browser_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -13753,6 +14161,7 @@ mod proptests {
 <h2 id="code-37"><a class="header" href="#code-37">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Web Worker Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -13777,6 +14186,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example wasm_web_worker
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -14114,6 +14533,7 @@ mod proptests {
 <h2 id="code-38"><a class="header" href="#code-38">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Progressive Model Loading
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -14138,6 +14558,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example wasm_progressive_loading
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -14546,6 +14976,7 @@ mod proptests {
 <h2 id="code-39"><a class="header" href="#code-39">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: WebGPU Acceleration
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -14570,6 +15001,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example wasm_webgpu_acceleration
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -14894,6 +15335,7 @@ mod proptests {
 <h2 id="code-40"><a class="header" href="#code-40">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: WASM Streaming Compilation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -14918,6 +15360,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example wasm_streaming_compilation
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -15301,6 +15753,8 @@ mod proptests {
 <pre><code class="language-rust ignore">//! # Recipe: CUDA GPU Inference
 //!
 //! **Category**: GPU Acceleration
+//! **CLI Equivalent**: `apr gpu`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)
@@ -15324,6 +15778,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example gpu_cuda_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run --device gpu model.apr          # APR native format
+//! apr run --device gpu model.gguf         # GGUF (llama.cpp compatible)
+//! apr run --device gpu model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -15674,6 +16138,7 @@ mod proptests {
 <h2 id="code-42"><a class="header" href="#code-42">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Tensor Core Optimization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: GPU Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -15698,6 +16163,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example gpu_tensor_core_optimization
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run --device gpu model.apr          # APR native format
+//! apr run --device gpu model.gguf         # GGUF (llama.cpp compatible)
+//! apr run --device gpu model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -15978,6 +16453,7 @@ mod proptests {
 <h2 id="code-43"><a class="header" href="#code-43">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Multi-GPU Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: GPU Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -16002,6 +16478,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example gpu_multi_gpu_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run --device gpu model.apr          # APR native format
+//! apr run --device gpu model.gguf         # GGUF (llama.cpp compatible)
+//! apr run --device gpu model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -16363,6 +16849,7 @@ mod proptests {
 <h2 id="code-44"><a class="header" href="#code-44">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: GPU Memory Management
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: GPU Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -16387,6 +16874,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example gpu_memory_management
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run --device gpu model.apr          # APR native format
+//! apr run --device gpu model.gguf         # GGUF (llama.cpp compatible)
+//! apr run --device gpu model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -16828,6 +17325,7 @@ mod proptests {
 <h2 id="code-45"><a class="header" href="#code-45">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: SIMD Matrix Operations
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -16852,6 +17350,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example simd_matrix_operations
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hennessy, J. &amp; Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -17214,6 +17722,7 @@ mod proptests {
 <h2 id="code-46"><a class="header" href="#code-46">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Vectorized Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -17238,6 +17747,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example simd_vectorized_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hennessy, J. &amp; Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -17627,6 +18146,7 @@ mod proptests {
 <h2 id="code-47"><a class="header" href="#code-47">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Quantized SIMD Operations
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -17651,6 +18171,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example simd_quantized_operations
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hennessy, J. &amp; Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -17941,6 +18471,7 @@ mod proptests {
 <h2 id="code-48"><a class="header" href="#code-48">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Auto-Vectorization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -17965,6 +18496,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example simd_auto_vectorization
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hennessy, J. &amp; Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -18271,6 +18812,7 @@ mod proptests {
 <h2 id="code-49"><a class="header" href="#code-49">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Knowledge Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -18295,6 +18837,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example distill_knowledge_transfer
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -18605,6 +19157,7 @@ mod proptests {
 <h2 id="code-50"><a class="header" href="#code-50">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Layer-wise Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -18629,6 +19182,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example distill_layer_matching
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -18965,6 +19528,7 @@ mod proptests {
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method magnitude --target 0.5`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates magnitude-based unstructured pruning: zeroing out the
 //! smallest-magnitude weights to achieve a target sparsity. This is the
@@ -18977,6 +19541,16 @@ mod proptests {
 //! 4. [x] No temp files leaked
 //! 5. [x] Clippy clean
 //! 6. [x] No `unwrap()` in logic
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr prune model.apr          # APR native format
+//! apr prune model.gguf         # GGUF (llama.cpp compatible)
+//! apr prune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Frantar, E. &amp; Alistarh, D. (2023). *SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot*. ICML. arXiv:2301.00774
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -19341,6 +19915,7 @@ mod tests {
 <h2 id="code-52"><a class="header" href="#code-52">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Quantization-Aware Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -19365,6 +19940,16 @@ mod tests {
 //! ```bash
 //! cargo run --example distill_quantization_aware
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -19680,6 +20265,7 @@ mod proptests {
 <h2 id="code-53"><a class="header" href="#code-53">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Attention Transfer Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -19705,6 +20291,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example distill_attention_transfer
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -20467,6 +21063,7 @@ mod proptests {
 <h2 id="code-54"><a class="header" href="#code-54">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: Self-Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -20492,6 +21089,16 @@ mod proptests {
 //! ```bash
 //! cargo run --example distill_self_distillation
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -21262,6 +21869,7 @@ mod proptests {
 <h2 id="code-55"><a class="header" href="#code-55">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: APR Model Info CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Category**: CLI Tools
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -21287,6 +21895,16 @@ mod proptests {
 //! cargo run --example cli_apr_info
 //! cargo run --example cli_apr_info -- --demo
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use clap::Parser;
@@ -21557,6 +22175,7 @@ apr-info --json model.apr    # JSON output
 <h2 id="code-56"><a class="header" href="#code-56">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: APR Benchmark CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Category**: CLI Tools
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -21582,8 +22201,19 @@ apr-info --json model.apr    # JSON output
 //! cargo run --example cli_apr_bench
 //! cargo run --example cli_apr_bench -- --demo --iterations 100
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -21683,18 +22313,33 @@ fn run_benchmark(config: &amp;BenchConfig) -&gt; Result&lt;()&gt; {
     }
 
     // Warmup (simulated)
+    let output = AdaptiveOutput::new();
     let _warmup_times: Vec&lt;f64&gt; = (0..config.warmup)
-        .map(|i| simulate_inference(i, config.batch_size))
+        .map(|i| {
+            if !config.json {
+                output.progress(i + 1, config.warmup, &quot;warmup&quot;);
+            }
+            simulate_inference(i, config.batch_size)
+        })
         .collect();
 
     if !config.json {
+        output.status(&quot;&quot;); // clear progress line
         println!(&quot;Running benchmark...&quot;);
     }
 
     // Benchmark (simulated)
     let mut times: Vec&lt;f64&gt; = (0..config.iterations)
-        .map(|i| simulate_inference(i + config.warmup, config.batch_size))
+        .map(|i| {
+            if !config.json {
+                output.progress(i + 1, config.iterations, &quot;benchmarking&quot;);
+            }
+            simulate_inference(i + config.warmup, config.batch_size)
+        })
         .collect();
+    if !config.json {
+        output.status(&quot;&quot;); // clear progress line
+    }
 
     times.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 
@@ -21943,6 +22588,7 @@ apr-bench --batch 32 model.apr   # Batch size 32
 <h2 id="code-57"><a class="header" href="#code-57">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Recipe: APR Format Converter CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Category**: CLI Tools
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -21968,8 +22614,19 @@ apr-bench --batch 32 model.apr   # Batch size 32
 //! cargo run --example cli_apr_convert
 //! cargo run --example cli_apr_convert -- --demo
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -22104,13 +22761,17 @@ fn write_output(
 
 fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;cli_apr_convert&quot;)?;
+    let output = AdaptiveOutput::new();
 
-    // Load input
+    // Phase 1: Load input
+    output.progress(1, 4, &quot;loading model&quot;);
     let Some((input_path, input_bytes)) = load_input(config) else {
         println!(&quot;No input provided. Use --demo or specify an input file.&quot;);
         return Ok(());
     };
 
+    // Phase 2: Detect format
+    output.progress(2, 4, &quot;detecting format&quot;);
     let input_format = detect_format(&amp;input_bytes);
 
     if config.verbose {
@@ -22122,19 +22783,26 @@ fn run_convert(config: &amp;ConvertConfig) -&gt; Result&lt;()&gt; {
         );
     }
 
-    // Convert
+    // Phase 3: Convert
+    output.progress(
+        3,
+        4,
+        &amp;format!(&quot;converting to {}&quot;, config.output_format().as_str()),
+    );
     let output_bytes = convert(
         &amp;input_bytes,
         config.output_format(),
         config.quantize.as_deref(),
     )?;
 
-    // Determine and write output
+    // Phase 4: Write output
+    output.progress(4, 4, &quot;writing output&quot;);
     let output_path = config
         .output_path
         .clone()
         .unwrap_or_else(|| generate_output_path(&amp;input_path, config.output_format()));
     let actual_output_path = write_output(&amp;mut ctx, &amp;output_path, &amp;output_bytes, config.demo)?;
+    output.status(&quot;&quot;); // clear progress line
 
     // Record metrics
     let compression_ratio = input_bytes.len() as f64 / output_bytes.len() as f64;
@@ -22352,6 +23020,8 @@ apr-convert --quantize q4 input.apr output.apr
 <pre><code class="language-rust ignore">//! # Recipe: APR Model Server CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr serve`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)
@@ -22376,6 +23046,16 @@ apr-convert --quantize q4 input.apr output.apr
 //! cargo run --example cli_apr_serve
 //! cargo run --example cli_apr_serve -- --demo
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use clap::Parser;
@@ -24113,6 +24793,7 @@ fn test_work_stealing_load_balance() {
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: `apr chat --format chatml`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support)
 //!
 //! ## What this demonstrates
@@ -24144,6 +24825,16 @@ fn test_work_stealing_load_balance() {
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 
@@ -24483,6 +25174,7 @@ mod tests {
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: `apr chat --format llama2`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support)
 //!
 //! ## What this demonstrates
@@ -24517,6 +25209,16 @@ mod tests {
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 
@@ -24906,6 +25608,7 @@ mod tests {
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: `apr chat --format mistral`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support)
 //!
 //! ## What this demonstrates
@@ -24936,6 +25639,16 @@ mod tests {
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 
@@ -25332,6 +26045,7 @@ mod tests {
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: `apr chat` (auto-detect format from model name)
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support)
 //!
 //! ## What this demonstrates
@@ -25364,6 +26078,16 @@ mod tests {
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 
@@ -25877,6 +26601,7 @@ mod tests {
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: security hardening for `apr chat`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support), APR-SEC-003 (Input Sanitization)
 //!
 //! ## What this demonstrates
@@ -25907,6 +26632,16 @@ mod tests {
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 
@@ -26414,10 +27149,21 @@ mod tests {
 <pre><code class="language-rust ignore">//! # APR Model Inspection
 //!
 //! CLI equivalent: `apr inspect model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Inspects an APR model file to extract metadata, architecture details,
 //! tensor listing, and size breakdown. Essential for understanding model
 //! structure before inference or conversion.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;
@@ -26927,10 +27673,21 @@ mod tests {
 <pre><code class="language-rust ignore">//! # APR Model Validation
 //!
 //! CLI equivalent: `apr validate model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs a comprehensive 100-point model validation and integrity check.
 //! Each check contributes to a pass/fail/warn score, giving a clear picture
 //! of model health before deployment.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr validate model.apr          # APR native format
+//! apr validate model.gguf         # GGUF (llama.cpp compatible)
+//! apr validate model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::fmt;
@@ -27435,10 +28192,21 @@ mod tests {
 <pre><code class="language-rust ignore">//! # APR Model Diff
 //!
 //! CLI equivalent: `apr diff model_a.apr model_b.apr --weights --values`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Compares two APR models structurally and numerically. Reports tensor-level
 //! weight differences including L2 distance, max absolute diff, mean absolute
 //! diff, and cosine similarity. Essential for tracking fine-tuning impact.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr diff model.apr          # APR native format
+//! apr diff model.gguf         # GGUF (llama.cpp compatible)
+//! apr diff model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 
@@ -27906,10 +28674,21 @@ mod tests {
 <pre><code class="language-rust ignore">//! # APR Model Benchmarking
 //!
 //! CLI equivalent: `apr bench model.apr --batch-sizes 1,4,16,64`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Throughput benchmarking for APR model inference across multiple batch sizes.
 //! Measures latency, throughput, and memory scaling to identify optimal
 //! deployment configurations.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::time::Instant;
@@ -28299,10 +29078,21 @@ mod tests {
 <pre><code class="language-rust ignore">//! # APR Model Profiling (Roofline Analysis)
 //!
 //! CLI equivalent: `apr profile model.apr --granular`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs roofline model analysis to classify each layer as compute-bound
 //! or memory-bound. Produces per-layer profiling, an ASCII roofline chart,
 //! bottleneck identification, and optimization recommendations.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr profile model.apr          # APR native format
+//! apr profile model.gguf         # GGUF (llama.cpp compatible)
+//! apr profile model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 
@@ -28787,8 +29577,19 @@ mod tests {
 </ul>
 <h2 id="code-74"><a class="header" href="#code-74">Code</a></h2>
 <pre><code class="language-rust ignore">//! # APR Model QA Gates — CLI equivalent: `apr qa model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Runs 6 falsifiable quality gates on an APR model for CI/CD pipelines.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr qa model.apr          # APR native format
+//! apr qa model.gguf         # GGUF (llama.cpp compatible)
+//! apr qa model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::time::Instant;
@@ -29303,6 +30104,8 @@ mod tests {
 </ul>
 <h2 id="code-75"><a class="header" href="#code-75">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Model Family Oracle
+//! **CLI Equivalent**: `apr oracle`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Identifies model architecture family from weight tensor names and shapes.
 //!
@@ -29315,6 +30118,16 @@ mod tests {
 //! - Heuristic classification of model architectures
 //! - Pattern matching on tensor naming conventions
 //! - Confidence scoring with evidence accumulation
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr oracle model.apr          # APR native format
+//! apr oracle model.gguf         # GGUF (llama.cpp compatible)
+//! apr oracle model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -29809,6 +30622,8 @@ mod tests {
 </ul>
 <h2 id="code-76"><a class="header" href="#code-76">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Canary Tokens for Regression Testing
+//! **CLI Equivalent**: `apr canary`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Embeds test vectors in a model and verifies outputs match expected values,
 //! detecting model drift and weight corruption.
@@ -29823,6 +30638,16 @@ mod tests {
 //! - Deterministic canary generation from model weights
 //! - Tolerance-based drift detection
 //! - JSON serialization of canary test vectors
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -30198,6 +31023,8 @@ mod tests {
 </ul>
 <h2 id="code-77"><a class="header" href="#code-77">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Architecture Visualization as ASCII Tree
+//! **CLI Equivalent**: `apr tree`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Renders model tensor hierarchy as an ASCII tree with parameter counts,
 //! grouping tensors by their dotted name paths.
@@ -30212,6 +31039,16 @@ mod tests {
 //! - Recursive tree construction and rendering
 //! - Parameter count aggregation at each level
 //! - Box-drawing character output
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr tree model.apr          # APR native format
+//! apr tree model.gguf         # GGUF (llama.cpp compatible)
+//! apr tree model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -30582,6 +31419,8 @@ mod tests {
 </ul>
 <h2 id="code-78"><a class="header" href="#code-78">Code</a></h2>
 <pre><code class="language-rust ignore">//! # Format-Aware Binary Forensics
+//! **CLI Equivalent**: `apr hex`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Hex dump with APR format annotations, parsing magic bytes, version,
 //! metadata offsets, and tensor data regions.
@@ -30596,6 +31435,16 @@ mod tests {
 //! - Annotated hex dump with region labels
 //! - Magic byte identification and format validation
 //! - Offset calculation for format regions
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr hex model.apr          # APR native format
+//! apr hex model.gguf         # GGUF (llama.cpp compatible)
+//! apr hex model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -31083,6 +31932,8 @@ mod tests {
 </ul>
 <h2 id="code-79"><a class="header" href="#code-79">Code</a></h2>
 <pre><code class="language-rust ignore">//! # APR Error Code Explanation System
+//! **CLI Equivalent**: `apr explain`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Provides detailed explanations, causes, and solutions for APR error codes,
 //! similar to `rustc --explain`.
@@ -31096,6 +31947,16 @@ mod tests {
 //! - Error catalog design pattern
 //! - Structured error documentation
 //! - Lookup-based CLI diagnostics
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr explain model.apr          # APR native format
+//! apr explain model.gguf         # GGUF (llama.cpp compatible)
+//! apr explain model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -31679,7 +32540,7 @@ mod tests {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="tensor-slice"><a class="header" href="#tensor-slice">Tensor Slice</a></h1>
 <p>Extracts and decodes a range of elements from tensor data. Demonstrates index-range slicing, row/column extraction, strided access, hex dumping, dtype conversion with precision-loss analysis, and per-slice statistics.</p>
 <h2 id="cli-equivalent-22"><a class="header" href="#cli-equivalent-22">CLI Equivalent</a></h2>
-<pre><code class="language-bash">apr slice model.apr --tensor weights --range 10..20
+<pre><code class="language-bash">apr tensors model.apr --slice weights --range 10..20
 </code></pre>
 <h2 id="key-concepts-34"><a class="header" href="#key-concepts-34">Key Concepts</a></h2>
 <ul>
@@ -31892,7 +32753,7 @@ mod tests {
 <div style="break-before: page; page-break-before: always;"></div><h1 id="migration-pipeline"><a class="header" href="#migration-pipeline">Migration Pipeline</a></h1>
 <p>Complete model migration pipeline composing four stages: import, lint, convert, and export. This is the workflow used when migrating a HuggingFace SafeTensors model into the APR v2 format with quality checks and round-trip verification.</p>
 <h2 id="cli-equivalent-24"><a class="header" href="#cli-equivalent-24">CLI Equivalent</a></h2>
-<pre><code class="language-bash">apr migrate model.safetensors --to apr2 --lint --verify
+<pre><code class="language-bash">apr convert model.safetensors --to apr2 --lint --verify
 </code></pre>
 <h2 id="key-concepts-36"><a class="header" href="#key-concepts-36">Key Concepts</a></h2>
 <ul>

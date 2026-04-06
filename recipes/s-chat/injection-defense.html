@@ -201,6 +201,7 @@
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: security hardening for `apr chat`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support), APR-SEC-003 (Input Sanitization)
 //!
 //! ## What this demonstrates
@@ -231,6 +232,16 @@
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr chat model.apr          # APR native format
+//! apr chat model.gguf         # GGUF (llama.cpp compatible)
+//! apr chat model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 

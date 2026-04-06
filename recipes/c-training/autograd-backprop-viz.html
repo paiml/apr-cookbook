@@ -189,6 +189,7 @@
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
 <pre><code class="language-rust ignore">//! Autograd Backpropagation Visualization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Visualizes gradient flow through a multi-layer neural network.
 //! Detects vanishing/exploding gradients, compares ReLU vs sigmoid,
 //! and demonstrates skip connections and batch norm mitigations.
@@ -196,6 +197,16 @@
 //! ```bash
 //! cargo run --example autograd_backprop_viz
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;
