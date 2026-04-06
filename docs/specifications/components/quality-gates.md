@@ -359,7 +359,7 @@ Every apr CLI subcommand must map to at least one provable-contract YAML in `con
   pv lean-status C ≥ L2
 ```
 
-This invariant is audited in **Phase 0** of the `/qa` skill before per-target testing. Current coverage (as of 2026-04-06): 11 contracts / 58 subcommands (19 matched, 32%). Target: 95%+ subcommand coverage, 80%+ Lean-proved contracts. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues against `apr-cookbook`.
+This invariant is audited in **Phase 0** of the `/qa` skill before per-target testing. Current coverage (as of 2026-04-06): 11 contracts / 58 subcommands. CLI parity: 57/58 (98%, only `help` excluded). Target: 95%+ subcommand coverage, 80%+ Lean-proved contracts. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues against `apr-cookbook`.
 
 The audit uses the `pv` CLI from `../provable-contracts`:
 
