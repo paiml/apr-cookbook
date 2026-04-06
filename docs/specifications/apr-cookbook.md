@@ -341,7 +341,7 @@ Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook ch
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-**Baseline (2026-04-06)**: 13/268 .md files validated (4.9%). `make docs-validate` covers `README.md`, `CLAUDE.md`, and `docs/specifications/**/*.md`. The `book/src/` tree (252 files) is not yet bound. **Gate**: `make docs-validate` (enforced for the 13 bound files; book coverage is a target).
+**Baseline (2026-04-06)**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, and `book/src/**/*.md`. 3 excluded: `CHANGELOG.md`, `deep-context.md` (generated), `docs/specifications-advanced-demos.md` (orphan). **Gate**: `make docs-validate` — **ENFORCED**.
 
 ---
 

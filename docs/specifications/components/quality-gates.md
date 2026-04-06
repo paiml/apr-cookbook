@@ -415,7 +415,7 @@ Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-**Baseline**: 13/268 .md files validated (4.9%). `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`. The `book/src/` tree (252 files) is not yet bound. **Gate**: `make docs-validate` (enforced for 13 bound files; book coverage is a target).
+**Baseline**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, `book/src/**/*.md`. **Gate**: `make docs-validate` — **ENFORCED**.
 
 ### Variant definition
 
@@ -453,7 +453,7 @@ The `make cli-parity` regex matches all of:
 | Recipes with contract reference | 219/219 (100%) | 219/219 | `make contract-grade` | **ENFORCED** |
 | Recipes with all format variants | 219/219 (100%) | 100% applicable | `make format-coverage` | **ENFORCED** |
 | Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
-| Docs validated by contract | 13/268 (4.9%) | 268/268 | `make docs-validate` | TARGET |
+| Docs validated by contract | 264/267 (98.9%) | 267/267 | `make docs-validate` | **ENFORCED** |
 | Flag variants | ~468 | ~468 | `make variant-coverage` | measured |
 | Contracts with Lean proof ≥ L2 | 0/11 | 80%+ | `pv lean-status` | TARGET |
 

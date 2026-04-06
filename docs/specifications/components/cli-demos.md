@@ -27,7 +27,7 @@ See [Quality Gates § Five Coverage Invariants](quality-gates.md#five-coverage-i
 | **B** Recipe Contract Grade A | `make contract-grade` | 219/219 (100%) | **ENFORCED** |
 | **C** Model Format Coverage | `make format-coverage` | 219/219 (100%) | **ENFORCED** |
 | **D** arXiv Citation | `make citation-check` | 219/219 (100%) | **ENFORCED** |
-| **E** Docs Contract Coverage | `make docs-validate` | 13/268 (4.9%) | TARGET |
+| **E** Docs Contract Coverage | `make docs-validate` | 264/267 (98.9%) | **ENFORCED** |
 
 Every new `.rs` recipe under `examples/` **must** include a doc comment header of the form:
 
