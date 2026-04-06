@@ -72,7 +72,8 @@ Each component specification is in `components/` and is self-contained (max 500 
 
 | # | Component | Description |
 |---|-----------|-------------|
-| 5 | [Quality Gates](components/quality-gates.md) | PMAT, falsification, provable contracts, CLI QA process |
+| 5 | [Quality Gates](components/quality-gates.md) | PMAT, falsification, provable contracts, five invariants |
+| 5b | [CLI QA](components/cli-qa.md) | Fleet testing, defect taxonomy, 12 QA protocols |
 | 6 | [Implementation Guidelines](components/implementation.md) | Toyota Way compliance, code style, error handling |
 
 ### Reference
