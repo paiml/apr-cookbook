@@ -35,23 +35,21 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   APR Cookbook v3.0                          │
+│                   APR Cookbook v4.0                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Examples Layer                                             │
+│  Examples Layer (219 recipes across 24 categories)          │
 │  ├── Model Bundling (include_bytes!, APR v2 compression)    │
 │  ├── Format Conversion (SafeTensors -> APR v2 -> GGUF)     │
-│  ├── Speech Recognition (whisper.apr integration)           │
+│  ├── Speech Recognition (simulated whisper pipelines)       │
 │  ├── Browser Apps (WASM + WebGPU acceleration)              │
 │  ├── CLI Tools (inference, conversion, benchmarking)        │
 │  └── Optimization (finetune, prune, distill, merge, quant) │
 ├─────────────────────────────────────────────────────────────┤
 │  Framework Layer (Sovereign AI Stack)                       │
-│  ├── aprender 0.25 (APR v2 format, LZ4/ZSTD, Int4/Int8)   │
-│  ├── trueno 0.14 (SIMD/GPU, LZ4 tensors)                   │
-│  ├── entrenar 0.5 (Training, autograd, LoRA, monitoring)    │
-│  ├── realizar 0.4 (GPU kernels, FlashAttention, Q4K/Q5K)   │
-│  ├── whisper-apr 0.1 (WASM-first ASR, streaming)           │
-│  └── repartir 1.1 (distributed compute, work-stealing)     │
+│  ├── aprender 0.27 (APR v2 format, LZ4/ZSTD, Int4/Int8)   │
+│  ├── trueno 0.16 (SIMD/GPU, LZ4 tensors)                   │
+│  ├── entrenar 0.7 (Training, autograd, LoRA, monitoring)    │
+│  └── ndarray 0.16 (Tensor gradients)                        │
 ├─────────────────────────────────────────────────────────────┤
 │  Compression Layer                                          │
 │  ├── trueno-zram (SIMD LZ4/ZSTD, 3-13 GB/s)               │
@@ -81,13 +79,17 @@
 
 | Crate | Version | Role | Features |
 |-------|---------|------|----------|
-| aprender | 0.25 | Core ML library, .apr format | `format-compression`, `format-signing` |
-| trueno | 0.14 | SIMD tensor backend | `gpu` (optional) |
-| entrenar | 0.5 | Training and inference monitoring | autograd, LoRA, collectors |
-| realizar | 0.4 | GPU kernels | FlashAttention, Q4K/Q5K |
-| repartir | 1.1 | Distributed compute | `cpu`, work-stealing |
-| whisper-apr | 0.1 | Speech recognition | WASM-first ASR |
+| aprender | 0.27 | Core ML library, .apr format | `format-compression` |
+| trueno | 0.16 | SIMD tensor backend | — |
+| entrenar | 0.7 | Training and inference monitoring | autograd, LoRA, collectors |
+| ndarray | 0.16 | Tensor gradients for entrenar | — |
 | clap | 4 | CLI argument parsing | `derive` |
+| serde | 1 | Serialization | `derive` |
+| ed25519-dalek | 2.1 | Model signing | — |
+| lz4_flex | 0.11 | LZ4 compression | — |
+| zstd | 0.13 | ZSTD compression | — |
+
+GPU (realizar), distributed (repartir), and speech (whisper-apr) are part of the broader sovereign stack but are **simulated** in cookbook examples — not actual Cargo.toml dependencies.
 
 ---
 

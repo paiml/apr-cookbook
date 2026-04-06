@@ -32,20 +32,18 @@ APR Cookbook v4.0
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
 │   ├── 64 other recipes (acceleration, advanced, inference, etc.)
 │   └── 219 total examples across 24 categories
-├── Framework Layer
+├── Framework Layer (actual Cargo.toml dependencies)
 │   ├── aprender 0.27  — ML algorithms, .apr format, quantization
 │   ├── trueno 0.16    — SIMD/GPU tensor operations
 │   ├── entrenar 0.7   — Training, monitoring, autograd
-│   ├── realizar 0.4   — GPU kernels, FlashAttention
-│   ├── repartir 1.1   — Distributed compute, work-stealing
-│   └── whisper-apr 0.1 — WASM-first ASR
-├── Compression Layer
-│   ├── trueno-zram    — SIMD LZ4/ZSTD (3-13 GB/s)
-│   └── trueno-ublk    — GPU block device (10-50 GB/s)
+│   └── ndarray 0.16   — Tensor gradients
+├── Compression (vendored)
+│   ├── lz4_flex 0.11  — LZ4 compression
+│   └── zstd 0.13      — ZSTD compression
 └── Runtime Layer
     ├── Native: x86_64 (AVX2/AVX-512), aarch64 (NEON)
     ├── WASM: wasm32-unknown-unknown
-    └── GPU: wgpu (Vulkan/Metal/DX12/WebGPU)
+    └── GPU: simulated (cookbook demos, not actual GPU deps)
 ```
 
 ---
@@ -212,43 +210,40 @@ cargo fmt --all -- --check
 ```toml
 [package]
 name = "apr-cookbook"
-version = "4.0.0"
+version = "0.1.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT"
-description = "APR Cookbook - Production ML deployment with IIUR recipes"
+description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
 
 [dependencies]
 aprender = { version = "0.27", features = ["format-compression"] }
 trueno = "0.16"
-entrenar = { version = "0.7", optional = true }
-realizar = { version = "0.4", optional = true }
-whisper-apr = { version = "0.1", optional = true }
-repartir = { version = "1.1", optional = true, features = ["cpu"] }
+entrenar = "0.7"
+ndarray = "0.16"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-thiserror = "2"
-anyhow = "1"
-
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-wasm-bindgen = "0.2"
-console_error_panic_hook = "0.1"
-web-sys = { version = "0.3", features = ["Performance", "Window", "console"] }
+thiserror = "1"
+rand = { version = "0.8", features = ["std_rng"] }
+tempfile = "3"
+lz4_flex = "0.11.3"
+zstd = "0.13.3"
+ed25519-dalek = "2.1.1"
+blake3 = "1"
+flate2 = "1"
 
 [dev-dependencies]
-criterion = { version = "0.5", features = ["html_reports"] }
 proptest = "1"
-tempfile = "3"
+criterion = { version = "0.5", features = ["html_reports"] }
 
 [features]
 default = []
 encryption = ["aprender/format-encryption"]
-gpu = ["realizar", "trueno/gpu"]
-speech = ["whisper-apr"]
-distributed = ["repartir"]
-full = ["encryption", "gpu", "speech", "distributed"]
+full = ["encryption"]
 ```
+
+**Note**: GPU (realizar), distributed (repartir), and speech (whisper-apr) capabilities are **simulated** in cookbook examples. The recipes demonstrate the algorithms and patterns without requiring these optional sovereign-stack crates as compile-time dependencies.
 
 ---
 
@@ -355,4 +350,4 @@ See [Quality Gates](components/quality-gates.md) for the target fleet, full defe
 
 ---
 
-*Specification Version: 4.1.0 — Five Coverage Invariants (A-E) + Parity/POC ecosystem cross-references*
+*Specification Version: 4.0.0 — Five Coverage Invariants (A-E) + Parity/POC ecosystem cross-references*
