@@ -122,39 +122,39 @@ Before submitting a recipe, verify:
 
 | Category | Recipes | Status |
 |----------|---------|--------|
-| A: Model Creation | 5 | Implemented |
-| B: Binary Bundling | 5 | Implemented |
-| C: Continuous Training | 4 | Implemented |
+| A: Model Creation | 7 | Implemented |
+| B: Binary Bundling | 7 | Implemented |
+| C: Continuous Training | 16 | Implemented |
 | D: Format Conversion | 5 | Implemented |
-| E: Model Registry | 4 | Implemented |
-| F: API Integration | 4 | Implemented |
-| G: Serverless Deployment | 4 | Implemented |
-| H: WASM & Browser | 5 | Implemented |
-| I: GPU Acceleration | 4 | Implemented |
-| J: SIMD Acceleration | 4 | Implemented |
-| K: Model Distillation | 4 | Implemented |
-| L: CLI Tools | 4 | Implemented |
-| **Total IIUR** | **52** | **100%** |
+| E: Model Registry | 5 | Implemented |
+| F: API Integration | 5 | Implemented |
+| G: Serverless Deployment | 5 | Implemented |
+| H: WASM & Browser | 6 | Implemented |
+| I: GPU Acceleration | 8 | Implemented |
+| J: SIMD Acceleration | 6 | Implemented |
+| K: Model Distillation | 5 | Implemented |
+| L: CLI Tools | 16 | Implemented |
+| **Total IIUR** | **91** | **100%** |
 
 ### CLI Demo Status
 
 | Category | Recipes | Status |
 |----------|---------|--------|
-| optimize/ | 22 | In progress |
-| chat/ | 5 | In progress |
-| analysis/ | 11 | In progress |
-| format/ | 10 | In progress |
-| **Total CLI** | **48** | **Phased rollout** |
+| optimize/ | 23 | Implemented |
+| chat/ | 5 | Implemented |
+| analysis/ | 25 | Implemented |
+| format/ | 11 | Implemented |
+| **Total CLI** | **64** | **100%** |
 
 ### Five Invariants Status
 
-| Invariant | Gate | Status |
-|-----------|------|--------|
-| A: CLI Recipe Parity | `make cli-parity` | 57/57 = 100% |
-| B: Recipe Contract Grade A | `make contract-grade` | 11 contracts (in progress) |
-| C: Model Format Coverage | `make format-coverage` | TBD |
-| D: arXiv Citation | `make citation-check` | TBD |
-| E: Docs Contract Coverage | `make docs-validate` | partial |
+| Invariant | Gate | Baseline | Status |
+|-----------|------|----------|--------|
+| A: CLI Recipe Parity | `make cli-parity` | 57/57 (100%) | **ENFORCED** |
+| B: Recipe Contract Grade A | `make contract-grade` | 0/219 (0%) | TARGET |
+| C: Model Format Coverage | `make format-coverage` | 3/219 (1.4%) | TARGET |
+| D: arXiv Citation | `make citation-check` | 0/219 (0%) | TARGET |
+| E: Docs Contract Coverage | `make docs-validate` | 13/268 (4.9%) | TARGET |
 
 ### Quality Gates Summary
 

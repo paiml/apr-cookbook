@@ -21,13 +21,13 @@ E: docs-validate     — repo docs bound to provable-contracts
 
 See [Quality Gates § Five Coverage Invariants](quality-gates.md#five-coverage-invariants) for formal definitions. Summary:
 
-| Invariant | Gate | Status |
-|-----------|------|--------|
-| **A** CLI Recipe Parity | `make cli-parity` | 57/57 = 100% |
-| **B** Recipe Contract Grade A | `make contract-grade` | 11 contracts, target: all recipes |
-| **C** Model Format Coverage | `make format-coverage` | TBD, target: 100% applicable |
-| **D** arXiv Citation | `make citation-check` | TBD, target: 100% |
-| **E** Docs Contract Coverage | `make docs-validate` | partial, target: 100% |
+| Invariant | Gate | Baseline | Status |
+|-----------|------|----------|--------|
+| **A** CLI Recipe Parity | `make cli-parity` | 57/57 (100%) | **ENFORCED** |
+| **B** Recipe Contract Grade A | `make contract-grade` | 0/219 (0%) | TARGET |
+| **C** Model Format Coverage | `make format-coverage` | 3/219 (1.4%) | TARGET |
+| **D** arXiv Citation | `make citation-check` | 0/219 (0%) | TARGET |
+| **E** Docs Contract Coverage | `make docs-validate` | 13/268 (4.9%) | TARGET |
 
 Every new `.rs` recipe under `examples/` **must** include a doc comment header of the form:
 

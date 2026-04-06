@@ -443,9 +443,9 @@ A `make docs-validate` target chains these. Docs validation is a **mandatory pre
 
 ## Five Coverage Invariants
 
-These invariants are the **master quality gates** for the cookbook. All five must pass before any release. See also the [root spec](../apr-cookbook.md#five-coverage-invariants) for the executive summary.
+These are the **master quality gates** for the cookbook. Invariant A is enforced (blocks commits). Invariants B–E are measured and reported but do not yet block — they will become enforcing gates once baselines exceed 50%.
 
-### Invariant A — CLI Recipe Parity (F-CLIPARITY-001)
+### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
 Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe.
 
@@ -453,11 +453,11 @@ Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe.
 ∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
 ```
 
-**Status (2026-04-06)**: 57/57 = **100%**. Enforced by `make cli-parity`.
+**Baseline**: 57/57 = **100%**. **Gate**: `make cli-parity` (exits non-zero on regression).
 
-### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001)
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — TARGET
 
-Every recipe must reference a provable-contract YAML that passes `pv lint` at **grade A**.
+Every recipe should reference a provable-contract YAML that passes `pv lint` at **grade A**.
 
 ```
 ∀ r ∈ recipes:
@@ -468,11 +468,11 @@ Every recipe must reference a provable-contract YAML that passes `pv lint` at **
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-**Status (2026-04-06)**: 11 contracts passing `pv lint`. Target: 1 grade-A contract per recipe.
+**Baseline**: 0/219 recipes reference a contract (0%). 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` (reports; warns until > 50%).
 
-### Invariant C — Model Format Coverage (F-FORMAT-COV-001)
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
 
-Every recipe that accepts a model file must demonstrate all three canonical formats where the subcommand supports them: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
+Every recipe that accepts a model file should demonstrate all three canonical formats where the subcommand supports them: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
 
 ```
 ∀ r ∈ recipes where r.accepts_model_input:
@@ -485,13 +485,11 @@ Examples:
 - `apr encrypt` is APR-only → 1 variant sufficient
 - `apr import hf://…` outputs APR → 1 variant sufficient
 
-Enforced by `make format-coverage`. Each format variant is either a separate recipe or a documented section within the recipe demonstrating that format path.
+**Baseline**: 3/219 recipes demonstrate all three formats (1.4%). Most recipes are APR-only. **Gate**: `make format-coverage` (reports; warns until > 50%).
 
-**Status (2026-04-06)**: Not yet measured. Target: 100% where applicable.
+### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
 
-### Invariant D — arXiv Citation (F-ARXIV-001)
-
-Every recipe must cite ≥1 arXiv paper or peer-reviewed reference linking the technique to the literature.
+Every recipe should cite ≥1 arXiv paper or peer-reviewed reference linking the technique to the literature.
 
 ```
 ∀ r ∈ recipes: |r.citations ∩ (arXiv ∪ peer_reviewed)| ≥ 1
@@ -504,13 +502,11 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation*. arXiv:2106.09685
 ```
 
-Enforced by `make citation-check`.
+**Baseline**: 0/219 recipes have arXiv/DOI citations (0%). **Gate**: `make citation-check` (reports; warns until > 50%).
 
-**Status (2026-04-06)**: Not yet measured. Target: 100%.
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
 
-### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001)
-
-Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — must be bound to a provable-contract and pass `pmat validate-readme`.
+Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — should be bound to a provable-contract and pass `pmat validate-readme`.
 
 ```
 ∀ d ∈ {README.md, CLAUDE.md, book/src/**/*.md, docs/specifications/**/*.md}:
@@ -519,13 +515,11 @@ Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-Enforced by `make docs-validate` + `pv validate contracts/docs-schema-v1.yaml`.
-
-**Status (2026-04-06)**: `docs-schema-v1.yaml` covers spec components. Target: all repo `*.md` files bound.
+**Baseline**: 13/268 .md files validated (4.9%). `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`. The `book/src/` tree (252 files) is not yet bound. **Gate**: `make docs-validate` (enforced for 13 bound files; book coverage is a target).
 
 ### Variant definition
 
-A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 57 subcommands, apr-cli exposes ~400 distinct variants.
+A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 57 subcommands, apr-cli exposes ~468 distinct flag variants.
 
 ### Recipe doc-comment contract
 
@@ -553,15 +547,15 @@ The `make cli-parity` regex matches all of:
 
 ### Coverage dashboard
 
-| Dimension | Actual | Target | Gate |
-|-----------|--------|--------|------|
-| Subcommands with ≥1 recipe | 57/57 | 57/57 | `make cli-parity` |
-| Recipes with grade-A contract | 11/97+ | 97+/97+ | `make contract-grade` |
-| Recipes with format variants (APR/GGUF/ST) | TBD | 100% applicable | `make format-coverage` |
-| Recipes with arXiv citation | TBD | 97+/97+ | `make citation-check` |
-| Docs with provable-contract | partial | 100% | `make docs-validate` |
-| Estimated flag variants | ~400 | ~400 | `make variant-coverage` |
-| Contracts with Lean proof ≥ L2 | 0 | 80%+ | `pv lean-status` |
+| Dimension | Baseline | Target | Gate | Status |
+|-----------|----------|--------|------|--------|
+| Subcommands with ≥1 recipe | 57/57 (100%) | 57/57 | `make cli-parity` | **ENFORCED** |
+| Recipes with contract reference | 0/219 (0%) | 219/219 | `make contract-grade` | TARGET |
+| Recipes with all format variants | 3/219 (1.4%) | 100% applicable | `make format-coverage` | TARGET |
+| Recipes with arXiv/DOI citation | 0/219 (0%) | 219/219 | `make citation-check` | TARGET |
+| Docs validated by contract | 13/268 (4.9%) | 268/268 | `make docs-validate` | TARGET |
+| Flag variants | ~468 | ~468 | `make variant-coverage` | measured |
+| Contracts with Lean proof ≥ L2 | 0/11 | 80%+ | `pv lean-status` | TARGET |
 
 ### Pre-commit enforcement
 

@@ -14,7 +14,7 @@ SHELL := /bin/bash
 .PHONY: all validate quick-validate release clean help
 .PHONY: format format-check lint lint-check check test test-fast test-quick test-doc test-property
 .PHONY: quality-gate audit docs build install examples
-.PHONY: docs-validate cli-parity variant-coverage contracts-lint
+.PHONY: docs-validate cli-parity variant-coverage contracts-lint contract-grade format-coverage citation-check
 .PHONY: update-deps update-deps-check
 .PHONY: coverage coverage-ci coverage-clean clean-coverage coverage-open
 .PHONY: sub-test sub-lint sub-check
@@ -210,6 +210,56 @@ variant-coverage: ## Report per-subcommand flag/variant coverage
 		fi; \
 		printf "  %-15s %8d %8d %5d%%\n" "$$sub" "$$FLAGS" "$$RECIPES" "$$COV"; \
 	done
+
+contract-grade: ## Invariant B: check recipe-to-contract bindings (F-CONTRACT-GRADE-001)
+	@echo "📋 Checking recipe → contract bindings (Invariant B)..."
+	@N_RECIPES=$$(find examples/ -name '*.rs' | wc -l); \
+	N_WITH_CONTRACT=$$(grep -rl 'Contract:' examples/ 2>/dev/null | wc -l); \
+	PCT=$$((100 * N_WITH_CONTRACT / N_RECIPES)); \
+	printf "  Recipes:       %3d\n  With contract: %3d\n  Coverage:      %d%%\n" $$N_RECIPES $$N_WITH_CONTRACT $$PCT; \
+	if [ $$PCT -lt 50 ]; then \
+		echo "⚠️  Invariant B below 50% — target, not yet enforced"; \
+	else \
+		if [ $$N_WITH_CONTRACT -lt $$N_RECIPES ]; then \
+			echo "❌ Invariant B: $$((N_RECIPES - N_WITH_CONTRACT)) recipes missing contract reference"; \
+			exit 1; \
+		else \
+			echo "✅ Invariant B: all recipes reference a contract"; \
+		fi; \
+	fi
+
+format-coverage: ## Invariant C: check APR/GGUF/SafeTensors format coverage (F-FORMAT-COV-001)
+	@echo "📦 Checking model format coverage (Invariant C)..."
+	@N_RECIPES=$$(find examples/ -name '*.rs' | wc -l); \
+	N_APR=$$(grep -rlE '\.(apr)\b' examples/ 2>/dev/null | wc -l); \
+	N_GGUF=$$(grep -rlE '\.(gguf)\b' examples/ 2>/dev/null | wc -l); \
+	N_ST=$$(grep -rlE '\.(safetensors)\b' examples/ 2>/dev/null | wc -l); \
+	N_ALL3=$$(comm -12 <(comm -12 <(grep -rlE '\.(apr)\b' examples/ 2>/dev/null | sort) <(grep -rlE '\.(gguf)\b' examples/ 2>/dev/null | sort)) <(grep -rlE '\.(safetensors)\b' examples/ 2>/dev/null | sort) | wc -l); \
+	printf "  Total recipes: %3d\n  Mention .apr:  %3d\n  Mention .gguf: %3d\n  Mention .safetensors: %3d\n  All 3 formats: %3d\n" $$N_RECIPES $$N_APR $$N_GGUF $$N_ST $$N_ALL3; \
+	PCT=$$((100 * N_ALL3 / N_RECIPES)); \
+	printf "  Multi-format coverage: %d%%\n" $$PCT; \
+	if [ $$PCT -lt 50 ]; then \
+		echo "⚠️  Invariant C below 50% — target, not yet enforced"; \
+	else \
+		echo "✅ Invariant C: format coverage at $$PCT%%"; \
+	fi
+
+citation-check: ## Invariant D: check arXiv/DOI citations in recipes (F-ARXIV-001)
+	@echo "📚 Checking arXiv/DOI citations (Invariant D)..."
+	@N_RECIPES=$$(find examples/ -name '*.rs' | wc -l); \
+	N_CITED=$$(grep -rlE '(arXiv:|DOI:)' examples/ 2>/dev/null | wc -l); \
+	PCT=$$((100 * N_CITED / N_RECIPES)); \
+	printf "  Recipes:    %3d\n  With citation: %3d\n  Coverage:   %d%%\n" $$N_RECIPES $$N_CITED $$PCT; \
+	if [ $$PCT -lt 50 ]; then \
+		echo "⚠️  Invariant D below 50% — target, not yet enforced"; \
+	else \
+		if [ $$N_CITED -lt $$N_RECIPES ]; then \
+			echo "❌ Invariant D: $$((N_RECIPES - N_CITED)) recipes missing arXiv/DOI citation"; \
+			exit 1; \
+		else \
+			echo "✅ Invariant D: all recipes have citations"; \
+		fi; \
+	fi
 
 # =============================================================================
 # COVERAGE (Toyota Way: "make coverage" just works)

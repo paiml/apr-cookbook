@@ -26,15 +26,16 @@ The APR Cookbook is the technical manual for production ML deployment using the 
 ## Technology Stack
 
 ```
-APR Cookbook v3.0
+APR Cookbook v4.0
 ├── Examples Layer (this repo)
-│   ├── 52 IIUR recipes (Categories A-L)
-│   ├── 48 CLI demo recipes (optimize, chat, analysis, format)
-│   └── CLI tools (apr-info, apr-bench, apr-convert, apr-compile, apr-serve)
+│   ├── 91 IIUR recipes (Categories A-L)
+│   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
+│   ├── 64 other recipes (acceleration, advanced, inference, etc.)
+│   └── 219 total examples across 24 categories
 ├── Framework Layer
-│   ├── aprender 0.25  — ML algorithms, .apr format, quantization
-│   ├── trueno 0.14    — SIMD/GPU tensor operations
-│   ├── entrenar 0.5   — Training, monitoring, autograd
+│   ├── aprender 0.27  — ML algorithms, .apr format, quantization
+│   ├── trueno 0.16    — SIMD/GPU tensor operations
+│   ├── entrenar 0.7   — Training, monitoring, autograd
 │   ├── realizar 0.4   — GPU kernels, FlashAttention
 │   ├── repartir 1.1   — Distributed compute, work-stealing
 │   └── whisper-apr 0.1 — WASM-first ASR
@@ -64,8 +65,8 @@ Each component specification is in `components/` and is self-contained (max 500 
 
 | # | Component | Description |
 |---|-----------|-------------|
-| 3 | [Recipe Catalog](components/recipe-catalog.md) | 52 IIUR recipes across 12 categories (A-L) |
-| 4 | [CLI Demos](components/cli-demos.md) | 48 CLI-mirroring recipes: optimize, chat, analysis, format |
+| 3 | [Recipe Catalog](components/recipe-catalog.md) | 91 IIUR recipes across 12 categories (A-L) |
+| 4 | [CLI Demos](components/cli-demos.md) | 64 CLI-mirroring recipes: optimize, chat, analysis, format |
 
 ### Quality & Process
 
@@ -107,31 +108,31 @@ Each component specification is in `components/` and is self-contained (max 500 
 
 ## Recipe Overview
 
-### IIUR Recipes (52 total)
+### IIUR Recipes (91 total)
 
 | Category | Count | Scope |
 |----------|-------|-------|
-| A: Model Creation | 5 | Build models from scratch |
-| B: Binary Bundling | 5 | Static embedding, quantized, encrypted, signed, Lambda |
-| C: Continuous Training | 4 | Incremental, online, federated, curriculum |
+| A: Model Creation | 7 | Build models from scratch |
+| B: Binary Bundling | 7 | Static embedding, quantized, encrypted, signed, Lambda |
+| C: Continuous Training | 16 | Incremental, online, federated, curriculum, autograd |
 | D: Format Conversion | 5 | Phi, SafeTensors, GGUF, ONNX |
-| E: Model Registry | 4 | Pacha: register, lineage, comparison, rollback |
-| F: API Integration | 4 | REST inference, streaming, batch, health |
-| G: Serverless | 4 | Lambda inference, batch, edge, container |
-| H: WASM & Browser | 5 | Browser inference, interactive, dashboard, autocomplete, web worker |
-| I: GPU Acceleration | 4 | Matrix ops, model inference, batch, WebGPU fallback |
-| J: SIMD Acceleration | 4 | Vector ops, matmul, convolution, softmax |
-| K: Distillation | 4 | HF distill, knowledge transfer, pruning, QAT |
-| L: CLI Tools | 4 | apr-info, apr-bench, apr-convert, apr-validate |
+| E: Model Registry | 5 | Pacha: register, lineage, comparison, rollback |
+| F: API Integration | 5 | REST inference, streaming, batch, health |
+| G: Serverless | 5 | Lambda inference, batch, edge, container |
+| H: WASM & Browser | 6 | Browser inference, interactive, dashboard, autocomplete, web worker |
+| I: GPU Acceleration | 8 | Matrix ops, model inference, batch, WebGPU fallback |
+| J: SIMD Acceleration | 6 | Vector ops, matmul, convolution, softmax |
+| K: Distillation | 5 | HF distill, knowledge transfer, pruning, QAT |
+| L: CLI Tools | 16 | apr-info, apr-bench, apr-convert, apr-validate, and more |
 
-### CLI Demo Recipes (48 total)
+### CLI Demo Recipes (64 total)
 
 | Category | Count | Scope |
 |----------|-------|-------|
-| optimize/ | 22 | Finetune, prune, distill, merge, quantize |
+| optimize/ | 23 | Finetune, prune, distill, merge, quantize |
 | chat/ | 5 | ChatML, LLaMA 2, Mistral, multi-format, injection defense |
-| analysis/ | 11 | Inspect, validate, diff, bench, profile, QA, oracle, canary, tree, hex, explain |
-| format/ | 10 | Import HF, export SafeTensors/GGUF, rosetta, convert, publish, pull, batch |
+| analysis/ | 25 | Inspect, validate, diff, bench, profile, QA, oracle, canary, tree, hex, explain |
+| format/ | 11 | Import HF, export SafeTensors/GGUF, rosetta, convert, publish, pull, batch |
 
 ---
 
@@ -162,16 +163,16 @@ cargo fmt --all -- --check
 ```toml
 [package]
 name = "apr-cookbook"
-version = "3.0.0"
+version = "4.0.0"
 edition = "2021"
 rust-version = "1.75"
 license = "MIT"
 description = "APR Cookbook - Production ML deployment with IIUR recipes"
 
 [dependencies]
-aprender = { version = "0.25", features = ["format-compression", "format-signing"] }
-trueno = "0.14"
-entrenar = { version = "0.5", optional = true }
+aprender = { version = "0.27", features = ["format-compression"] }
+trueno = "0.16"
+entrenar = { version = "0.7", optional = true }
 realizar = { version = "0.4", optional = true }
 whisper-apr = { version = "0.1", optional = true }
 repartir = { version = "1.1", optional = true, features = ["cpu"] }
@@ -218,9 +219,9 @@ All claims are backed by provable-contracts YAML in `contracts/` with formal equ
 
 ## Five Coverage Invariants
 
-The spec enforces five hard invariants. All are formal requirements — not aspirational targets.
+The spec defines five coverage invariants. Each has a formal definition, a `make` target for enforcement, and a measured baseline. Invariants marked **TARGET** are not yet fully satisfied — the baseline shows the current gap.
 
-### Invariant A — CLI Recipe Parity (F-CLIPARITY-001)
+### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
 Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
 
@@ -228,11 +229,11 @@ Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
 ∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
 ```
 
-**Status**: 57/57 = 100%. Enforced by `make cli-parity`.
+**Baseline (2026-04-06)**: 57/57 = 100%. **Gate**: `make cli-parity` (exits non-zero on regression).
 
-### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001)
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — TARGET
 
-Every recipe must reference a provable-contract (`../provable-contracts` YAML) that passes `pv lint` at grade **A**.
+Every recipe should reference a provable-contract (`../provable-contracts` YAML) that passes `pv lint` at grade **A**.
 
 ```
 ∀ r ∈ recipes:
@@ -243,9 +244,11 @@ Every recipe must reference a provable-contract (`../provable-contracts` YAML) t
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-### Invariant C — Model Format Coverage (F-FORMAT-COV-001)
+**Baseline (2026-04-06)**: 0/219 recipes reference a contract. 11 contracts exist, mean `pv lint` score 0.54 (99 warnings). **Gate**: `make contract-grade` (reports current state; warns but does not block until baseline > 50%).
 
-Every recipe that operates on a model file **must** demonstrate all three canonical formats where applicable: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
+
+Every recipe that operates on a model file should demonstrate all three canonical formats where applicable: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
 
 ```
 ∀ r ∈ recipes where r.accepts_model_input:
@@ -258,11 +261,11 @@ Every recipe that operates on a model file **must** demonstrate all three canoni
 - `apr encrypt` only supports `.apr` → 1 variant sufficient
 - `apr import hf://…` outputs `.apr` only → 1 variant sufficient
 
-Enforced by `make format-coverage`. Each format variant is a distinct recipe or a documented section within the recipe.
+**Baseline (2026-04-06)**: 3/219 recipes demonstrate all three formats (1.4%). Most recipes are APR-only. **Gate**: `make format-coverage` (reports current state; warns but does not block until baseline > 50%).
 
-### Invariant D — arXiv Citation (F-ARXIV-001)
+### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
 
-Every recipe must include ≥1 arXiv or peer-reviewed citation in its doc comment header linking the technique to the literature.
+Every recipe should include ≥1 arXiv or peer-reviewed citation in its doc comment header linking the technique to the literature.
 
 ```
 ∀ r ∈ recipes:
@@ -276,11 +279,11 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 ```
 
-Enforced by `make citation-check` (grep for `arXiv:` or `DOI:` in every recipe `.rs` file).
+**Baseline (2026-04-06)**: 0/219 recipes have citations (0%). **Gate**: `make citation-check` (reports current state; warns but does not block until baseline > 50%).
 
-### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001)
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
 
-Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — must be bound to a provable-contract that validates factual accuracy and structural integrity.
+Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — should be bound to a provable-contract that validates factual accuracy and structural integrity.
 
 ```
 ∀ d ∈ {README.md, CLAUDE.md, book/src/**/*.md, docs/specifications/**/*.md}:
@@ -289,7 +292,7 @@ Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook ch
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-Enforced by `make docs-validate` + `pv validate contracts/docs-schema-v1.yaml`.
+**Baseline (2026-04-06)**: 13/268 .md files validated (4.9%). `make docs-validate` covers `README.md`, `CLAUDE.md`, and `docs/specifications/**/*.md`. The `book/src/` tree (252 files) is not yet bound. **Gate**: `make docs-validate` (enforced for the 13 bound files; book coverage is a target).
 
 ---
 
