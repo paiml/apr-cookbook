@@ -356,7 +356,7 @@ Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe.
 
 **Baseline**: 57/57 = **100%**. **Gate**: `make cli-parity` (exits non-zero on regression).
 
-### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — TARGET
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — ENFORCED
 
 Every recipe should reference a provable-contract YAML that passes `pv lint` at **grade A**.
 
@@ -371,7 +371,7 @@ Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_o
 
 **Baseline**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
-### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — ENFORCED
 
 Every recipe that accepts a model file should demonstrate all three canonical formats where the subcommand supports them: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
 
@@ -388,7 +388,7 @@ Examples:
 
 **Baseline**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
-### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
+### Invariant D — arXiv Citation (F-ARXIV-001) — ENFORCED
 
 Every recipe should cite ≥1 arXiv paper or peer-reviewed reference linking the technique to the literature.
 
@@ -405,7 +405,7 @@ Doc comment format:
 
 **Baseline**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
-### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — ENFORCED
 
 Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — should be bound to a provable-contract and pass `pmat validate-readme`.
 

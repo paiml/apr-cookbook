@@ -29,7 +29,7 @@ Every recipe is classified by hardware requirements. The runtime fallback chain 
 | T2b | `wgpu` | WebGPU | Browser/native GPU compute via wgpu (Vulkan/Metal/DX12/WebGPU) |
 | T3 | `wasm` | wasm32 | Browser/edge via WebAssembly + SIMD128 |
 | T4 | `serverless` | Lambda/Edge | Constrained CPU, cold start budget, memory cap |
-| T5 | `distributed` | Multi-node | Cluster via repartir work-stealing scheduler |
+| T5 | `distributed` | Multi-node | Cluster compute (simulated in cookbook) |
 
 ### Detection Mechanisms
 

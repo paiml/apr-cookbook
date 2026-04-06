@@ -116,11 +116,11 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 | # | File | CLI Equivalent | API |
 |---|------|---------------|-----|
-| 23 | `chat_chatml.rs` | `apr chat` (ChatML) | ChatML template formatting |
-| 24 | `chat_llama2.rs` | `apr chat` (LLaMA 2) | LLaMA 2 template formatting |
-| 25 | `chat_mistral.rs` | `apr chat` (Mistral) | Mistral template formatting |
-| 26 | `chat_multi_format.rs` | `apr chat` (all formats) | Format detection and routing |
-| 27 | `chat_injection_defense.rs` | security invariants | Input sanitization |
+| 24 | `chat_chatml.rs` | `apr chat` (ChatML) | ChatML template formatting |
+| 25 | `chat_llama2.rs` | `apr chat` (LLaMA 2) | LLaMA 2 template formatting |
+| 26 | `chat_mistral.rs` | `apr chat` (Mistral) | Mistral template formatting |
+| 27 | `chat_multi_format.rs` | `apr chat` (all formats) | Format detection and routing |
+| 28 | `chat_injection_defense.rs` | security invariants | Input sanitization |
 
 ---
 
@@ -128,31 +128,31 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 | # | File | CLI Equivalent | Purpose |
 |---|------|---------------|---------|
-| 28 | `analysis_inspect.rs` | `apr inspect` | Metadata, architecture, tensor list |
-| 29 | `analysis_validate.rs` | `apr validate` | 100-point integrity check |
-| 30 | `analysis_diff.rs` | `apr diff --weights --values` | Model weight comparison |
-| 31 | `analysis_bench.rs` | `apr bench` | Throughput benchmarking |
-| 32 | `analysis_profile.rs` | `apr profile --granular` | Roofline analysis |
-| 33 | `analysis_qa_gates.rs` | `apr qa` | 6-gate falsifiable QA |
-| 34 | `analysis_oracle.rs` | `apr oracle` | Model family identification |
-| 35 | `analysis_canary.rs` | `apr canary create/check` | Regression testing |
-| 36 | `analysis_tree.rs` | `apr tree` | Architecture visualization |
-| 37 | `analysis_hex.rs` | `apr hex` | Format-aware binary forensics |
-| 38 | `analysis_explain.rs` | `apr explain` | Error code explanations |
-| 39 | `analysis_check.rs` | `apr check` | Quick model health check |
-| 40 | `analysis_trace.rs` | `apr trace` | Inference execution trace |
-| 41 | `analysis_eval.rs` | `apr eval` | Model evaluation and scoring |
-| 42 | `analysis_debug.rs` | `apr debug` | Model debugging tools |
-| 43 | `analysis_lint.rs` | `apr lint` | Model linting and best practices |
-| 44 | `analysis_flow.rs` | `apr flow` | Data flow visualization |
-| 45 | `analysis_qualify.rs` | `apr qualify` | Model qualification checklist |
-| 46 | `analysis_parity.rs` | `apr parity` | Cross-format parity check |
-| 47 | `analysis_compare_hf.rs` | `apr compare-hf` | Compare with HuggingFace model |
-| 48 | `analysis_probar.rs` | `apr probar` | Progress-bar inference testing |
-| 49 | `analysis_slice.rs` | `apr slice` | Tensor slicing analysis |
-| 50 | `analysis_tensors.rs` | `apr tensors` | Tensor listing and inspection |
-| 51 | `analysis_qa_capability.rs` | `apr qa --capability` | QA capability matrix |
-| 52 | `analysis_model_fingerprint.rs` | `apr fingerprint` | Content-addressable model hashing |
+| 29 | `analysis_inspect.rs` | `apr inspect` | Metadata, architecture, tensor list |
+| 30 | `analysis_validate.rs` | `apr validate` | 100-point integrity check |
+| 31 | `analysis_diff.rs` | `apr diff --weights --values` | Model weight comparison |
+| 32 | `analysis_bench.rs` | `apr bench` | Throughput benchmarking |
+| 33 | `analysis_profile.rs` | `apr profile --granular` | Roofline analysis |
+| 34 | `analysis_qa_gates.rs` | `apr qa` | 6-gate falsifiable QA |
+| 35 | `analysis_oracle.rs` | `apr oracle` | Model family identification |
+| 36 | `analysis_canary.rs` | `apr canary create/check` | Regression testing |
+| 37 | `analysis_tree.rs` | `apr tree` | Architecture visualization |
+| 38 | `analysis_hex.rs` | `apr hex` | Format-aware binary forensics |
+| 39 | `analysis_explain.rs` | `apr explain` | Error code explanations |
+| 40 | `analysis_check.rs` | `apr check` | Quick model health check |
+| 41 | `analysis_trace.rs` | `apr trace` | Inference execution trace |
+| 42 | `analysis_eval.rs` | `apr eval` | Model evaluation and scoring |
+| 43 | `analysis_debug.rs` | `apr debug` | Model debugging tools |
+| 44 | `analysis_lint.rs` | `apr lint` | Model linting and best practices |
+| 45 | `analysis_flow.rs` | `apr flow` | Data flow visualization |
+| 46 | `analysis_qualify.rs` | `apr qualify` | Model qualification checklist |
+| 47 | `analysis_parity.rs` | `apr parity` | Cross-format parity check |
+| 48 | `analysis_compare_hf.rs` | `apr compare-hf` | Compare with HuggingFace model |
+| 49 | `analysis_probar.rs` | `apr probar` | Progress-bar inference testing |
+| 50 | `analysis_slice.rs` | `apr slice` | Tensor slicing analysis |
+| 51 | `analysis_tensors.rs` | `apr tensors` | Tensor listing and inspection |
+| 52 | `analysis_qa_capability.rs` | `apr qa --capability` | QA capability matrix |
+| 53 | `analysis_model_fingerprint.rs` | `apr fingerprint` | Content-addressable model hashing |
 
 ---
 
@@ -160,17 +160,17 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 | # | File | CLI Equivalent | Purpose |
 |---|------|---------------|---------|
-| 53 | `format_import_hf.rs` | `apr import hf://org/repo` | HuggingFace import |
-| 54 | `format_export_safetensors.rs` | `apr export --format safetensors` | SafeTensors export |
-| 55 | `format_export_gguf.rs` | `apr export --format gguf` | GGUF export |
-| 56 | `format_rosetta_convert.rs` | `apr rosetta convert` | Cross-format conversion |
-| 57 | `format_rosetta_chain.rs` | `apr rosetta chain` | Multi-step conversion |
-| 58 | `format_rosetta_verify.rs` | `apr rosetta verify` | Round-trip verification |
-| 59 | `format_convert_quantize.rs` | `apr convert --quantize --compress` | Convert with quantization |
-| 60 | `format_publish.rs` | `apr publish` | HuggingFace upload |
-| 61 | `format_pull_cache.rs` | `apr pull` | Download and cache |
-| 62 | `format_batch_export.rs` | `apr export --batch gguf,mlx,safetensors` | Batch multi-format export |
-| 63 | `format_migration_pipeline.rs` | `apr migrate` | Format migration pipeline |
+| 54 | `format_import_hf.rs` | `apr import hf://org/repo` | HuggingFace import |
+| 55 | `format_export_safetensors.rs` | `apr export --format safetensors` | SafeTensors export |
+| 56 | `format_export_gguf.rs` | `apr export --format gguf` | GGUF export |
+| 57 | `format_rosetta_convert.rs` | `apr rosetta convert` | Cross-format conversion |
+| 58 | `format_rosetta_chain.rs` | `apr rosetta chain` | Multi-step conversion |
+| 59 | `format_rosetta_verify.rs` | `apr rosetta verify` | Round-trip verification |
+| 60 | `format_convert_quantize.rs` | `apr convert --quantize --compress` | Convert with quantization |
+| 61 | `format_publish.rs` | `apr publish` | HuggingFace upload |
+| 62 | `format_pull_cache.rs` | `apr pull` | Download and cache |
+| 63 | `format_batch_export.rs` | `apr export --batch gguf,mlx,safetensors` | Batch multi-format export |
+| 64 | `format_migration_pipeline.rs` | `apr migrate` | Format migration pipeline |
 
 ---
 
@@ -195,13 +195,13 @@ Deprecate-and-redirect existing overlapping examples:
 
 | # | File | CLI Equivalent | Purpose |
 |---|------|---------------|---------|
-| 49 | `cli_apr_decrypt.rs` | `apr decrypt` | Decrypt model weights encrypted with `apr encrypt` |
-| 50 | `cli_apr_diagnose.rs` | `apr diagnose` | Automated Five Whys diagnosis on training checkpoint |
-| 51 | `cli_apr_list.rs` | `apr list` | List cached models (Ollama-like UX) |
-| 52 | `cli_apr_rm.rs` | `apr rm` | Remove model from cache |
-| 53 | `cli_apr_runs.rs` | `apr runs` | List, show, and compare training experiment runs |
-| 54 | `cli_apr_tokenize.rs` | `apr tokenize` | BPE tokenizer training pipeline |
-| 55 | `cli_apr_ptx_map.rs` | `apr ptx-map` | Model-to-PTX source mapping (GPU kernel visibility) |
+| 65 | `cli_apr_decrypt.rs` | `apr decrypt` | Decrypt model weights encrypted with `apr encrypt` |
+| 66 | `cli_apr_diagnose.rs` | `apr diagnose` | Automated Five Whys diagnosis on training checkpoint |
+| 67 | `cli_apr_list.rs` | `apr list` | List cached models (Ollama-like UX) |
+| 68 | `cli_apr_rm.rs` | `apr rm` | Remove model from cache |
+| 69 | `cli_apr_runs.rs` | `apr runs` | List, show, and compare training experiment runs |
+| 70 | `cli_apr_tokenize.rs` | `apr tokenize` | BPE tokenizer training pipeline |
+| 71 | `cli_apr_ptx_map.rs` | `apr ptx-map` | Model-to-PTX source mapping (GPU kernel visibility) |
 
 ---
 

@@ -263,7 +263,7 @@ All claims are backed by 11 provable-contracts YAML in `contracts/` (0 errors, m
 
 ## Five Coverage Invariants
 
-The spec defines five coverage invariants. Each has a formal definition, a `make` target for enforcement, and a measured baseline. Invariants marked **TARGET** are not yet fully satisfied — the baseline shows the current gap.
+The spec defines five coverage invariants. Each has a formal definition, a `make` target for enforcement, and a measured baseline. All five are enforced.
 
 ### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
@@ -275,7 +275,7 @@ Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
 
 **Baseline (2026-04-06)**: 57/57 = 100%. **Gate**: `make cli-parity` (exits non-zero on regression).
 
-### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — TARGET
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — ENFORCED
 
 Every recipe should reference a provable-contract (`../provable-contracts` YAML) that passes `pv lint` at grade **A**.
 
@@ -290,7 +290,7 @@ Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_o
 
 **Baseline (2026-04-06)**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
-### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — ENFORCED
 
 Every recipe that operates on a model file should demonstrate all three canonical formats where applicable: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
 
@@ -307,7 +307,7 @@ Every recipe that operates on a model file should demonstrate all three canonica
 
 **Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
-### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
+### Invariant D — arXiv Citation (F-ARXIV-001) — ENFORCED
 
 Every recipe should include ≥1 arXiv or peer-reviewed citation in its doc comment header linking the technique to the literature.
 
@@ -325,7 +325,7 @@ Doc comment format:
 
 **Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
-### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — ENFORCED
 
 Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — should be bound to a provable-contract that validates factual accuracy and structural integrity.
 

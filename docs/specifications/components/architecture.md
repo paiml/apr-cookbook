@@ -134,8 +134,8 @@ examples/
 ├── distillation/   Knowledge transfer, pruning
 ├── cli/            apr-info, apr-bench, apr-convert, apr-compile, apr-serve
 ├── monitoring/     Inference explainability, hash chain audit
-├── speech/         whisper.apr transcription
-├── distributed/    repartir multi-node inference
+├── speech/         Speech recognition pipelines (simulated)
+├── distributed/    Multi-node inference (simulated)
 ├── advanced/       End-to-end demo applications
 ├── optimize/       Finetune, prune, distill, merge, quantize (CLI demos)
 ├── chat/           Chat template formatting (CLI demos)
