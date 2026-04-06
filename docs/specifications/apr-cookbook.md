@@ -106,6 +106,54 @@ Each component specification is in `components/` and is self-contained (max 500 
 
 ---
 
+## Parity & POC Ecosystem
+
+The cookbook does not exist in isolation. These companion repos provide head-to-head benchmarks against competing runtimes and proof-of-concept deployments. Recipes should link to these repos when demonstrating a workflow that has a competing-solution equivalent.
+
+### Parity Repos (APR vs. competitors)
+
+| Repo | What it proves | Competing runtime | Link |
+|------|---------------|-------------------|------|
+| `qwen-coder-deploy` | 5-runtime inference benchmark (Ollama, llama.cpp, vLLM, realizr, realizr-wgpu) | All major | [paiml/qwen-coder-deploy](https://github.com/paiml/qwen-coder-deploy) |
+| `candle-vs-apr` | Candle vs realizr GGUF inference — realizr 1.63x faster | HuggingFace Candle | [paiml/candle-vs-apr](https://github.com/paiml/candle-vs-apr) |
+| `qwen-train-canary` | Training throughput comparison across 5 runtimes | Ollama, vLLM, etc. | [paiml/qwen-train-canary](https://github.com/paiml/qwen-train-canary) |
+| `apr-leaderboard` | HuggingFace leaderboard proving single `apr` binary matches Python benchmarks (HumanEval, MBPP) | Python ecosystem | [paiml/apr-leaderboard](https://github.com/paiml/apr-leaderboard) |
+
+### POC Repos (proof-of-concept deployments)
+
+| Repo | What it demonstrates | Link |
+|------|---------------------|------|
+| `sovereign-ai-cookbook` | Full sovereign stack: 17 Rust components, 10 deployment stacks, forjar configs | [paiml/sovereign-ai-cookbook](https://github.com/paiml/sovereign-ai-cookbook) |
+| `whisper.apr` | Production Whisper in pure Rust — WASM-first speech-to-text | [paiml/whisper.apr](https://github.com/paiml/whisper.apr) |
+| `tiny-model-ground-truth` | Token-identical greedy outputs across all apr subcommands and formats | [paiml/tiny-model-ground-truth](https://github.com/paiml/tiny-model-ground-truth) |
+| `apr-model-qa-playbook` | Structured QA playbook for model validation with apr | [paiml/apr-model-qa-playbook](https://github.com/paiml/apr-model-qa-playbook) |
+
+### Competing Runtimes (reference implementations)
+
+Recipes that benchmark or compare against these runtimes should link to the upstream repo and the corresponding parity repo above.
+
+| Runtime | Language | Strength | Link |
+|---------|----------|----------|------|
+| llama.cpp | C++ | Gold-standard CPU inference, GGUF format origin | [ggerganov/llama.cpp](https://github.com/ggerganov/llama.cpp) |
+| Ollama | Go | Easy local deployment UX | [ollama/ollama](https://github.com/ollama/ollama) |
+| vLLM | Python/CUDA | High-concurrency GPU serving | [vllm-project/vllm](https://github.com/vllm-project/vllm) |
+| Candle | Rust | HuggingFace minimalist Rust ML framework | [huggingface/candle](https://github.com/huggingface/candle) |
+| llamafile | C++ | Single-file executable distribution | [Mozilla-Ocho/llamafile](https://github.com/Mozilla-Ocho/llamafile) |
+| TGI | Rust/Python | HuggingFace inference server (maintenance mode → vLLM) | [huggingface/text-generation-inference](https://github.com/huggingface/text-generation-inference) |
+| SafeTensors | Rust/Python | Secure tensor format (complementary, not competing) | [huggingface/safetensors](https://github.com/huggingface/safetensors) |
+
+### Recipe Cross-Reference Convention
+
+When a recipe demonstrates a workflow that has a parity benchmark, it should include a doc-comment link:
+
+```rust
+//! ## Parity
+//! - Benchmark: [qwen-coder-deploy](https://github.com/paiml/qwen-coder-deploy) — APR vs 4 runtimes
+//! - Competing: `ollama run qwen2.5-coder:1.5b` (see parity repo for tok/s comparison)
+```
+
+---
+
 ## Recipe Overview
 
 ### IIUR Recipes (91 total)
@@ -306,4 +354,4 @@ See [Quality Gates](components/quality-gates.md) for the target fleet, full defe
 
 ---
 
-*Specification Version: 4.0.0 — Five Coverage Invariants: A (CLI parity 100%), B (recipe contract grade A), C (APR/GGUF/SafeTensors format coverage), D (arXiv citations), E (docs contract coverage)*
+*Specification Version: 4.1.0 — Five Coverage Invariants (A-E) + Parity/POC ecosystem cross-references*

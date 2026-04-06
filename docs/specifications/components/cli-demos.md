@@ -189,12 +189,39 @@ Deprecate-and-redirect existing overlapping examples:
 
 ---
 
+## Parity Cross-References
+
+High-traffic recipes should link to parity repos showing how the same workflow looks in competing runtimes. This grounds apr-cookbook in measurable, falsifiable comparisons.
+
+### Key recipe → parity mappings
+
+| Recipe workflow | CLI invocation | Competing equivalent | Parity repo |
+|----------------|------------|---------------------|-------------|
+| Model inference | `apr run model.gguf` | `ollama run`, `llama-cli -m`, `vllm serve` | [qwen-coder-deploy](https://github.com/paiml/qwen-coder-deploy) |
+| GGUF inference (Rust) | `apr run --device cpu` | `candle-cli infer` | [candle-vs-apr](https://github.com/paiml/candle-vs-apr) |
+| Training throughput | `apr finetune --method lora` | Ollama, vLLM training | [qwen-train-canary](https://github.com/paiml/qwen-train-canary) |
+| Benchmark eval | `apr eval --perplexity` | HumanEval/MBPP Python suite | [apr-leaderboard](https://github.com/paiml/apr-leaderboard) |
+| Format round-trip | `apr convert`, `apr rosetta` | `safetensors` Python API | [tiny-model-ground-truth](https://github.com/paiml/tiny-model-ground-truth) |
+| Whisper transcription | `apr run whisper.apr` | `whisper.cpp`, Python Whisper | [whisper.apr](https://github.com/paiml/whisper.apr) |
+| Full stack deployment | `apr serve`, `apr compile` | Docker + vLLM + Triton | [sovereign-ai-cookbook](https://github.com/paiml/sovereign-ai-cookbook) |
+| Model validation | `apr validate`, `apr qualify` | manual QA checklist | [apr-model-qa-playbook](https://github.com/paiml/apr-model-qa-playbook) |
+
+### Doc-comment convention
+
+```rust
+//! ## Parity
+//! - Benchmark: [qwen-coder-deploy](https://github.com/paiml/qwen-coder-deploy)
+//! - Competing: `ollama run qwen2.5-coder:1.5b` → 28 tok/s vs apr 45 tok/s
+```
+
+---
+
 ## Build Order
 
 1. **Phase 1**: `optimize_full_pipeline.rs` — flagship composed pipeline
-2. **Phase 2**: `optimize/` individual steps (22 examples)
+2. **Phase 2**: `optimize/` individual steps (23 examples)
 3. **Phase 3**: `chat/` (5 examples)
-4. **Phase 4**: `analysis/` (11 examples)
-5. **Phase 5**: `format/` (10 examples)
-6. **Phase 6**: CLI gap coverage (7 examples)
-7. **Phase 7**: Cargo.toml + deprecation pass
+4. **Phase 4**: `analysis/` (25 examples)
+5. **Phase 5**: `format/` (11 examples)
+6. **Phase 6**: CLI gap coverage (16 examples)
+7. **Phase 7**: Parity cross-references + deprecation pass

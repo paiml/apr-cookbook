@@ -87,3 +87,45 @@
 [31] Wheeler, D. (2021). *Fully Countering Trusting Trust through Diverse Double-Compiling*. ACSAC.
 
 [32] Claessen, K. & Hughes, J. (2000). *QuickCheck: A Lightweight Tool for Random Testing of Haskell Programs*. ICFP 2000. DOI: 10.1145/351240.351266
+
+---
+
+## Parity & POC Repos
+
+These companion repositories provide head-to-head benchmarks and proof-of-concept deployments referenced by cookbook recipes.
+
+### Parity Benchmarks (APR vs. competitors)
+
+[P1] paiml/qwen-coder-deploy — 5-runtime inference benchmark (Ollama, llama.cpp, vLLM, realizr, realizr-wgpu). [GitHub](https://github.com/paiml/qwen-coder-deploy)
+
+[P2] paiml/candle-vs-apr — Candle vs realizr GGUF inference (realizr 1.63x faster). [GitHub](https://github.com/paiml/candle-vs-apr)
+
+[P3] paiml/qwen-train-canary — Training throughput comparison across 5 runtimes. [GitHub](https://github.com/paiml/qwen-train-canary)
+
+[P4] paiml/apr-leaderboard — HuggingFace leaderboard proving APR binary matches Python benchmarks (HumanEval, MBPP). [GitHub](https://github.com/paiml/apr-leaderboard)
+
+### POC Deployments
+
+[POC1] paiml/sovereign-ai-cookbook — Full sovereign stack: 17 Rust components, 10 deployment stacks. [GitHub](https://github.com/paiml/sovereign-ai-cookbook)
+
+[POC2] paiml/whisper.apr — Production Whisper in pure Rust, WASM-first speech-to-text. [GitHub](https://github.com/paiml/whisper.apr)
+
+[POC3] paiml/tiny-model-ground-truth — Token-identical greedy outputs across all apr subcommands and formats. [GitHub](https://github.com/paiml/tiny-model-ground-truth)
+
+[POC4] paiml/apr-model-qa-playbook — Structured QA playbook for model validation with apr. [GitHub](https://github.com/paiml/apr-model-qa-playbook)
+
+### Competing Runtimes (upstream references)
+
+[CR1] ggerganov/llama.cpp — C++ LLM inference, GGUF format origin. [GitHub](https://github.com/ggerganov/llama.cpp)
+
+[CR2] ollama/ollama — Local AI runtime. [GitHub](https://github.com/ollama/ollama)
+
+[CR3] vllm-project/vllm — High-concurrency GPU serving. [GitHub](https://github.com/vllm-project/vllm)
+
+[CR4] huggingface/candle — Minimalist Rust ML framework. [GitHub](https://github.com/huggingface/candle)
+
+[CR5] Mozilla-Ocho/llamafile — Single-file LLM distribution. [GitHub](https://github.com/Mozilla-Ocho/llamafile)
+
+[CR6] huggingface/text-generation-inference — HF inference server (maintenance mode). [GitHub](https://github.com/huggingface/text-generation-inference)
+
+[CR7] huggingface/safetensors — Secure tensor format (complementary). [GitHub](https://github.com/huggingface/safetensors)
