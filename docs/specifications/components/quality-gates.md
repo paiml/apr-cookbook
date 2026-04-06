@@ -272,7 +272,7 @@ All 11 existing contracts share the same warnings (99 total across 11 contracts,
 
 | Asset class | Count | Contract coverage |
 |-------------|-------|-------------------|
-| Recipe `.rs` files with `Contract:` header | 0 / 219 | 0% — no recipe references any contract |
+| Recipe `.rs` files with `Contract:` header | 219 / 219 | 100% — all recipes reference ≥1 contract |
 | `book/src/` .md files | 0 / 252 | 0% — not bound to `docs-schema-v1` or any contract |
 | Lean proofs | 0 / 11 | 0% — no contract has `pv lean-status` >= L2 |
 | Per-subcommand contracts | 0 / 57 | 0% — subcommands share `cli-parity-v1` but have no individual contracts |
@@ -368,7 +368,7 @@ Every recipe should reference a provable-contract YAML that passes `pv lint` at 
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-**Baseline**: 0/219 recipes reference a contract (0%). 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` (reports; warns until > 50%).
+**Baseline**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
 ### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
 
@@ -450,7 +450,7 @@ The `make cli-parity` regex matches all of:
 | Dimension | Baseline | Target | Gate | Status |
 |-----------|----------|--------|------|--------|
 | Subcommands with ≥1 recipe | 57/57 (100%) | 57/57 | `make cli-parity` | **ENFORCED** |
-| Recipes with contract reference | 0/219 (0%) | 219/219 | `make contract-grade` | TARGET |
+| Recipes with contract reference | 219/219 (100%) | 219/219 | `make contract-grade` | **ENFORCED** |
 | Recipes with all format variants | 219/219 (100%) | 100% applicable | `make format-coverage` | **ENFORCED** |
 | Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
 | Docs validated by contract | 13/268 (4.9%) | 268/268 | `make docs-validate` | TARGET |

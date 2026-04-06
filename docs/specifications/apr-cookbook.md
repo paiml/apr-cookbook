@@ -264,7 +264,7 @@ full = ["encryption", "gpu", "speech", "distributed"]
 | F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x | `flash-attention-v1` |
 | F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 | `avx512-matmul-v1` |
 
-All claims are backed by 11 provable-contracts YAML in `contracts/` (0 errors, mean score 0.54, 0 Lean proofs). No recipe `.rs` file references a contract yet (Invariant B baseline: 0/219). 3 invariant contracts (B, C, D) are specified but not yet created. See [Quality Gates](components/quality-gates.md) for the full contract inventory and gap analysis.
+All claims are backed by 11 provable-contracts YAML in `contracts/` (0 errors, mean score 0.54, 0 Lean proofs). All 219 recipe files reference ≥1 contract via `Contract:` header (Invariant B: 100%). See [Quality Gates](components/quality-gates.md) for the full contract inventory and gap analysis.
 
 ## Five Coverage Invariants
 
@@ -293,7 +293,7 @@ Every recipe should reference a provable-contract (`../provable-contracts` YAML)
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-**Baseline (2026-04-06)**: 0/219 recipes reference a contract. 11 contracts exist, mean `pv lint` score 0.54 (99 warnings). **Gate**: `make contract-grade` (reports current state; warns but does not block until baseline > 50%).
+**Baseline (2026-04-06)**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
 ### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — TARGET
 
