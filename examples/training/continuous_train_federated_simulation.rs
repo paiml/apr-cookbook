@@ -1,5 +1,6 @@
 //! # Recipe: Federated Learning Simulation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

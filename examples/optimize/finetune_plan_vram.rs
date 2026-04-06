@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune --plan`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Estimates VRAM requirements for different fine-tuning methods (full,
 //! LoRA, QLoRA) and recommends optimal configurations given GPU memory

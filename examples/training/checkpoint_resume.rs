@@ -1,5 +1,6 @@
 //! Checkpoint Resume Training Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates saving and restoring training state: model weights,
 //! optimizer state, epoch counter, and loss history. Enables resuming
 //! interrupted training from the last checkpoint.

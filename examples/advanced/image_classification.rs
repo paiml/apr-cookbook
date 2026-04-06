@@ -1,5 +1,6 @@
 //! # Demo J: Image Classification (MobileNet-style)
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! MobileNet-style classification with depthwise separable convolutions,
 //! squeeze-and-excitation, and efficient mobile inference.
 //!

@@ -1,5 +1,6 @@
 //! # Demo M: Real-time Style Transfer
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Applies artistic styles to images using a simplified Fast Style Transfer network.
 //! Demonstrates convolution operations and image processing pipelines.
 //!

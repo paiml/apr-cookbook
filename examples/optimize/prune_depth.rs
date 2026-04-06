@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method depth`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates depth pruning: removing entire transformer layers based on
 //! importance scores. Inspired by NVIDIA Minitron, this technique produces

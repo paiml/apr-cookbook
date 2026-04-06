@@ -1,5 +1,6 @@
 //! Autograd Gradient Clipping Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! Demonstrates gradient clipping techniques for training stability using
 //! entrenar's autograd API. Gradient clipping prevents exploding gradients
 //! by bounding gradient magnitudes before the optimizer step.

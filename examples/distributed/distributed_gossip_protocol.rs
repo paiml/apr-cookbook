@@ -1,5 +1,6 @@
 //! Gossip Protocol for Decentralized Model Parameter Averaging
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates a gossip-based protocol where nodes exchange and average model
 //! parameters without a central coordinator. Each round, every node picks a
 //! random peer, and the pair averages their parameters. Over time, all nodes

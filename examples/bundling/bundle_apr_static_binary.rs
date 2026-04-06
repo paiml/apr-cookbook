@@ -1,5 +1,6 @@
 //! # Recipe: Bundle APR into Static Binary
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

@@ -1,5 +1,6 @@
 //! Adaptive Batch Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates dynamic request batching for model inference: accumulates
 //! individual requests until a batch size or timeout threshold, then runs
 //! a single vectorized forward pass. Measures throughput vs latency tradeoff.

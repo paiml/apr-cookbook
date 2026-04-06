@@ -1,5 +1,6 @@
 //! Ensemble Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates combining predictions from multiple models using different
 //! ensemble strategies: majority voting, probability averaging, and weighted
 //! confidence-based combining.

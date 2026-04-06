@@ -1,5 +1,6 @@
 //! # Recipe: Quantization Quality Tradeoff Analysis
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! Comprehensive analysis of quantization schemes (F32, F16, BF16, Q8_0, Q4_0, Q4_1)
 //! measuring accuracy degradation, compression ratios, and reconstruction error.
 //!

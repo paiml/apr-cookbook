@@ -1,5 +1,6 @@
 //! # Recipe: Pipeline Parallelism for Distributed Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Distributed Computing
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

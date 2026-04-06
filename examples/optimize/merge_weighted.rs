@@ -1,6 +1,7 @@
 //! Weighted Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy weighted`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Weighted averaging generalizes uniform averaging by assigning a scalar
 //! weight to each model. This lets you bias the merge toward models that

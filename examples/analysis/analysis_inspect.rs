@@ -1,6 +1,7 @@
 //! # APR Model Inspection
 //!
 //! CLI equivalent: `apr inspect model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Inspects an APR model file to extract metadata, architecture details,
 //! tensor listing, and size breakdown. Essential for understanding model

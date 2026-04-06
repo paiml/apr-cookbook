@@ -1,5 +1,6 @@
 //! # Recipe: WASM Model Loader Pipeline
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

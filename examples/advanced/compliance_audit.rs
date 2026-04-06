@@ -1,5 +1,6 @@
 //! # Recipe: Compliance Audit Pipeline
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates a full compliance audit pipeline for model deployment approval,
 //! composing five stages: inspect, oracle, qualify, qa, and report.
 //!

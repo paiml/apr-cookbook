@@ -1,6 +1,7 @@
 //! # Combined Quantization and Compression Conversion
 //!
 //! **CLI equivalent:** `apr convert model.apr --quantize int4 --compress lz4`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates re-quantizing and re-compressing an APR model. This is a
 //! common workflow when optimizing models for edge deployment: reduce

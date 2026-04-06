@@ -1,5 +1,6 @@
 //! # Recipe: Quantization-Aware Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

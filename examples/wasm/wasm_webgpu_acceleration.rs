@@ -1,5 +1,6 @@
 //! # Recipe: WebGPU Acceleration
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

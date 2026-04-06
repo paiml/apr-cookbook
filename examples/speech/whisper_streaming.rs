@@ -1,5 +1,6 @@
 //! Whisper Streaming Transcription Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/whisper-wer-v1.yaml
 //! Demonstrates real-time streaming speech recognition with whisper.apr.
 //!
 //! # Streaming Architecture

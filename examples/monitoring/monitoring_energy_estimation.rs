@@ -1,5 +1,6 @@
 //! # Recipe: Inference Energy Estimation (RAPL)
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Inference Monitoring
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

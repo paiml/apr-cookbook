@@ -1,5 +1,6 @@
 //! # Recipe: Memory Profiler for Container Sizing
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Inference Monitoring
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

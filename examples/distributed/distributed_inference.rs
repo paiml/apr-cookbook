@@ -1,5 +1,6 @@
 //! Distributed Inference Example with repartir
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates multi-node inference using the repartir distributed computing library.
 //!
 //! # repartir Features

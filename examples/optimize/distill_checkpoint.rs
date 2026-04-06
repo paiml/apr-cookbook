@@ -18,6 +18,7 @@
 //! ## Learning Objective
 //! Distillation with checkpoint save/resume for fault tolerance.
 //! CLI equivalent: `apr distill` + save/resume workflow
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Run Command
 //! ```bash

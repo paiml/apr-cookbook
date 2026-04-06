@@ -1,5 +1,6 @@
 //! Distributed Model Sharding Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates partitioning large models across multiple workers for distributed
 //! inference. Covers layer-wise sharding, tensor-parallel sharding, pipeline
 //! parallel execution, fault tolerance with shard reassignment, and memory

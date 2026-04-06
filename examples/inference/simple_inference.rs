@@ -1,5 +1,6 @@
 //! Simple Model Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! The "front door" example: load model weights, run a forward pass,
 //! interpret the output. Demonstrates the minimal inference loop with
 //! no streaming, batching, or caching.

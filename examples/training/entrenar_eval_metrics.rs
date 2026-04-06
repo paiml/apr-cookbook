@@ -1,5 +1,6 @@
 //! Entrenar Model Evaluation Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates the entrenar eval module for computing classification metrics,
 //! confusion matrices, and multi-class metric reports.
 //!

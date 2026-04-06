@@ -1,5 +1,6 @@
 //! # Recipe: Model Version Management
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Semantic versioning, compatibility checking, dependency resolution,
 //! upgrade paths, and lifecycle management for model registries.
 //!

@@ -1,6 +1,7 @@
 //! # Layer Activation Snapshots for Visual Regression Testing
 //!
 //! CLI equivalent: `apr probar model.apr --layers all --compare baseline.json`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Exports per-layer activation statistics (histogram, mean, std, min, max,
 //! kurtosis) and compares two snapshots to detect regressions. Regression

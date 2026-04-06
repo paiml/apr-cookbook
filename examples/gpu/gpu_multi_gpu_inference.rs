@@ -1,5 +1,6 @@
 //! # Recipe: Multi-GPU Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Category**: GPU Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

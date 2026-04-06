@@ -1,6 +1,7 @@
 //! # APR Model Diff
 //!
 //! CLI equivalent: `apr diff model_a.apr model_b.apr --weights --values`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Compares two APR models structurally and numerically. Reports tensor-level
 //! weight differences including L2 distance, max absolute diff, mean absolute

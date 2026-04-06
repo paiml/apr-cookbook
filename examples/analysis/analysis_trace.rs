@@ -1,6 +1,7 @@
 //! # APR Model Activation Trace
 //!
 //! CLI equivalent: `apr trace model.apr --stats --anomalies`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs layer-by-layer statistical analysis of model tensor activations,
 //! computing per-layer statistics (mean, std, L2 norm, min, max, NaN/Inf counts)

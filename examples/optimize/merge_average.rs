@@ -1,6 +1,7 @@
 //! Average Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy average`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Uniform averaging is the simplest model merge strategy: for each parameter
 //! tensor, the merged value is the arithmetic mean across all input models.

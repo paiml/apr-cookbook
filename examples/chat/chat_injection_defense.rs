@@ -2,6 +2,7 @@
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: security hardening for `apr chat`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support), APR-SEC-003 (Input Sanitization)
 //!
 //! ## What this demonstrates

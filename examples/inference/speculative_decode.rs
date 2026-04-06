@@ -1,5 +1,6 @@
 //! Speculative Decoding Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates speculative decoding: a small "draft" model proposes K candidate
 //! tokens, then a larger "target" model verifies them in a single forward pass.
 //! Accepted tokens are emitted instantly; rejected tokens trigger resampling.

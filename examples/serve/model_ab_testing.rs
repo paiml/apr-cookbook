@@ -1,5 +1,6 @@
 //! Model A/B Testing Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates serving two model versions simultaneously with traffic
 //! splitting, collecting metrics for each variant, and computing
 //! statistical significance of performance differences.

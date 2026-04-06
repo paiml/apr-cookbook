@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method wanda`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates Wanda (Pruning by Weights and Activations): a calibration-based
 //! pruning method that considers both weight magnitude and input activation

@@ -1,6 +1,7 @@
 //! # Cross-Format Conversion via Rosetta
 //!
 //! **CLI equivalent:** `apr rosetta convert --from safetensors --to apr`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates cross-format conversion using an intermediate representation.
 //! The Rosetta module finds the optimal conversion path between any two

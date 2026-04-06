@@ -1,5 +1,6 @@
 //! Encrypted model bundling example.
 //! **CLI Equivalent**: `apr encrypt`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/aes256-gcm-decrypt-v1.yaml
 //!
 //! This example demonstrates loading encrypted APR models with password-based
 //! decryption using Argon2id key derivation and AES-256-GCM encryption.

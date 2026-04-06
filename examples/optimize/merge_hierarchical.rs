@@ -1,6 +1,7 @@
 //! Hierarchical Model Merge
 //!
 //! CLI equivalent: composed multi-model merge pipeline
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Hierarchical merging applies different strategies at different stages of
 //! a merge pipeline. Instead of merging all models at once, you group related

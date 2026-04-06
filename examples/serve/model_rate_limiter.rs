@@ -1,5 +1,6 @@
 //! Model Rate Limiter Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates rate limiting and request throttling strategies for ML model
 //! serving. Compares token bucket, sliding window, and per-client fairness
 //! approaches with request prioritization and throughput metrics.

@@ -1,6 +1,7 @@
 //! # APR Tensor Listing
 //!
 //! CLI equivalent: `apr tensors model.apr [--stats]`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Lists all tensors in a model file with shape, dtype, size, and optional
 //! statistics (mean, std, min, max, NaN count, sparsity). Prints a compact

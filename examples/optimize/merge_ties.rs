@@ -1,6 +1,7 @@
 //! TIES Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy ties --density 0.2`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! TIES (TrIm, Elect Sign & merge) is a task-arithmetic merge strategy that
 //! resolves interference between fine-tuned models by:

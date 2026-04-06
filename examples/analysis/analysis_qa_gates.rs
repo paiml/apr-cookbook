@@ -1,4 +1,5 @@
 //! # APR Model QA Gates — CLI equivalent: `apr qa model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Runs 6 falsifiable quality gates on an APR model for CI/CD pipelines.
 //!

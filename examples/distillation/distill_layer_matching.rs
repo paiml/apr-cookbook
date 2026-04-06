@@ -1,5 +1,6 @@
 //! # Recipe: Layer-wise Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

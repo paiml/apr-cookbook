@@ -1,5 +1,6 @@
 //! # Recipe: APR Model Diff CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! Compare two APR model files, showing differences in tensors, metadata,
 //! and architecture. Detect weight drift between model versions.
 //!

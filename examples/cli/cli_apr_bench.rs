@@ -1,5 +1,6 @@
 //! # Recipe: APR Benchmark CLI
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Category**: CLI Tools
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

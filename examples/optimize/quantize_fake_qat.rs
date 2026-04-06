@@ -1,6 +1,7 @@
 //! Quantization-Aware Training (QAT) with Fake Quantization
 //!
 //! CLI equivalent: QAT (quantization-aware training) simulation
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //!
 //! Fake quantization inserts quantize-then-dequantize operations into the
 //! forward pass so the model "sees" quantization noise during training. The

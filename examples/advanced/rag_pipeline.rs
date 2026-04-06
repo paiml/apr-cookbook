@@ -1,6 +1,7 @@
 //! Demo K: RAG Pipeline - chunking, embedding, vector search, context injection.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Format Variants
 //! ```bash

@@ -1,6 +1,7 @@
 //! # Tensor Slice Extraction and Decoding
 //!
 //! CLI equivalent: `apr tensors model.apr --slice weights --range 10..20`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Extract and decode a range of elements from tensor data. Demonstrates
 //! index-range slicing, row/column extraction, strided access, hex dumping,

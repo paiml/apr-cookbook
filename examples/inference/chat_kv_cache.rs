@@ -1,5 +1,6 @@
 //! Chat KV-Cache Management Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates key-value cache management for multi-turn conversational
 //! inference, where cached attention states from prior turns are reused
 //! to avoid redundant computation.

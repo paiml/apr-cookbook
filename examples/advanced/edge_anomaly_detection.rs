@@ -1,5 +1,6 @@
 //! # Demo L: Edge Anomaly Detection
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Micro-autoencoder for sensor anomaly detection on resource-constrained edge devices.
 //! Fixed-point arithmetic (Q8.8), <1KB model, <100us inference.
 //!

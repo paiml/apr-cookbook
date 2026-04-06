@@ -1,5 +1,6 @@
 //! # Recipe: APR Model TUI (Headless Simulation)
 //! **CLI Equivalent**: `apr tui`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //!
 //! Simulate a terminal UI for interactive model exploration, rendered in
 //! headless mode. Mirrors `apr tui` with 4 tabs: Overview, Tensors, Stats, Help.

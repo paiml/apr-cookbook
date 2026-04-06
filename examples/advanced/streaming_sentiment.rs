@@ -1,5 +1,6 @@
 //! # Demo N: Streaming Sentiment Analysis
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! High-throughput sentiment analysis on streaming text data.
 //! Demonstrates batching, async patterns, and backpressure handling.
 //!

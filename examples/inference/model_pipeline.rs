@@ -1,5 +1,6 @@
 //! Model Pipeline Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates chaining multiple models in a pipeline: an encoder
 //! produces embeddings, which feed into a classifier. Shows pipeline
 //! construction, intermediate inspection, and throughput measurement.

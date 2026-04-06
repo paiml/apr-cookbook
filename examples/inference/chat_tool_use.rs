@@ -1,5 +1,6 @@
 //! Chat Tool Use / Function Calling Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates a chat system with tool dispatch where the model can invoke
 //! registered functions (calculator, weather lookup, unit converter) during
 //! a multi-turn conversation and incorporate their results.

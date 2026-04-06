@@ -1,5 +1,6 @@
 //! # Recipe: Create APR KMeans Clustering Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

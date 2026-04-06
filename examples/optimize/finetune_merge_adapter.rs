@@ -1,6 +1,7 @@
 //! # Recipe: Adapter Merge and Unmerge Lifecycle
 //!
 //! **CLI Equivalent**: `apr finetune --merge --adapter`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! LoRA adapter lifecycle: create, train, merge for inference, unmerge for
 //! continued training, save adapter-only and merged models to APR v2.

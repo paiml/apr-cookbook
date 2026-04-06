@@ -1,6 +1,7 @@
 //! # APR Model Lint
 //!
 //! CLI equivalent: `apr lint model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Runs static quality checks on model metadata for best practices.
 //! Each lint rule checks a specific aspect of the model (compression,

@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr tune`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Plans LoRA/QLoRA fine-tuning configurations by computing optimal rank given
 //! a VRAM budget. Compares Full, LoRA, and QLoRA methods across model sizes

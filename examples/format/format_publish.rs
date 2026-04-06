@@ -1,6 +1,7 @@
 //! # Publish Model to HuggingFace
 //!
 //! **CLI equivalent:** `apr publish model.apr --repo org/model`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates the publishing workflow: preparing a model for upload
 //! to HuggingFace Hub. Generates a model card (README.md), validates

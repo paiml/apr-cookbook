@@ -1,5 +1,6 @@
 //! # Recipe: Bundle Ed25519 Signed Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

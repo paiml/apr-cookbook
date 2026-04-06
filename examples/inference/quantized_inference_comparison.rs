@@ -1,5 +1,6 @@
 //! Quantized Inference Comparison Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! Compares inference across precision levels: FP32, Q8, and Q4.
 //! Measures accuracy degradation, latency improvements, and memory
 //! savings for each quantization level.

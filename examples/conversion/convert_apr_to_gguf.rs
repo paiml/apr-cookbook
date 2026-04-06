@@ -1,5 +1,6 @@
 //! APR to GGUF format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting APR models to GGUF format
 //! for use with llama.cpp and other GGML-based inference engines.
 //!

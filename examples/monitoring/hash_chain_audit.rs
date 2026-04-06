@@ -1,5 +1,6 @@
 //! # Recipe: Hash Chain Audit Trail
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Inference Monitoring
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

@@ -1,6 +1,7 @@
 //! # Model Migration Pipeline
 //!
 //! **CLI equivalent:** `apr convert model.safetensors --to apr2 --lint --verify`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates a complete model migration pipeline composing four stages:
 //! import, lint, convert, and export. This is the workflow used when

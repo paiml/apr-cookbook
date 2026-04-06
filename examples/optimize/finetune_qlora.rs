@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune --method qlora`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates Quantized LoRA (QLoRA) fine-tuning, which combines 4-bit NF4
 //! quantization of the base model with LoRA adapters. This enables fine-tuning

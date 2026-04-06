@@ -1,6 +1,7 @@
 //! # APR Model Profiling (Roofline Analysis)
 //!
 //! CLI equivalent: `apr profile model.apr --granular`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs roofline model analysis to classify each layer as compute-bound
 //! or memory-bound. Produces per-layer profiling, an ASCII roofline chart,

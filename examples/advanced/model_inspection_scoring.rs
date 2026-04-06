@@ -1,5 +1,6 @@
 //! # Recipe: Model Inspection & Quality Scoring
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Advanced - Observability & Quality
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

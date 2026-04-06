@@ -1,5 +1,6 @@
 //! # Recipe: Memory-Mapped Lazy Model Loading
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/mmap-inference-v1.yaml
 //! **Category**: Inference Patterns
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

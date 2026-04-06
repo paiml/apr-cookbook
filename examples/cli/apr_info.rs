@@ -1,5 +1,6 @@
 //! Display APR model information.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! This CLI tool inspects `.apr` model files and displays their
 //! metadata, format version, and capabilities.
 //!

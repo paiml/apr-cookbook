@@ -1,5 +1,6 @@
 //! Gradient Accumulation Training Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates gradient accumulation for training with large effective batch
 //! sizes while keeping memory usage bounded. Micro-batches are processed
 //! sequentially, gradients are summed, and a single optimizer step is taken

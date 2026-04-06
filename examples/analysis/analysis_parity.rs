@@ -1,6 +1,7 @@
 //! # CPU vs GPU Parity Check — Statistical Process Control
 //!
 //! CLI equivalent: `apr parity model.apr --device cpu,cuda`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Compares CPU and GPU logit outputs using SPC metrics: cosine similarity,
 //! KL divergence, RMSE, max absolute error, and sigma level. Classifies each

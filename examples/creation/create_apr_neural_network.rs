@@ -1,5 +1,6 @@
 //! # Recipe: Create APR Neural Network Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

@@ -1,5 +1,6 @@
 //! # Recipe: Model Warmup Strategies
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

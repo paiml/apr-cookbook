@@ -1,5 +1,6 @@
 //! Learning Rate Schedule Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates common learning rate scheduling strategies for ML training:
 //! constant, step decay, exponential decay, cosine annealing, warmup+cosine,
 //! one-cycle, and polynomial decay. Compares convergence behavior across

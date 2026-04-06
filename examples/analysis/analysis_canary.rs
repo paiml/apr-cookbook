@@ -1,5 +1,6 @@
 //! # Canary Tokens for Regression Testing
 //! **CLI Equivalent**: `apr canary`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Embeds test vectors in a model and verifies outputs match expected values,
 //! detecting model drift and weight corruption.

@@ -1,6 +1,7 @@
 //! # Round-Trip Verification
 //!
 //! **CLI equivalent:** `apr rosetta verify model.apr --roundtrip safetensors`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates round-trip verification: convert APR to another format
 //! and back, then compare the original and reconstructed weights to

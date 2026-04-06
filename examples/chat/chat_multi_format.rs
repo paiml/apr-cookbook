@@ -2,6 +2,7 @@
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: `apr chat` (auto-detect format from model name)
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! **APR Spec**: APR-021 (Chat Template Support)
 //!
 //! ## What this demonstrates

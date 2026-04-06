@@ -1,5 +1,6 @@
 //! Ring-Allreduce for Distributed Gradient Aggregation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates the ring-allreduce algorithm used in distributed training to
 //! aggregate gradients across worker nodes with optimal bandwidth utilization.
 //!

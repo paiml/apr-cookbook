@@ -1,5 +1,6 @@
 //! Inference Cost Tracking and Resource Monitoring
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Per-request cost accounting, budget alerting, and cost trend analysis
 //! for production inference workloads. Zero external dependencies beyond `std`.
 //!

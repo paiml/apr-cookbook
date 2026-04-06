@@ -1,6 +1,7 @@
 //! SLERP Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy slerp`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Spherical Linear Interpolation (SLERP) interpolates between two models
 //! along a geodesic on the hypersphere rather than a straight line. This

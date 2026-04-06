@@ -1,5 +1,6 @@
 //! # Recipe: Compression Benchmark for .apr Model Payloads
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: Acceleration - Compression
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

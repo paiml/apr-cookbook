@@ -1,5 +1,6 @@
 //! # Architecture Visualization as ASCII Tree
 //! **CLI Equivalent**: `apr tree`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Renders model tensor hierarchy as an ASCII tree with parameter counts,
 //! grouping tensors by their dotted name paths.

@@ -1,5 +1,6 @@
 //! # Recipe: Multilingual Speech Processing
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/whisper-wer-v1.yaml
 //! **Category**: Speech Recognition
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

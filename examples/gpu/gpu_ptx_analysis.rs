@@ -2,6 +2,7 @@
 //!
 //! **Category**: GPU Acceleration
 //! **CLI Equivalent**: `apr ptx`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

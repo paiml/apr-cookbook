@@ -1,5 +1,6 @@
 //! # Recipe: Edge Function Deployment
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

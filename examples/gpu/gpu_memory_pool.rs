@@ -1,5 +1,6 @@
 //! GPU Memory Pool Allocation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! Demonstrates memory pooling with slab allocation, fragmentation analysis,
 //! multi-tenant budgets, and watermark tracking for inference workloads.
 //!

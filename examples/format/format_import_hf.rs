@@ -1,6 +1,7 @@
 //! # Import Model from HuggingFace
 //!
 //! **CLI equivalent:** `apr import hf://org/repo`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates the complete workflow for importing a model from
 //! HuggingFace Hub into the APR v2 format. Parses HF URIs, simulates

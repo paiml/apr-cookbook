@@ -1,5 +1,6 @@
 //! # Recipe: Model Fingerprinting & Tamper Detection
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Analysis
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

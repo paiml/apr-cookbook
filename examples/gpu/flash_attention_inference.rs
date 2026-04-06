@@ -1,5 +1,6 @@
 //! FlashAttention GPU Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/flash-attention-v1.yaml
 //! Demonstrates FlashAttention-style attention computation with automatic
 //! GPU/SIMD/Scalar fallback chain. Part of APR-024 specification.
 //!

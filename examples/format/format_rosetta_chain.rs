@@ -1,6 +1,7 @@
 //! # Multi-Step Conversion Chain
 //!
 //! **CLI equivalent:** `apr rosetta chain model.safetensors --through apr,gguf`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates chaining multiple format conversions in sequence.
 //! Given a source file and a list of target formats, the chain converter

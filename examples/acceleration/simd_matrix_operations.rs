@@ -1,5 +1,6 @@
 //! SIMD-accelerated matrix operations demonstration.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! This example shows how trueno provides automatic SIMD acceleration
 //! with graceful fallback to scalar operations.
 //!

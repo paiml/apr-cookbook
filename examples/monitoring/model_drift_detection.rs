@@ -1,5 +1,6 @@
 //! Model Drift Detection for Production ML Monitoring
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates PSI, KS statistic, confidence monitoring, and accuracy
 //! degradation detection for production ML systems using only `std`.
 //!

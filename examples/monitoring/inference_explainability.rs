@@ -2,6 +2,7 @@
 //!
 //! **Category**: Inference Monitoring
 //! **CLI Equivalent**: `apr monitor`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: inference-monitoring feature (aprender)

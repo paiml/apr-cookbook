@@ -1,6 +1,7 @@
 //! # Low-Level Model File Debug Inspection
 //!
 //! CLI equivalent: `apr debug model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Parses raw APR model bytes to extract header fields: magic bytes, version,
 //! flags (compressed, signed, encrypted), dtype, tensor count. Detects format

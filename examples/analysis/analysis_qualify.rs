@@ -1,4 +1,5 @@
 //! # APR Model Qualification — CLI equivalent: `apr qualify model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Runs 11 diagnostic gates (smoke tests) to qualify a model for deployment.
 //! Each gate produces a Pass/Fail/Skip result with timing. The final report

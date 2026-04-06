@@ -18,6 +18,7 @@
 //! ## Learning Objective
 //! Multi-teacher ensemble distillation with uniform and weighted ensembles.
 //! CLI equivalent: `apr distill --strategy ensemble`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Run Command
 //! ```bash

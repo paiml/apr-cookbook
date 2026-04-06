@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method magnitude --target 0.5`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates magnitude-based unstructured pruning: zeroing out the
 //! smallest-magnitude weights to achieve a target sparsity. This is the

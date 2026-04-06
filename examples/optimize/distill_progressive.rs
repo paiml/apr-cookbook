@@ -18,6 +18,7 @@
 //! ## Learning Objective
 //! Progressive layer-wise distillation with hidden state matching.
 //! CLI equivalent: `apr distill --strategy progressive`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Run Command
 //! ```bash

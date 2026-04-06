@@ -1,5 +1,6 @@
 //! Latency Percentile Tracking and SLO Monitoring for Production ML Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates histogram-based latency tracking with percentile computation,
 //! SLO compliance monitoring, rolling window analysis, per-variant breakdown,
 //! and ASCII histogram visualization -- all with zero external dependencies.

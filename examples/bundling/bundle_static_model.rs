@@ -1,5 +1,6 @@
 //! Statically embedded model inference.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! This example demonstrates how to embed an ML model directly into
 //! a Rust binary using `include_bytes!()`, enabling zero-dependency
 //! deployment.

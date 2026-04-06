@@ -1,5 +1,6 @@
 //! Hyperparameter Sweep Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates systematic hyperparameter optimization: grid search,
 //! random search, and early stopping. Trains a simple model across
 //! parameter combinations and reports the best configuration.

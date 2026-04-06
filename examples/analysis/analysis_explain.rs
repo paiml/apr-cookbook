@@ -1,5 +1,6 @@
 //! # APR Error Code Explanation System
 //! **CLI Equivalent**: `apr explain`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Provides detailed explanations, causes, and solutions for APR error codes,
 //! similar to `rustc --explain`.

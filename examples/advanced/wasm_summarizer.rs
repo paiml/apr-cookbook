@@ -1,5 +1,6 @@
 //! # Demo G: WASM Document Summarizer
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Client-side document summarization using extractive methods.
 //! Designed for WASM deployment with minimal dependencies.
 //!

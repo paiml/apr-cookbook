@@ -1,5 +1,6 @@
 //! # Recipe: Iterative Debug-Fix Loop
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Advanced - Model Debugging & Repair
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

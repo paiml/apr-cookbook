@@ -1,5 +1,6 @@
 //! # Tensor Transformation Flow Visualization
 //! **CLI Equivalent**: `apr flow`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Renders a model's tensor transformation flow as an ASCII pipeline diagram,
 //! showing data path through architecture components with parameter counts.

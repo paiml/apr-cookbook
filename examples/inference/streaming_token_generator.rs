@@ -1,5 +1,6 @@
 //! Streaming Token Generator Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates autoregressive token generation with streaming output,
 //! stop sequences, and time-to-first-token (TTFT) measurement.
 //!

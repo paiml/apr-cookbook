@@ -1,5 +1,6 @@
 //! Benchmark APR model inference performance.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! This CLI tool measures inference latency and throughput for
 //! APR models, helping identify performance characteristics.
 //!

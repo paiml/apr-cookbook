@@ -1,6 +1,7 @@
 //! Recipe: Hierarchical Cache Performance Benchmark
 //! Category: Advanced | Isolation: Full | Idempotent: Yes
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Format Variants
 //! ```bash

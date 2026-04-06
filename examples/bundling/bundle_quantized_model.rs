@@ -1,5 +1,6 @@
 //! Quantized model loading demonstration.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! This example shows how to work with quantized models (Q4_0, Q8_0)
 //! for reduced size and faster inference on edge devices.
 //!

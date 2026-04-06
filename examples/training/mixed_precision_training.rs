@@ -1,5 +1,6 @@
 //! Mixed-Precision Training Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates training with different numerical precisions:
 //! FP32 (baseline), simulated FP16 with loss scaling, and simulated BF16.
 //! Shows accuracy vs throughput tradeoffs for each precision level.

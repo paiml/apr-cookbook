@@ -1,5 +1,6 @@
 //! Autograd Custom Operations Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates building custom differentiable operations using entrenar's
 //! autograd engine. Custom ops implement the `BackwardOp` trait to define
 //! how gradients flow backward through the computational graph.

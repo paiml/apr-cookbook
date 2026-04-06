@@ -1,6 +1,7 @@
 //! # APR Model Evaluation — Perplexity and Cross-Entropy
 //!
 //! CLI equivalent: `apr eval model.apr --dataset test.jsonl`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Evaluates an APR language model by computing perplexity and cross-entropy
 //! on synthetic test data. Uses the log-sum-exp trick for numerical stability.

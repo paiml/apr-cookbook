@@ -1,5 +1,6 @@
 //! Dynamic Batch Inference with SLA Deadlines
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates adaptive batching that respects per-request SLA deadlines
 //! while maximizing throughput. Requests are classified into SLA tiers
 //! (real-time, interactive, batch), scheduled via a priority queue, and

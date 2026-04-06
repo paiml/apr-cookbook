@@ -1,5 +1,6 @@
 //! # Recipe: Memory-Mapped Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: Acceleration - Memory Optimization
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

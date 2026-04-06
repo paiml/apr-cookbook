@@ -2,6 +2,7 @@
 //!
 //! **Category**: CLI Tools
 //! **CLI Equivalent**: `apr ptx-map`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)

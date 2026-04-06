@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method structured`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates structured pruning: removing entire neurons or channels
 //! rather than individual weights. Structured pruning produces genuinely

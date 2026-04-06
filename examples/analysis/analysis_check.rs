@@ -1,6 +1,7 @@
 //! # APR Model Pre-Flight Check
 //!
 //! CLI equivalent: `apr check model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Runs a 10-stage sequential pre-flight health check pipeline on an APR
 //! model file. Each stage produces a pass/fail/skip result with detail.

@@ -1,5 +1,6 @@
 //! Unified Model Inference Dispatch (`apr run`)
 //! **CLI Equivalent**: `apr run`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Mirrors what `apr run model.apr --prompt "hello" --max-tokens 50` does:
 //! tokenize input, run a tiny 2-layer transformer forward pass, sample tokens

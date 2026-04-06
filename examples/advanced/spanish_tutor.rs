@@ -1,6 +1,7 @@
 //! Demo P: Spanish Language Tutor - translation with grammar explanations.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Format Variants
 //! ```bash

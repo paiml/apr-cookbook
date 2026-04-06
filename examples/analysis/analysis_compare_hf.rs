@@ -1,5 +1,6 @@
 //! # APR vs HuggingFace SafeTensors Comparison
 //! **CLI Equivalent**: `apr compare-hf`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! CLI equivalent: `apr compare-hf model.apr --repo my-org/my-model --threshold 1e-5`
 //!

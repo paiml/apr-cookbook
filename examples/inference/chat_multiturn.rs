@@ -1,5 +1,6 @@
 //! Multi-Turn Chat Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates a chat-style inference loop with conversation history,
 //! system prompts, turn formatting, and context window management.
 //!

@@ -1,5 +1,6 @@
 //! # Recipe: Register APR Model in Registry
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

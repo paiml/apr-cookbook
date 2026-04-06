@@ -1,5 +1,6 @@
 //! # Recipe: Bundle APR for Lambda Deployment
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Binary Bundling
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

@@ -1,5 +1,6 @@
 //! Model Selection Router
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Intelligent request routing to multiple model variants based on latency,
 //! accuracy, and cost tradeoffs. Supports round-robin, lowest-latency,
 //! cost-aware, accuracy-weighted, and adaptive routing with shadow traffic.

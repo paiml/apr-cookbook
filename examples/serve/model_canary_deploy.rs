@@ -1,5 +1,6 @@
 //! Model Canary Deployment Example
 //! **CLI Equivalent**: `apr showcase`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates progressive canary deployment for ML model serving with
 //! gradual traffic shifting, health checks at each stage, and automatic

@@ -1,6 +1,7 @@
 //! # APR Model Benchmarking
 //!
 //! CLI equivalent: `apr bench model.apr --batch-sizes 1,4,16,64`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Throughput benchmarking for APR model inference across multiple batch sizes.
 //! Measures latency, throughput, and memory scaling to identify optimal

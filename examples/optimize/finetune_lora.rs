@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune --method lora`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates Low-Rank Adaptation (LoRA) fine-tuning of a pretrained model.
 //! LoRA freezes the original weights and injects small trainable rank-decomposition

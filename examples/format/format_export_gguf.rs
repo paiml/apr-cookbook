@@ -1,6 +1,7 @@
 //! # Export APR Model to GGUF Format
 //!
 //! **CLI equivalent:** `apr export model.apr --format gguf`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates exporting an APR v2 model to the GGUF (GPT-Generated
 //! Unified Format) format. GGUF is used by llama.cpp and friends for

@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune && apr prune && apr distill && apr merge && apr quantize`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates chaining: LoRA fine-tuning → magnitude pruning → knowledge
 //! distillation → TIES model merging → 4-bit quantization.

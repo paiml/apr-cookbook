@@ -1,5 +1,6 @@
 //! # Recipe: Batch Model Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

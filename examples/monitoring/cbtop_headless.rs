@@ -1,6 +1,7 @@
 //! # Headless Performance Monitoring Report (cbtop)
 //!
 //! **CLI equivalent:** `apr cbtop --headless --json`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates headless inference monitoring: per-brick (layer) timing
 //! collection, hardware inventory, throughput computation, latency percentiles,

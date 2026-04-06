@@ -1,6 +1,7 @@
 //! 4-Bit Quantization
 //!
 //! CLI equivalent: `apr quantize --scheme int4`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //!
 //! Post-training quantization maps floating-point weights to lower bit-width
 //! integers using affine quantization: each block of weights shares a scale

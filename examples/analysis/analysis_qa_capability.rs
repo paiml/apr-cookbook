@@ -1,4 +1,5 @@
 //! # APR QA Capability Check — CLI equivalent: `apr qa_capability model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Gate 0 pre-flight check: validates that hardware supports a model's required
 //! operations before loading weights. Prevents wasted time loading 70B models

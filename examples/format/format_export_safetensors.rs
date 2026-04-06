@@ -1,6 +1,7 @@
 //! # Export APR Model to SafeTensors Format
 //!
 //! **CLI equivalent:** `apr export model.apr --format safetensors`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates exporting an APR v2 model to the SafeTensors format.
 //! SafeTensors uses a JSON header followed by raw tensor data, with

@@ -1,5 +1,6 @@
 //! SafeTensors to APR format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting HuggingFace SafeTensors
 //! models to the native APR format.
 //!

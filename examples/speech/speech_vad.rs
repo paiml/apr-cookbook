@@ -1,5 +1,6 @@
 //! Voice Activity Detection (VAD) Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/whisper-wer-v1.yaml
 //! Demonstrates frame-based voice activity detection on a synthetic audio stream
 //! using energy, zero-crossing rate, and spectral centroid features.
 //!

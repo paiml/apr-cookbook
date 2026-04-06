@@ -1,5 +1,6 @@
 //! # Recipe: Vectorized Inference
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

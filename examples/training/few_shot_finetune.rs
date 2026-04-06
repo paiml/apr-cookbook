@@ -1,5 +1,6 @@
 //! Few-Shot Fine-Tuning Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates fine-tuning a pre-trained model with very few labeled examples
 //! using prototypical networks and metric learning. Compares few-shot approaches:
 //! nearest-centroid, cosine-similarity, and Mahalanobis distance.

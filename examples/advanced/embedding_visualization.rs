@@ -1,5 +1,6 @@
 //! Large-Scale Embedding Visualization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! PCA, t-SNE approximation, K-Means and DBSCAN clustering for embeddings.
 //!
 //! ```bash

@@ -1,6 +1,7 @@
 //! Utility to generate `assets/demo_model.apr` — a small, deterministic APR v1
 //! model file suitable for use in tests, documentation, and bundled-model examples.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! ## Run Command
 //! ```bash
 //! cargo run --example create_demo_model

@@ -1,5 +1,6 @@
 //! Data Preprocessing Pipeline Example
 //! **CLI Equivalent**: `apr data`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates common data preprocessing steps for ML training:
 //! normalization, standardization, train/test splitting, data augmentation,

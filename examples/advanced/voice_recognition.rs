@@ -1,5 +1,6 @@
 //! # Demo H: Voice Recognition Pipeline
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Simulates a speech-to-text pipeline with mel spectrogram processing
 //! and CTC-style decoding. Demonstrates audio preprocessing concepts.
 //!

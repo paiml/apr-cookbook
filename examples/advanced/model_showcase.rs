@@ -1,5 +1,6 @@
 //! # Recipe: Model Showcase Pipeline
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Advanced - End-to-End Workflow
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed

@@ -1,5 +1,6 @@
 //! Autograd Backpropagation Visualization
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Visualizes gradient flow through a multi-layer neural network.
 //! Detects vanishing/exploding gradients, compares ReLU vs sigmoid,
 //! and demonstrates skip connections and batch norm mitigations.

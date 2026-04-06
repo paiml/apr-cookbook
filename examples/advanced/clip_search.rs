@@ -1,6 +1,7 @@
 //! Demo O: Multi-Modal CLIP Search - text-to-image and image-to-text semantic search.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //!
 //! ## Format Variants
 //! ```bash

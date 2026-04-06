@@ -1,5 +1,6 @@
 //! # Demo I: Handwriting Recognition (MNIST)
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! LeNet-5 CNN for digit recognition: 28x28 grayscale -> 10 classes.
 //! Image preprocessing, augmentation, convolutional inference, and evaluation.
 //!

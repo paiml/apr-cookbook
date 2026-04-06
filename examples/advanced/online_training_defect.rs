@@ -1,5 +1,6 @@
 //! Continuous Online Training (Defect Prediction)
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Incremental SGD and Passive-Aggressive algorithms for predicting software
 //! defects from execution traces, with concept drift detection.
 //!

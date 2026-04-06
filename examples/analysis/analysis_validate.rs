@@ -1,6 +1,7 @@
 //! # APR Model Validation
 //!
 //! CLI equivalent: `apr validate model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs a comprehensive 100-point model validation and integrity check.
 //! Each check contributes to a pass/fail/warn score, giving a clear picture

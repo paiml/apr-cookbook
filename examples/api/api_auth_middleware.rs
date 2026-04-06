@@ -1,5 +1,6 @@
 //! # Recipe: API Authentication and Authorization Middleware
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! API authentication and authorization middleware for model serving:
 //! API key validation, token-based auth, request signing (HMAC),
 //! role-based access control, rate limiting, and audit logging.

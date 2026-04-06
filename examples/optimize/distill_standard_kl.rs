@@ -18,6 +18,7 @@
 //! ## Learning Objective
 //! Standard KL divergence distillation with temperature scaling.
 //! CLI equivalent: `apr distill --strategy standard`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Run Command
 //! ```bash

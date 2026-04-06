@@ -1,5 +1,6 @@
 //! HTTP Model Server Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates model serving patterns: request parsing, batched inference,
 //! health checks, request routing, and metrics collection. Simulates an
 //! HTTP server without external dependencies.

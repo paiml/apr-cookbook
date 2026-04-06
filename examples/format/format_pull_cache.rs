@@ -1,6 +1,7 @@
 //! # Download and Cache Management
 //!
 //! **CLI equivalent:** `apr pull hf://org/model --cache ~/.cache/apr`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates a local cache manager for downloaded models. Handles
 //! cache misses (simulated download), cache hits (instant return),

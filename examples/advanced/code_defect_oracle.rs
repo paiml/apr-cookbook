@@ -1,5 +1,6 @@
 //! # Demo D: Code Defect Oracle
 //! **CLI Equivalent**: `apr code`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Browser-ready code analysis tool detecting defects, security issues, and anti-patterns.
 //! Multi-language support (Rust, Python, JavaScript, Go) with 18 defect categories,

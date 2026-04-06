@@ -1,5 +1,6 @@
 //! # Model Family Oracle
 //! **CLI Equivalent**: `apr oracle`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Identifies model architecture family from weight tensor names and shapes.
 //!

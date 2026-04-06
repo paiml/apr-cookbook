@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune` with various schedules
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates gradual pruning schedules: linear, cubic, and cosine.
 //! Instead of pruning all at once, gradual pruning incrementally increases

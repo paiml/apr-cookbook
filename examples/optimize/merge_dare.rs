@@ -1,6 +1,7 @@
 //! DARE Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy dare --drop-prob 0.5`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! DARE (Drop And REscale) randomly drops delta weights (differences from the
 //! base model) and rescales the surviving weights to compensate. This reduces
