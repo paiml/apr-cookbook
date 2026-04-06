@@ -8,6 +8,9 @@
 //! - **Jidoka**: Automatic silence/noise detection
 //! - **Heijunka**: Consistent latency regardless of audio length
 //! - **Genchi Genbutsu**: Process real audio patterns
+//!
+//! ## References
+//! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 
 use std::f32::consts::PI;
 

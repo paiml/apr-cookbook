@@ -21,6 +21,9 @@
 //! - Protecting proprietary models in distribution
 //! - Compliance with data protection regulations
 //! - Secure model deployment in untrusted environments
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::Result;
 #[cfg(feature = "encryption")]

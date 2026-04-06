@@ -8,6 +8,9 @@
 //! - **Heijunka**: Consistent processing time per pixel
 //! - **Jidoka**: Quality detection for style strength
 //! - **Kaizen**: Iterative refinement of style application
+//!
+//! ## References
+//! - Gatys, L. et al. (2016). *Image Style Transfer Using Convolutional Neural Networks*. CVPR. DOI: 10.1109/CVPR.2016.265
 
 /// Image dimensions
 pub const MAX_IMAGE_SIZE: usize = 512;

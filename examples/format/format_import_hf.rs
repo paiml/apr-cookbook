@@ -12,6 +12,9 @@
 //! 2. Metadata extraction — simulate fetching model config and tokenizer info
 //! 3. Weight conversion — transform downloaded bytes into APR tensor layout
 //! 4. APR bundle creation — produce a valid APR v2 bundle with all metadata
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

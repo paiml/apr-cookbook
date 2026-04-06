@@ -4,6 +4,9 @@
 //! upgrade paths, and lifecycle management for model registries.
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Proptests (50+ cases).
+//!
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

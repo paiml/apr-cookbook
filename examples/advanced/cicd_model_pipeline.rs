@@ -21,6 +21,9 @@
 //! - **Jidoka** (Quality built-in): Fail-fast pipeline stops on first defect
 //! - **Poka-yoke** (Mistake-proofing): NaN scan, size budget, accuracy threshold
 //! - **Heijunka** (Level scheduling): Deterministic stages with wall-clock timing
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

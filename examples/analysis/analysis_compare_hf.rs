@@ -7,6 +7,9 @@
 //! HuggingFace SafeTensors weights. Maps HF naming conventions to APR naming,
 //! then computes per-tensor metrics: max absolute error, mean absolute error,
 //! cosine similarity, and L2 distance. Reports PASS/FAIL per tensor and overall.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

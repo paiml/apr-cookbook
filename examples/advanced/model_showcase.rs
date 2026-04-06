@@ -19,6 +19,9 @@
 //! - **Genchi Genbutsu** (Go and see): Walk the full model lifecycle
 //! - **Jidoka** (Quality built-in): Validation at every step
 //! - **Heijunka** (Level scheduling): Deterministic pipeline stages
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

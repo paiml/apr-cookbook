@@ -37,6 +37,9 @@
 //! - **Heijunka** (Level scheduling): Pipeline keeps all stages busy
 //! - **Muda** (Waste elimination): Minimise idle bubble cycles
 //! - **Jidoka** (Quality built-in): Deterministic schedule, verifiable metrics
+//!
+//! ## References
+//! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

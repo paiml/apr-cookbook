@@ -11,6 +11,9 @@
 //! 2. Header generation — produce SafeTensors JSON header with tensor metadata
 //! 3. Tensor data layout — compute contiguous offsets for each tensor
 //! 4. Format comparison — compare APR vs SafeTensors sizes and features
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

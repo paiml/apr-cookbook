@@ -19,6 +19,9 @@
 //! - Combining multiple fine-tuned checkpoints from the same base
 //! - Ensembling models trained on different data splits
 //! - Quick baseline before trying more sophisticated merge strategies
+//!
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

@@ -25,6 +25,9 @@
 //! cargo run --example cli_apr_convert
 //! cargo run --example cli_apr_convert -- --demo
 //! ```
+//!
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use aprender::demo::reliable::AdaptiveOutput;

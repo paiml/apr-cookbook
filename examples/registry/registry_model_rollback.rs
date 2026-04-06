@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example registry_model_rollback
 //! ```
+//!
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

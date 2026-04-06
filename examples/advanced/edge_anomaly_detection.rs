@@ -2,6 +2,9 @@
 //!
 //! Micro-autoencoder for sensor anomaly detection on resource-constrained edge devices.
 //! Fixed-point arithmetic (Q8.8), <1KB model, <100us inference.
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use std::fmt;
 use std::mem::size_of;

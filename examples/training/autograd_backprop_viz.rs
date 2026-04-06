@@ -7,6 +7,9 @@
 //! ```bash
 //! cargo run --example autograd_backprop_viz
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

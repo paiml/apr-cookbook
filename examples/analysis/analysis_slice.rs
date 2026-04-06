@@ -11,6 +11,9 @@
 //! - Raw byte extraction and hex representation
 //! - f32 to f16 conversion with precision loss measurement
 //! - Per-slice descriptive statistics (mean, min, max, sum)
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

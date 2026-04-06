@@ -22,6 +22,9 @@
 //! - When PTQ accuracy loss is unacceptable
 //! - For INT4/INT8 deployment where every bit of accuracy matters
 //! - When you can afford extra training compute for better quantized models
+//!
+//! ## References
+//! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

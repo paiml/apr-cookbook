@@ -17,6 +17,9 @@
 //! 4. [x] No temp files leaked
 //! 5. [x] Clippy clean
 //! 6. [x] No `unwrap()` in logic
+//!
+//! ## References
+//! - Frantar, E. & Alistarh, D. (2023). *SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot*. ICML. arXiv:2301.00774
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

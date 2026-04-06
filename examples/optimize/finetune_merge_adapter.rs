@@ -8,6 +8,9 @@
 //! ```bash
 //! cargo run --example finetune_merge_adapter
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

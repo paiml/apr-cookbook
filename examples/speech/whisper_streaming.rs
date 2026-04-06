@@ -29,6 +29,9 @@
 //! ```bash
 //! cargo run --example whisper_streaming
 //! ```
+//!
+//! ## References
+//! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 
 use apr_cookbook::prelude::*;
 use std::collections::VecDeque;

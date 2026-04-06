@@ -34,6 +34,9 @@
 //! - **Genchi Genbutsu** (Go and see): Measure actual acoustic features, not assumptions
 //! - **Jidoka** (Quality built-in): Confidence thresholds gate transcription routing
 //! - **Heijunka** (Level production): Uniform processing pipeline for all languages
+//!
+//! ## References
+//! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

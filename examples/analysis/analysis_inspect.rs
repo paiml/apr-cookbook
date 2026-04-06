@@ -5,6 +5,9 @@
 //! Inspects an APR model file to extract metadata, architecture details,
 //! tensor listing, and size breakdown. Essential for understanding model
 //! structure before inference or conversion.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

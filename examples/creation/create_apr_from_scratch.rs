@@ -32,6 +32,9 @@
 //! Saved to: /tmp/.../custom_model.apr (2360448 bytes)
 //! Roundtrip verification: PASSED
 //! ```
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

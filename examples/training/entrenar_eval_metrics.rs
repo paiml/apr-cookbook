@@ -14,6 +14,9 @@
 //! ```bash
 //! cargo run --example entrenar_eval_metrics
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use entrenar::eval::classification::{
     classification_report, confusion_matrix, Average, MultiClassMetrics,

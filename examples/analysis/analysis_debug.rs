@@ -12,6 +12,9 @@
 //! - Format detection from magic bytes (APR2, GGUF, SafeTensors)
 //! - Annotated hex dump of the first 64 bytes
 //! - Graceful handling of corrupted files
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

@@ -11,6 +11,9 @@
 //! 2. Cache hit — second request returns cached path instantly
 //! 3. LRU eviction — remove oldest entries when cache is full
 //! 4. Cache stats — summary of cache contents and utilization
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};

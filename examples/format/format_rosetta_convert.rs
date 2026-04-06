@@ -11,6 +11,9 @@
 //! 2. Path finding — discover direct and transitive conversion paths
 //! 3. Conversion execution — apply each step in the conversion path
 //! 4. Verification — validate the output matches expectations
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

@@ -1,5 +1,8 @@
 //! Recipe: Hierarchical Cache Performance Benchmark
 //! Category: Advanced | Isolation: Full | Idempotent: Yes
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

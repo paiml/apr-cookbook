@@ -5,6 +5,9 @@
 //! ```bash
 //! cargo run --example embedding_visualization
 //! ```
+//!
+//! ## References
+//! - McInnes, L. et al. (2018). *UMAP: Uniform Manifold Approximation and Projection*. arXiv:1802.03426
 
 use std::collections::HashMap;
 

@@ -23,6 +23,9 @@
 //! ```bash
 //! cargo run --example distill_standard_kl
 //! ```
+//!
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use entrenar::distill::DistillationLoss;

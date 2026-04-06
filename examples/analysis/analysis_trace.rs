@@ -6,6 +6,9 @@
 //! computing per-layer statistics (mean, std, L2 norm, min, max, NaN/Inf counts)
 //! and detecting anomalies such as high-variance spikes, dead layers, NaN/Inf
 //! presence, and gradient explosion.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

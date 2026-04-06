@@ -19,6 +19,9 @@
 //! ```bash
 //! cargo run --example few_shot_finetune
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

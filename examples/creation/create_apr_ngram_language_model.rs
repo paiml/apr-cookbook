@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example create_apr_ngram_language_model
 //! ```
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

@@ -11,6 +11,9 @@
 //! 2. Forward conversion — APR → target format
 //! 3. Reverse conversion — target format → APR
 //! 4. Diff analysis — compare original vs reconstructed byte-by-byte
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::fmt;

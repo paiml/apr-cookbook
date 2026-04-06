@@ -20,6 +20,9 @@
 //! - Merging 4+ models with natural groupings (e.g., STEM + humanities)
 //! - When flat merge of all models causes too much interference
 //! - When you want fine-grained control over how capabilities combine
+//!
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

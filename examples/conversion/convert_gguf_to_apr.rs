@@ -21,6 +21,9 @@
 //! - WASM deployment
 //! - Integration with trueno SIMD
 //! - Encryption and signing
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,

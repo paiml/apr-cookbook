@@ -24,6 +24,9 @@
 //! - Deploying models on edge devices with limited memory
 //! - Reducing model size for mobile / WASM inference
 //! - Trading small accuracy loss for 4-8x memory savings
+//!
+//! ## References
+//! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

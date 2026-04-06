@@ -13,6 +13,9 @@
 //! 3. Convert — transform from source format to APR v2
 //! 4. Verify — round-trip verification with cosine similarity
 //! 5. Export — write final APR bundle with checksum and manifest
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

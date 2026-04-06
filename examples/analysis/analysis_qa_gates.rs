@@ -1,6 +1,9 @@
 //! # APR Model QA Gates — CLI equivalent: `apr qa model.apr`
 //!
 //! Runs 6 falsifiable quality gates on an APR model for CI/CD pipelines.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::time::Instant;

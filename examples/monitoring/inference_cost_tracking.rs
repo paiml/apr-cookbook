@@ -4,6 +4,9 @@
 //! for production inference workloads. Zero external dependencies beyond `std`.
 //!
 //! ## QA: Build, test, clippy, fmt PASS. IIUR compliant.
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use std::collections::hash_map::DefaultHasher;
 use std::fmt;

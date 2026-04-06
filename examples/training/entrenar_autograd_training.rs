@@ -37,6 +37,9 @@
 //! - **Complexity**: Intermediate
 //! - **Dependencies**: entrenar 0.3+, aprender 0.21+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

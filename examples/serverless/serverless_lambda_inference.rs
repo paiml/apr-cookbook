@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example serverless_lambda_inference
 //! ```
+//!
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

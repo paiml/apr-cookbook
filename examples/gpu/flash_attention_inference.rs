@@ -31,6 +31,9 @@
 //! # Falsification Claim (F6)
 //!
 //! FlashAttention achieves ≥2x speedup over naive attention for seq_len ≥ 512.
+//!
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use std::time::Instant;
 

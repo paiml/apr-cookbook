@@ -20,6 +20,9 @@
 //! - Merging two models where you want smooth interpolation
 //! - Preserving weight magnitude during merge
 //! - When linear averaging causes quality degradation
+//!
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

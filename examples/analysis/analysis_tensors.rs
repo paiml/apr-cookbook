@@ -6,6 +6,9 @@
 //! statistics (mean, std, min, max, NaN count, sparsity). Prints a compact
 //! table sorted by size (largest first) with a total summary and dtype
 //! breakdown.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

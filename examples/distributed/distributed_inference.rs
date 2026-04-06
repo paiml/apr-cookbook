@@ -36,6 +36,9 @@
 //! - **Complexity**: Advanced
 //! - **Dependencies**: repartir 1.1+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 
 use std::time::Instant;
 

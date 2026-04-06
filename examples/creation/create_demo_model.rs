@@ -5,6 +5,9 @@
 //! ```bash
 //! cargo run --example create_demo_model
 //! ```
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::bundle::ModelBundle;
 use std::path::Path;

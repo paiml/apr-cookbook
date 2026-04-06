@@ -30,6 +30,9 @@
 //! - **Genchi Genbutsu** (Go and see): Analyze actual audio features, not assumptions
 //! - **Jidoka** (Quality built-in): Validated embeddings and deterministic clustering
 //! - **Muda** (Waste elimination): Minimal 3-dim embeddings, no heavy ML stack
+//!
+//! ## References
+//! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

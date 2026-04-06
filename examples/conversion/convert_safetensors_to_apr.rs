@@ -16,6 +16,9 @@
 //! - Encryption (AES-256-GCM)
 //! - Digital signatures (Ed25519)
 //! - Quantization (Q4_0, Q8_0)
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,

@@ -14,6 +14,9 @@
 //! - Building a flow graph from flat tensor metadata
 //! - Rendering ASCII flow diagrams for architecture visualization
 //! - Computing per-component parameter breakdowns
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::BTreeMap;

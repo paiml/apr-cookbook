@@ -4,6 +4,9 @@
 //! Browser-ready code analysis tool detecting defects, security issues, and anti-patterns.
 //! Multi-language support (Rust, Python, JavaScript, Go) with 18 defect categories,
 //! Tarantula-style fault localization, and actionable fix suggestions.
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use std::collections::HashMap;
 

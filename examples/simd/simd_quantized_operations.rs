@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example simd_quantized_operations
 //! ```
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

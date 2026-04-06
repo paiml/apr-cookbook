@@ -1,5 +1,8 @@
 //! Demo K: RAG Pipeline - chunking, embedding, vector search, context injection.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
+//!
+//! ## References
+//! - Lewis, P. et al. (2020). *Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks*. NeurIPS. arXiv:2005.11401
 
 use std::collections::HashMap;
 

@@ -14,6 +14,9 @@
 //! - Recursive tree construction and rendering
 //! - Parameter count aggregation at each level
 //! - Box-drawing character output
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

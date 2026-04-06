@@ -3,6 +3,9 @@
 //! Gate 0 pre-flight check: validates that hardware supports a model's required
 //! operations before loading weights. Prevents wasted time loading 70B models
 //! onto hardware that cannot run them.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::HashSet;

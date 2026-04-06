@@ -30,6 +30,9 @@
 //! ```bash
 //! cargo run --example inference_mmap_lazy_load
 //! ```
+//!
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

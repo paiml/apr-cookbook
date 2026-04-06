@@ -19,6 +19,9 @@
 //! - Merging 3+ models fine-tuned on different tasks
 //! - When simple averaging degrades individual task performance
 //! - When models have conflicting gradient directions
+//!
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

@@ -19,6 +19,9 @@
 //! - **Genchi Genbutsu** (Go and see): Measure actual model performance, not assumptions
 //! - **Jidoka** (Quality built-in): Statistical significance gates before promotion
 //! - **Kaizen** (Continuous improvement): Systematic model iteration via A/B testing
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

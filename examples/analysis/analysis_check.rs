@@ -5,6 +5,9 @@
 //! Runs a 10-stage sequential pre-flight health check pipeline on an APR
 //! model file. Each stage produces a pass/fail/skip result with detail.
 //! The final report summarizes overall model readiness for deployment.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::fmt;

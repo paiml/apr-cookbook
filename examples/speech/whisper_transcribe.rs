@@ -32,6 +32,9 @@
 //! - **Complexity**: Intermediate
 //! - **Dependencies**: trueno 0.11+, aprender 0.21+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Radford, A. et al. (2023). *Robust Speech Recognition via Large-Scale Weak Supervision*. ICML. arXiv:2212.04356
 
 use apr_cookbook::prelude::*;
 use std::f32::consts::PI;

@@ -15,6 +15,9 @@
 //! ```bash
 //! cargo run --example hyperparameter_sweep
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

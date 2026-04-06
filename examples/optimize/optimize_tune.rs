@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example optimize_tune
 //! ```
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 

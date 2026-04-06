@@ -37,6 +37,9 @@
 //! Section 5: Roundtrip verification: PASSED
 //! Section 6: Architecture summary (123 total parameters)
 //! ```
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

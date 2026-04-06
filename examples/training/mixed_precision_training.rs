@@ -17,6 +17,9 @@
 //! ```bash
 //! cargo run --example mixed_precision_training
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

@@ -4,6 +4,9 @@
 //! and architecture. Detect weight drift between model versions.
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Proptests (100+ cases).
+//!
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use clap::Parser;

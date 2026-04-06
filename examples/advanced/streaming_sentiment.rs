@@ -6,6 +6,9 @@
 //! ```bash
 //! cargo run --example streaming_sentiment
 //! ```
+//!
+//! ## References
+//! - Devlin, J. et al. (2019). *BERT: Pre-training of Deep Bidirectional Transformers*. NAACL. arXiv:1810.04805
 
 use std::collections::{HashMap, VecDeque};
 use std::time::Instant;

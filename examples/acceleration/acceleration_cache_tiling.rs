@@ -33,6 +33,9 @@
 //! ```bash
 //! cargo run --example acceleration_cache_tiling --release
 //! ```
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 #![deny(unsafe_code)]
 #![deny(clippy::todo, clippy::unimplemented, clippy::panic)]

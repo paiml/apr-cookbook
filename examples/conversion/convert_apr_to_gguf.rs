@@ -16,6 +16,9 @@
 //! - Ollama integration
 //! - Efficient quantization (Q4_K, Q5_K, Q8_0)
 //! - CPU/GPU hybrid execution
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{AprConverter, ConversionFormat, DataType, TensorData};
 use apr_cookbook::Result;

@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example wasm_browser_inference
 //! ```
+//!
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

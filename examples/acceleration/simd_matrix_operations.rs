@@ -17,6 +17,9 @@
 //! 3. NEON (aarch64)
 //! 4. WASM SIMD (wasm32)
 //! 5. Scalar fallback (always available)
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::Result;
 use std::time::Instant;

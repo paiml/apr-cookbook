@@ -4,6 +4,9 @@
 //! measuring accuracy degradation, compression ratios, and reconstruction error.
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Property tests included.
+//!
+//! ## References
+//! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

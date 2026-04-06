@@ -40,6 +40,9 @@
 //! - **Complexity**: Advanced
 //! - **Dependencies**: std, rand
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

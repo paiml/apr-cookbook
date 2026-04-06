@@ -7,6 +7,9 @@
 //! ```bash
 //! cargo run --example model_selection_router
 //! ```
+//!
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;

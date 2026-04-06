@@ -4,6 +4,9 @@
 //!
 //! Evaluates an APR language model by computing perplexity and cross-entropy
 //! on synthetic test data. Uses the log-sum-exp trick for numerical stability.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

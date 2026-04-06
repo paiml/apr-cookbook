@@ -11,6 +11,9 @@
 //! 2. Metadata mapping — APR metadata to GGUF key-value pairs
 //! 3. Tensor data conversion — APR tensors to GGUF tensor descriptors
 //! 4. Quantization type mapping — APR quantization levels to GGUF types
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

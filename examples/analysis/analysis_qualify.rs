@@ -4,6 +4,9 @@
 //! Each gate produces a Pass/Fail/Skip result with timing. The final report
 //! assigns a qualification tier: Smoke (all pass), Qualified (8+ pass),
 //! or Rejected.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::fmt;

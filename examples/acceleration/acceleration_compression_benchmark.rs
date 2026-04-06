@@ -33,6 +33,9 @@
 //!
 //! ## Falsification Claim (F9)
 //! LZ4 decompression throughput >= 2 GB/s on model-like data.
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use std::time::Instant;
 

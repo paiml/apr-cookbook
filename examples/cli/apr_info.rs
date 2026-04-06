@@ -9,6 +9,9 @@
 //! cargo run --example apr_info -- --help
 //! cargo run --example apr_info -- model.apr
 //! ```
+//!
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;

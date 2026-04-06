@@ -5,6 +5,9 @@
 //! Compares two APR models structurally and numerically. Reports tensor-level
 //! weight differences including L2 distance, max absolute diff, mean absolute
 //! diff, and cosine similarity. Essential for tracking fine-tuning impact.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 

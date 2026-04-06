@@ -2,6 +2,9 @@
 //!
 //! LeNet-5 CNN for digit recognition: 28x28 grayscale -> 10 classes.
 //! Image preprocessing, augmentation, convolutional inference, and evaluation.
+//!
+//! ## References
+//! - LeCun, Y. et al. (1998). *Gradient-Based Learning Applied to Document Recognition*. Proceedings of IEEE. DOI: 10.1109/5.726791
 
 use std::f32::consts::PI;
 

@@ -29,6 +29,9 @@
 //! ```bash
 //! cargo run --example monitoring_energy_estimation
 //! ```
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use serde::Serialize;

@@ -19,6 +19,9 @@
 //! # Falsification Claim (F7)
 //!
 //! AVX-512 matmul achieves ≥80 GFLOPS on compatible hardware.
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use std::time::Instant;
 use trueno::Matrix;

@@ -8,6 +8,9 @@
 //! - **Heijunka**: Consistent summary quality regardless of document size
 //! - **Jidoka**: Automatic quality detection stops poor summaries
 //! - **Kaizen**: Iterative sentence selection refinement
+//!
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use std::collections::{HashMap, HashSet};
 

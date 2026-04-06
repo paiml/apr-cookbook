@@ -12,6 +12,9 @@
 //! 2. Parallel export to 3+ formats — convert to each target
 //! 3. Size comparison table — compare output sizes
 //! 4. Format feature matrix — capabilities of each format
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

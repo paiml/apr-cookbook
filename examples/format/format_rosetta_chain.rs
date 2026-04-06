@@ -11,6 +11,9 @@
 //! 2. Step-by-step conversion — execute each link in the chain
 //! 3. Intermediate sizes — track size changes at each stage
 //! 4. Final verification — confirm all outputs are valid
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::fmt;

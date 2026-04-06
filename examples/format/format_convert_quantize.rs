@@ -12,6 +12,9 @@
 //! 2. Quantization — FP32 → INT4 precision reduction
 //! 3. Compression — None → LZ4 byte-level compression
 //! 4. Size comparison table — before/after for each transformation
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 

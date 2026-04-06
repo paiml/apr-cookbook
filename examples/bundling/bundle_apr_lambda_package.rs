@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example bundle_apr_lambda_package
 //! ```
+//!
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use flate2::write::GzEncoder;

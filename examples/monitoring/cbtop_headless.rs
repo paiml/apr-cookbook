@@ -48,6 +48,9 @@
 //! - **Complexity**: Intermediate
 //! - **Dependencies**: apr_cookbook (RecipeContext, rand)
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

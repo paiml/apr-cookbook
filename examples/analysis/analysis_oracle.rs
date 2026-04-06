@@ -12,6 +12,9 @@
 //! - Heuristic classification of model architectures
 //! - Pattern matching on tensor naming conventions
 //! - Confidence scoring with evidence accumulation
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

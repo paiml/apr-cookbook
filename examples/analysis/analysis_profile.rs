@@ -5,6 +5,9 @@
 //! Performs roofline model analysis to classify each layer as compute-bound
 //! or memory-bound. Produces per-layer profiling, an ASCII roofline chart,
 //! bottleneck identification, and optimization recommendations.
+//!
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 

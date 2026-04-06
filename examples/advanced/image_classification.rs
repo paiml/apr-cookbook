@@ -4,6 +4,9 @@
 //! squeeze-and-excitation, and efficient mobile inference.
 //!
 //! ## QA: Build, test, clippy, fmt PASS. Property tests (100+ cases).
+//!
+//! ## References
+//! - He, K. et al. (2016). *Deep Residual Learning for Image Recognition*. CVPR. arXiv:1512.03385
 
 use std::f32::consts::PI;
 

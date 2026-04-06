@@ -6,6 +6,9 @@
 //! ```bash
 //! cargo run --example model_drift_detection
 //! ```
+//!
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use std::collections::hash_map::DefaultHasher;
 use std::fmt;

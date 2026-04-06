@@ -19,6 +19,9 @@
 //! - **Muda** (Waste elimination): Only load the pages you actually need
 //! - **Jidoka** (Quality built-in): Track page faults to verify demand paging
 //! - **Genchi Genbutsu** (Go and see): Measure actual RSS, not theoretical max
+//!
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

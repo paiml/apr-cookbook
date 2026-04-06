@@ -25,6 +25,9 @@
 //! ```bash
 //! cargo run --example gpu_cuda_inference
 //! ```
+//!
+//! ## References
+//! - Dao, T. et al. (2022). *FlashAttention: Fast and Memory-Efficient Exact Attention*. NeurIPS. arXiv:2205.14135
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

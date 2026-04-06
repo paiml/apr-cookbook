@@ -23,6 +23,9 @@
 //! ```bash
 //! cargo run --example finetune_plan_vram
 //! ```
+//!
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 

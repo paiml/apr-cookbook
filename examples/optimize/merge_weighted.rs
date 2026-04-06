@@ -18,6 +18,9 @@
 //! - You have benchmark scores and want to bias toward the best model
 //! - Combining a general model with a task-specific fine-tune
 //! - A/B testing merge ratios for optimal downstream performance
+//!
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

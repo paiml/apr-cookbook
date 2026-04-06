@@ -32,6 +32,9 @@
 //! - [x] No unsafe code
 //! - [x] No unwrap on user data
 //! - [x] Clippy clean
+//!
+//! ## References
+//! - Touvron, H. et al. (2023). *LLaMA: Open and Efficient Foundation Language Models*. arXiv:2302.13971
 
 use apr_cookbook::prelude::*;
 

@@ -25,6 +25,9 @@
 //! - **Complexity**: Advanced
 //! - **Dependencies**: std only
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//! ## References
+//! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

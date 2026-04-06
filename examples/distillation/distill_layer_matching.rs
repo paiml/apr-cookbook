@@ -24,6 +24,9 @@
 //! ```bash
 //! cargo run --example distill_layer_matching
 //! ```
+//!
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

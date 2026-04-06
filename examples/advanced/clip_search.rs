@@ -1,5 +1,8 @@
 //! Demo O: Multi-Modal CLIP Search - text-to-image and image-to-text semantic search.
 //! QA: Build, test, clippy, fmt PASS. Property tests included.
+//!
+//! ## References
+//! - Radford, A. et al. (2021). *Learning Transferable Visual Models From Natural Language Supervision*. ICML. arXiv:2103.00020
 
 use std::collections::HashMap;
 
