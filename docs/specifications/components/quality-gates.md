@@ -493,7 +493,7 @@ apr --help 2>&1 | awk '/^  [a-z]/ {print $1}' | while read sub; do
 done
 ```
 
-### Current baseline (measured by `make cli-parity` on 2026-04-05)
+### Current baseline (measured by `make cli-parity` on 2026-04-06)
 
 | Dimension | Actual | Target | Gap |
 |-----------|--------|--------|-----|
