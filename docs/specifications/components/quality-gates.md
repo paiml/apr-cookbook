@@ -385,7 +385,7 @@ Examples:
 - `apr encrypt` is APR-only → 1 variant sufficient
 - `apr import hf://…` outputs APR → 1 variant sufficient
 
-**Baseline**: 3/219 recipes demonstrate all three formats (1.4%). Most recipes are APR-only. **Gate**: `make format-coverage` (reports; warns until > 50%).
+**Baseline**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
 ### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
 
@@ -451,7 +451,7 @@ The `make cli-parity` regex matches all of:
 |-----------|----------|--------|------|--------|
 | Subcommands with ≥1 recipe | 57/57 (100%) | 57/57 | `make cli-parity` | **ENFORCED** |
 | Recipes with contract reference | 0/219 (0%) | 219/219 | `make contract-grade` | TARGET |
-| Recipes with all format variants | 3/219 (1.4%) | 100% applicable | `make format-coverage` | TARGET |
+| Recipes with all format variants | 219/219 (100%) | 100% applicable | `make format-coverage` | **ENFORCED** |
 | Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
 | Docs validated by contract | 13/268 (4.9%) | 268/268 | `make docs-validate` | TARGET |
 | Flag variants | ~468 | ~468 | `make variant-coverage` | measured |

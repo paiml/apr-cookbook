@@ -25,7 +25,7 @@ See [Quality Gates § Five Coverage Invariants](quality-gates.md#five-coverage-i
 |-----------|------|----------|--------|
 | **A** CLI Recipe Parity | `make cli-parity` | 57/57 (100%) | **ENFORCED** |
 | **B** Recipe Contract Grade A | `make contract-grade` | 0/219 (0%) | TARGET |
-| **C** Model Format Coverage | `make format-coverage` | 3/219 (1.4%) | TARGET |
+| **C** Model Format Coverage | `make format-coverage` | 219/219 (100%) | **ENFORCED** |
 | **D** arXiv Citation | `make citation-check` | 219/219 (100%) | **ENFORCED** |
 | **E** Docs Contract Coverage | `make docs-validate` | 13/268 (4.9%) | TARGET |
 

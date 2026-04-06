@@ -310,7 +310,7 @@ Every recipe that operates on a model file should demonstrate all three canonica
 - `apr encrypt` only supports `.apr` → 1 variant sufficient
 - `apr import hf://…` outputs `.apr` only → 1 variant sufficient
 
-**Baseline (2026-04-06)**: 3/219 recipes demonstrate all three formats (1.4%). Most recipes are APR-only. **Gate**: `make format-coverage` (reports current state; warns but does not block until baseline > 50%).
+**Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
 ### Invariant D — arXiv Citation (F-ARXIV-001) — TARGET
 
