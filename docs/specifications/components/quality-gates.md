@@ -230,24 +230,52 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 | `kani_harnesses` | KANI-PREFIX-NNN formal verification harnesses |
 | `qa_gate` | F-PREFIX-NNN quality gate tying checks to pass criteria |
 
-### Contract Inventory
+### Contract Inventory (measured 2026-04-06)
 
-| Contract | Invariant/F-Claim | Obligations | Tests |
-|----------|-------------------|-------------|-------|
-| `cli-parity-v1` | **A** F-CLIPARITY-001 | 5 | 5 |
-| `contract-grade-v1` | **B** F-CONTRACT-GRADE-001 | TBD | TBD |
-| `format-coverage-v1` | **C** F-FORMAT-COV-001 | TBD | TBD |
-| `arxiv-citation-v1` | **D** F-ARXIV-001 | TBD | TBD |
-| `docs-schema-v1` | **E** F-DOCS-CONTRACT-001 | 5 | 5 |
-| `lz4-decompression-v1` | F1 | 3 | 3 |
-| `mmap-inference-v1` | F2 | 3 | 3 |
-| `int4-quantization-v1` | F3 | 3 | 3 |
-| `aes256-gcm-decrypt-v1` | F4 | 3 | 3 |
-| `whisper-wer-v1` | F5 | 3 | 3 |
-| `flash-attention-v1` | F6 | 3 | 3 |
-| `avx512-matmul-v1` | F7 | 3 | 3 |
-| `recipe-iiur-v1` | IIUR | 4 | 4 |
-| `apr-format-roundtrip-v1` | Conversion | 4 | 4 |
+11 contracts exist in `contracts/`. All pass `pv lint` (0 errors, 99 warnings, mean score 0.54). No contract has a Lean proof yet.
+
+#### Existing Contracts
+
+| Contract | Covers | Type | `pv lint` | Lean proof | Equations |
+|----------|--------|------|-----------|------------|-----------|
+| `cli-parity-v1` | Invariant **A**: 57 subcommands have recipes | Structural | PASS | None | 5 |
+| `docs-schema-v1` | Invariant **E**: 13 .md files validated | Structural | PASS | None | 5 |
+| `recipe-iiur-v1` | IIUR compliance for all recipes | Structural | PASS | None | 4 |
+| `apr-format-roundtrip-v1` | Format conversion round-trip correctness | Correctness | PASS | None | 4 |
+| `lz4-decompression-v1` | F1: LZ4 >= 3 GB/s (AVX2) | Performance | PASS | None | 3 |
+| `mmap-inference-v1` | F2: mmap latency < 1ms (<=100MB) | Performance | PASS | None | 3 |
+| `int4-quantization-v1` | F3: Int4 accuracy loss < 2% | Accuracy | PASS | None | 3 |
+| `aes256-gcm-decrypt-v1` | F4: AES-256-GCM decrypt < 5ms (100MB) | Performance | PASS | None | 3 |
+| `whisper-wer-v1` | F5: whisper.apr WER < 10% | Accuracy | PASS | None | 3 |
+| `flash-attention-v1` | F6: FlashAttention >= 2x speedup | Performance | PASS | None | 3 |
+| `avx512-matmul-v1` | F7: AVX-512 matmul >= 80 GFLOPS | Performance | PASS | None | 3 |
+
+#### Missing Contracts
+
+| Contract needed | Invariant | Status | Priority |
+|----------------|-----------|--------|----------|
+| `contract-grade-v1` | **B**: recipe-to-contract binding | Not created | P2 |
+| `format-coverage-v1` | **C**: APR/GGUF/SafeTensors variants | Not created | P2 |
+| `arxiv-citation-v1` | **D**: arXiv/DOI per recipe | Not created | P3 |
+| Per-subcommand contracts (×57) | **B**: one contract per subcommand | 0/57 created | P2 |
+
+#### Contract Quality Gaps
+
+All 11 existing contracts share the same warnings (99 total across 11 contracts, 9 per contract):
+
+- Every equation missing `preconditions` and `postconditions`
+- Every equation missing `lean_theorem` reference
+- Mean `pv lint` score: **0.54** (target: grade A requires > 0.8)
+- Gate 7 (reverse-coverage) skipped: no `--binding` or `--crate-dir` provided
+
+#### What Has No Contract At All
+
+| Asset class | Count | Contract coverage |
+|-------------|-------|-------------------|
+| Recipe `.rs` files with `Contract:` header | 0 / 219 | 0% — no recipe references any contract |
+| `book/src/` .md files | 0 / 252 | 0% — not bound to `docs-schema-v1` or any contract |
+| Lean proofs | 0 / 11 | 0% — no contract has `pv lean-status` >= L2 |
+| Per-subcommand contracts | 0 / 57 | 0% — subcommands share `cli-parity-v1` but have no individual contracts |
 
 ### Provability Invariant
 
@@ -260,6 +288,8 @@ Every non-registry contract must satisfy:
   |C.kani_harnesses| > 0
   ∀ h ∈ C.kani_harnesses: h.obligation ∈ C.proof_obligations
 ```
+
+**Status**: All 11 contracts satisfy obligation/test counts. None satisfy `kani_harnesses > 0` (no Kani harnesses exist yet).
 
 ---
 

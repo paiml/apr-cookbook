@@ -263,7 +263,7 @@ full = ["encryption", "gpu", "speech", "distributed"]
 | F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x | `flash-attention-v1` |
 | F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 | `avx512-matmul-v1` |
 
-All claims are backed by provable-contracts YAML in `contracts/` with formal equations, proof obligations, and falsification tests. See [Quality Gates](components/quality-gates.md) for the full contract schema.
+All claims are backed by 11 provable-contracts YAML in `contracts/` (0 errors, mean score 0.54, 0 Lean proofs). No recipe `.rs` file references a contract yet (Invariant B baseline: 0/219). 3 invariant contracts (B, C, D) are specified but not yet created. See [Quality Gates](components/quality-gates.md) for the full contract inventory and gap analysis.
 
 ## Five Coverage Invariants
 
