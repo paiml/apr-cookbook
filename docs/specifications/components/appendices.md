@@ -6,17 +6,11 @@
 
 | Feature | Description | Recipes |
 |---------|-------------|---------|
-| `default` | Core functionality | A.*, B.1-B.2, C.*, D.*, J.*, L.1-L.2 |
-| `encryption` | AES-256-GCM | B.3, E.* |
-| `signing` | Ed25519 signatures | B.4, E.*, L.4 |
-| `gpu` | GPU acceleration | I.* |
-| `browser` | WASM target | H.* |
-| `pacha` | Model registry | E.* |
-| `realizar` | Model serving | F.*, G.* |
-| `presentar` | UI widgets | H.2-H.4 |
-| `hf-hub` | HuggingFace integration | D.1, K.* |
-| `lambda` | AWS Lambda support | B.5, G.* |
-| `full` | All features | All recipes |
+| `default` | Core functionality — all recipes except B.3 | A.*, B.1-B.2/B.4-B.7, C.*, D.*, E.*, F.*, G.*, H.*, I.*, J.*, K.*, L.* |
+| `encryption` | AES-256-GCM model encryption | B.3 |
+| `full` | All features (`encryption`) | All recipes |
+
+**Note**: Only two feature flags exist in Cargo.toml. GPU, distributed, and speech patterns are **simulated** in cookbook examples — no feature flag needed.
 
 ---
 
@@ -177,7 +171,7 @@ Coverage:     95%+ minimum          Verified
 
 ### QA Review Checklist
 
-- [ ] All 52 IIUR recipes execute without error
+- [ ] All 219 recipes execute without error
 - [ ] mdbook builds successfully
 - [ ] CI pipeline passes on all platforms
 - [ ] Git hooks enforce quality gates

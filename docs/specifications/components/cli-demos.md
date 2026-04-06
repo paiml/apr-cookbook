@@ -55,7 +55,7 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 ---
 
-## `examples/optimize/` — Model Optimization Pipeline (22 examples)
+## `examples/optimize/` — Model Optimization Pipeline (23 examples)
 
 ### Full Pipeline
 
@@ -108,6 +108,7 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 |---|------|---------------|-----|
 | 21 | `quantize_4bit.rs` | `apr quantize --scheme int4` | 4-bit quantize/dequantize |
 | 22 | `quantize_fake_qat.rs` | QAT training-aware quantize | Fake quantize + STE backward |
+| 23 | `optimize_tune.rs` | `apr tune` | Hyperparameter tuning pipeline |
 
 ---
 
@@ -123,7 +124,7 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 ---
 
-## `examples/analysis/` — Model Analysis (11 examples)
+## `examples/analysis/` — Model Analysis (25 examples)
 
 | # | File | CLI Equivalent | Purpose |
 |---|------|---------------|---------|
@@ -138,23 +139,38 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 | 36 | `analysis_tree.rs` | `apr tree` | Architecture visualization |
 | 37 | `analysis_hex.rs` | `apr hex` | Format-aware binary forensics |
 | 38 | `analysis_explain.rs` | `apr explain` | Error code explanations |
+| 39 | `analysis_check.rs` | `apr check` | Quick model health check |
+| 40 | `analysis_trace.rs` | `apr trace` | Inference execution trace |
+| 41 | `analysis_eval.rs` | `apr eval` | Model evaluation and scoring |
+| 42 | `analysis_debug.rs` | `apr debug` | Model debugging tools |
+| 43 | `analysis_lint.rs` | `apr lint` | Model linting and best practices |
+| 44 | `analysis_flow.rs` | `apr flow` | Data flow visualization |
+| 45 | `analysis_qualify.rs` | `apr qualify` | Model qualification checklist |
+| 46 | `analysis_parity.rs` | `apr parity` | Cross-format parity check |
+| 47 | `analysis_compare_hf.rs` | `apr compare-hf` | Compare with HuggingFace model |
+| 48 | `analysis_probar.rs` | `apr probar` | Progress-bar inference testing |
+| 49 | `analysis_slice.rs` | `apr slice` | Tensor slicing analysis |
+| 50 | `analysis_tensors.rs` | `apr tensors` | Tensor listing and inspection |
+| 51 | `analysis_qa_capability.rs` | `apr qa --capability` | QA capability matrix |
+| 52 | `analysis_model_fingerprint.rs` | `apr fingerprint` | Content-addressable model hashing |
 
 ---
 
-## `examples/format/` — Format Operations (10 examples)
+## `examples/format/` — Format Operations (11 examples)
 
 | # | File | CLI Equivalent | Purpose |
 |---|------|---------------|---------|
-| 39 | `format_import_hf.rs` | `apr import hf://org/repo` | HuggingFace import |
-| 40 | `format_export_safetensors.rs` | `apr export --format safetensors` | SafeTensors export |
-| 41 | `format_export_gguf.rs` | `apr export --format gguf` | GGUF export |
-| 42 | `format_rosetta_convert.rs` | `apr rosetta convert` | Cross-format conversion |
-| 43 | `format_rosetta_chain.rs` | `apr rosetta chain` | Multi-step conversion |
-| 44 | `format_rosetta_verify.rs` | `apr rosetta verify` | Round-trip verification |
-| 45 | `format_convert_quantize.rs` | `apr convert --quantize --compress` | Convert with quantization |
-| 46 | `format_publish.rs` | `apr publish` | HuggingFace upload |
-| 47 | `format_pull_cache.rs` | `apr pull` | Download and cache |
-| 48 | `format_batch_export.rs` | `apr export --batch gguf,mlx,safetensors` | Batch multi-format export |
+| 53 | `format_import_hf.rs` | `apr import hf://org/repo` | HuggingFace import |
+| 54 | `format_export_safetensors.rs` | `apr export --format safetensors` | SafeTensors export |
+| 55 | `format_export_gguf.rs` | `apr export --format gguf` | GGUF export |
+| 56 | `format_rosetta_convert.rs` | `apr rosetta convert` | Cross-format conversion |
+| 57 | `format_rosetta_chain.rs` | `apr rosetta chain` | Multi-step conversion |
+| 58 | `format_rosetta_verify.rs` | `apr rosetta verify` | Round-trip verification |
+| 59 | `format_convert_quantize.rs` | `apr convert --quantize --compress` | Convert with quantization |
+| 60 | `format_publish.rs` | `apr publish` | HuggingFace upload |
+| 61 | `format_pull_cache.rs` | `apr pull` | Download and cache |
+| 62 | `format_batch_export.rs` | `apr export --batch gguf,mlx,safetensors` | Batch multi-format export |
+| 63 | `format_migration_pipeline.rs` | `apr migrate` | Format migration pipeline |
 
 ---
 
@@ -221,7 +237,7 @@ High-traffic recipes should link to parity repos showing how the same workflow l
 1. **Phase 1**: `optimize_full_pipeline.rs` — flagship composed pipeline
 2. **Phase 2**: `optimize/` individual steps (23 examples)
 3. **Phase 3**: `chat/` (5 examples)
-4. **Phase 4**: `analysis/` (25 examples)
-5. **Phase 5**: `format/` (11 examples)
-6. **Phase 6**: CLI gap coverage (16 examples)
+4. **Phase 4**: `analysis/` (25 examples) — **COMPLETE**
+5. **Phase 5**: `format/` (11 examples) — **COMPLETE**
+6. **Phase 6**: `cli/` gap coverage (16 examples) — **COMPLETE**
 7. **Phase 7**: Parity cross-references + deprecation pass

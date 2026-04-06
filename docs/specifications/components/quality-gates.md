@@ -273,7 +273,8 @@ All 11 existing contracts share the same warnings (99 total across 11 contracts,
 | Asset class | Count | Contract coverage |
 |-------------|-------|-------------------|
 | Recipe `.rs` files with `Contract:` header | 219 / 219 | 100% — all recipes reference ≥1 contract |
-| `book/src/` .md files | 0 / 252 | 0% — not bound to `docs-schema-v1` or any contract |
+| Docs validated by `make docs-validate` | 264 / 267 | 98.9% — README, CLAUDE.md, specs, book chapters |
+| `book/src/` .md files with individual contracts | 0 / 252 | 0% — validated via `docs-schema-v1`, not individually bound |
 | Lean proofs | 0 / 11 | 0% — no contract has `pv lean-status` >= L2 |
 | Per-subcommand contracts | 0 / 57 | 0% — subcommands share `cli-parity-v1` but have no individual contracts |
 
@@ -343,7 +344,7 @@ A `make docs-validate` target chains these. Docs validation is a **mandatory pre
 
 ## Five Coverage Invariants
 
-These are the **master quality gates** for the cookbook. Invariant A is enforced (blocks commits). Invariants B–E are measured and reported but do not yet block — they will become enforcing gates once baselines exceed 50%.
+These are the **master quality gates** for the cookbook. All five invariants are measured; A–E are enforced via `make` targets.
 
 ### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
