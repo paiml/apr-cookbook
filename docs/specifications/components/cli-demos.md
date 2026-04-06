@@ -1,15 +1,57 @@
-# CLI Demo Recipes (55 recipes)
+# CLI Demo Recipes — 1:1 Parity with apr-cli
 
-These 48 examples mirror the `apr` CLI's 44 subcommands. Each demonstrates a real CLI workflow using entrenar/aprender library APIs directly, teaching users how the CLI composes these primitives.
+These examples mirror the `apr` CLI's **57 subcommands** (excluding `help`) and their **~400 variants** (flag combinations). Each recipe demonstrates a real CLI workflow using entrenar/aprender library APIs directly, teaching users how the CLI composes these primitives.
 
 ```
-apr CLI (44 subcommands)
+apr CLI (57 subcommands, ~400 variants)
     | composes
 entrenar APIs (merge, distill, prune, finetune, quant)
 aprender APIs (format, chat templates, model inspection)
     | demonstrated by
-Cookbook examples (48 CLI demos)
+Cookbook recipes (1 recipe per subcommand, ≥1 recipe per variant)
+    | verified by 5 invariants
+A: cli-parity        — every subcommand has a recipe
+B: contract-grade    — every recipe has grade-A provable-contract
+C: format-coverage   — APR + GGUF + SafeTensors variants where applicable
+D: citation-check    — arXiv/DOI citation per recipe
+E: docs-validate     — repo docs bound to provable-contracts
 ```
+
+## Five Coverage Invariants
+
+See [Quality Gates § Five Coverage Invariants](quality-gates.md#five-coverage-invariants) for formal definitions. Summary:
+
+| Invariant | Gate | Status |
+|-----------|------|--------|
+| **A** CLI Recipe Parity | `make cli-parity` | 57/57 = 100% |
+| **B** Recipe Contract Grade A | `make contract-grade` | 11 contracts, target: all recipes |
+| **C** Model Format Coverage | `make format-coverage` | TBD, target: 100% applicable |
+| **D** arXiv Citation | `make citation-check` | TBD, target: 100% |
+| **E** Docs Contract Coverage | `make docs-validate` | partial, target: 100% |
+
+Every new `.rs` recipe under `examples/` **must** include a doc comment header of the form:
+
+```rust
+//! CLI Equivalent: `apr <sub> --flag value`
+//! Demonstrates: <flag1>, <flag2>
+//! Contract: contracts/<name>-v1.yaml
+//! Lean proof: L2+
+//!
+//! ## References
+//! - Author et al. (YEAR). *Title*. arXiv:NNNN.NNNNN
+```
+
+### Model Format Coverage (Invariant C)
+
+Recipes that accept model files must demonstrate all applicable formats:
+
+| Format | Extension | When required |
+|--------|-----------|---------------|
+| APR | `.apr` | Always (native format) |
+| GGUF | `.gguf` | When subcommand accepts GGUF (run, inspect, bench, convert, etc.) |
+| SafeTensors | `.safetensors` | When subcommand accepts SafeTensors (import, convert, compare-hf, etc.) |
+
+Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `apr run model.gguf`, `apr run model.safetensors`.
 
 ---
 

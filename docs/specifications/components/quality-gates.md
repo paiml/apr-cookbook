@@ -232,8 +232,13 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 
 ### Contract Inventory
 
-| Contract | F-Claim | Obligations | Tests |
-|----------|---------|-------------|-------|
+| Contract | Invariant/F-Claim | Obligations | Tests |
+|----------|-------------------|-------------|-------|
+| `cli-parity-v1` | **A** F-CLIPARITY-001 | 5 | 5 |
+| `contract-grade-v1` | **B** F-CONTRACT-GRADE-001 | TBD | TBD |
+| `format-coverage-v1` | **C** F-FORMAT-COV-001 | TBD | TBD |
+| `arxiv-citation-v1` | **D** F-ARXIV-001 | TBD | TBD |
+| `docs-schema-v1` | **E** F-DOCS-CONTRACT-001 | 5 | 5 |
 | `lz4-decompression-v1` | F1 | 3 | 3 |
 | `mmap-inference-v1` | F2 | 3 | 3 |
 | `int4-quantization-v1` | F3 | 3 | 3 |
@@ -243,8 +248,6 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 | `avx512-matmul-v1` | F7 | 3 | 3 |
 | `recipe-iiur-v1` | IIUR | 4 | 4 |
 | `apr-format-roundtrip-v1` | Conversion | 4 | 4 |
-| `cli-parity-v1` | F-CLIPARITY-001 | 5 | 5 |
-| `docs-schema-v1` | F-DOCS-001 | 5 | 5 |
 
 ### Provability Invariant
 
@@ -348,10 +351,10 @@ The skill MUST execute these **protocol-level** checks beyond the per-command gr
 
 ### Contract Coverage Invariant
 
-Every apr CLI subcommand must map to at least one provable-contract YAML in `contracts/`, and every contract must carry a Lean 4 proof verified by `pv lean-status`. Formally:
+Every apr CLI subcommand must map to at least one provable-contract YAML in `contracts/`, and every contract must carry a Lean 4 proof verified by `pv lean-status`. This is subsumed by **Invariant B** (grade-A contract per recipe) but stated explicitly for the `/qa` skill:
 
 ```
-∀ subcommand s ∈ apr.subcommands:
+∀ subcommand s ∈ apr.subcommands \ {help}:
   ∃ contract C ∈ contracts/: s ∈ C.bindings
 
 ∀ contract C ∈ contracts/:
@@ -359,7 +362,7 @@ Every apr CLI subcommand must map to at least one provable-contract YAML in `con
   pv lean-status C ≥ L2
 ```
 
-This invariant is audited in **Phase 0** of the `/qa` skill before per-target testing. Current coverage (as of 2026-04-06): 11 contracts / 58 subcommands. CLI parity: 57/58 (98%, only `help` excluded). Fleet: yoga deployed (ca687120), intel/jetson pending. Target: 95%+ subcommand coverage, 80%+ Lean-proved contracts. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues against `apr-cookbook`.
+**Status (2026-04-06)**: 11 contracts / 57 subcommands. CLI recipe parity: 57/57 = 100%. Fleet: yoga deployed (ca687120), intel/jetson pending. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues.
 
 The audit uses the `pv` CLI from `../provable-contracts`:
 
@@ -438,26 +441,91 @@ A `make docs-validate` target chains these. Docs validation is a **mandatory pre
 
 ---
 
-## CLI Parity Invariant
+## Five Coverage Invariants
 
-Every apr-cli subcommand **and every variant** must have a corresponding cookbook recipe, a provable contract, and a Lean proof. Formalized in `contracts/cli-parity-v1.yaml` (F-CLIPARITY-001).
+These invariants are the **master quality gates** for the cookbook. All five must pass before any release. See also the [root spec](../apr-cookbook.md#five-coverage-invariants) for the executive summary.
 
-### Invariants
+### Invariant A — CLI Recipe Parity (F-CLIPARITY-001)
+
+Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe.
 
 ```
-∀ s ∈ apr.subcommands:
-  ∃ r ∈ recipes: r.cli_equivalent = s                    # subcommand coverage
-∀ (s, f, v) ∈ apr.variants:
-  ∃ r ∈ recipes: (s, f, v) ∈ r.demonstrates              # variant coverage
+∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
+```
+
+**Status (2026-04-06)**: 57/57 = **100%**. Enforced by `make cli-parity`.
+
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001)
+
+Every recipe must reference a provable-contract YAML that passes `pv lint` at **grade A**.
+
+```
 ∀ r ∈ recipes:
-  ∃ c ∈ contracts/: r.behavior ⊨ c.obligations           # contract binding
-∀ c ∈ contracts/:
-  pv lean-status(c) ≥ L2                                  # Lean proof
+  ∃ c ∈ contracts/: r.contract = c
+  pv grade(c) = A
+  pv lean-status(c) ≥ L2
 ```
+
+Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
+
+**Status (2026-04-06)**: 11 contracts passing `pv lint`. Target: 1 grade-A contract per recipe.
+
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001)
+
+Every recipe that accepts a model file must demonstrate all three canonical formats where the subcommand supports them: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
+
+```
+∀ r ∈ recipes where r.accepts_model_input:
+  ∀ fmt ∈ {apr, gguf, safetensors} where r.supports(fmt):
+    ∃ variant v ∈ r: v.format = fmt
+```
+
+Examples:
+- `apr run` accepts all three → 3 format variants required
+- `apr encrypt` is APR-only → 1 variant sufficient
+- `apr import hf://…` outputs APR → 1 variant sufficient
+
+Enforced by `make format-coverage`. Each format variant is either a separate recipe or a documented section within the recipe demonstrating that format path.
+
+**Status (2026-04-06)**: Not yet measured. Target: 100% where applicable.
+
+### Invariant D — arXiv Citation (F-ARXIV-001)
+
+Every recipe must cite ≥1 arXiv paper or peer-reviewed reference linking the technique to the literature.
+
+```
+∀ r ∈ recipes: |r.citations ∩ (arXiv ∪ peer_reviewed)| ≥ 1
+```
+
+Doc comment format:
+
+```rust
+//! ## References
+//! - Hu et al. (2021). *LoRA: Low-Rank Adaptation*. arXiv:2106.09685
+```
+
+Enforced by `make citation-check`.
+
+**Status (2026-04-06)**: Not yet measured. Target: 100%.
+
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001)
+
+Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — must be bound to a provable-contract and pass `pmat validate-readme`.
+
+```
+∀ d ∈ {README.md, CLAUDE.md, book/src/**/*.md, docs/specifications/**/*.md}:
+  ∃ c ∈ contracts/: d ∈ c.bindings
+  pv lint(c) = PASS
+  pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
+```
+
+Enforced by `make docs-validate` + `pv validate contracts/docs-schema-v1.yaml`.
+
+**Status (2026-04-06)**: `docs-schema-v1.yaml` covers spec components. Target: all repo `*.md` files bound.
 
 ### Variant definition
 
-A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 58 subcommands, apr-cli exposes ~400 distinct variants.
+A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 57 subcommands, apr-cli exposes ~400 distinct variants.
 
 ### Recipe doc-comment contract
 
@@ -467,11 +535,14 @@ Every recipe `.rs` file **must** start with a doc comment containing the followi
 //! # <Recipe Name>
 //!
 //! CLI Equivalent: `apr <subcommand> [--flag value]`
-//! Demonstrates: <flag1>, <flag2>, ...
+//! Demonstrates: <flag1>, <flag2>
 //! Contract: contracts/<name>-v1.yaml
 //! Lean proof: L2+
 //! Run Command: cargo run --example <name>
 //! Learning Objective: <one-line summary>
+//!
+//! ## References
+//! - Author et al. (YEAR). *Title*. arXiv:NNNN.NNNNN
 ```
 
 The `make cli-parity` regex matches all of:
@@ -480,39 +551,25 @@ The `make cli-parity` regex matches all of:
 - `**CLI Equivalent**: \`apr <cmd>\``
 - `CLI Equivalent**: \`apr <cmd>\``
 
-### Coverage matrix
+### Coverage dashboard
 
-The live coverage matrix is generated by `make cli-parity`:
-
-```bash
-# For each subcommand, enumerate flags and check recipe coverage
-apr --help 2>&1 | awk '/^  [a-z]/ {print $1}' | while read sub; do
-    flags=$(apr $sub --help 2>&1 | grep -E '^\s+--[a-z]' | awk '{print $1}')
-    recipes=$(grep -l "CLI Equivalent:.*apr $sub\b" examples/**/*.rs 2>/dev/null | wc -l)
-    printf "%-15s %3d flags  %3d recipes\n" "$sub" $(echo "$flags" | wc -l) "$recipes"
-done
-```
-
-### Current baseline (measured by `make cli-parity` on 2026-04-06)
-
-| Dimension | Actual | Target | Gap |
-|-----------|--------|--------|-----|
-| apr subcommands | 58 | 58 | — |
-| Subcommands with ≥1 recipe | 29 | 58 | **29 missing** (50% coverage) |
-| Estimated variants | ~400 | ~400 | — |
-| Variants with recipe | measured by `make variant-coverage` | ≥360 (90%) | large |
-| Contracts | 11 | ≥58 | 47+ missing |
-| Contracts with Lean proof ≥ L2 | 0 | ≥47 (80%) | all missing |
-| Contracts passing `pv lint` | 11/11 | 11/11 | **PASS** (fixed 2026-04-05) |
-
-**Missing subcommands** (run `make cli-parity` for live list): `canary`, `code`, `compare-hf`, `compile`, `data`, `decrypt`, `diagnose`, `encrypt`, `experiment`, `explain`, `flow`, `gpu`, `hex`, `list`, `monitor`, `oracle`, `pipeline`, `ptx`, `ptx-map`, `rm`, `run`, `runs`, `serve`, `showcase`, `tokenize`, `train`, `tree`, `tui`, `tune`.
-
-Gaps are tracked as individual P2 (missing recipe), P2 (missing contract), P3 (missing Lean proof) issues and actioned via kaizen-paiml.
+| Dimension | Actual | Target | Gate |
+|-----------|--------|--------|------|
+| Subcommands with ≥1 recipe | 57/57 | 57/57 | `make cli-parity` |
+| Recipes with grade-A contract | 11/97+ | 97+/97+ | `make contract-grade` |
+| Recipes with format variants (APR/GGUF/ST) | TBD | 100% applicable | `make format-coverage` |
+| Recipes with arXiv citation | TBD | 97+/97+ | `make citation-check` |
+| Docs with provable-contract | partial | 100% | `make docs-validate` |
+| Estimated flag variants | ~400 | ~400 | `make variant-coverage` |
+| Contracts with Lean proof ≥ L2 | 0 | 80%+ | `pv lean-status` |
 
 ### Pre-commit enforcement
 
 ```bash
-make cli-parity              # Enumerates gaps, exits non-zero if coverage regresses
-make variant-coverage        # Detailed per-subcommand matrix
-make docs-validate           # pmat + pv validation of all *.md
+make cli-parity              # Invariant A: every subcommand has a recipe
+make contract-grade          # Invariant B: every recipe has grade-A contract
+make format-coverage         # Invariant C: APR/GGUF/SafeTensors variants
+make citation-check          # Invariant D: arXiv citation per recipe
+make docs-validate           # Invariant E: docs contract coverage
+make variant-coverage        # Detailed per-subcommand flag matrix
 ```

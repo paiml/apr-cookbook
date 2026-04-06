@@ -1,9 +1,9 @@
 # APR Cookbook Specification
 
-**Version**: 3.0.0
+**Version**: 4.0.0
 **Status**: ACTIVE
 **MSRV**: 1.75
-**Date**: 2026-03-17
+**Date**: 2026-04-06
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
 
 ---
@@ -216,10 +216,91 @@ full = ["encryption", "gpu", "speech", "distributed"]
 
 All claims are backed by provable-contracts YAML in `contracts/` with formal equations, proof obligations, and falsification tests. See [Quality Gates](components/quality-gates.md) for the full contract schema.
 
-## CLI QA
+## Five Coverage Invariants
 
-The installed `apr` binary is tested via `/qa` (Claude Code skill in `.claude/skills/qa/`). This exercises all 40+ subcommands against a real model, detects bugs (panics, exit code lies, hangs, wrong data, missing fallbacks), and files GitHub issues automatically. See [Quality Gates](components/quality-gates.md) for the defect taxonomy and test matrix.
+The spec enforces five hard invariants. All are formal requirements — not aspirational targets.
+
+### Invariant A — CLI Recipe Parity (F-CLIPARITY-001)
+
+Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
+
+```
+∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
+```
+
+**Status**: 57/57 = 100%. Enforced by `make cli-parity`.
+
+### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001)
+
+Every recipe must reference a provable-contract (`../provable-contracts` YAML) that passes `pv lint` at grade **A**.
+
+```
+∀ r ∈ recipes:
+  ∃ c ∈ contracts/: r.contract = c
+  pv grade(c) = A
+  pv lean-status(c) ≥ L2
+```
+
+Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
+
+### Invariant C — Model Format Coverage (F-FORMAT-COV-001)
+
+Every recipe that operates on a model file **must** demonstrate all three canonical formats where applicable: **APR** (`.apr`), **GGUF** (`.gguf`), **SafeTensors** (`.safetensors`).
+
+```
+∀ r ∈ recipes where r.accepts_model_input:
+  ∀ fmt ∈ {apr, gguf, safetensors} where r.supports(fmt):
+    ∃ variant v ∈ r: v.format = fmt
+```
+
+"Where applicable" means the subcommand accepts that format. For example:
+- `apr run model.apr`, `apr run model.gguf`, `apr run model.safetensors` → 3 variants required
+- `apr encrypt` only supports `.apr` → 1 variant sufficient
+- `apr import hf://…` outputs `.apr` only → 1 variant sufficient
+
+Enforced by `make format-coverage`. Each format variant is a distinct recipe or a documented section within the recipe.
+
+### Invariant D — arXiv Citation (F-ARXIV-001)
+
+Every recipe must include ≥1 arXiv or peer-reviewed citation in its doc comment header linking the technique to the literature.
+
+```
+∀ r ∈ recipes:
+  |r.citations ∩ (arXiv ∪ peer_reviewed)| ≥ 1
+```
+
+Doc comment format:
+
+```rust
+//! ## References
+//! - Hu et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
+```
+
+Enforced by `make citation-check` (grep for `arXiv:` or `DOI:` in every recipe `.rs` file).
+
+### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001)
+
+Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook chapters, spec components — must be bound to a provable-contract that validates factual accuracy and structural integrity.
+
+```
+∀ d ∈ {README.md, CLAUDE.md, book/src/**/*.md, docs/specifications/**/*.md}:
+  ∃ c ∈ contracts/: d ∈ c.bindings
+  pv lint(c) = PASS
+  pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
+```
+
+Enforced by `make docs-validate` + `pv validate contracts/docs-schema-v1.yaml`.
 
 ---
 
-*Specification Version: 3.1.0 — Added provable contracts (F1–F7) and CLI QA process*
+## CLI QA — Fleet + Contract Coverage + Pattern-Driven Protocols
+
+The installed `apr` binary is tested via `/qa` (Claude Code skill in `.claude/skills/qa/`) across the full **hardware fleet** (intel, yoga, jetson, lambda-labs + local), and every subcommand is audited against the `provable-contracts` registry (YAML + Lean 4 proofs via `pv` CLI). This exercises all 57 subcommands, detects arch-divergence bugs, contract drift, coverage gaps, and 12+ systemic bug patterns, and files GitHub issues automatically.
+
+**Pattern-Driven QA Protocols**: 12 protocol-level checks derived from 500 historical paiml/aprender issues (#24–#607). The top bug classes — GPU/CUDA (8.2%), NaN/Inf (7.0%), silently-ignored flags (4.6%), hardcoded values (3.0%), wrong output (2.8%), cross-subcommand divergence, and cache inconsistency — are each caught by a dedicated protocol (Silent-Flag, Exit-Code Contradiction, Flag-Echo, Cross-Subcommand Consistency, Cache Registry Integrity, GPU/CPU Parity, NaN/Inf Sentinel, Version Sanity, Phantom Subcommand, JSON Schema Stability, Default-Defamation, Hardware Cascade).
+
+See [Quality Gates](components/quality-gates.md) for the target fleet, full defect taxonomy with historical frequencies, test matrix, protocol definitions, docs schema, CLI parity invariant, and formal coverage metrics.
+
+---
+
+*Specification Version: 4.0.0 — Five Coverage Invariants: A (CLI parity 100%), B (recipe contract grade A), C (APR/GGUF/SafeTensors format coverage), D (arXiv citations), E (docs contract coverage)*

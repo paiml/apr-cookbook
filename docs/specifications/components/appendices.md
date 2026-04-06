@@ -146,6 +146,16 @@ Before submitting a recipe, verify:
 | format/ | 10 | In progress |
 | **Total CLI** | **48** | **Phased rollout** |
 
+### Five Invariants Status
+
+| Invariant | Gate | Status |
+|-----------|------|--------|
+| A: CLI Recipe Parity | `make cli-parity` | 57/57 = 100% |
+| B: Recipe Contract Grade A | `make contract-grade` | 11 contracts (in progress) |
+| C: Model Format Coverage | `make format-coverage` | TBD |
+| D: arXiv Citation | `make citation-check` | TBD |
+| E: Docs Contract Coverage | `make docs-validate` | partial |
+
 ### Quality Gates Summary
 
 ```
