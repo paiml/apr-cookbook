@@ -328,7 +328,7 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 ```
 
-**Baseline (2026-04-06)**: 0/219 recipes have citations (0%). **Gate**: `make citation-check` (reports current state; warns but does not block until baseline > 50%).
+**Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
 ### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
 

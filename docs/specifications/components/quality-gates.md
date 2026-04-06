@@ -402,7 +402,7 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation*. arXiv:2106.09685
 ```
 
-**Baseline**: 0/219 recipes have arXiv/DOI citations (0%). **Gate**: `make citation-check` (reports; warns until > 50%).
+**Baseline**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
 ### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — TARGET
 
@@ -452,7 +452,7 @@ The `make cli-parity` regex matches all of:
 | Subcommands with ≥1 recipe | 57/57 (100%) | 57/57 | `make cli-parity` | **ENFORCED** |
 | Recipes with contract reference | 0/219 (0%) | 219/219 | `make contract-grade` | TARGET |
 | Recipes with all format variants | 3/219 (1.4%) | 100% applicable | `make format-coverage` | TARGET |
-| Recipes with arXiv/DOI citation | 0/219 (0%) | 219/219 | `make citation-check` | TARGET |
+| Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
 | Docs validated by contract | 13/268 (4.9%) | 268/268 | `make docs-validate` | TARGET |
 | Flag variants | ~468 | ~468 | `make variant-coverage` | measured |
 | Contracts with Lean proof ≥ L2 | 0/11 | 80%+ | `pv lean-status` | TARGET |
