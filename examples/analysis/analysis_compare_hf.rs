@@ -1,7 +1,7 @@
 //! # APR vs HuggingFace SafeTensors Comparison
 //! **CLI Equivalent**: `apr compare-hf`
 //!
-//! CLI equivalent: `apr compare_hf model.apr --repo my-org/my-model --threshold 1e-5`
+//! CLI equivalent: `apr compare-hf model.apr --repo my-org/my-model --threshold 1e-5`
 //!
 //! Performs bit-for-bit tensor comparison between a local APR model and
 //! HuggingFace SafeTensors weights. Maps HF naming conventions to APR naming,

@@ -1,6 +1,6 @@
 //! # Model Migration Pipeline
 //!
-//! **CLI equivalent:** `apr migrate model.safetensors --to apr2 --lint --verify`
+//! **CLI equivalent:** `apr convert model.safetensors --to apr2 --lint --verify`
 //!
 //! Demonstrates a complete model migration pipeline composing four stages:
 //! import, lint, convert, and export. This is the workflow used when

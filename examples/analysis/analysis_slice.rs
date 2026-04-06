@@ -1,6 +1,6 @@
 //! # Tensor Slice Extraction and Decoding
 //!
-//! CLI equivalent: `apr slice model.apr --tensor weights --range 10..20`
+//! CLI equivalent: `apr tensors model.apr --slice weights --range 10..20`
 //!
 //! Extract and decode a range of elements from tensor data. Demonstrates
 //! index-range slicing, row/column extraction, strided access, hex dumping,

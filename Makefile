@@ -178,9 +178,9 @@ contracts-lint: ## Run pv lint + lean-status on all contracts (F-DOCS-001, F-CLI
 
 cli-parity: ## Verify every apr subcommand has ≥1 cookbook recipe (F-CLIPARITY-001)
 	@echo "🎯 Checking apr-cli ↔ recipes 1:1 parity..."
-	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u > /tmp/apr-subs.txt
+	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u | grep -v '^help$$' > /tmp/apr-subs.txt
 	@grep -rhoiE 'CLI [Ee]quivalent[*: ]+`?apr [a-z][a-z-]+' examples/ 2>/dev/null | grep -oE 'apr [a-z][a-z-]+' | awk '{print $$2}' | sort -u > /tmp/recipe-subs.txt
-	@MISSING=$$(comm -23 /tmp/apr-subs.txt /tmp/recipe-subs.txt | grep -v '^help$$' || true); \
+	@MISSING=$$(comm -23 /tmp/apr-subs.txt /tmp/recipe-subs.txt || true); \
 	N_SUBS=$$(wc -l < /tmp/apr-subs.txt); \
 	N_COVERED=$$(comm -12 /tmp/apr-subs.txt /tmp/recipe-subs.txt | wc -l); \
 	printf "  Subcommands:  %3d\n  Covered:      %3d\n  Coverage:     %d%%\n" $$N_SUBS $$N_COVERED $$((100*N_COVERED/N_SUBS)); \
@@ -194,7 +194,7 @@ cli-parity: ## Verify every apr subcommand has ≥1 cookbook recipe (F-CLIPARITY
 		echo "⚠️  Orphan recipes (no matching apr subcommand):"; \
 		echo "$$ORPHANS" | sed 's/^/    /'; \
 	fi
-	@echo "✅ CLI parity: all 58 subcommands have ≥1 recipe"
+	@echo "✅ CLI parity: all $$( wc -l < /tmp/apr-subs.txt | tr -d ' ') subcommands have ≥1 recipe"
 
 variant-coverage: ## Report per-subcommand flag/variant coverage
 	@echo "📊 Per-subcommand variant coverage:"
