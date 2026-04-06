@@ -146,9 +146,9 @@ docs-validate: ## Validate all *.md via pmat validate-readme + link integrity + 
 		echo "  → Generating deep context..."; \
 		pmat context --output deep-context.md >/dev/null 2>&1 || true; \
 	fi
-	@echo "  → Factual validation (README, CLAUDE, spec)..."
+	@echo "  → Factual validation (README, CLAUDE, spec, book)..."
 	@pmat validate-readme \
-		--targets README.md CLAUDE.md $$(find docs/specifications -name '*.md') \
+		--targets README.md CLAUDE.md $$(find docs/specifications -name '*.md') $$(find book/src -name '*.md' 2>/dev/null) \
 		--deep-context deep-context.md \
 		--fail-on-contradiction \
 		--fail-on-unverified 2>&1 || (echo "❌ pmat validate-readme FAILED"; exit 1)
@@ -156,7 +156,7 @@ docs-validate: ## Validate all *.md via pmat validate-readme + link integrity + 
 	@pmat validate-docs --root . --fail-on-error 2>&1 || (echo "❌ pmat validate-docs FAILED"; exit 1)
 	@echo "  → CLI binding integrity (every apr cmd in docs exists)..."
 	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u > /tmp/apr-cmds-actual.txt
-	@grep -rhoP '(?<![.\w])apr [a-z][a-z-]+\b' README.md CLAUDE.md docs/ 2>/dev/null | awk '{print $$2}' | sort -u > /tmp/apr-cmds-in-docs.txt
+	@grep -rhoP '(?<![.\w])apr [a-z][a-z-]+\b' README.md CLAUDE.md docs/ book/src/ 2>/dev/null | awk '{print $$2}' | sort -u > /tmp/apr-cmds-in-docs.txt
 	@MISSING=$$(comm -23 /tmp/apr-cmds-in-docs.txt /tmp/apr-cmds-actual.txt | grep -vE '^(help|subcommand|subcommands)$$' || true); \
 	if [ -n "$$MISSING" ]; then \
 		echo "❌ Docs reference nonexistent apr subcommands:"; \

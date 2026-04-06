@@ -4,7 +4,7 @@ Complete model migration pipeline composing four stages: import, lint, convert, 
 
 ## CLI Equivalent
 ```bash
-apr migrate model.safetensors --to apr2 --lint --verify
+apr convert model.safetensors --to apr2 --lint --verify
 ```
 
 ## Key Concepts
