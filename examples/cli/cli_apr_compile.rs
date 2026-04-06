@@ -30,6 +30,7 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use serde::{Deserialize, Serialize};
 use std::env;
 use std::path::Path;
@@ -184,8 +185,10 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     }
 
     let mut ctx = RecipeContext::new("cli_apr_compile")?;
+    let output = AdaptiveOutput::new();
 
     // Create or load model
+    output.progress(1, 5, "loading model");
     let (model_name, model_bytes) = if config.demo {
         let payload = generate_model_payload(42, 4096);
         let bytes = ModelBundle::new()
@@ -234,7 +237,9 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     println!();
 
     // Generate Cargo project (demonstrate the template, don't actually build)
+    output.progress(2, 5, "generating Cargo.toml");
     let cargo_toml = generate_cargo_toml(&bin_name);
+    output.progress(3, 5, "generating main.rs");
     let main_rs = generate_main_rs(&bin_name, &model_name, model_bytes.len());
 
     println!("Generated Cargo.toml:");
@@ -246,6 +251,7 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     println!("{}", main_rs);
 
     // Write generated files to temp dir for verification
+    output.progress(4, 5, "writing project files");
     let project_dir = ctx.path(&bin_name);
     std::fs::create_dir_all(project_dir.join("src"))?;
     std::fs::write(project_dir.join("Cargo.toml"), &cargo_toml)?;
@@ -253,6 +259,7 @@ fn run_compile(config: &CompileConfig) -> Result<()> {
     std::fs::write(project_dir.join("model.apr"), &model_bytes)?;
 
     // Build RUSTFLAGS
+    output.progress(5, 5, "generating report");
     let mut rustflags = Vec::new();
     if config.strip {
         rustflags.push("-C strip=symbols");

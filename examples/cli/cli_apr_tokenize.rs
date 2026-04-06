@@ -31,6 +31,7 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
@@ -244,6 +245,7 @@ fn apply_merge(words: &mut [Vec<String>], left: &str, right: &str) {
 /// Train a BPE tokenizer from raw text, iterating merges until `vocab_size`
 /// distinct symbols are reached.
 fn train_bpe(text: &str, vocab_size: usize) -> BpeTrainer {
+    let output = AdaptiveOutput::new();
     let mut trainer = BpeTrainer::new();
     let (mut words, counts) = split_into_words(text);
 
@@ -267,7 +269,9 @@ fn train_bpe(text: &str, vocab_size: usize) -> BpeTrainer {
     });
 
     // Iteratively merge the most frequent pair
+    let merges_needed = vocab_size.saturating_sub(trainer.vocab.len());
     while trainer.vocab.len() < vocab_size {
+        output.progress(trainer.merges.len() + 1, merges_needed, "BPE merge");
         let pairs = count_pairs(&words, &counts);
         let best = most_frequent_pair(&pairs);
         match best {
@@ -284,6 +288,7 @@ fn train_bpe(text: &str, vocab_size: usize) -> BpeTrainer {
             None => break, // no more pairs to merge
         }
     }
+    output.status(""); // clear progress line
 
     trainer
 }

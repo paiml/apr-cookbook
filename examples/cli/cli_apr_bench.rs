@@ -27,6 +27,7 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -126,18 +127,33 @@ fn run_benchmark(config: &BenchConfig) -> Result<()> {
     }
 
     // Warmup (simulated)
+    let output = AdaptiveOutput::new();
     let _warmup_times: Vec<f64> = (0..config.warmup)
-        .map(|i| simulate_inference(i, config.batch_size))
+        .map(|i| {
+            if !config.json {
+                output.progress(i + 1, config.warmup, "warmup");
+            }
+            simulate_inference(i, config.batch_size)
+        })
         .collect();
 
     if !config.json {
+        output.status(""); // clear progress line
         println!("Running benchmark...");
     }
 
     // Benchmark (simulated)
     let mut times: Vec<f64> = (0..config.iterations)
-        .map(|i| simulate_inference(i + config.warmup, config.batch_size))
+        .map(|i| {
+            if !config.json {
+                output.progress(i + 1, config.iterations, "benchmarking");
+            }
+            simulate_inference(i + config.warmup, config.batch_size)
+        })
         .collect();
+    if !config.json {
+        output.status(""); // clear progress line
+    }
 
     times.sort_by(|a, b| a.partial_cmp(b).unwrap_or(std::cmp::Ordering::Equal));
 

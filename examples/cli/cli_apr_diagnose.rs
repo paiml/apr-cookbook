@@ -32,6 +32,7 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use std::collections::hash_map::DefaultHasher;
 use std::fmt;
@@ -521,7 +522,9 @@ fn print_diagnosis_chain(steps: &[DiagnosisStep], depth: usize) {
 
 fn run_diagnose(config: &DiagnoseConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_diagnose")?;
+    let output = AdaptiveOutput::new();
 
+    output.progress(1, 4, "loading checkpoint");
     let data = if config.demo {
         create_demo_checkpoint()
     } else if let Some(path) = &config.checkpoint_path {
@@ -537,8 +540,10 @@ fn run_diagnose(config: &DiagnoseConfig) -> Result<()> {
     println!("============================================");
     println!();
 
+    output.progress(2, 4, "inspecting checkpoint");
     print_checkpoint_summary(&data);
 
+    output.progress(3, 4, "detecting symptoms");
     let symptoms = detect_symptoms(&data);
     println!(
         "Detected Symptoms: {}",
@@ -554,7 +559,9 @@ fn run_diagnose(config: &DiagnoseConfig) -> Result<()> {
     );
     println!();
 
+    output.progress(4, 4, "running Five Whys analysis");
     let steps = diagnose_checkpoint(&data);
+    output.status(""); // clear progress line
     print_diagnosis_chain(&steps, depth);
 
     ctx.record_metric("epoch", data.epoch as i64);

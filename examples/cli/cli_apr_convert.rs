@@ -27,6 +27,7 @@
 //! ```
 
 use apr_cookbook::prelude::*;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 
@@ -161,13 +162,17 @@ fn write_output(
 
 fn run_convert(config: &ConvertConfig) -> Result<()> {
     let mut ctx = RecipeContext::new("cli_apr_convert")?;
+    let output = AdaptiveOutput::new();
 
-    // Load input
+    // Phase 1: Load input
+    output.progress(1, 4, "loading model");
     let Some((input_path, input_bytes)) = load_input(config) else {
         println!("No input provided. Use --demo or specify an input file.");
         return Ok(());
     };
 
+    // Phase 2: Detect format
+    output.progress(2, 4, "detecting format");
     let input_format = detect_format(&input_bytes);
 
     if config.verbose {
@@ -179,19 +184,26 @@ fn run_convert(config: &ConvertConfig) -> Result<()> {
         );
     }
 
-    // Convert
+    // Phase 3: Convert
+    output.progress(
+        3,
+        4,
+        &format!("converting to {}", config.output_format().as_str()),
+    );
     let output_bytes = convert(
         &input_bytes,
         config.output_format(),
         config.quantize.as_deref(),
     )?;
 
-    // Determine and write output
+    // Phase 4: Write output
+    output.progress(4, 4, "writing output");
     let output_path = config
         .output_path
         .clone()
         .unwrap_or_else(|| generate_output_path(&input_path, config.output_format()));
     let actual_output_path = write_output(&mut ctx, &output_path, &output_bytes, config.demo)?;
+    output.status(""); // clear progress line
 
     // Record metrics
     let compression_ratio = input_bytes.len() as f64 / output_bytes.len() as f64;

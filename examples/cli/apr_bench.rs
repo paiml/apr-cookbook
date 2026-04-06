@@ -12,6 +12,7 @@
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
@@ -89,20 +90,24 @@ fn simulate_inference(model: &BundledModel, _batch_size: usize) {
 }
 
 fn run_benchmark(model: &BundledModel, args: &Args) -> BenchResult {
+    let output = AdaptiveOutput::new();
     let mut latencies = Vec::with_capacity(args.iterations);
 
     // Warmup
-    for _ in 0..args.warmup {
+    for i in 0..args.warmup {
+        output.progress(i + 1, args.warmup, "warmup");
         simulate_inference(model, args.batch_size);
     }
 
     // Benchmark
     let start = Instant::now();
-    for _ in 0..args.iterations {
+    for i in 0..args.iterations {
+        output.progress(i + 1, args.iterations, "benchmarking");
         let iter_start = Instant::now();
         simulate_inference(model, args.batch_size);
         latencies.push(iter_start.elapsed());
     }
+    output.status(""); // clear progress line
     let total_time = start.elapsed();
 
     // Calculate statistics
