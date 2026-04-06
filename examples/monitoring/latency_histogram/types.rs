@@ -140,7 +140,7 @@ impl fmt::Display for SloCheckResult {
 /// Values exceeding `MAX_LATENCY_US` are placed in the last bucket.
 pub struct LatencyHistogram {
     // Bucket counts; index `i` covers `[i * BUCKET_WIDTH_US, (i+1) * BUCKET_WIDTH_US)`
-    pub buckets: [u64; NUM_BUCKETS],
+    buckets: [u64; NUM_BUCKETS],
     // Total number of recorded observations
     pub count: u64,
     // Running sum for mean calculation (microseconds)

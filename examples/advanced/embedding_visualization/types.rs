@@ -20,7 +20,7 @@ pub struct DataPoint {
     pub id: String,
     pub content: String,
     pub embedding: Vec<f32>,
-    pub projection: Option<(f32, f32)>,
+    projection: Option<(f32, f32)>,
     pub cluster_id: Option<usize>,
 }
 

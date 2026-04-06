@@ -139,27 +139,27 @@ path = "examples/acceleration/simd_matrix_operations.rs"
 
 [[example]]
 name = "acceleration_kernel_fusion"
-path = "examples/acceleration/acceleration_kernel_fusion.rs"
+path = "examples/acceleration/acceleration_kernel_fusion/main.rs"
 
 [[example]]
 name = "acceleration_mmap_inference"
-path = "examples/acceleration/acceleration_mmap_inference.rs"
+path = "examples/acceleration/acceleration_mmap_inference/main.rs"
 
 [[example]]
 name = "acceleration_autotuner"
-path = "examples/acceleration/acceleration_autotuner.rs"
+path = "examples/acceleration/acceleration_autotuner/main.rs"
 
 [[example]]
 name = "acceleration_quantized_matmul"
-path = "examples/acceleration/acceleration_quantized_matmul.rs"
+path = "examples/acceleration/acceleration_quantized_matmul/main.rs"
 
 [[example]]
 name = "acceleration_compression_benchmark"
-path = "examples/acceleration/acceleration_compression_benchmark.rs"
+path = "examples/acceleration/acceleration_compression_benchmark/main.rs"
 
 [[example]]
 name = "acceleration_cache_tiling"
-path = "examples/acceleration/acceleration_cache_tiling.rs"
+path = "examples/acceleration/acceleration_cache_tiling/main.rs"
 
 [[example]]
 name = "apr_info"
@@ -196,7 +196,7 @@ path = "examples/creation/create_apr_ngram_language_model.rs"
 
 [[example]]
 name = "create_apr_neural_network"
-path = "examples/creation/create_apr_neural_network.rs"
+path = "examples/creation/create_apr_neural_network/main.rs"
 
 # Category B: Binary Bundling (additional)
 [[example]]
@@ -234,7 +234,7 @@ path = "examples/training/continuous_train_curriculum.rs"
 
 [[example]]
 name = "entrenar_autograd_training"
-path = "examples/training/entrenar_autograd_training.rs"
+path = "examples/training/entrenar_autograd_training/main.rs"
 
 [[example]]
 name = "entrenar_eval_metrics"
@@ -242,7 +242,7 @@ path = "examples/training/entrenar_eval_metrics.rs"
 
 [[example]]
 name = "hyperparameter_sweep"
-path = "examples/training/hyperparameter_sweep.rs"
+path = "examples/training/hyperparameter_sweep/main.rs"
 
 [[example]]
 name = "checkpoint_resume"
@@ -250,35 +250,35 @@ path = "examples/training/checkpoint_resume.rs"
 
 [[example]]
 name = "mixed_precision_training"
-path = "examples/training/mixed_precision_training.rs"
+path = "examples/training/mixed_precision_training/main.rs"
 
 [[example]]
 name = "few_shot_finetune"
-path = "examples/training/few_shot_finetune.rs"
+path = "examples/training/few_shot_finetune/main.rs"
 
 [[example]]
 name = "data_preprocessing"
-path = "examples/training/data_preprocessing.rs"
+path = "examples/training/data_preprocessing/main.rs"
 
 [[example]]
 name = "learning_rate_schedule"
-path = "examples/training/learning_rate_schedule.rs"
+path = "examples/training/learning_rate_schedule/main.rs"
 
 [[example]]
 name = "gradient_accumulation"
-path = "examples/training/gradient_accumulation.rs"
+path = "examples/training/gradient_accumulation/main.rs"
 
 [[example]]
 name = "autograd_custom_ops"
-path = "examples/training/autograd_custom_ops.rs"
+path = "examples/training/autograd_custom_ops/main.rs"
 
 [[example]]
 name = "autograd_backprop_viz"
-path = "examples/training/autograd_backprop_viz.rs"
+path = "examples/training/autograd_backprop_viz/main.rs"
 
 [[example]]
 name = "autograd_gradient_clipping"
-path = "examples/training/autograd_gradient_clipping.rs"
+path = "examples/training/autograd_gradient_clipping/main.rs"
 
 # Category D: Format Conversion (additional)
 [[example]]
@@ -308,7 +308,7 @@ path = "examples/registry/registry_model_rollback.rs"
 
 [[example]]
 name = "registry_model_versioning"
-path = "examples/registry/registry_model_versioning.rs"
+path = "examples/registry/registry_model_versioning/main.rs"
 
 # Category F: API
 [[example]]
@@ -329,7 +329,7 @@ path = "examples/api/api_model_health_check.rs"
 
 [[example]]
 name = "api_auth_middleware"
-path = "examples/api/api_auth_middleware.rs"
+path = "examples/api/api_auth_middleware/main.rs"
 
 # Category G: Serverless
 [[example]]
@@ -350,7 +350,7 @@ path = "examples/serverless/serverless_container_image.rs"
 
 [[example]]
 name = "serverless_model_warmup"
-path = "examples/serverless/serverless_model_warmup.rs"
+path = "examples/serverless/serverless_model_warmup/main.rs"
 
 # Category H: WASM/Browser
 [[example]]
@@ -375,12 +375,12 @@ path = "examples/wasm/wasm_streaming_compilation.rs"
 
 [[example]]
 name = "wasm_model_loader"
-path = "examples/wasm/wasm_model_loader.rs"
+path = "examples/wasm/wasm_model_loader/main.rs"
 
 # Category I: GPU Acceleration
 [[example]]
 name = "flash_attention_inference"
-path = "examples/gpu/flash_attention_inference.rs"
+path = "examples/gpu/flash_attention_inference/main.rs"
 
 [[example]]
 name = "gpu_cuda_inference"
@@ -400,20 +400,20 @@ path = "examples/gpu/gpu_memory_management.rs"
 
 [[example]]
 name = "gpu_memory_pool"
-path = "examples/gpu/gpu_memory_pool.rs"
+path = "examples/gpu/gpu_memory_pool/main.rs"
 
 [[example]]
 name = "gpu_ptx_analysis"
-path = "examples/gpu/gpu_ptx_analysis.rs"
+path = "examples/gpu/gpu_ptx_analysis/main.rs"
 
 [[example]]
 name = "gpu_vulkan_inference"
-path = "examples/gpu/gpu_vulkan_inference.rs"
+path = "examples/gpu/gpu_vulkan_inference/main.rs"
 
 # Category J: SIMD Acceleration (additional)
 [[example]]
 name = "trueno_simd_ops"
-path = "examples/simd/trueno_simd_ops.rs"
+path = "examples/simd/trueno_simd_ops/main.rs"
 
 [[example]]
 name = "simd_matrix_ops"
@@ -433,7 +433,7 @@ path = "examples/simd/simd_auto_vectorization.rs"
 
 [[example]]
 name = "simd_avx_vnni_int8_inference"
-path = "examples/simd/simd_avx_vnni_int8_inference.rs"
+path = "examples/simd/simd_avx_vnni_int8_inference/main.rs"
 
 # Category K: Model Distillation
 [[example]]
@@ -450,11 +450,11 @@ path = "examples/distillation/distill_quantization_aware.rs"
 
 [[example]]
 name = "distill_attention_transfer"
-path = "examples/distillation/distill_attention_transfer.rs"
+path = "examples/distillation/distill_attention_transfer/main.rs"
 
 [[example]]
 name = "distill_self_distillation"
-path = "examples/distillation/distill_self_distillation.rs"
+path = "examples/distillation/distill_self_distillation/main.rs"
 
 # Category L: CLI Tools (additional)
 [[example]]
@@ -475,23 +475,23 @@ path = "examples/cli/cli_apr_serve.rs"
 
 [[example]]
 name = "cli_apr_diff"
-path = "examples/cli/cli_apr_diff.rs"
+path = "examples/cli/cli_apr_diff/main.rs"
 
 [[example]]
 name = "cli_apr_compile"
-path = "examples/cli/cli_apr_compile.rs"
+path = "examples/cli/cli_apr_compile/main.rs"
 
 [[example]]
 name = "cli_apr_tui"
-path = "examples/cli/cli_apr_tui.rs"
+path = "examples/cli/cli_apr_tui/main.rs"
 
 [[example]]
 name = "cli_apr_decrypt"
-path = "examples/cli/cli_apr_decrypt.rs"
+path = "examples/cli/cli_apr_decrypt/main.rs"
 
 [[example]]
 name = "cli_apr_diagnose"
-path = "examples/cli/cli_apr_diagnose.rs"
+path = "examples/cli/cli_apr_diagnose/main.rs"
 
 [[example]]
 name = "cli_apr_list"
@@ -503,15 +503,15 @@ path = "examples/cli/cli_apr_rm.rs"
 
 [[example]]
 name = "cli_apr_runs"
-path = "examples/cli/cli_apr_runs.rs"
+path = "examples/cli/cli_apr_runs/main.rs"
 
 [[example]]
 name = "cli_apr_tokenize"
-path = "examples/cli/cli_apr_tokenize.rs"
+path = "examples/cli/cli_apr_tokenize/main.rs"
 
 [[example]]
 name = "cli_apr_ptx_map"
-path = "examples/cli/cli_apr_ptx_map.rs"
+path = "examples/cli/cli_apr_ptx_map/main.rs"
 
 # --- Benchmarks ---
 
@@ -522,87 +522,87 @@ harness = false
 # Category: Advanced Demos
 [[example]]
 name = "model_inspection_scoring"
-path = "examples/advanced/model_inspection_scoring.rs"
+path = "examples/advanced/model_inspection_scoring/main.rs"
 
 [[example]]
 name = "quantization_quality_tradeoff"
-path = "examples/advanced/quantization_quality_tradeoff.rs"
+path = "examples/advanced/quantization_quality_tradeoff/main.rs"
 
 [[example]]
 name = "hierarchical_cache_benchmark"
-path = "examples/advanced/hierarchical_cache_benchmark.rs"
+path = "examples/advanced/hierarchical_cache_benchmark/main.rs"
 
 [[example]]
 name = "handwriting_recognition"
-path = "examples/advanced/handwriting_recognition.rs"
+path = "examples/advanced/handwriting_recognition/main.rs"
 
 [[example]]
 name = "image_classification"
-path = "examples/advanced/image_classification.rs"
+path = "examples/advanced/image_classification/main.rs"
 
 [[example]]
 name = "rag_pipeline"
-path = "examples/advanced/rag_pipeline.rs"
+path = "examples/advanced/rag_pipeline/main.rs"
 
 [[example]]
 name = "edge_anomaly_detection"
-path = "examples/advanced/edge_anomaly_detection.rs"
+path = "examples/advanced/edge_anomaly_detection/main.rs"
 
 [[example]]
 name = "online_training_defect"
-path = "examples/advanced/online_training_defect.rs"
+path = "examples/advanced/online_training_defect/main.rs"
 
 [[example]]
 name = "embedding_visualization"
-path = "examples/advanced/embedding_visualization.rs"
+path = "examples/advanced/embedding_visualization/main.rs"
 
 [[example]]
 name = "wasm_summarizer"
-path = "examples/advanced/wasm_summarizer.rs"
+path = "examples/advanced/wasm_summarizer/main.rs"
 
 [[example]]
 name = "voice_recognition"
-path = "examples/advanced/voice_recognition.rs"
+path = "examples/advanced/voice_recognition/main.rs"
 
 [[example]]
 name = "style_transfer"
-path = "examples/advanced/style_transfer.rs"
+path = "examples/advanced/style_transfer/main.rs"
 
 [[example]]
 name = "streaming_sentiment"
-path = "examples/advanced/streaming_sentiment.rs"
+path = "examples/advanced/streaming_sentiment/main.rs"
 
 [[example]]
 name = "clip_search"
-path = "examples/advanced/clip_search.rs"
+path = "examples/advanced/clip_search/main.rs"
 
 [[example]]
 name = "spanish_tutor"
-path = "examples/advanced/spanish_tutor.rs"
+path = "examples/advanced/spanish_tutor/main.rs"
 
 [[example]]
 name = "code_defect_oracle"
-path = "examples/advanced/code_defect_oracle.rs"
+path = "examples/advanced/code_defect_oracle/main.rs"
 
 [[example]]
 name = "model_showcase"
-path = "examples/advanced/model_showcase.rs"
+path = "examples/advanced/model_showcase/main.rs"
 
 [[example]]
 name = "ab_experiment"
-path = "examples/advanced/ab_experiment.rs"
+path = "examples/advanced/ab_experiment/main.rs"
 
 [[example]]
 name = "cicd_model_pipeline"
-path = "examples/advanced/cicd_model_pipeline.rs"
+path = "examples/advanced/cicd_model_pipeline/main.rs"
 
 [[example]]
 name = "debug_fix_loop"
-path = "examples/advanced/debug_fix_loop.rs"
+path = "examples/advanced/debug_fix_loop/main.rs"
 
 [[example]]
 name = "compliance_audit"
-path = "examples/advanced/compliance_audit.rs"
+path = "examples/advanced/compliance_audit/main.rs"
 
 # --- Category M: Inference Monitoring ---
 
@@ -616,19 +616,19 @@ path = "examples/monitoring/hash_chain_audit.rs"
 
 [[example]]
 name = "model_drift_detection"
-path = "examples/monitoring/model_drift_detection.rs"
+path = "examples/monitoring/model_drift_detection/main.rs"
 
 [[example]]
 name = "latency_histogram"
-path = "examples/monitoring/latency_histogram.rs"
+path = "examples/monitoring/latency_histogram/main.rs"
 
 [[example]]
 name = "inference_cost_tracking"
-path = "examples/monitoring/inference_cost_tracking.rs"
+path = "examples/monitoring/inference_cost_tracking/main.rs"
 
 [[example]]
 name = "cbtop_headless"
-path = "examples/monitoring/cbtop_headless.rs"
+path = "examples/monitoring/cbtop_headless/main.rs"
 
 [[example]]
 name = "monitoring_energy_estimation"
@@ -636,7 +636,7 @@ path = "examples/monitoring/monitoring_energy_estimation.rs"
 
 [[example]]
 name = "monitoring_memory_profiler"
-path = "examples/monitoring/monitoring_memory_profiler.rs"
+path = "examples/monitoring/monitoring_memory_profiler/main.rs"
 
 # --- Category N: Speech Recognition ---
 
@@ -646,19 +646,19 @@ path = "examples/speech/whisper_transcribe.rs"
 
 [[example]]
 name = "whisper_streaming"
-path = "examples/speech/whisper_streaming.rs"
+path = "examples/speech/whisper_streaming/main.rs"
 
 [[example]]
 name = "speech_vad"
-path = "examples/speech/speech_vad.rs"
+path = "examples/speech/speech_vad/main.rs"
 
 [[example]]
 name = "speech_diarization"
-path = "examples/speech/speech_diarization.rs"
+path = "examples/speech/speech_diarization/main.rs"
 
 [[example]]
 name = "speech_multilingual"
-path = "examples/speech/speech_multilingual.rs"
+path = "examples/speech/speech_multilingual/main.rs"
 
 # --- Category P: Inference Patterns ---
 
@@ -676,7 +676,7 @@ path = "examples/inference/adaptive_batch_inference.rs"
 
 [[example]]
 name = "chat_kv_cache"
-path = "examples/inference/chat_kv_cache.rs"
+path = "examples/inference/chat_kv_cache/main.rs"
 
 [[example]]
 name = "simple_inference"
@@ -692,11 +692,11 @@ path = "examples/inference/model_pipeline.rs"
 
 [[example]]
 name = "chat_tool_use"
-path = "examples/inference/chat_tool_use.rs"
+path = "examples/inference/chat_tool_use/main.rs"
 
 [[example]]
 name = "ensemble_inference"
-path = "examples/inference/ensemble_inference.rs"
+path = "examples/inference/ensemble_inference/main.rs"
 
 [[example]]
 name = "quantized_inference_comparison"
@@ -704,37 +704,37 @@ path = "examples/inference/quantized_inference_comparison.rs"
 
 [[example]]
 name = "dynamic_batch_with_sla"
-path = "examples/inference/dynamic_batch_with_sla.rs"
+path = "examples/inference/dynamic_batch_with_sla/main.rs"
 
 [[example]]
 name = "inference_apr_run"
-path = "examples/inference/inference_apr_run.rs"
+path = "examples/inference/inference_apr_run/main.rs"
 
 [[example]]
 name = "inference_mmap_lazy_load"
-path = "examples/inference/inference_mmap_lazy_load.rs"
+path = "examples/inference/inference_mmap_lazy_load/main.rs"
 
 # --- Category Q: Model Serving ---
 
 [[example]]
 name = "http_model_server"
-path = "examples/serve/http_model_server.rs"
+path = "examples/serve/http_model_server/main.rs"
 
 [[example]]
 name = "model_ab_testing"
-path = "examples/serve/model_ab_testing.rs"
+path = "examples/serve/model_ab_testing/main.rs"
 
 [[example]]
 name = "model_canary_deploy"
-path = "examples/serve/model_canary_deploy.rs"
+path = "examples/serve/model_canary_deploy/main.rs"
 
 [[example]]
 name = "model_rate_limiter"
-path = "examples/serve/model_rate_limiter.rs"
+path = "examples/serve/model_rate_limiter/main.rs"
 
 [[example]]
 name = "model_selection_router"
-path = "examples/serve/model_selection_router.rs"
+path = "examples/serve/model_selection_router/main.rs"
 
 # --- Category O: Distributed Computing ---
 
@@ -744,19 +744,19 @@ path = "examples/distributed/distributed_inference.rs"
 
 [[example]]
 name = "distributed_model_sharding"
-path = "examples/distributed/distributed_model_sharding.rs"
+path = "examples/distributed/distributed_model_sharding/main.rs"
 
 [[example]]
 name = "distributed_pipeline_parallel"
-path = "examples/distributed/distributed_pipeline_parallel.rs"
+path = "examples/distributed/distributed_pipeline_parallel/main.rs"
 
 [[example]]
 name = "distributed_ring_allreduce"
-path = "examples/distributed/distributed_ring_allreduce.rs"
+path = "examples/distributed/distributed_ring_allreduce/main.rs"
 
 [[example]]
 name = "distributed_gossip_protocol"
-path = "examples/distributed/distributed_gossip_protocol.rs"
+path = "examples/distributed/distributed_gossip_protocol/main.rs"
 
 # --- Category: Optimize ---
 
@@ -778,7 +778,7 @@ path = "examples/optimize/distill_checkpoint.rs"
 
 [[example]]
 name = "optimize_full_pipeline"
-path = "examples/optimize/optimize_full_pipeline.rs"
+path = "examples/optimize/optimize_full_pipeline/main.rs"
 
 [[example]]
 name = "prune_magnitude"
@@ -814,7 +814,7 @@ path = "examples/optimize/finetune_merge_adapter.rs"
 
 [[example]]
 name = "finetune_plan_vram"
-path = "examples/optimize/finetune_plan_vram.rs"
+path = "examples/optimize/finetune_plan_vram/main.rs"
 
 [[example]]
 name = "merge_average"
@@ -850,7 +850,7 @@ path = "examples/optimize/quantize_fake_qat.rs"
 
 [[example]]
 name = "optimize_tune"
-path = "examples/optimize/optimize_tune.rs"
+path = "examples/optimize/optimize_tune/main.rs"
 
 # --- Category: Chat Templates ---
 
@@ -868,15 +868,15 @@ path = "examples/chat/chat_mistral.rs"
 
 [[example]]
 name = "chat_multi_format"
-path = "examples/chat/chat_multi_format.rs"
+path = "examples/chat/chat_multi_format/main.rs"
 
 [[example]]
 name = "chat_injection_defense"
-path = "examples/chat/chat_injection_defense.rs"
+path = "examples/chat/chat_injection_defense/main.rs"
 
 [[example]]
 name = "analysis_oracle"
-path = "examples/analysis/analysis_oracle.rs"
+path = "examples/analysis/analysis_oracle/main.rs"
 
 [[example]]
 name = "analysis_canary"
@@ -896,11 +896,11 @@ path = "examples/analysis/analysis_explain.rs"
 
 [[example]]
 name = "analysis_inspect"
-path = "examples/analysis/analysis_inspect.rs"
+path = "examples/analysis/analysis_inspect/main.rs"
 
 [[example]]
 name = "analysis_validate"
-path = "examples/analysis/analysis_validate.rs"
+path = "examples/analysis/analysis_validate/main.rs"
 
 [[example]]
 name = "analysis_diff"
@@ -916,15 +916,15 @@ path = "examples/analysis/analysis_profile.rs"
 
 [[example]]
 name = "analysis_qa_gates"
-path = "examples/analysis/analysis_qa_gates.rs"
+path = "examples/analysis/analysis_qa_gates/main.rs"
 
 [[example]]
 name = "analysis_check"
-path = "examples/analysis/analysis_check.rs"
+path = "examples/analysis/analysis_check/main.rs"
 
 [[example]]
 name = "analysis_trace"
-path = "examples/analysis/analysis_trace.rs"
+path = "examples/analysis/analysis_trace/main.rs"
 
 [[example]]
 name = "analysis_eval"
@@ -936,43 +936,43 @@ path = "examples/analysis/analysis_debug.rs"
 
 [[example]]
 name = "analysis_lint"
-path = "examples/analysis/analysis_lint.rs"
+path = "examples/analysis/analysis_lint/main.rs"
 
 [[example]]
 name = "analysis_flow"
-path = "examples/analysis/analysis_flow.rs"
+path = "examples/analysis/analysis_flow/main.rs"
 
 [[example]]
 name = "analysis_qualify"
-path = "examples/analysis/analysis_qualify.rs"
+path = "examples/analysis/analysis_qualify/main.rs"
 
 [[example]]
 name = "analysis_parity"
-path = "examples/analysis/analysis_parity.rs"
+path = "examples/analysis/analysis_parity/main.rs"
 
 [[example]]
 name = "analysis_compare_hf"
-path = "examples/analysis/analysis_compare_hf.rs"
+path = "examples/analysis/analysis_compare_hf/main.rs"
 
 [[example]]
 name = "analysis_probar"
-path = "examples/analysis/analysis_probar.rs"
+path = "examples/analysis/analysis_probar/main.rs"
 
 [[example]]
 name = "analysis_slice"
-path = "examples/analysis/analysis_slice.rs"
+path = "examples/analysis/analysis_slice/main.rs"
 
 [[example]]
 name = "analysis_tensors"
-path = "examples/analysis/analysis_tensors.rs"
+path = "examples/analysis/analysis_tensors/main.rs"
 
 [[example]]
 name = "analysis_qa_capability"
-path = "examples/analysis/analysis_qa_capability.rs"
+path = "examples/analysis/analysis_qa_capability/main.rs"
 
 [[example]]
 name = "analysis_model_fingerprint"
-path = "examples/analysis/analysis_model_fingerprint.rs"
+path = "examples/analysis/analysis_model_fingerprint/main.rs"
 
 [[example]]
 name = "format_import_hf"
@@ -988,7 +988,7 @@ path = "examples/format/format_export_gguf.rs"
 
 [[example]]
 name = "format_rosetta_convert"
-path = "examples/format/format_rosetta_convert.rs"
+path = "examples/format/format_rosetta_convert/main.rs"
 
 [[example]]
 name = "format_rosetta_chain"
@@ -1004,7 +1004,7 @@ path = "examples/format/format_convert_quantize.rs"
 
 [[example]]
 name = "format_publish"
-path = "examples/format/format_publish.rs"
+path = "examples/format/format_publish/main.rs"
 
 [[example]]
 name = "format_pull_cache"
@@ -1016,4 +1016,4 @@ path = "examples/format/format_batch_export.rs"
 
 [[example]]
 name = "format_migration_pipeline"
-path = "examples/format/format_migration_pipeline.rs"
+path = "examples/format/format_migration_pipeline/main.rs"
