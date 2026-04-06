@@ -37,7 +37,7 @@
 
 ## What is apr-cookbook?
 
-218+ executable examples across 23 categories covering the full ML
+219 executable examples across 24 categories covering the full ML
 model lifecycle in pure Rust: creation, bundling, format conversion,
 training, optimization, inference, serving, monitoring, and deployment
 -- all built on the APR v2 model format with LZ4/ZSTD compression,
@@ -81,7 +81,7 @@ cargo run --example bundle_static_model
 # Run the full optimization pipeline
 cargo run --example optimize_full_pipeline
 
-# List all 218+ examples
+# List all 219 examples
 cargo run --example 2>&1 | head -50
 ```
 
@@ -113,7 +113,7 @@ cargo run --example 2>&1 | head -50
 | [Acceleration](examples/acceleration/) | 7 | Autotuner, kernel fusion, mmap, quantized matmul, LZ4/ZSTD bench, cache tiling |
 | [Advanced](examples/advanced/) | 21 | RAG, CI/CD pipeline, A/B experiment, compliance audit, edge anomaly, style transfer |
 
-**Total: 218+ recipes.** Run any example: `cargo run --example <name>`
+**Total: 219 recipes.** Run any example: `cargo run --example <name>`
 
 ## APR v2 Format
 
@@ -170,6 +170,32 @@ Every example includes a doc header with QA checklist, uses
 - [The APR Cookbook](book/src/introduction.md) -- mdBook source (build with `mdbook serve book/`)
 - [Specification](docs/specifications/apr-cookbook.md) -- Unified spec with component docs
 - [API Reference](book/src/reference/api.md) -- module-level API overview
+
+## Usage
+
+```bash
+# Run any example by name
+cargo run --example create_apr_from_scratch
+cargo run --example optimize_full_pipeline
+cargo run --example analysis_inspect
+
+# Build all examples
+cargo build --examples
+
+# Run tests
+cargo test --all-features
+
+# With encryption feature
+cargo run --example bundle_encrypted_model --features encryption
+```
+
+## Contributing
+
+1. Fork and clone the repository
+2. Create examples following IIUR principles (see `docs/specifications/components/principles.md`)
+3. Ensure `cargo clippy --all-targets -- -D warnings` passes
+4. Ensure `cargo test --all-features` passes
+5. Every recipe file must be under 500 lines; split into `main.rs` + `types.rs` + `helpers.rs` if needed
 
 ## License
 
