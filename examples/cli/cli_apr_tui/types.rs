@@ -41,7 +41,7 @@ impl Tab {
             Self::Help => "Help",
         }
     }
-    fn index(self) -> usize {
+    pub fn index(self) -> usize {
         match self {
             Self::Overview => 1,
             Self::Tensors => 2,
@@ -50,7 +50,7 @@ impl Tab {
         }
     }
     #[allow(dead_code)]
-    fn next(self) -> Self {
+    pub fn next(self) -> Self {
         match self {
             Self::Overview => Self::Tensors,
             Self::Tensors => Self::Stats,
