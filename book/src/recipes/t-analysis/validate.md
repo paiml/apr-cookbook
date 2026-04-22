@@ -22,9 +22,9 @@ cargo run --example analysis_validate
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/analysis/analysis_validate.rs}}
+{{#include ../../../../examples/analysis/analysis_validate/main.rs}}
 ```
 
 ## Source
 
-[`examples/analysis/analysis_validate.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_validate.rs)
+[`examples/analysis/analysis_validate/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_validate/main.rs)

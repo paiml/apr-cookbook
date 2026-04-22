@@ -18,4 +18,4 @@ cargo run --example analysis_qa_capability
 ```
 
 ## Source
-[`examples/analysis/analysis_qa_capability.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qa_capability.rs)
+[`examples/analysis/analysis_qa_capability/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qa_capability/main.rs)

@@ -18,4 +18,4 @@ cargo run --example distributed_gossip_protocol
 ```
 
 ## Source
-[`examples/distributed/distributed_gossip_protocol.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_gossip_protocol.rs)
+[`examples/distributed/distributed_gossip_protocol/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_gossip_protocol/main.rs)

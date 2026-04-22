@@ -18,4 +18,4 @@ cargo run --example cbtop_headless
 ```
 
 ## Source
-[`examples/monitoring/cbtop_headless.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/monitoring/cbtop_headless.rs)
+[`examples/monitoring/cbtop_headless/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/monitoring/cbtop_headless/main.rs)

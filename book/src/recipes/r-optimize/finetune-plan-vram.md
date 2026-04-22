@@ -21,4 +21,4 @@ cargo run --example finetune_plan_vram
 
 ## Source
 
-[`examples/optimize/finetune_plan_vram.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/finetune_plan_vram.rs)
+[`examples/optimize/finetune_plan_vram/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/finetune_plan_vram/main.rs)
