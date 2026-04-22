@@ -224,13 +224,12 @@ variant-depth: ## Invariant F: verify every apr subcommand has ≥3 cookbook rec
 	done < /tmp/apr-subs.txt); \
 	printf "  Subcommands:   %3d\n  At ≥3 depth:   %3d\n  Coverage:      %d%%\n" "$$TOTAL" "$$OK" "$$((100*OK/TOTAL))"; \
 	if [ -n "$$SHORT" ]; then \
-		echo "⚠️  Below variant-depth target (<3 recipes — TARGET, not yet ENFORCED):"; \
+		echo "❌ Below variant-depth target (<3 recipes — Invariant F regression):"; \
 		echo "$$SHORT"; \
 		echo "    See: docs/specifications/components/quality-gates.md#invariant-f"; \
-		echo "    Backlog: PMAT-049 / -050 / -051"; \
+		exit 1; \
 	fi
-	@# TARGET gate: don't fail CI yet. Change `exit 0` → `exit 1` when ENFORCED.
-	@exit 0
+	@echo "✅ Variant depth: all 66/66 subcommands have ≥3 recipes (Invariant F ENFORCED)"
 
 variant-coverage: ## Report per-subcommand flag/variant coverage
 	@echo "📊 Per-subcommand variant coverage:"

@@ -443,7 +443,7 @@ Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec
 
 **Baseline**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, `book/src/**/*.md`. **Gate**: `make docs-validate` — **ENFORCED**.
 
-### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — TARGET
+### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — ENFORCED
 
 Every apr-cli subcommand must have **≥3 distinct cookbook recipes**. Single-example coverage is necessary (Invariant A) but not sufficient — learners need multiple worked examples per subcommand to internalize idiomatic usage. Three maps to Toyota *kata*: happy path, edge case, composition.
 
@@ -452,7 +452,7 @@ Every apr-cli subcommand must have **≥3 distinct cookbook recipes**. Single-ex
   |{ r ∈ recipes : r.cli_equivalent = s }| ≥ 3
 ```
 
-**Baseline (2026-04-22)**: 8/66 = **12%** at ≥3; 48/66 at exactly 1–2; 10/66 at 0. **Gate**: `make variant-depth` — **TARGET**, not ENFORCED (reaching ENFORCED requires ≥128 new recipes; backlog is PMAT-049 / -050 / -051).
+**Baseline (2026-04-22)**: 66/66 = **100%**. All 128 backlog recipes from PMAT-049, PMAT-050 (Sprints A–D), and PMAT-051 were written and merged. **Gate**: `make variant-depth` — **ENFORCED**.
 
 #### Current ≥3-coverage subcommands
 
@@ -504,7 +504,7 @@ The `make cli-parity` regex matches all of:
 | Dimension | Baseline | Target | Gate | Status |
 |-----------|----------|--------|------|--------|
 | Subcommands with ≥1 recipe | 56/66 (85%) | 66/66 | `make cli-parity` | **ENFORCED** |
-| Subcommands with ≥3 recipes | 8/66 (12%) | 66/66 | `make variant-depth` | **TARGET** |
+| Subcommands with ≥3 recipes | 66/66 (100%) | 66/66 | `make variant-depth` | **ENFORCED** |
 | Recipes with contract reference | 219/219 (100%) | 219/219 | `make contract-grade` | **ENFORCED** |
 | Recipes with all format variants | 219/219 (100%) | 100% applicable | `make format-coverage` | **ENFORCED** |
 | Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
