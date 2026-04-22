@@ -1179,3 +1179,92 @@ path = "examples/analysis/analysis_tensors_stats.rs"
 [[example]]
 name = "inference_run_temperature_sweep"
 path = "examples/inference/inference_run_temperature_sweep.rs"
+
+# PMAT-050a Sprint A: bench/canary/cbtop/check/compile/data/debug/decrypt/diagnose/diff/encrypt additions (Invariant F)
+[[example]]
+name = "bench_batch_sweep"
+path = "examples/analysis/bench_batch_sweep.rs"
+
+[[example]]
+name = "bench_quantization_compare"
+path = "examples/analysis/bench_quantization_compare.rs"
+
+[[example]]
+name = "canary_regression"
+path = "examples/analysis/canary_regression.rs"
+
+[[example]]
+name = "canary_rolling_window"
+path = "examples/analysis/canary_rolling_window.rs"
+
+[[example]]
+name = "cbtop_streaming"
+path = "examples/monitoring/cbtop_streaming.rs"
+
+[[example]]
+name = "cbtop_histogram"
+path = "examples/monitoring/cbtop_histogram.rs"
+
+[[example]]
+name = "check_batch"
+path = "examples/analysis/check_batch.rs"
+
+[[example]]
+name = "check_json_report"
+path = "examples/analysis/check_json_report.rs"
+
+[[example]]
+name = "compile_ptx"
+path = "examples/cli/compile_ptx.rs"
+
+[[example]]
+name = "compile_size_optimized"
+path = "examples/cli/compile_size_optimized.rs"
+
+[[example]]
+name = "data_sharded_shuffle"
+path = "examples/training/data_sharded_shuffle.rs"
+
+[[example]]
+name = "data_streaming_tokens"
+path = "examples/training/data_streaming_tokens.rs"
+
+[[example]]
+name = "debug_nan_trace"
+path = "examples/analysis/debug_nan_trace.rs"
+
+[[example]]
+name = "debug_activation_dist"
+path = "examples/analysis/debug_activation_dist.rs"
+
+[[example]]
+name = "decrypt_key_rotation"
+path = "examples/cli/decrypt_key_rotation.rs"
+
+[[example]]
+name = "decrypt_batch"
+path = "examples/cli/decrypt_batch.rs"
+
+[[example]]
+name = "diagnose_multi_model"
+path = "examples/cli/diagnose_multi_model.rs"
+
+[[example]]
+name = "diagnose_hardware"
+path = "examples/cli/diagnose_hardware.rs"
+
+[[example]]
+name = "diff_topology"
+path = "examples/cli/diff_topology.rs"
+
+[[example]]
+name = "diff_quantization"
+path = "examples/cli/diff_quantization.rs"
+
+[[example]]
+name = "encrypt_signed"
+path = "examples/bundling/encrypt_signed.rs"
+
+[[example]]
+name = "encrypt_kdf_sweep"
+path = "examples/bundling/encrypt_kdf_sweep.rs"
