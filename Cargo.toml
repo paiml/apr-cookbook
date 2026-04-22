@@ -1268,3 +1268,92 @@ path = "examples/bundling/encrypt_signed.rs"
 [[example]]
 name = "encrypt_kdf_sweep"
 path = "examples/bundling/encrypt_kdf_sweep.rs"
+
+# PMAT-050b Sprint B: eval/experiment/explain/flow/gpu/hex/import/inspect/lint/list/monitor additions (Invariant F)
+[[example]]
+name = "eval_benchmark_suite"
+path = "examples/analysis/eval_benchmark_suite.rs"
+
+[[example]]
+name = "eval_pass_at_k"
+path = "examples/analysis/eval_pass_at_k.rs"
+
+[[example]]
+name = "experiment_ab_test"
+path = "examples/analysis/experiment_ab_test.rs"
+
+[[example]]
+name = "experiment_multi_seed"
+path = "examples/analysis/experiment_multi_seed.rs"
+
+[[example]]
+name = "explain_error_codes"
+path = "examples/analysis/explain_error_codes.rs"
+
+[[example]]
+name = "explain_shape_mismatch"
+path = "examples/analysis/explain_shape_mismatch.rs"
+
+[[example]]
+name = "flow_arch_diff"
+path = "examples/analysis/flow_arch_diff.rs"
+
+[[example]]
+name = "flow_depth_sweep"
+path = "examples/analysis/flow_depth_sweep.rs"
+
+[[example]]
+name = "gpu_memory_planner"
+path = "examples/gpu/gpu_memory_planner.rs"
+
+[[example]]
+name = "gpu_capability_detect"
+path = "examples/gpu/gpu_capability_detect.rs"
+
+[[example]]
+name = "hex_diff"
+path = "examples/analysis/hex_diff.rs"
+
+[[example]]
+name = "hex_pattern_search"
+path = "examples/analysis/hex_pattern_search.rs"
+
+[[example]]
+name = "import_hf_cache"
+path = "examples/format/import_hf_cache.rs"
+
+[[example]]
+name = "import_multi_format"
+path = "examples/format/import_multi_format.rs"
+
+[[example]]
+name = "inspect_layer_params"
+path = "examples/analysis/inspect_layer_params.rs"
+
+[[example]]
+name = "inspect_quantization_stats"
+path = "examples/analysis/inspect_quantization_stats.rs"
+
+[[example]]
+name = "lint_naming_rules"
+path = "examples/analysis/lint_naming_rules.rs"
+
+[[example]]
+name = "lint_suppression"
+path = "examples/analysis/lint_suppression.rs"
+
+[[example]]
+name = "list_size_filter"
+path = "examples/cli/list_size_filter.rs"
+
+[[example]]
+name = "list_json_export"
+path = "examples/cli/list_json_export.rs"
+
+[[example]]
+name = "monitor_realtime"
+path = "examples/monitoring/monitor_realtime.rs"
+
+[[example]]
+name = "monitor_alerting"
+path = "examples/monitoring/monitor_alerting.rs"
