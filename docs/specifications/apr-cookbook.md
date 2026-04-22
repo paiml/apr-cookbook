@@ -387,7 +387,7 @@ Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook ch
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — TARGET
+### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — ENFORCED
 
 Every apr-cli subcommand must have **≥3 distinct cookbook recipes** demonstrating different variants (different flag values, input shapes, deployment targets, or workflows). Single-example coverage is necessary (Invariant A) but not sufficient — real users need multiple worked examples per subcommand to learn idiomatic usage.
 
@@ -398,7 +398,7 @@ Every apr-cli subcommand must have **≥3 distinct cookbook recipes** demonstrat
 
 **Rationale**: A single recipe demonstrates that a subcommand exists; three demonstrate the *variance* (happy path, edge case, composition). This maps directly to Toyota *kata* — three repetitions make the pattern concrete.
 
-**Baseline (2026-04-22)**: 8/66 = 12% (only `prune`, `merge`, `finetune`, `distill`, `chat`, `rosetta`, `export`, `convert` currently meet the bar). **Gate**: `make variant-depth` — **TARGET**, not yet enforced (raising it to ENFORCED requires ≥128 new recipes; see PMAT-049/050/051 backlog).
+**Baseline (2026-04-22)**: 66/66 = **100%**. Closed via PMAT-049/050/051 (→ 128 new recipes written and merged). **Gate**: `make variant-depth` — **ENFORCED** (exits non-zero on regression).
 
 **Baseline (2026-04-22)**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, and `book/src/**/*.md`. 3 excluded: `CHANGELOG.md`, `deep-context.md` (generated), `docs/specifications-advanced-demos.md` (orphan). **Gate**: `make docs-validate` — **ENFORCED**.
 
