@@ -197,7 +197,8 @@
 <li><code>defend_input(&amp;input)</code> -- Combined detect-and-sanitize pipeline</li>
 </ul>
 <h2 id="code"><a class="header" href="#code">Code</a></h2>
-<pre><code class="language-rust ignore">//! # Recipe: Chat Prompt Injection Defense
+<pre><code class="language-rust ignore">#![allow(unused_imports)]
+//! # Recipe: Chat Prompt Injection Defense
 //!
 //! **Category**: chat
 //! **CLI Equivalent**: security hardening for `apr chat`
@@ -245,174 +246,10 @@
 
 use apr_cookbook::prelude::*;
 
-/// Known dangerous token patterns that could break chat template structure.
-const DANGEROUS_TOKENS: &amp;[&amp;str] = &amp;[
-    &quot;&lt;|im_start|&gt;&quot;,
-    &quot;&lt;|im_end|&gt;&quot;,
-    &quot;&lt;|endoftext|&gt;&quot;,
-    &quot;&lt;|assistant|&gt;&quot;,
-    &quot;&lt;|system|&gt;&quot;,
-    &quot;&lt;|user|&gt;&quot;,
-    &quot;&lt;|end|&gt;&quot;,
-    &quot;[INST]&quot;,
-    &quot;[/INST]&quot;,
-    &quot;&lt;&lt;SYS&gt;&gt;&quot;,
-    &quot;&lt;&lt;/SYS&gt;&gt;&quot;,
-    &quot;### Instruction:&quot;,
-    &quot;### Response:&quot;,
-    &quot;### Input:&quot;,
-];
-
-/// Patterns that indicate instruction override attempts.
-const OVERRIDE_PATTERNS: &amp;[&amp;str] = &amp;[
-    &quot;ignore previous&quot;,
-    &quot;ignore all previous&quot;,
-    &quot;ignore above&quot;,
-    &quot;disregard previous&quot;,
-    &quot;disregard all previous&quot;,
-    &quot;forget previous&quot;,
-    &quot;forget your instructions&quot;,
-    &quot;new instructions:&quot;,
-    &quot;override instructions&quot;,
-    &quot;system prompt:&quot;,
-    &quot;you are now&quot;,
-    &quot;act as if&quot;,
-    &quot;pretend you are&quot;,
-    &quot;from now on&quot;,
-    &quot;instead, do&quot;,
-];
-
-/// Result of an injection scan.
-#[derive(Debug, Clone)]
-struct InjectionReport {
-    is_suspicious: bool,
-    findings: Vec&lt;String&gt;,
-}
-
-impl InjectionReport {
-    fn clean() -&gt; Self {
-        Self {
-            is_suspicious: false,
-            findings: Vec::new(),
-        }
-    }
-
-    fn with_finding(mut self, finding: String) -&gt; Self {
-        self.is_suspicious = true;
-        self.findings.push(finding);
-        self
-    }
-}
-
-/// Sanitize user input by escaping dangerous chat template tokens.
-///
-/// Replaces angle brackets in known token patterns with escaped versions
-/// to prevent them from being interpreted as template delimiters.
-fn sanitize_content(input: &amp;str) -&gt; String {
-    let mut result = input.to_string();
-
-    // Escape known dangerous tokens
-    for token in DANGEROUS_TOKENS {
-        if result.contains(token) {
-            let escaped = token
-                .replace('&lt;', &quot;&amp;lt;&quot;)
-                .replace('&gt;', &quot;&amp;gt;&quot;)
-                .replace('[', &quot;&amp;#91;&quot;)
-                .replace(']', &quot;&amp;#93;&quot;);
-            result = result.replace(token, &amp;escaped);
-        }
-    }
-
-    // Remove zero-width characters that could hide payloads
-    result = result.replace(
-        ['\u{200B}', '\u{200C}', '\u{200D}', '\u{FEFF}', '\u{2060}'],
-        &quot;&quot;,
-    );
-
-    result
-}
-
-/// Detect potential prompt injection in user input.
-///
-/// Checks for:
-/// 1. Role-spoofing tokens (e.g., `&lt;|im_start|&gt;system`)
-/// 2. Instruction override phrases
-/// 3. Template delimiter injection
-/// 4. Suspicious Unicode patterns
-fn contains_injection(input: &amp;str) -&gt; bool {
-    let report = scan_for_injection(input);
-    report.is_suspicious
-}
-
-/// Perform a detailed injection scan, returning specific findings.
-fn scan_for_injection(input: &amp;str) -&gt; InjectionReport {
-    let mut report = InjectionReport::clean();
-    let lower = input.to_lowercase();
-
-    // Check for dangerous token patterns
-    for token in DANGEROUS_TOKENS {
-        if input.contains(token) {
-            report = report.with_finding(format!(&quot;Dangerous token found: {token}&quot;));
-        }
-    }
-
-    // Check for instruction override patterns (case-insensitive)
-    for pattern in OVERRIDE_PATTERNS {
-        if lower.contains(pattern) {
-            report = report.with_finding(format!(&quot;Override pattern found: {pattern}&quot;));
-        }
-    }
-
-    // Check for role-spoofing in angle bracket patterns
-    let role_spoof_patterns = [&quot;&lt;|im_start|&gt;system&quot;, &quot;&lt;|im_start|&gt;assistant&quot;, &quot;&lt;|system|&gt;&quot;];
-    for pattern in &amp;role_spoof_patterns {
-        if input.contains(pattern) {
-            report = report.with_finding(format!(&quot;Role spoofing attempt: {pattern}&quot;));
-        }
-    }
-
-    // Check for zero-width characters (potential payload hiding)
-    let zero_width_chars = ['\u{200B}', '\u{200C}', '\u{200D}', '\u{FEFF}', '\u{2060}'];
-    for c in &amp;zero_width_chars {
-        if input.contains(*c) {
-            report =
-                report.with_finding(format!(&quot;Zero-width character U+{:04X} detected&quot;, *c as u32));
-        }
-    }
-
-    // Check for base64-encoded suspicious content
-    if looks_like_base64_payload(&amp;lower) {
-        report = report.with_finding(&quot;Possible base64-encoded payload detected&quot;.to_string());
-    }
-
-    report
-}
-
-/// Heuristic check for base64-encoded payloads.
-///
-/// Looks for long sequences of base64 characters that could hide instructions.
-fn looks_like_base64_payload(input: &amp;str) -&gt; bool {
-    // Find runs of base64 characters longer than 40 chars
-    let mut run_length = 0;
-    for c in input.chars() {
-        if c.is_ascii_alphanumeric() || c == '+' || c == '/' || c == '=' {
-            run_length += 1;
-            if run_length &gt; 40 {
-                return true;
-            }
-        } else {
-            run_length = 0;
-        }
-    }
-    false
-}
-
-/// Apply all defense layers: detect, sanitize, and report.
-fn defend_input(input: &amp;str) -&gt; (String, InjectionReport) {
-    let report = scan_for_injection(input);
-    let sanitized = sanitize_content(input);
-    (sanitized, report)
-}
+mod types;
+#[allow(unused_imports)]
+#[allow(clippy::wildcard_imports)]
+use types::*;
 
 fn main() -&gt; Result&lt;()&gt; {
     let mut ctx = RecipeContext::new(&quot;chat_injection_defense&quot;)?;
@@ -702,7 +539,7 @@ mod tests {
     }
 }</code></pre>
 <h2 id="source"><a class="header" href="#source">Source</a></h2>
-<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_injection_defense.rs"><code>examples/chat/chat_injection_defense.rs</code></a></p>
+<p><a href="https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_injection_defense/main.rs"><code>examples/chat/chat_injection_defense/main.rs</code></a></p>
 
                     </main>
 
