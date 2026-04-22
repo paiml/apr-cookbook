@@ -950,11 +950,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'DEBT: src/bundle.rs (986) and src/recipe.rs (540) exceed 500-line cap — extract-module refactor'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-04-22T09:55:38Z
-  updated: 2026-04-22T09:55:38Z
+  updated: 2026-04-22T10:19:13.741794971+00:00
   spec: null
   acceptance_criteria: []
   phases: []
