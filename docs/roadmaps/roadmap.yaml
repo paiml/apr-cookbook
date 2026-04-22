@@ -982,11 +982,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'DEBT: paiml/apr-cookbook is archived on GitHub (isArchived: true) — cannot push refactor/aprender-monorepo-v31 or open PR; requires un-archive by repo admin'
-  status: planned
+  status: completed
   priority: critical
   assigned_to: null
   created: 2026-04-22T10:27:43Z
-  updated: 2026-04-22T10:27:43Z
+  updated: 2026-04-22T10:55:20.305463572+00:00
   spec: null
   acceptance_criteria: []
   phases: []
