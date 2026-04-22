@@ -120,7 +120,7 @@ All recipes follow IIUR principles. See [principles.md](principles.md) for struc
 
 | # | Recipe | Objective | Falsifiable Claim |
 |---|--------|-----------|-------------------|
-| I.1 | `flash_attention_inference` | FlashAttention implementation for long sequences | F6: >= 2x speedup (seq>=1024) |
+| I.1 | `flash_attention_inference` | FlashAttention implementation for long sequences | (F6 deleted in v5.0 — CPU-tiled proxy, no measured speedup; keep as architecture demo) |
 | I.2 | `gpu_cuda_inference` | CUDA-style GPU inference | — |
 | I.3 | `gpu_tensor_core_optimization` | Tensor core utilization patterns | — |
 | I.4 | `gpu_multi_gpu_inference` | Multi-GPU model parallel inference | — |

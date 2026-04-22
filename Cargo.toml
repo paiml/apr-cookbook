@@ -2,7 +2,7 @@
 name = "apr-cookbook"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.89"
 license = "MIT"
 description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
 repository = "https://github.com/paiml/apr-cookbook"
@@ -59,11 +59,13 @@ codegen-units = 1
 strip = "symbols"
 
 [dependencies]
-# Sovereign Stack - crates.io published versions (2026)
-aprender = { version = "0.27", features = ["format-compression"] }
-trueno = "0.16"
-entrenar = "0.7"
-ndarray = "0.16"  # For entrenar Tensor gradients
+# APR-MONO v0.31.2 — canonical crate names via path deps to ../aprender monorepo.
+# Root `aprender` facade doesn't forward features, so depend on aprender-core
+# (whose lib name is "aprender") with a package rename. Same trick the monorepo uses.
+aprender = { path = "../aprender/crates/aprender-core", package = "aprender-core", features = ["format-compression"] }
+aprender-compute = { path = "../aprender/crates/aprender-compute" }
+aprender-train = { path = "../aprender/crates/aprender-train" }
+ndarray = "0.16"  # For aprender-train Tensor gradients
 
 # CLI
 clap = { version = "4", features = ["derive"] }
@@ -100,6 +102,10 @@ tempfile = "3"
 lz4_flex = "0.11.3"
 ed25519-dalek = "2.1.1"
 zstd = "0.13.3"
+# F2 zero-copy mmap falsification
+memmap2 = "0.9"
+# In-process contract validation (replaces external `pv` dependency)
+aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 
 [features]
 default = []

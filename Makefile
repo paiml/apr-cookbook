@@ -23,7 +23,11 @@ SHELL := /bin/bash
 MAKEFLAGS += -j$(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
 
 # Sub-projects (disabled - using crates.io dependencies)
-# SUB_PROJECTS := ../aprender ../trueno ../entrenar
+# Sovereign stack now consolidated in ../aprender monorepo (APR-MONO v0.31.2).
+# The `pv` binary ships from aprender-contracts-cli; prefer the installed binary
+# for speed, fall back to `cargo run` so CI works without a prior install step.
+# Override: `make PV=~/my/pv docs-validate` to use a custom binary.
+PV ?= $(shell command -v pv 2>/dev/null || echo "cargo run -q -p aprender-contracts-cli --manifest-path ../aprender/Cargo.toml --bin pv --")
 
 # Default target
 all: validate build
@@ -163,18 +167,23 @@ docs-validate: ## Validate all *.md via pmat validate-readme + link integrity + 
 		echo "$$MISSING" | sed 's/^/    /'; \
 		exit 1; \
 	fi
-	@echo "  → Contract schema..."
-	@pv validate contracts/docs-schema-v1.yaml >/dev/null 2>&1 || (echo "❌ docs-schema-v1 invalid"; exit 1)
+	@echo "  → Contract schema (in-process via aprender-contracts)..."
+	@cargo test --test contracts -q --no-fail-fast >/dev/null 2>&1 || (echo "❌ contract validation failed — run 'cargo test --test contracts' for details"; exit 1)
 	@echo "✅ Docs validation PASS (factual + links + CLI binding + schema)"
 
 contracts-lint: ## Run pv lint + lean-status on all contracts (F-DOCS-001, F-CLIPARITY-001)
-	@echo "📜 Linting provable-contracts..."
-	@pv lint contracts/ || (echo "❌ pv lint FAILED"; exit 1)
+	@echo "📜 Linting provable-contracts (pv from ../aprender monorepo)..."
+	@$(PV) lint contracts/ || (echo "❌ pv lint FAILED"; exit 1)
 	@echo "  → Lean proof status..."
-	@pv lean-status contracts/ || true
+	@$(PV) lean-status contracts/ || true
 	@echo "  → Proof level report..."
-	@pv proof-status contracts/ || true
+	@$(PV) proof-status contracts/ || true
 	@echo "✅ Contracts lint complete"
+
+install-pv: ## Install the `pv` binary from the aprender monorepo (one-time setup)
+	@echo "📦 Installing pv from ../aprender/crates/aprender-contracts-cli..."
+	@cargo install --path ../aprender/crates/aprender-contracts-cli --force
+	@echo "✅ pv installed — verify: pv --version"
 
 cli-parity: ## Verify every apr subcommand has ≥1 cookbook recipe (F-CLIPARITY-001)
 	@echo "🎯 Checking apr-cli ↔ recipes 1:1 parity..."

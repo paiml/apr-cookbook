@@ -109,7 +109,7 @@ Every apr CLI subcommand must map to at least one provable-contract YAML in `con
   pv lean-status C ≥ L2
 ```
 
-**Status (2026-04-06)**: 11 contracts / 57 subcommands. CLI recipe parity: 57/57 = 100%. Fleet: yoga deployed (ca687120), intel/jetson pending. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues.
+**Status (2026-04-22)**: 11 contracts / 57 subcommands. CLI recipe parity: 57/57 = 100%. Fleet: yoga deployed (ca687120), intel/jetson pending. Gaps are filed as **P2 (missing contract)** or **P3 (missing Lean proof)** issues.
 
 The audit uses the `pv` CLI from `../provable-contracts`:
 

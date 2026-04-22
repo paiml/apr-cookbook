@@ -7,59 +7,79 @@
 Following Karl Popper's criterion of demarcation, every performance or correctness claim must be:
 
 1. **Specific**: Quantified with measurable thresholds
-2. **Testable**: Executable via automated test
+2. **Testable**: Executable via automated test OR cited from a reproducible external harness with a source-path line number
 3. **Refutable**: Clear conditions for falsification
 
 **Anti-pattern (unfalsifiable)**: "APR v2 is faster than alternatives."
-**Pattern (falsifiable)**: "APR v2 LZ4 decompression achieves >= 3 GB/s on x86_64-AVX2."
+**Pattern (falsifiable, in-process)**: "Zero-copy mmap-backed load completes in < 0.1 ms p95 on release builds — refuted if p95 exceeds 0.2 ms."
+**Pattern (falsifiable, cited)**: "Decode throughput ≥ 270 tok/s at c=1 on RTX 4090 GGUF Q4_K_M, measured at `candle-vs-apr/performance.md:85` (273.8 tok/s)."
 
-### Falsifiable Claims Registry
+### Falsifiable Claims Registry — v5.0
+
+Two categories. In-process claims are exercised by `tests/falsification.rs`. Cited claims reference external measurements; each must name a source file and line number.
+
+#### In-process
 
 | Code | Claim | Threshold | Refutation | Test |
 |------|-------|-----------|------------|------|
-| F1 | LZ4 decompression throughput | >= 3 GB/s (AVX2) | < 2.5 GB/s | `cargo bench --bench compression` |
-| F2 | Zero-copy mmap latency (<=100MB) | < 1ms | p95 > 2ms | `cargo bench --bench loading` |
-| F3 | Int4 quantization accuracy loss | < 2% | > 2.5% | `cargo test --test quantization_accuracy` |
-| F4 | AES-256-GCM decrypt latency (100MB) | < 5ms | p95 > 10ms | `cargo bench --bench encryption` |
-| F5 | whisper.apr WER (LibriSpeech) | < 10% | > 12% | `cargo test --test whisper_wer` |
-| F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x | `cargo bench --bench attention` |
-| F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 | `cargo bench --bench matmul` |
+| F2 | Zero-copy mmap-backed load | p95 < 0.1 ms (release) | p95 > 0.2 ms (release) or > 10 ms (debug) | `f2_zero_copy_loading_latency` |
 
-### Falsification Test Suite
+#### Cited (external harness, source-path verified)
+
+| Code | Claim | Threshold | Measured | Source |
+|------|-------|-----------|----------|--------|
+| N1 | Decode throughput, c=1, RTX 4090, GGUF Q4_K_M | ≥ 270 tok/s | 273.8 tok/s | `candle-vs-apr/performance.md:85` |
+| N2 | Batch scaling, c=1 → c=32, v5 scheduler | ≥ 10× | 13.4× | `candle-vs-apr/performance.md:150` |
+| N3 | Load-time parity across APR / GGUF / SafeTensors | within 1.5× | 0.028 / 0.024 / 0.029 ms | `aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:88-93` |
+| N4 | Decode advantage vs Candle on identical hardware | ≥ 1.15× | 1.20× | `candle-vs-apr/performance.md:85` |
+
+#### Deleted (no evidence in any repo — do not re-introduce without committed harness)
+
+| Code | Original claim | Why removed |
+|------|----------------|-------------|
+| F1 | LZ4 decompression ≥ 3 GB/s | No LZ4 throughput bench in aprender-compute / trueno |
+| F3 | Int4 NMSE < 2% | aprender-quant benches measure throughput only, never accuracy delta |
+| F4 | AES-256-GCM ≥ 100 MB/s | Prior test used BLAKE3 proxy; no crypto bench anywhere |
+| F5 | Whisper WER < 10% | Threshold defined in `whisper.apr/THRESHOLDS.md:74` but no measured WER logged. Prior test simulated WER on hand-written strings, not audio. |
+| F6 | FlashAttention ≥ 2× | Prior CPU-tiled proxy never reaches 2×; GPU harness lives in sibling repo |
+| F7 | AVX-512 ≥ 80 GFLOPS | Trueno SDE infrastructure exists but no published GFLOPS numbers |
+
+### Falsification Test Suite (F2, current)
 
 ```rust
-/// F1: LZ4 decompression >= 3 GB/s on AVX2
-/// Refutation: measured < 2.5 GB/s
+/// F2: Zero-copy mmap-backed load, p95 < 0.1 ms (release)
+/// Evidence basis: FORMAT_PARITY_REPORT.md:88 measured 0.028 ms.
 #[test]
-fn f1_lz4_decompression_throughput() {
-    let data = vec![0u8; 100_000_000]; // 100MB
-    let compressed = Compression::Lz4.compress(&data).unwrap();
-    let start = Instant::now();
-    let _decompressed = Compression::Lz4.decompress(&compressed).unwrap();
-    let elapsed = start.elapsed();
-    let throughput_gbps = data.len() as f64 / elapsed.as_secs_f64() / 1e9;
-    assert!(throughput_gbps >= 2.5,
-        "FALSIFIED: LZ4 throughput {:.2} < 2.5 GB/s threshold", throughput_gbps);
-}
+fn f2_zero_copy_loading_latency() {
+    use apr_cookbook::prelude::*;
+    use memmap2::Mmap;
+    use tempfile::NamedTempFile;
 
-/// F3: Int4 quantization accuracy loss < 2%
-/// Refutation: measured loss > 2.5%
-#[test]
-fn f3_int4_quantization_accuracy() {
-    let model_fp32 = AprModel::load("models/test-fp32.apr").unwrap();
-    let model_int4 = AprModel::load("models/test-int4.apr").unwrap();
-    let test_inputs = load_test_inputs();
-    let mut total_diff = 0.0;
-    for input in &test_inputs {
-        let out_fp32 = model_fp32.predict(input).unwrap();
-        let out_int4 = model_int4.predict(input).unwrap();
-        total_diff += (out_fp32 - out_int4).abs();
-    }
-    let accuracy_loss = total_diff / test_inputs.len() as f64;
-    assert!(accuracy_loss < 0.025,
-        "FALSIFIED: accuracy loss {:.2}% > 2.5% threshold", accuracy_loss * 100.0);
+    let payload: Vec<u8> = (0..10 * 1024 * 1024).map(|i| (i & 0xFF) as u8).collect();
+    let bundle = ModelBundle::new()
+        .with_name("f2-mmap-probe")
+        .with_payload(payload)
+        .build();
+
+    let mut tmp = NamedTempFile::new().unwrap();
+    tmp.write_all(&bundle).unwrap();
+    tmp.flush().unwrap();
+
+    let file = tmp.reopen().unwrap();
+    let mmap = unsafe { Mmap::map(&file).unwrap() };
+
+    // Warmup + measurement loop with p95 calculation omitted for brevity.
+    let p95 = measure_p95(|| BundledModel::from_bytes(&mmap[..]));
+    let threshold = if cfg!(debug_assertions) {
+        Duration::from_millis(10)
+    } else {
+        Duration::from_micros(200)
+    };
+    assert!(p95 < threshold, "FALSIFIED: F2 mmap p95 {p95:?} > {threshold:?}");
 }
 ```
+
+No other F# tests exist in the cookbook. Cited claims (N1–N4) are validated in sibling repos; reviewers reproduce by checking out the named source file at the cited line.
 
 ---
 
@@ -156,7 +176,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        rust: [stable, 1.75.0]
+        rust: [stable, 1.89.0]
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -215,7 +235,7 @@ jobs:
 
 ## Provable Contracts
 
-All falsifiable claims (F1–F7) and structural invariants are formalized as YAML contracts in `contracts/`, following the [provable-contracts](https://github.com/paiml/provable-contracts) schema.
+Structural invariants and the one surviving in-process falsifiable claim (F2) are formalized as YAML contracts in `contracts/`, following the [provable-contracts](https://github.com/paiml/aprender/tree/main/crates/aprender-contracts) schema (now living in `aprender/crates/aprender-contracts`, lib name `provable_contracts`). Contract YAMLs for the deleted F# claims (F1/F3/F4/F5/F6/F7) are retained on disk as target specifications but are NOT tied to enforced gates in v5.0.
 
 ### Contract Schema
 
@@ -230,25 +250,25 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 | `kani_harnesses` | KANI-PREFIX-NNN formal verification harnesses |
 | `qa_gate` | F-PREFIX-NNN quality gate tying checks to pass criteria |
 
-### Contract Inventory (measured 2026-04-06)
+### Contract Inventory (measured 2026-04-22)
 
-11 contracts exist in `contracts/`. All pass `pv lint` (0 errors, 99 warnings, mean score 0.54). No contract has a Lean proof yet.
+11 contracts exist in `contracts/`. All parse and validate in-process via `cargo test --test contracts` (replaces prior external `pv validate`). No contract has a Lean proof yet.
 
 #### Existing Contracts
 
-| Contract | Covers | Type | `pv lint` | Lean proof | Equations |
-|----------|--------|------|-----------|------------|-----------|
-| `cli-parity-v1` | Invariant **A**: 57 subcommands have recipes | Structural | PASS | None | 5 |
-| `docs-schema-v1` | Invariant **E**: 13 .md files validated | Structural | PASS | None | 5 |
-| `recipe-iiur-v1` | IIUR compliance for all recipes | Structural | PASS | None | 4 |
-| `apr-format-roundtrip-v1` | Format conversion round-trip correctness | Correctness | PASS | None | 4 |
-| `lz4-decompression-v1` | F1: LZ4 >= 3 GB/s (AVX2) | Performance | PASS | None | 3 |
-| `mmap-inference-v1` | F2: mmap latency < 1ms (<=100MB) | Performance | PASS | None | 3 |
-| `int4-quantization-v1` | F3: Int4 accuracy loss < 2% | Accuracy | PASS | None | 3 |
-| `aes256-gcm-decrypt-v1` | F4: AES-256-GCM decrypt < 5ms (100MB) | Performance | PASS | None | 3 |
-| `whisper-wer-v1` | F5: whisper.apr WER < 10% | Accuracy | PASS | None | 3 |
-| `flash-attention-v1` | F6: FlashAttention >= 2x speedup | Performance | PASS | None | 3 |
-| `avx512-matmul-v1` | F7: AVX-512 matmul >= 80 GFLOPS | Performance | PASS | None | 3 |
+| Contract | Covers | Status | Equations |
+|----------|--------|--------|-----------|
+| `cli-parity-v1` | Invariant **A**: 57 subcommands have recipes | ENFORCED | 5 |
+| `docs-schema-v1` | Invariant **E**: 13 .md files validated | ENFORCED | 5 |
+| `recipe-iiur-v1` | IIUR compliance for all recipes | ENFORCED | 4 |
+| `apr-format-roundtrip-v1` | Format conversion round-trip correctness | ENFORCED | 4 |
+| `mmap-inference-v1` | F2: mmap-backed load p95 < 0.1 ms | ENFORCED (tests/falsification.rs) | 3 |
+| `lz4-decompression-v1` | Target spec for LZ4 throughput (claim F1 deleted in v5.0) | TARGET — no in-process test | 3 |
+| `int4-quantization-v1` | Target spec for Int4 NMSE (claim F3 deleted in v5.0) | TARGET — no in-process test | 3 |
+| `aes256-gcm-decrypt-v1` | Target spec for AES-256-GCM (claim F4 deleted in v5.0) | TARGET — no in-process test | 3 |
+| `whisper-wer-v1` | Target spec for whisper WER (claim F5 deleted in v5.0; reintroduce when whisper.apr publishes measurement) | TARGET — no in-process test | 3 |
+| `flash-attention-v1` | Target spec for FlashAttention speedup (claim F6 deleted in v5.0) | TARGET — no in-process test | 3 |
+| `avx512-matmul-v1` | Target spec for AVX-512 matmul (claim F7 deleted in v5.0) | TARGET — no in-process test | 3 |
 
 #### Missing Contracts
 
@@ -261,22 +281,27 @@ Each contract follows the chain: `metadata → equations → proof_obligations �
 
 #### Contract Quality Gaps
 
-All 11 existing contracts share the same warnings (99 total across 11 contracts, 9 per contract):
+All 11 existing contracts share the same historical warnings (9 per contract = 99 total) from the last `pv lint` run before v5.0:
 
 - Every equation missing `preconditions` and `postconditions`
 - Every equation missing `lean_theorem` reference
-- Mean `pv lint` score: **0.54** (target: grade A requires > 0.8)
+- Mean `pv lint` score: **0.54** (grade A requires > 0.8)
 - Gate 7 (reverse-coverage) skipped: no `--binding` or `--crate-dir` provided
+
+These gaps are unchanged in v5.0 — the refactor deliberately did not touch YAML bodies, only claim-to-test wiring.
 
 #### What Has No Contract At All
 
-| Asset class | Count | Contract coverage |
-|-------------|-------|-------------------|
-| Recipe `.rs` files with `Contract:` header | 219 / 219 | 100% — all recipes reference ≥1 contract |
-| Docs validated by `make docs-validate` | 264 / 267 | 98.9% — README, CLAUDE.md, specs, book chapters |
-| `book/src/` .md files with individual contracts | 0 / 252 | 0% — validated via `docs-schema-v1`, not individually bound |
-| Lean proofs | 0 / 11 | 0% — no contract has `pv lean-status` >= L2 |
-| Per-subcommand contracts | 0 / 57 | 0% — subcommands share `cli-parity-v1` but have no individual contracts |
+"Recipe" in this table means a distinct Cargo `[[example]]` entry (the publishable unit). Each recipe may live across several `.rs` files (e.g. `main.rs`, `types.rs`, `helpers.rs`, `tests.rs`); only the `main.rs` or single-file recipe entry carries the `//! Contract:` header. There are 219 recipes across 377 total `.rs` files.
+
+| Asset class | Denominator | Coverage | Notes |
+|-------------|-------------|----------|-------|
+| Cargo `[[example]]` recipes with `//! Contract:` header | 219 | 100% | The binding surface — all recipes reference ≥1 contract |
+| Supporting `.rs` files under recipe dirs (`types.rs`, `tests.rs`, helpers) | 152 | N/A | Not recipes; inherit their recipe's contract by association |
+| Docs validated by `make docs-validate` | 267 | 98.9% (264/267) | README, CLAUDE.md, specs, book chapters |
+| `book/src/` .md files with individual contracts | 252 | 0% (0/252) | Validated via `docs-schema-v1`, not individually bound |
+| Lean proofs | 11 | 0% (0/11) | No contract has `pv lean-status` ≥ L2 |
+| Per-subcommand contracts | 57 | 0% (0/57) | Subcommands share `cli-parity-v1` |
 
 ### Provability Invariant
 

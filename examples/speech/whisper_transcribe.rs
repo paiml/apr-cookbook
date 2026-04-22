@@ -31,7 +31,7 @@
 //!
 //! - **Category**: Speech Recognition
 //! - **Complexity**: Intermediate
-//! - **Dependencies**: trueno 0.11+, aprender 0.21+
+//! - **Dependencies**: aprender-compute 0.31+, aprender-core 0.31+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
 //!
 //!
