@@ -59,12 +59,13 @@ codegen-units = 1
 strip = "symbols"
 
 [dependencies]
-# APR-MONO v0.31.2 — canonical crate names via path deps to ../aprender monorepo.
+# APR-MONO v0.31.2 — canonical crate names from crates.io.
 # Root `aprender` facade doesn't forward features, so depend on aprender-core
 # (whose lib name is "aprender") with a package rename. Same trick the monorepo uses.
-aprender = { path = "../aprender/crates/aprender-core", package = "aprender-core", features = ["format-compression"] }
-aprender-compute = { path = "../aprender/crates/aprender-compute" }
-aprender-train = { path = "../aprender/crates/aprender-train" }
+# For local co-development with ../aprender, uncomment [patch.crates-io] below.
+aprender = { version = "0.31.2", package = "aprender-core", features = ["format-compression"] }
+aprender-compute = "0.31.2"   # package `aprender-compute`, lib name `trueno`
+aprender-train = "0.31.2"     # package `aprender-train`, lib name `entrenar`
 ndarray = "0.16"  # For aprender-train Tensor gradients
 
 # CLI
@@ -105,7 +106,20 @@ zstd = "0.13.3"
 # F2 zero-copy mmap falsification
 memmap2 = "0.9"
 # In-process contract validation (replaces external `pv` dependency)
-aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
+# package `aprender-contracts`, lib name `provable_contracts`
+aprender-contracts = "0.31.2"
+
+# ---------------------------------------------------------------------------
+# Local-development patch: point the four APR-MONO deps at a co-checked-out
+# ../aprender monorepo instead of the crates.io-published versions. Uncomment
+# the block below when iterating on both repos simultaneously. Commented by
+# default so CI and external users resolve straight from crates.io.
+# ---------------------------------------------------------------------------
+# [patch.crates-io]
+# aprender-core = { path = "../aprender/crates/aprender-core" }
+# aprender-compute = { path = "../aprender/crates/aprender-compute" }
+# aprender-train = { path = "../aprender/crates/aprender-train" }
+# aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 
 [features]
 default = []

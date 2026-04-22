@@ -174,6 +174,8 @@ dependencies = [
 [[package]]
 name = "aprender-compute"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "946c5ef1369e3aee38b770625a62dc072e80598cf00b9f01c1ecdb3cca637b34"
 dependencies = [
  "anyhow",
  "aprender-gemm-codegen",
@@ -192,6 +194,8 @@ dependencies = [
 [[package]]
 name = "aprender-contracts"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c560e3ea6885da40f2d1e9799c4bc70c8abf02e95422136a18d9733ecab4f15d"
 dependencies = [
  "aprender-contracts-macros",
  "regex",
@@ -204,6 +208,8 @@ dependencies = [
 [[package]]
 name = "aprender-contracts-macros"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea95ce34ddd7ea4cfb182eeb7c7aae5808bcd224e49de52468390960acfcb7b7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -213,6 +219,8 @@ dependencies = [
 [[package]]
 name = "aprender-core"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fcb077f34d350fa794746f4d430323304b315944c590f7dd493b2bad46af2c17"
 dependencies = [
  "aes-gcm",
  "argon2",
@@ -242,6 +250,8 @@ dependencies = [
 [[package]]
 name = "aprender-gemm-codegen"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4728c271299e5133afd7bea5fc1c29c886b722c49d5f301b01bf4836d0305708"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -251,6 +261,8 @@ dependencies = [
 [[package]]
 name = "aprender-quant"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cf3f48ecad540ed322953ac6b11377080e7384e80955f4bb0ad650e68f370fb6"
 dependencies = [
  "half",
 ]
@@ -258,6 +270,8 @@ dependencies = [
 [[package]]
 name = "aprender-train"
 version = "0.31.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3b361df0207d1b6ae2de5f8e39c19941c81210e9fd3d369003004f769ec91de4"
 dependencies = [
  "aprender-core",
  "bytemuck",

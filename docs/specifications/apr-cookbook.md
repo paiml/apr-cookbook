@@ -33,7 +33,8 @@ APR Cookbook v5.0 — APR-MONO Integration
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
 │   ├── 64 other recipes (acceleration, advanced, inference, etc.)
 │   └── 219 total examples across 24 categories
-├── Framework Layer — APR-MONO workspace crates (path deps to ../aprender)
+├── Framework Layer — APR-MONO v0.31.2 crates from crates.io
+│   │   (optional `[patch.crates-io]` override for local ../aprender co-dev)
 │   ├── aprender-core 0.31.2         — package `aprender-core`, lib `aprender`
 │   │                                  — ML algorithms, .apr format, quantization
 │   │                                  — declared as `aprender = { package = "aprender-core" }`
@@ -230,12 +231,12 @@ license = "MIT"
 description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
 
 [dependencies]
-# APR-MONO v0.31.2 — canonical crate names via path deps to ../aprender monorepo.
+# APR-MONO v0.31.2 — canonical crate names from crates.io.
 # Root `aprender` facade doesn't forward features, so depend on aprender-core
 # (whose lib name is "aprender") with a package rename.
-aprender = { path = "../aprender/crates/aprender-core", package = "aprender-core", features = ["format-compression"] }
-aprender-compute = { path = "../aprender/crates/aprender-compute" }   # lib = `trueno`
-aprender-train   = { path = "../aprender/crates/aprender-train"   }   # lib = `entrenar`
+aprender = { version = "0.31.2", package = "aprender-core", features = ["format-compression"] }
+aprender-compute = "0.31.2"   # package `aprender-compute`, lib name `trueno`
+aprender-train = "0.31.2"     # package `aprender-train`, lib name `entrenar`
 ndarray = "0.16"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
@@ -254,12 +255,21 @@ proptest = "1"
 criterion = { version = "0.5", features = ["html_reports"] }
 memmap2 = "0.9"   # F2 zero-copy falsification
 # In-process contract validation (replaces external `pv` binary dep)
-aprender-contracts = { path = "../aprender/crates/aprender-contracts" }   # lib = `provable_contracts`
+aprender-contracts = "0.31.2"   # lib = `provable_contracts`
 
 [features]
 default = []
 encryption = ["aprender/format-encryption"]
 full = ["encryption"]
+
+# Local-development override: point the four APR-MONO deps at a co-checked-out
+# ../aprender monorepo instead of crates.io. Uncomment when iterating on both
+# repos simultaneously.
+# [patch.crates-io]
+# aprender-core = { path = "../aprender/crates/aprender-core" }
+# aprender-compute = { path = "../aprender/crates/aprender-compute" }
+# aprender-train = { path = "../aprender/crates/aprender-train" }
+# aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 ```
 
 **Note**: GPU (aprender-gpu / aprender-cuda-edge), distributed (aprender-distribute), and speech (aprender-core/audio) capabilities are **simulated** in cookbook examples. The recipes demonstrate algorithms and patterns without requiring GPU drivers at compile time. Real-hardware numbers for those paths live in sibling repos (candle-vs-apr, apr-leaderboard) and are cited as claims N1–N4, not re-run here.
