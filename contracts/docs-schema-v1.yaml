@@ -7,11 +7,28 @@ metadata:
     - "APR Cookbook Spec v3.4.0, Docs Schema Enforcement"
     - "pmat validate-readme (factual accuracy + hallucination detection)"
     - "paiml/provable-contracts schema"
+  depends_on:
+    - "recipe-iiur-v1"
   registry: false
   tags:
     - docs
     - schema
     - validation
+
+kernel_structure:
+  phases:
+    - name: "scan_markdown"
+      description: "Walk repository and collect every *.md file with its frontmatter + body"
+      invariant: "Every file path resolves; frontmatter parses as valid YAML or is empty"
+    - name: "validate_facts"
+      description: "Run pmat validate-readme against deep-context.md; flag unverified + contradictions"
+      invariant: "unverified_count == 0 && contradictions_count == 0 && min_confidence >= 0.9"
+    - name: "check_schema"
+      description: "For each docs/specifications/**/*.md, validate frontmatter against provable-contracts schema"
+      invariant: "Every spec has version field; every benchmark claim has F-code + contract_ref"
+    - name: "verify_links"
+      description: "Resolve every relative link, contract reference, and example reference in markdown"
+      invariant: "broken_links == ∅ && every contract_ref and example_ref exists on disk"
 
 equations:
   factual_accuracy:
@@ -24,6 +41,15 @@ equations:
       - "All CLI commands referenced in docs are actual apr subcommands"
       - "All file paths referenced exist"
       - "All version numbers match Cargo.toml"
+    preconditions:
+      - "std::path::Path::new(markdown_path).exists()"
+      - "markdown_path.ends_with(\".md\")"
+      - "std::path::Path::new(\"deep-context.md\").exists()"
+    postconditions:
+      - "report.unverified_count == 0"
+      - "report.contradictions_count == 0"
+      - "report.min_confidence >= 0.9"
+    lean_theorem: "Theorems.FactualAccuracy"
 
   schema_compliance:
     formula: "∀ m ∈ docs/specifications/**/*.md: m.frontmatter ⊨ provable_contracts.doc_schema"
@@ -34,6 +60,15 @@ equations:
       - "Every spec component references contracts/ YAML where applicable"
       - "Every benchmark claim has F-code + contract reference"
       - "Every performance claim is falsifiable (has threshold + refutation)"
+    preconditions:
+      - "spec_path.starts_with(\"docs/specifications/\")"
+      - "spec_path.ends_with(\".md\")"
+      - "!frontmatter.is_empty()"
+    postconditions:
+      - "frontmatter.contains_key(\"version\")"
+      - "benchmark_claims.iter().all(|c| c.has_f_code() && !c.contract_ref.is_empty())"
+      - "performance_claims.iter().all(|c| c.threshold.is_some() && !c.refutation.is_empty())"
+    lean_theorem: "Theorems.SchemaCompliance"
 
   link_integrity:
     formula: "∀ link ∈ *.md: link.target.exists"
@@ -44,6 +79,16 @@ equations:
       - "Every contract reference (contracts/*.yaml) exists"
       - "Every example reference (examples/**/*.rs) exists"
       - "No dead section anchors within the repo"
+    preconditions:
+      - "!links.is_empty()"
+      - "std::path::Path::new(repo_root).is_dir()"
+      - "links.iter().all(|l| !l.target.is_empty())"
+    postconditions:
+      - "broken_links.is_empty()"
+      - "contract_refs.iter().all(|c| std::path::Path::new(c).exists())"
+      - "example_refs.iter().all(|e| std::path::Path::new(e).exists())"
+      - "dead_anchors.is_empty()"
+    lean_theorem: "Theorems.LinkIntegrity"
 
   cli_binding:
     formula: "∀ claim ∈ README.md ∪ docs/**/*.md: claim.references_apr_cmd ⟹ cmd ∈ apr.subcommands"
@@ -53,28 +98,62 @@ equations:
       - "Every `apr <cmd>` in docs corresponds to a real apr subcommand"
       - "Every documented flag exists in `apr <cmd> --help`"
       - "Documentation version never claims features absent from installed apr"
+    preconditions:
+      - "!doc_cli_mentions.is_empty()"
+      - "!apr_subcommands.is_empty()"
+      - "doc_cli_mentions.iter().all(|(cmd, _)| !cmd.is_empty())"
+    postconditions:
+      - "doc_cli_mentions.iter().all(|(cmd, _)| apr_subcommands.contains(cmd))"
+      - "doc_flags.iter().all(|(cmd, flag)| apr_flags_of(cmd).contains(flag))"
+      - "unknown_commands_in_docs.is_empty()"
+    lean_theorem: "Theorems.CliBinding"
 
 proof_obligations:
   - type: invariant
     property: "No unverified claims"
     formal: "pmat.validate_readme(*.md).unverified = 0"
+    tolerance: 0.0
     applies_to: factual_accuracy
+    lean:
+      theorem: "Theorems.NoUnverifiedClaims"
+      module: "ProvableContracts.Docs.Schema"
+      status: wip
   - type: invariant
     property: "No contradictions"
     formal: "pmat.validate_readme(*.md).contradictions = 0"
+    tolerance: 0.0
     applies_to: factual_accuracy
+    lean:
+      theorem: "Theorems.NoContradictions"
+      module: "ProvableContracts.Docs.Schema"
+      status: wip
   - type: invariant
     property: "Schema compliance for specs"
     formal: "∀ m ∈ spec: validates(m.frontmatter, doc_schema)"
+    tolerance: 0.0
     applies_to: schema_compliance
+    lean:
+      theorem: "Theorems.SchemaComplianceForSpecs"
+      module: "ProvableContracts.Docs.Schema"
+      status: wip
   - type: invariant
     property: "Link integrity"
     formal: "∀ l ∈ links: exists(l.target)"
+    tolerance: 0.0
     applies_to: link_integrity
+    lean:
+      theorem: "Theorems.LinkIntegrity"
+      module: "ProvableContracts.Docs.Schema"
+      status: wip
   - type: invariant
     property: "CLI binding integrity"
     formal: "∀ cmd ∈ docs: cmd ∈ apr.subcommands"
+    tolerance: 0.0
     applies_to: cli_binding
+    lean:
+      theorem: "Theorems.CliBindingIntegrity"
+      module: "ProvableContracts.Docs.Schema"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-DOCS-001

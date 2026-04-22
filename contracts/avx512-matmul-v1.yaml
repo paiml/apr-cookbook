@@ -8,11 +8,27 @@ metadata:
     - "Intel Intrinsics Guide — _mm512_fmadd_ps"
     - "APR Cookbook Spec v3.0.0, Claim F7"
   depends_on:
-    - "avx2-fma-dot-v1.yaml"
+    - "recipe-iiur-v1"
+    - "int4-quantization-v1"
   tags:
     - simd
     - matmul
     - performance
+
+kernel_structure:
+  phases:
+    - name: "tile_partition"
+      description: "Partition A (M×K) and B (K×N) into cache-blocked tiles sized for L1/L2"
+      invariant: "Tile sizes fit in L2; M_tile*K_tile + K_tile*N_tile + M_tile*N_tile <= L2_size"
+    - name: "pack_panels"
+      description: "Pack tiles into contiguous row-major A-panel and column-major B-panel (Goto algorithm)"
+      invariant: "Packed layout is aligned to 64 bytes for AVX-512 loads"
+    - name: "fma_inner"
+      description: "Inner kernel uses _mm512_fmadd_ps with 8×16 register tile and software prefetching"
+      invariant: "No denormal stalls; all FMA operations on aligned addresses"
+    - name: "accumulate"
+      description: "Write accumulator tiles back to output C in row-major order"
+      invariant: "C[i,j] == sum_k A[i,k]*B[k,j] within k·ε_mach accumulation error"
 
 equations:
   matmul:
@@ -22,6 +38,15 @@ equations:
     invariants:
       - "C is deterministic for same inputs"
       - "(A × B) × C = A × (B × C) (associativity, modulo fp rounding)"
+    preconditions:
+      - "a.shape() == [m, k]"
+      - "b.shape() == [k, n]"
+      - "m > 0 && n > 0 && k > 0"
+    postconditions:
+      - "result.shape() == [m, n]"
+      - "matmul(&a, &b) == matmul(&a, &b)"
+      - "result.iter().all(|v: &f32| v.is_finite())"
+    lean_theorem: "Theorems.Matmul"
 
   throughput:
     formula: "GFLOPS = 2·M·N·K / (wall_time · 10^9)"
@@ -30,6 +55,15 @@ equations:
     invariants:
       - "GFLOPS >= 80 for M=N=K=1024 on AVX-512 (F7 threshold)"
       - "GFLOPS bounded by theoretical peak: cores × freq × FMA_width × 2"
+    preconditions:
+      - "m > 0 && n > 0 && k > 0"
+      - "wall_time_seconds > 0.0"
+      - "is_x86_feature_detected!(\"avx512f\")"
+    postconditions:
+      - "gflops > 0.0"
+      - "gflops >= 80.0"
+      - "gflops <= num_cores as f64 * freq_ghz * fma_width as f64 * 2.0"
+    lean_theorem: "Theorems.Throughput"
 
   scalar_equivalence:
     formula: "||C_avx512 - C_scalar||_∞ < ε"
@@ -37,21 +71,44 @@ equations:
     codomain: "ε ∈ [0, ∞)"
     invariants:
       - "ε < K · ε_mach (accumulation error bounded by inner dimension)"
+    preconditions:
+      - "a.shape() == [m, k]"
+      - "b.shape() == [k, n]"
+      - "k > 0"
+    postconditions:
+      - "max_abs_error >= 0.0"
+      - "max_abs_error < (k as f64) * f32::EPSILON as f64"
+      - "max_abs_error < 1.0e-3"
+    lean_theorem: "Theorems.ScalarEquivalence"
 
 proof_obligations:
   - type: bound
     property: "Throughput meets F7 threshold"
     formal: "GFLOPS >= 80 for 1024×1024 matmul on AVX-512"
+    tolerance: 5.0
     applies_to: throughput
+    lean:
+      theorem: "Theorems.ThroughputMeetsF7Threshold"
+      module: "ProvableContracts.Avx512.Matmul"
+      status: wip
   - type: equivalence
     property: "SIMD matches scalar"
     formal: "||C_avx512 - C_scalar||_∞ < K · ε_mach"
     tolerance: 1.0e-3
     applies_to: scalar_equivalence
+    lean:
+      theorem: "Theorems.SimdMatchesScalar"
+      module: "ProvableContracts.Avx512.Matmul"
+      status: wip
   - type: invariant
     property: "Deterministic output"
     formal: "matmul(A, B) = matmul(A, B) for all A, B"
+    tolerance: 0.0
     applies_to: matmul
+    lean:
+      theorem: "Theorems.DeterministicOutput"
+      module: "ProvableContracts.Avx512.Matmul"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-MM-001

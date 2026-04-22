@@ -7,10 +7,28 @@ metadata:
     - "Dao et al. (2022) FlashAttention: Fast and Memory-Efficient Exact Attention"
     - "Dao (2023) FlashAttention-2: Faster Attention with Better Parallelism"
     - "APR Cookbook Spec v3.0.0, Claim F6"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "avx512-matmul-v1"
   tags:
     - gpu
     - attention
     - performance
+
+kernel_structure:
+  phases:
+    - name: "tile_qkv"
+      description: "Partition Q, K, V along sequence axis into B_r × B_c tiles that fit in GPU shared memory"
+      invariant: "B_r * B_c * sizeof(f32) <= shared_memory_capacity"
+    - name: "online_softmax"
+      description: "Compute running max and running sum per tile using online softmax algorithm (Milakov–Gimelshein)"
+      invariant: "Numerically stable: subtract running max before exp; no NaN from overflow"
+    - name: "tile_matmul"
+      description: "Compute P_ij = Q_i K_j^T scaled by 1/sqrt(d); accumulate O_i += P_ij * V_j"
+      invariant: "O tile is rescaled by (old_sum / new_sum) to maintain algebraic equivalence to full softmax"
+    - name: "write_back"
+      description: "Write output tile O_i to HBM; discard intermediate S_ij (never materialize full S×S)"
+      invariant: "Peak memory O(S) rather than O(S²); HBM reads < S²"
 
 equations:
   naive_attention:
@@ -20,6 +38,15 @@ equations:
     invariants:
       - "Memory grows quadratically with sequence length"
       - "Materializes full S×S attention matrix"
+    preconditions:
+      - "seq_len > 0"
+      - "head_dim > 0"
+      - "seq_len <= i32::MAX as usize / seq_len"
+    postconditions:
+      - "flops == 2 * seq_len * seq_len * head_dim"
+      - "memory_bytes >= seq_len * seq_len * std::mem::size_of::<f32>()"
+      - "memory_bytes as f64 >= (seq_len as f64).powi(2)"
+    lean_theorem: "Theorems.NaiveAttention"
 
   flash_attention:
     formula: "O(F) = O(S²·d) compute, O(S) memory"
@@ -29,6 +56,15 @@ equations:
       - "Same FLOP count as naive (exact, not approximate)"
       - "Memory is O(S) — no S×S materialization"
       - "Tiling makes it IO-aware: minimizes HBM reads/writes"
+    preconditions:
+      - "seq_len > 0 && head_dim > 0"
+      - "block_rows > 0 && block_cols > 0"
+      - "block_rows * block_cols * std::mem::size_of::<f32>() <= shared_memory_bytes"
+    postconditions:
+      - "flops == 2 * seq_len * seq_len * head_dim"
+      - "memory_bytes <= c_linear * seq_len * std::mem::size_of::<f32>()"
+      - "hbm_reads < seq_len * seq_len"
+    lean_theorem: "Theorems.FlashAttention"
 
   speedup:
     formula: "Speedup = wall_time(naive) / wall_time(flash)"
@@ -37,6 +73,15 @@ equations:
     invariants:
       - "Speedup >= 2x for S >= 1024 (F6 threshold)"
       - "Speedup increases with sequence length (IO-bound regime)"
+    preconditions:
+      - "seq_len >= 1024"
+      - "wall_time_flash > 0.0"
+      - "wall_time_naive > 0.0"
+    postconditions:
+      - "speedup > 0.0"
+      - "speedup >= 2.0"
+      - "speedup.is_finite()"
+    lean_theorem: "Theorems.Speedup"
 
   numerical_equivalence:
     formula: "||O_flash - O_naive||_∞ < ε"
@@ -45,21 +90,44 @@ equations:
     invariants:
       - "ε < 1e-3 for f32 (different summation order)"
       - "Output is exact in infinite precision — error is purely floating-point"
+    preconditions:
+      - "q_flash.shape() == q_naive.shape()"
+      - "k_flash.shape() == k_naive.shape()"
+      - "v_flash.shape() == v_naive.shape()"
+    postconditions:
+      - "max_abs_error >= 0.0"
+      - "max_abs_error < 1.0e-3"
+      - "max_abs_error.is_finite()"
+    lean_theorem: "Theorems.NumericalEquivalence"
 
 proof_obligations:
   - type: bound
     property: "Speedup >= 2x at seq >= 1024"
     formal: "wall_time(naive) / wall_time(flash) >= 2.0 for S >= 1024"
+    tolerance: 0.1
     applies_to: speedup
+    lean:
+      theorem: "Theorems.Speedup2xAtSeq1024"
+      module: "ProvableContracts.FlashAttention"
+      status: wip
   - type: equivalence
     property: "Numerical equivalence"
     formal: "||O_flash - O_naive||_∞ < 1e-3"
     tolerance: 1.0e-3
     applies_to: numerical_equivalence
+    lean:
+      theorem: "Theorems.NumericalEquivalence"
+      module: "ProvableContracts.FlashAttention"
+      status: wip
   - type: bound
     property: "Linear memory"
     formal: "peak_memory(flash) = O(S), not O(S²)"
+    tolerance: 0.05
     applies_to: flash_attention
+    lean:
+      theorem: "Theorems.LinearMemory"
+      module: "ProvableContracts.FlashAttention"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-FA-001
