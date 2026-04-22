@@ -259,8 +259,8 @@ pub fn section_kernel_map(kernels: &[KernelStep]) {
     println!("  {:-<80}", "");
 
     for (i, k) in kernels.iter().enumerate() {
-        let grid_str = format!("({},{},{})", k.grid_dim[0], k.grid_dim[1], k.grid_dim[2],);
-        let block_str = format!("({},{},{})", k.block_dim[0], k.block_dim[1], k.block_dim[2],);
+        let grid_str = format!("({},{},{})", k.grid_dim[0], k.grid_dim[1], k.grid_dim[2]);
+        let block_str = format!("({},{},{})", k.block_dim[0], k.block_dim[1], k.block_dim[2]);
         let shmem_str = if k.shared_mem_bytes >= 1024 {
             format!("{}KB", k.shared_mem_bytes / 1024)
         } else {

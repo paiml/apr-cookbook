@@ -116,7 +116,7 @@ impl WordFrequency {
     #[must_use]
     pub fn top_words(&self, n: usize) -> Vec<(String, usize)> {
         let mut sorted: Vec<_> = self.counts.iter().map(|(k, v)| (k.clone(), *v)).collect();
-        sorted.sort_by(|a, b| b.1.cmp(&a.1));
+        sorted.sort_by_key(|b| std::cmp::Reverse(b.1));
         sorted.into_iter().take(n).collect()
     }
 

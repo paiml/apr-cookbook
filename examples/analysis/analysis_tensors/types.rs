@@ -344,7 +344,7 @@ pub fn print_summary(tensors: &[TensorInfo]) {
     println!("\n--- DType Breakdown ---");
     let breakdown = dtype_breakdown(tensors);
     let mut entries: Vec<_> = breakdown.iter().collect();
-    entries.sort_by(|a, b| b.1 .1.cmp(&a.1 .1));
+    entries.sort_by_key(|b| std::cmp::Reverse(b.1 .1));
     for (dtype, (params, bytes)) in &entries {
         let pct = if total_bytes > 0 {
             (*bytes as f64 / total_bytes as f64) * 100.0

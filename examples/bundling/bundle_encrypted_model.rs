@@ -99,12 +99,8 @@ mod demo {
     }
 
     pub(super) fn print_size_comparison(encrypted_path: &Path, unencrypted_path: &Path) {
-        let encrypted_size = std::fs::metadata(encrypted_path)
-            .map(|m| m.len())
-            .unwrap_or(0);
-        let unencrypted_size = std::fs::metadata(unencrypted_path)
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let encrypted_size = std::fs::metadata(encrypted_path).map_or(0, |m| m.len());
+        let unencrypted_size = std::fs::metadata(unencrypted_path).map_or(0, |m| m.len());
 
         println!("File sizes:");
         println!("  Unencrypted: {} bytes", unencrypted_size);

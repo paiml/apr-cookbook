@@ -131,11 +131,7 @@ fn weight_histogram(weights: &[f32], bins: usize, label: &str) {
     for (i, &count) in counts.iter().enumerate() {
         let lo = i as f64 * bin_width;
         let hi = (i + 1) as f64 * bin_width;
-        let bar_len = if max_count > 0 {
-            count * bar_max / max_count
-        } else {
-            0
-        };
+        let bar_len = (count * bar_max).checked_div(max_count).unwrap_or(0);
         let bar: String = "#".repeat(bar_len);
         println!("    [{lo:>5.2}, {hi:>5.2}) | {bar:<40} ({count})");
     }

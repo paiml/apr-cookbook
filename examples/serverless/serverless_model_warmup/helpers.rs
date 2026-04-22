@@ -296,11 +296,9 @@ pub fn simulate_keep_alive(
     ping_interval_s: u32,
 ) -> KeepAliveResult {
     let simulation_duration_s: u32 = 3600; // 1 hour
-    let total_pings = if ping_interval_s > 0 {
-        simulation_duration_s / ping_interval_s
-    } else {
-        0
-    };
+    let total_pings = simulation_duration_s
+        .checked_div(ping_interval_s)
+        .unwrap_or(0);
 
     // Deterministic request pattern: requests arrive at hashed intervals
     let mut cold_starts_without_ping: u32 = 0;

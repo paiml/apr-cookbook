@@ -197,7 +197,7 @@ fn main() {
     let total_alerts: usize = all_window_stats.iter().map(|w| w.alerts.len()).sum();
     let mut all_alerts: Vec<&DriftAlert> =
         all_window_stats.iter().flat_map(|w| &w.alerts).collect();
-    all_alerts.sort_by(|a, b| b.severity.cmp(&a.severity));
+    all_alerts.sort_by_key(|a| std::cmp::Reverse(a.severity));
     println!("   Total: {total_alerts}");
     for (i, alert) in all_alerts.iter().enumerate().take(6) {
         println!("   {}. {alert}", i + 1);

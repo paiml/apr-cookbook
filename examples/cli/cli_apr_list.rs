@@ -190,10 +190,14 @@ fn seed_to_date(seed: u64, variant: u64) -> String {
     format!("2026-{month:02}-{day:02} {hour:02}:{minute:02}")
 }
 
+// Mixed sort strategy: Copy keys (u64) use sort_by_key for efficiency; String
+// keys stay on sort_by to avoid .clone() per comparison. clippy's uniform
+// suggestion doesn't apply to the String arms.
+#[allow(clippy::unnecessary_sort_by)]
 fn sort_models(models: &mut [CachedModel], field: SortField) {
     match field {
         SortField::Name => models.sort_by(|a, b| a.name.cmp(&b.name)),
-        SortField::Size => models.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes)),
+        SortField::Size => models.sort_by_key(|m| std::cmp::Reverse(m.size_bytes)),
         SortField::Downloaded => models.sort_by(|a, b| a.downloaded_at.cmp(&b.downloaded_at)),
         SortField::LastUsed => models.sort_by(|a, b| b.last_used.cmp(&a.last_used)),
     }

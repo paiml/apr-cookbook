@@ -89,8 +89,7 @@ fn bench_inference(model_bytes: &[u8], batch_size: usize, iterations: usize) -> 
     // Infer matrix dimensions (assume square-ish)
     let dim = (num_weights as f64).sqrt() as usize;
     let rows = dim.max(1);
-    let cols = if rows > 0 { num_weights / rows } else { 1 };
-    let cols = cols.max(1);
+    let cols = num_weights.checked_div(rows).unwrap_or(1).max(1);
 
     // Generate deterministic input
     let seed = hash_name_to_seed("bench-input");

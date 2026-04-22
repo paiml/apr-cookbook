@@ -261,7 +261,7 @@ pub fn dtype_distribution(tensors: &[TensorInfo]) -> String {
         *counts.entry(t.dtype.as_str()).or_insert(0usize) += 1;
     }
     let mut entries: Vec<_> = counts.into_iter().collect();
-    entries.sort_by(|a, b| b.1.cmp(&a.1));
+    entries.sort_by_key(|b| std::cmp::Reverse(b.1));
     entries
         .iter()
         .map(|(d, c)| format!("{d}: {c}"))

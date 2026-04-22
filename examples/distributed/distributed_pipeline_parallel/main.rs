@@ -164,7 +164,7 @@ fn main() -> Result<()> {
     println!("   │ Stage                │ Utilisation  │");
     println!("   ├──────────────────────┼──────────────┤");
     for (i, &u) in util.iter().enumerate() {
-        println!("   │ {:20} │ {:>10.1}%  │", stages[i].name, u * 100.0,);
+        println!("   │ {:20} │ {:>10.1}%  │", stages[i].name, u * 100.0);
     }
     println!("   └──────────────────────┴──────────────┘");
     println!();

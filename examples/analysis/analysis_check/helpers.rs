@@ -313,11 +313,11 @@ pub fn stage_embedding_consistency(bytes: &[u8]) -> StageResult {
     match most_common {
         Some((dim, count)) if count >= tensor_count / 2 => StageResult::pass(
             "Embedding consistency",
-            &format!("Common dim {dim} shared by {count}/{tensor_count} tensors",),
+            &format!("Common dim {dim} shared by {count}/{tensor_count} tensors"),
         ),
         Some((dim, count)) => StageResult::pass(
             "Embedding consistency",
-            &format!("Most common dim {dim} in {count}/{tensor_count} tensors (low overlap)",),
+            &format!("Most common dim {dim} in {count}/{tensor_count} tensors (low overlap)"),
         ),
         None => StageResult::skip("Embedding consistency", "No dimensions found"),
     }

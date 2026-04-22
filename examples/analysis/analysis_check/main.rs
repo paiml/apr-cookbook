@@ -52,7 +52,7 @@ fn main() -> Result<()> {
 
     let model_path = ctx.path("check-target.apr");
     std::fs::write(&model_path, &bundle)?;
-    println!("Model: check-target ({} bytes)\n", bundle.len(),);
+    println!("Model: check-target ({} bytes)\n", bundle.len());
 
     // --- Section 2: Run 10-stage check on valid model ---
     println!("--- Clean Model Check ---");
