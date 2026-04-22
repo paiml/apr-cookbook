@@ -7,10 +7,28 @@ metadata:
     - "NIST SP 800-38D: Recommendation for GCM Mode"
     - "McGrew & Viega (2004) The Galois/Counter Mode of Operation"
     - "APR Cookbook Spec v3.0.0, Claim F4"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "apr-format-roundtrip-v1"
   tags:
     - encryption
     - security
     - performance
+
+kernel_structure:
+  phases:
+    - name: "key_derivation"
+      description: "Derive 256-bit AES key from key material; reject if key.len() != 32"
+      invariant: "key.len() == 32 && nonce.len() == 12"
+    - name: "ghash_init"
+      description: "Initialize GHASH state with authentication key H = AES_k(0^128)"
+      invariant: "H ∈ GF(2^128); H is constant for fixed key"
+    - name: "ctr_decrypt"
+      description: "AES-CTR mode decryption with 96-bit nonce; AES-NI accelerated when available"
+      invariant: "|plaintext| == |ciphertext|; nonce never reused for same key"
+    - name: "auth_verify"
+      description: "Compute GHASH over (AAD || ciphertext) and compare to provided tag in constant time"
+      invariant: "tag mismatch → authentication failure; timing side-channel resistant"
 
 equations:
   decrypt_latency:
@@ -20,6 +38,15 @@ equations:
     invariants:
       - "L < 5ms for model header decryption (F4 threshold)"
       - "L scales linearly with ciphertext size for full-model decrypt"
+    preconditions:
+      - "!ciphertext.is_empty()"
+      - "key.len() == 32"
+      - "nonce.len() == 12"
+    postconditions:
+      - "result_seconds >= 0.0"
+      - "result_seconds < 0.005"
+      - "result_seconds.is_finite()"
+    lean_theorem: "Theorems.DecryptLatency"
 
   authenticity:
     formula: "V = GHASH(ciphertext, AAD) == tag"
@@ -29,6 +56,15 @@ equations:
       - "V = false for any bit flip in ciphertext (authentication)"
       - "V = false for any bit flip in tag (forgery detection)"
       - "Pr[forge] <= 2^{-128} (GCM security bound)"
+    preconditions:
+      - "!ciphertext.is_empty()"
+      - "tag.len() == 16"
+      - "key.len() == 32"
+    postconditions:
+      - "result == true || result == false"
+      - "!result || ghash_matches(ciphertext, aad, tag, key)"
+      - "forge_probability <= 2f64.powi(-128)"
+    lean_theorem: "Theorems.Authenticity"
 
   roundtrip:
     formula: "decrypt(encrypt(plaintext, key), key) = plaintext"
@@ -37,20 +73,43 @@ equations:
     invariants:
       - "Lossless: output = input for all valid key/plaintext pairs"
       - "decrypt with wrong key → authentication failure, not garbage"
+    preconditions:
+      - "!plaintext.is_empty()"
+      - "key.len() == 32"
+    postconditions:
+      - "result.as_slice() == plaintext.as_slice()"
+      - "result.len() == plaintext.len()"
+      - "wrong_key_yields_auth_error(plaintext, key)"
+    lean_theorem: "Theorems.Roundtrip"
 
 proof_obligations:
   - type: bound
     property: "Decrypt latency under 5ms"
     formal: "L < 0.005s for header decryption"
+    tolerance: 5.0e-4
     applies_to: decrypt_latency
+    lean:
+      theorem: "Theorems.DecryptLatencyUnder5Ms"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
   - type: roundtrip
     property: "Encrypt/decrypt lossless"
     formal: "decrypt(encrypt(P, K), K) = P for all P, K"
+    tolerance: 0.0
     applies_to: roundtrip
+    lean:
+      theorem: "Theorems.EncryptDecryptLossless"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
   - type: invariant
     property: "Tamper detection"
     formal: "flip_bit(ciphertext) → authentication failure"
+    tolerance: 0.0
     applies_to: authenticity
+    lean:
+      theorem: "Theorems.TamperDetection"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-AES-001

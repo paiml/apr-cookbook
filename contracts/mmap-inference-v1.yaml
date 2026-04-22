@@ -6,10 +6,28 @@ metadata:
   references:
     - "Kerrisk (2010) The Linux Programming Interface, Ch. 49: Memory Mappings"
     - "APR Cookbook Spec v3.0.0, Claim F2"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "apr-format-roundtrip-v1"
   tags:
     - performance
     - mmap
     - zero-copy
+
+kernel_structure:
+  phases:
+    - name: "open_file"
+      description: "Open .apr file with read-only flags; resolve inode via stat()"
+      invariant: "fd >= 0 && Path::new(path).exists() && file_size > 0"
+    - name: "mmap_region"
+      description: "Call mmap(NULL, len, PROT_READ, MAP_PRIVATE, fd, 0) to map file into address space"
+      invariant: "mmap returns non-MAP_FAILED pointer; no data copied; O(1) in file size"
+    - name: "parse_header"
+      description: "Read APR magic bytes and tensor directory from mapped region (pointer arithmetic only)"
+      invariant: "No heap allocations; all tensors are slices into mmap region"
+    - name: "first_access"
+      description: "Page fault on first tensor read pulls page from storage into page cache"
+      invariant: "Subsequent accesses to same page are served from page cache (no I/O)"
 
 equations:
   mmap_latency:
@@ -19,6 +37,15 @@ equations:
     invariants:
       - "L < 1ms for any model size (F2 threshold) — mmap is O(1) in file size"
       - "L is independent of file size (only page table setup, no I/O)"
+    preconditions:
+      - "file_size_bytes >= 1_048_576"
+      - "file_size_bytes <= 107_374_182_400"
+      - "std::path::Path::new(path).exists()"
+    postconditions:
+      - "result_seconds >= 0.0"
+      - "result_seconds < 0.001"
+      - "result_seconds.is_finite()"
+    lean_theorem: "Theorems.MmapLatency"
 
   first_access_latency:
     formula: "L_access = t_first_byte_read - t_mmap_complete"
@@ -27,6 +54,15 @@ equations:
     invariants:
       - "L_access depends on storage I/O (SSD: ~10µs, HDD: ~5ms)"
       - "Subsequent accesses to same page are L_cached ~ 0"
+    preconditions:
+      - "!mmap_region.is_empty()"
+      - "offset < mmap_region.len()"
+      - "!page_is_faulted(mmap_region, offset)"
+    postconditions:
+      - "result_seconds >= 0.0"
+      - "result_seconds < 0.005"
+      - "result_seconds.is_finite()"
+    lean_theorem: "Theorems.FirstAccessLatency"
 
   zero_copy:
     formula: "allocations(mmap_load) = 0 heap allocations"
@@ -35,20 +71,44 @@ equations:
     invariants:
       - "No memcpy from kernel to userspace (data stays in page cache)"
       - "Tensor slices are pointer offsets into mmap'd region"
+    preconditions:
+      - "std::path::Path::new(path).exists()"
+      - "path.ends_with(\".apr\")"
+      - "std::fs::metadata(path).map(|m| m.len() > 0).unwrap_or(false)"
+    postconditions:
+      - "heap_allocation_count == 0"
+      - "tensor_slices.iter().all(|t| mmap_region.as_ptr_range().contains(&t.as_ptr()))"
+      - "!memcpy_observed_in_load_path"
+    lean_theorem: "Theorems.ZeroCopy"
 
 proof_obligations:
   - type: bound
     property: "mmap latency under 1ms"
     formal: "L < 0.001s for all model sizes"
+    tolerance: 1.0e-4
     applies_to: mmap_latency
+    lean:
+      theorem: "Theorems.MmapLatencyUnder1Ms"
+      module: "ProvableContracts.Mmap.Inference"
+      status: wip
   - type: invariant
     property: "O(1) in file size"
     formal: "|L(100MB) - L(10GB)| < 0.5ms"
+    tolerance: 5.0e-4
     applies_to: mmap_latency
+    lean:
+      theorem: "Theorems.O1InFileSize"
+      module: "ProvableContracts.Mmap.Inference"
+      status: wip
   - type: invariant
     property: "Zero heap allocations"
     formal: "allocations(mmap_load) = 0"
+    tolerance: 0.0
     applies_to: zero_copy
+    lean:
+      theorem: "Theorems.ZeroHeapAllocations"
+      module: "ProvableContracts.Mmap.Inference"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-MMAP-001

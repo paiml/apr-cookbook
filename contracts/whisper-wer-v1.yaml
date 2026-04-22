@@ -7,10 +7,29 @@ metadata:
     - "Radford et al. (2022) Robust Speech Recognition via Large-Scale Weak Supervision"
     - "Panayotov et al. (2015) LibriSpeech: An ASR Corpus"
     - "APR Cookbook Spec v3.0.0, Claim F5"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "mmap-inference-v1"
+    - "int4-quantization-v1"
   tags:
     - speech
     - whisper
     - accuracy
+
+kernel_structure:
+  phases:
+    - name: "load_model"
+      description: "mmap whisper.apr; validate architecture and vocab; decode quantized weights on demand"
+      invariant: "model.architecture == 'whisper' && !weights.is_empty()"
+    - name: "mel_spectrogram"
+      description: "Convert 16kHz audio to 80-bin log-mel spectrogram using Hann window and STFT"
+      invariant: "mel_frames.shape == [80, ceil(audio_len / hop_length)]"
+    - name: "encoder_decoder"
+      description: "Run Whisper encoder (mel → hidden) + decoder (autoregressive token generation)"
+      invariant: "Token stream is prefix-closed; beam search depth bounded by beam_size"
+    - name: "wer_compute"
+      description: "Tokenize reference and hypothesis; compute Levenshtein edit distance / reference length"
+      invariant: "WER == (S + D + I) / N; WER >= 0 by construction"
 
 equations:
   wer:
@@ -21,6 +40,15 @@ equations:
       - "WER < 0.10 on LibriSpeech test-clean (F5 threshold)"
       - "WER = 0 iff hypothesis = reference"
       - "WER >= 0 (non-negative by construction)"
+    preconditions:
+      - "reference_word_count > 0"
+      - "substitutions + deletions + insertions <= reference_word_count * 10"
+      - "!hypothesis.is_empty() || reference_word_count > 0"
+    postconditions:
+      - "wer >= 0.0"
+      - "wer < 0.10"
+      - "(wer == 0.0) == (hypothesis == reference)"
+    lean_theorem: "Theorems.Wer"
 
   format_parity:
     formula: "ΔWER = |WER(whisper.apr) - WER(whisper.original)|"
@@ -28,20 +56,44 @@ equations:
     codomain: "ΔWER ∈ [0, ∞)"
     invariants:
       - "ΔWER < 0.005 (format conversion preserves accuracy within 0.5%)"
+    preconditions:
+      - "wer_apr >= 0.0 && wer_original >= 0.0"
+      - "model_weights_hash(\"whisper.apr\") == model_weights_hash(\"whisper.original\")"
+      - "!test_utterances.is_empty()"
+    postconditions:
+      - "delta_wer >= 0.0"
+      - "delta_wer < 0.005"
+      - "delta_wer.is_finite()"
+    lean_theorem: "Theorems.FormatParity"
 
 proof_obligations:
   - type: bound
     property: "WER under 10%"
     formal: "WER < 0.10 on LibriSpeech test-clean"
+    tolerance: 0.01
     applies_to: wer
+    lean:
+      theorem: "Theorems.WerUnder10Percent"
+      module: "ProvableContracts.Whisper.Wer"
+      status: wip
   - type: equivalence
     property: "Format parity"
     formal: "ΔWER < 0.005 between .apr and original format"
+    tolerance: 5.0e-3
     applies_to: format_parity
+    lean:
+      theorem: "Theorems.FormatParity"
+      module: "ProvableContracts.Whisper.Wer"
+      status: wip
   - type: invariant
     property: "WER non-negative"
     formal: "WER >= 0 for all inputs"
+    tolerance: 0.0
     applies_to: wer
+    lean:
+      theorem: "Theorems.WerNonNegative"
+      module: "ProvableContracts.Whisper.Wer"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-WER-001

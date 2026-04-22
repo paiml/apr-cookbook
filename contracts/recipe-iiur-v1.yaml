@@ -6,11 +6,27 @@ metadata:
   references:
     - "APR Cookbook Spec v3.0.0, IIUR Principles"
     - "Ohno (1988) Toyota Production System"
+  depends_on: []
   registry: false
   tags:
     - recipe
     - quality
     - iiur
+
+kernel_structure:
+  phases:
+    - name: "setup"
+      description: "Construct RecipeContext, seed RNG from recipe name hash, allocate temp directory"
+      invariant: "temp_dir exists and is empty; RNG seed = hash(recipe_name)"
+    - name: "execute"
+      description: "Run recipe body with RecipeContext; all writes go inside temp_dir"
+      invariant: "No writes outside temp_dir; no env mutation; no wall-clock reads"
+    - name: "verify"
+      description: "Hash recipe output and compare to prior run output (idempotency check)"
+      invariant: "output_run_1 == output_run_2 byte-for-byte"
+    - name: "teardown"
+      description: "Drop RecipeContext; temp_dir is removed; env snapshot matches pre-run"
+      invariant: "!temp_dir.exists() && env_after == env_before"
 
 equations:
   isolation:
@@ -22,6 +38,15 @@ equations:
       - "No environment variables modified"
       - "No global state mutated"
       - "Temp directory cleaned up on drop"
+    preconditions:
+      - "context.temp_dir().exists()"
+      - "context.temp_dir().is_dir()"
+      - "env_snapshot_before.len() > 0"
+    postconditions:
+      - "files_written_outside_temp.is_empty()"
+      - "env_snapshot_after == env_snapshot_before"
+      - "!context.temp_dir().exists()"
+    lean_theorem: "Theorems.Isolation"
 
   idempotency:
     formula: "output(run_1) = output(run_2) for same recipe"
@@ -31,6 +56,15 @@ equations:
       - "RecipeContext seeds RNG from recipe name hash"
       - "Sequential runs produce bitwise-identical output"
       - "No dependence on wall clock, PID, or hostname"
+    preconditions:
+      - "!recipe_name.is_empty()"
+      - "context.rng_seed() == hash(recipe_name.as_bytes())"
+      - "!recipe_reads_wall_clock(recipe_name)"
+    postconditions:
+      - "output_run_1 == output_run_2"
+      - "output_run_1.len() == output_run_2.len()"
+      - "!output_contains_nondeterminism(&output_run_1)"
+    lean_theorem: "Theorems.Idempotency"
 
   reproducibility:
     formula: "output(machine_A) = output(machine_B) for same recipe + deps"
@@ -40,24 +74,53 @@ equations:
       - "Pinned dependencies via Cargo.lock"
       - "MSRV 1.75 enforced in CI"
       - "Platform-independent results (no platform-specific float ops)"
+    preconditions:
+      - "std::path::Path::new(\"Cargo.lock\").exists()"
+      - "rustc_version::version().map(|v| v >= semver::Version::new(1, 75, 0)).unwrap_or(false)"
+      - "[\"linux\", \"macos\"].contains(&std::env::consts::OS)"
+    postconditions:
+      - "output_machine_a == output_machine_b"
+      - "hash_sha256(&output_machine_a) == hash_sha256(&output_machine_b)"
+      - "!uses_platform_specific_float_ops(&recipe_source)"
+    lean_theorem: "Theorems.Reproducibility"
 
 proof_obligations:
   - type: invariant
     property: "Isolation — no side effects"
     formal: "Files outside temp dir unchanged after recipe execution"
+    tolerance: 0.0
     applies_to: isolation
+    lean:
+      theorem: "Theorems.IsolationNoSideEffects"
+      module: "ProvableContracts.Recipe.Iiur"
+      status: wip
   - type: determinism
     property: "Idempotency — same output"
     formal: "run(recipe) = run(recipe) for all recipes"
+    tolerance: 0.0
     applies_to: idempotency
+    lean:
+      theorem: "Theorems.IdempotencySameOutput"
+      module: "ProvableContracts.Recipe.Iiur"
+      status: wip
   - type: invariant
     property: "Cleanup — no temp leaks"
     formal: "temp_dir does not exist after RecipeContext drops"
+    tolerance: 0.0
     applies_to: isolation
+    lean:
+      theorem: "Theorems.CleanupNoTempLeaks"
+      module: "ProvableContracts.Recipe.Iiur"
+      status: wip
   - type: equivalence
     property: "Cross-platform reproducibility"
     formal: "output(linux) = output(macos) for all recipes"
+    tolerance: 0.0
     applies_to: reproducibility
+    lean:
+      theorem: "Theorems.CrossPlatformReproducibility"
+      module: "ProvableContracts.Recipe.Iiur"
+      status: wip
 
 falsification_tests:
   - id: FALSIFY-IIUR-001
