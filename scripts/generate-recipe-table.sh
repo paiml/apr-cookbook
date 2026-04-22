@@ -26,7 +26,7 @@ extract_examples() {
     in_ex && /^path/ { path=$2 }
     in_ex && name != "" && path != "" { print name "\t" path; in_ex=0 }
     /^\[/ && !/^\[\[example\]\]/ { in_ex=0 }
-    ' "$CARGO" | sort -t$'\t' -k2,2 -k1,1
+    ' "$CARGO" | LC_ALL=C sort -t$'\t' -k2,2 -k1,1
 }
 
 # ---------------------------------------------------------------------------

@@ -18,4 +18,4 @@ cargo run --example acceleration_quantized_matmul --release
 ```
 
 ## Source
-[`examples/acceleration/acceleration_quantized_matmul.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_quantized_matmul.rs)
+[`examples/acceleration/acceleration_quantized_matmul/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_quantized_matmul/main.rs)

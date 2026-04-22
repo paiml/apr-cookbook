@@ -18,4 +18,4 @@ cargo run --example format_migration_pipeline
 ```
 
 ## Source
-[`examples/format/format_migration_pipeline.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_migration_pipeline.rs)
+[`examples/format/format_migration_pipeline/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_migration_pipeline/main.rs)

@@ -18,4 +18,4 @@ cargo run --example debug_fix_loop
 ```
 
 ## Source
-[`examples/advanced/debug_fix_loop.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/debug_fix_loop.rs)
+[`examples/advanced/debug_fix_loop/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/debug_fix_loop/main.rs)

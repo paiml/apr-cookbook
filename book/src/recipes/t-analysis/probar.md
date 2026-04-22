@@ -18,4 +18,4 @@ cargo run --example analysis_probar
 ```
 
 ## Source
-[`examples/analysis/analysis_probar.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_probar.rs)
+[`examples/analysis/analysis_probar/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_probar/main.rs)

@@ -18,4 +18,4 @@ cargo run --example acceleration_autotuner
 ```
 
 ## Source
-[`examples/acceleration/acceleration_autotuner.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_autotuner.rs)
+[`examples/acceleration/acceleration_autotuner/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_autotuner/main.rs)

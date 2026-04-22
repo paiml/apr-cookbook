@@ -24,9 +24,9 @@ cargo run --example chat_injection_defense
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/chat/chat_injection_defense.rs}}
+{{#include ../../../../examples/chat/chat_injection_defense/main.rs}}
 ```
 
 ## Source
 
-[`examples/chat/chat_injection_defense.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_injection_defense.rs)
+[`examples/chat/chat_injection_defense/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_injection_defense/main.rs)

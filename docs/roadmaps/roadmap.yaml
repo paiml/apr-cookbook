@@ -845,3 +845,152 @@ roadmap:
   labels:
   - quality
   notes: null
+- id: PMAT-037
+  github_issue: null
+  item_type: task
+  title: 'Invariant D: add arXiv citations to all 219 recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:33Z
+  updated: 2026-04-06T13:46:21Z
+  spec: null
+  acceptance_criteria:
+  - 'Every recipe .rs needs >=1 arXiv/DOI citation. Baseline: 0/219 (0%). Gate: make citation-check. Ref: F-ARXIV-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-038
+  github_issue: null
+  item_type: task
+  title: 'Invariant C: add GGUF/SafeTensors format variants to recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:34Z
+  updated: 2026-04-06T13:46:18Z
+  spec: null
+  acceptance_criteria:
+  - 'Recipes accepting model files must demo .apr + .gguf + .safetensors. Baseline: 3/219 (1.4%). Gate: make format-coverage. Ref: F-FORMAT-COV-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-039
+  github_issue: null
+  item_type: task
+  title: 'Invariant B: bind recipes to provable-contracts'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:35Z
+  updated: 2026-04-06T13:49:17Z
+  spec: null
+  acceptance_criteria:
+  - 'Every recipe needs Contract: header referencing YAML contract. Baseline: 0/219 (0%). Gate: make contract-grade. Ref: F-CONTRACT-GRADE-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-040
+  github_issue: null
+  item_type: task
+  title: 'Invariant E: bind book/ docs to provable-contracts'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-06T13:24:36Z
+  updated: 2026-04-06T14:10:34Z
+  spec: null
+  acceptance_criteria:
+  - '252 book/src/*.md files need contract binding. Baseline: 13/268 (4.9%). Gate: make docs-validate. Ref: F-DOCS-CONTRACT-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-041
+  github_issue: null
+  item_type: task
+  title: 'Fix 98 recipe files exceeding 500-line limit (Toyota Way: Muda)'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:31:39Z
+  updated: 2026-04-06T16:04:34Z
+  spec: null
+  acceptance_criteria:
+  - 'pmat checkpoint found 98/219 recipe .rs files over 500 lines. Worst: 977 lines. Root cause: monolithic examples with inline domain types that should be in lib.rs or split into focused sub-examples. Priority: reduce top 20 offenders (>800 lines) first.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-042
+  github_issue: null
+  item_type: task
+  title: 'APR-MONO v0.31.2 integration: retarget cookbook at aprender monorepo, falsification discipline v5.0'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-22T09:17:20Z
+  updated: 2026-04-22T10:03:14.569942946+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-043
+  github_issue: null
+  item_type: task
+  title: 'DEBT: src/bundle.rs (986) and src/recipe.rs (540) exceed 500-line cap — extract-module refactor'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T09:55:38Z
+  updated: 2026-04-22T10:19:13.741794971+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-044
+  github_issue: null
+  item_type: task
+  title: 'DEBT: push refactor/aprender-monorepo-v31 branch — blocked on user consent since ''main'' is protected'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T09:55:39Z
+  updated: 2026-04-22T10:30:13.015643081+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-045
+  github_issue: null
+  item_type: task
+  title: 'DEBT: paiml/apr-cookbook is archived on GitHub (isArchived: true) — cannot push refactor/aprender-monorepo-v31 or open PR; requires un-archive by repo admin'
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 2026-04-22T10:27:43Z
+  updated: 2026-04-22T10:55:20.305463572+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

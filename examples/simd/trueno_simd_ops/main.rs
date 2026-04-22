@@ -2,7 +2,7 @@
 //! Trueno SIMD Operations Example
 //!
 //! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
-//! Demonstrates SIMD-accelerated matrix operations using trueno 0.11.
+//! Demonstrates SIMD-accelerated matrix operations using aprender-compute 0.31+.
 //! Part of APR-024 specification.
 //!
 //! # Trueno SIMD Features

@@ -23,9 +23,9 @@ cargo run --example chat_multi_format
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/chat/chat_multi_format.rs}}
+{{#include ../../../../examples/chat/chat_multi_format/main.rs}}
 ```
 
 ## Source
 
-[`examples/chat/chat_multi_format.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_multi_format.rs)
+[`examples/chat/chat_multi_format/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/chat/chat_multi_format/main.rs)

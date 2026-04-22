@@ -18,4 +18,4 @@ cargo run --example optimize_tune
 ```
 
 ## Source
-[`examples/optimize/optimize_tune.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/optimize_tune.rs)
+[`examples/optimize/optimize_tune/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/optimize/optimize_tune/main.rs)

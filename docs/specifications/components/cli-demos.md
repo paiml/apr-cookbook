@@ -1,12 +1,12 @@
 # CLI Demo Recipes — 1:1 Parity with apr-cli
 
-These examples mirror the `apr` CLI's **57 subcommands** (excluding `help`) and their **~400 variants** (flag combinations). Each recipe demonstrates a real CLI workflow using entrenar/aprender library APIs directly, teaching users how the CLI composes these primitives.
+These examples mirror the `apr` CLI's **57 subcommands** (excluding `help`) and their **~400 variants** (flag combinations). Each recipe demonstrates a real CLI workflow using the APR-MONO library APIs directly — `aprender-train` (lib `entrenar`) and `aprender-core` (lib `aprender`) — teaching users how the CLI composes these primitives.
 
 ```
 apr CLI (57 subcommands, ~400 variants)
     | composes
-entrenar APIs (merge, distill, prune, finetune, quant)
-aprender APIs (format, chat templates, model inspection)
+aprender-train / lib `entrenar` APIs (merge, distill, prune, finetune, quant)
+aprender-core  / lib `aprender`  APIs (format, chat templates, model inspection)
     | demonstrated by
 Cookbook recipes (1 recipe per subcommand, ≥1 recipe per variant)
     | verified by 5 invariants
@@ -59,7 +59,7 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 
 ### Full Pipeline
 
-| # | File | CLI Equivalent | entrenar API |
+| # | File | CLI Equivalent | aprender-train API (lib `entrenar`) |
 |---|------|---------------|-------------|
 | 1 | `optimize_full_pipeline.rs` | composed: finetune->prune->distill->merge->quantize | All below |
 

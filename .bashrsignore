@@ -1,0 +1,22 @@
+# bashrs ignore list — rules with persistent false positives in this repo.
+# Every entry must document the trigger, not just the code.
+
+# SC1020 / SC1140: "Missing space before closing ]" and "Unexpected token after ]".
+# bashrs misparses `[text](url)` markdown literals (inside awk heredocs and bash
+# strings that emit markdown) as malformed test expressions. All hits are
+# cosmetic markdown fragments, not actual shell syntax errors.
+SC1020
+SC1140
+
+# SC1100: "This is a unicode dash. Delete and retype as a regular minus sign."
+# Em-dashes (U+2014) and en-dashes in COMMENT and DOCSTRING bodies are
+# intentional — they're prose formatting, not shell operators.
+SC1100
+
+# SC1078 / SC2188: "Did you forget to close this double-quoted string?" and
+# "Redirection without command". Triggered by multi-line `"..."` string
+# literals that contain `<!-- HTML comment -->` markers (used when a bash
+# script emits markdown). bashrs treats `<!--` as a here-doc or redirection
+# attempt instead of string content. All hits are in string literals.
+SC1078
+SC2188

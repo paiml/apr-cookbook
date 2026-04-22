@@ -24,9 +24,9 @@ cargo run --example analysis_qa_gates
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/analysis/analysis_qa_gates.rs}}
+{{#include ../../../../examples/analysis/analysis_qa_gates/main.rs}}
 ```
 
 ## Source
 
-[`examples/analysis/analysis_qa_gates.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qa_gates.rs)
+[`examples/analysis/analysis_qa_gates/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qa_gates/main.rs)

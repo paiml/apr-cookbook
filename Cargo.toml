@@ -2,7 +2,7 @@
 name = "apr-cookbook"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.89"
 license = "MIT"
 description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
 repository = "https://github.com/paiml/apr-cookbook"
@@ -59,11 +59,14 @@ codegen-units = 1
 strip = "symbols"
 
 [dependencies]
-# Sovereign Stack - crates.io published versions (2026)
-aprender = { version = "0.27", features = ["format-compression"] }
-trueno = "0.16"
-entrenar = "0.7"
-ndarray = "0.16"  # For entrenar Tensor gradients
+# APR-MONO v0.31.2 — canonical crate names from crates.io.
+# Root `aprender` facade doesn't forward features, so depend on aprender-core
+# (whose lib name is "aprender") with a package rename. Same trick the monorepo uses.
+# For local co-development with ../aprender, uncomment [patch.crates-io] below.
+aprender = { version = "0.31.2", package = "aprender-core", features = ["format-compression"] }
+aprender-compute = "0.31.2"   # package `aprender-compute`, lib name `trueno`
+aprender-train = "0.31.2"     # package `aprender-train`, lib name `entrenar`
+ndarray = "0.16"  # For aprender-train Tensor gradients
 
 # CLI
 clap = { version = "4", features = ["derive"] }
@@ -100,6 +103,23 @@ tempfile = "3"
 lz4_flex = "0.11.3"
 ed25519-dalek = "2.1.1"
 zstd = "0.13.3"
+# F2 zero-copy mmap falsification
+memmap2 = "0.9"
+# In-process contract validation (replaces external `pv` dependency)
+# package `aprender-contracts`, lib name `provable_contracts`
+aprender-contracts = "0.31.2"
+
+# ---------------------------------------------------------------------------
+# Local-development patch: point the four APR-MONO deps at a co-checked-out
+# ../aprender monorepo instead of the crates.io-published versions. Uncomment
+# the block below when iterating on both repos simultaneously. Commented by
+# default so CI and external users resolve straight from crates.io.
+# ---------------------------------------------------------------------------
+# [patch.crates-io]
+# aprender-core = { path = "../aprender/crates/aprender-core" }
+# aprender-compute = { path = "../aprender/crates/aprender-compute" }
+# aprender-train = { path = "../aprender/crates/aprender-train" }
+# aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 
 [features]
 default = []

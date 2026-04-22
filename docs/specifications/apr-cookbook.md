@@ -1,23 +1,24 @@
 # APR Cookbook Specification
 
-**Version**: 4.0.0
+**Version**: 5.0.0
 **Status**: ACTIVE
-**MSRV**: 1.75
-**Date**: 2026-04-06
+**MSRV**: 1.89
+**Date**: 2026-04-22
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
+**Sovereign Stack**: APR-MONO v0.31.2 ([github.com/paiml/aprender](https://github.com/paiml/aprender))
 
 ---
 
 ## Executive Summary
 
-The APR Cookbook is the technical manual for production ML deployment using the `.apr` format. It provides idiomatic Rust examples that demonstrate model bundling, format conversion, browser/edge deployment (WASM), SIMD/GPU acceleration, and CLI tooling — all as single-binary, zero-dependency artifacts.
+The APR Cookbook is the technical manual for production ML deployment using the `.apr` format. It provides idiomatic Rust examples that demonstrate model bundling, format conversion, browser/edge deployment (WASM), SIMD/GPU acceleration, and CLI tooling — all as single-binary artifacts with zero Python/CUDA runtime dependency (CPU path; GPU path requires CUDA libraries at inference time).
 
-**APR v2 Format** introduces binary tensor indices, LZ4/ZSTD compression, zero-copy loading, and Int4/Int8 quantization — achieving 3-10x size reduction with minimal accuracy loss.
+**APR v2 Format** introduces binary tensor indices, LZ4/ZSTD compression, zero-copy mmap loading, and Int4/Int8 quantization. Fair BF16 → Int4+LZ4 size comparison yields ~2–3× reduction (measured in [aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:17](https://github.com/paiml/aprender/blob/main/docs/benchmarks/FORMAT_PARITY_REPORT.md)). Larger ratios (e.g. 6.3× for F32 → Q4_K_M) confuse precision drop with format advantage.
 
 **Design Principles**:
 - **IIUR**: Every recipe is **Isolated**, **Idempotent**, **Useful**, and **Reproducible**
 - **Toyota Way**: Muda (waste elimination), Jidoka (built-in quality), Genchi Genbutsu (edge deployment), Poka-Yoke (compile-time safety), Kaizen (measurable improvement)
-- **Popperian Falsification**: Every performance claim is specific, testable, and refutable
+- **Popperian Falsification**: Every published performance claim is specific, testable, and refutable — and either (a) exercised in `tests/falsification.rs` with a committed refutation threshold, or (b) cited from a reproducible external harness with a source path and line number. No proxies, no simulated fixtures, no aspirational thresholds.
 
 **Target Audience**: Rust developers and ML Engineers deploying models without the Python/CUDA ecosystem.
 
@@ -26,25 +27,38 @@ The APR Cookbook is the technical manual for production ML deployment using the 
 ## Technology Stack
 
 ```
-APR Cookbook v4.0
+APR Cookbook v5.0 — APR-MONO Integration
 ├── Examples Layer (this repo)
 │   ├── 91 IIUR recipes (Categories A-L)
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
 │   ├── 64 other recipes (acceleration, advanced, inference, etc.)
 │   └── 219 total examples across 24 categories
-├── Framework Layer (actual Cargo.toml dependencies)
-│   ├── aprender 0.27  — ML algorithms, .apr format, quantization
-│   ├── trueno 0.16    — SIMD/GPU tensor operations
-│   ├── entrenar 0.7   — Training, monitoring, autograd
-│   └── ndarray 0.16   — Tensor gradients
-├── Compression (vendored)
+├── Framework Layer — APR-MONO v0.31.2 crates from crates.io
+│   │   (optional `[patch.crates-io]` override for local ../aprender co-dev)
+│   ├── aprender-core 0.31.2         — package `aprender-core`, lib `aprender`
+│   │                                  — ML algorithms, .apr format, quantization
+│   │                                  — declared as `aprender = { package = "aprender-core" }`
+│   ├── aprender-compute 0.31.2      — package `aprender-compute`, lib `trueno`
+│   │                                  — SIMD/GPU tensor operations (was standalone `trueno`)
+│   ├── aprender-train 0.31.2        — package `aprender-train`, lib `entrenar`
+│   │                                  — Training, autograd, LoRA/QLoRA, merge, distill
+│   │                                  — (was standalone `entrenar`)
+│   ├── aprender-contracts 0.31.2    — package `aprender-contracts`, lib `provable_contracts`
+│   │                                  — dev-dep: in-process YAML contract validation
+│   │                                  — (was standalone `provable-contracts`)
+│   └── ndarray 0.16                 — Tensor gradients (unchanged third-party)
+├── Compression (third-party)
 │   ├── lz4_flex 0.11  — LZ4 compression
 │   └── zstd 0.13      — ZSTD compression
 └── Runtime Layer
     ├── Native: x86_64 (AVX2/AVX-512), aarch64 (NEON)
     ├── WASM: wasm32-unknown-unknown
-    └── GPU: simulated (cookbook demos, not actual GPU deps)
+    └── GPU: simulated in cookbook demos; real kernels live in sibling
+             repos (candle-vs-apr, apr-leaderboard) and are cited via
+             claims N1–N4, not re-run in this repo's test suite.
 ```
+
+**Backward compatibility**: None. The sovereign-stack repos `trueno`, `entrenar`, `realizar`, `batuta`, and `provable-contracts` were consolidated into the `aprender` monorepo at v0.31.2. The cookbook depends on the monorepo directly via path deps; published crates.io aliases (`trueno`, `entrenar`) are deprecation shims and are NOT used. Lib names (`aprender`, `trueno`, `entrenar`, `provable_contracts`) are preserved inside the monorepo, so Rust source imports (`use entrenar::...`) do not change — only package names in `Cargo.toml` do.
 
 ---
 
@@ -88,8 +102,8 @@ Each component specification is in `components/` and is self-contained (max 500 
 | Feature | APR v1 | APR v2 |
 |---------|--------|--------|
 | Tensor Index | JSON | Binary (O(1) lookup) |
-| Compression | None/Gzip | LZ4/ZSTD (3-13 GB/s) |
-| Zero-Copy Loading | Partial | Full (mmap) |
+| Compression | None/Gzip | LZ4/ZSTD (throughput unmeasured in this repo; see apr-leaderboard for hardware-specific numbers) |
+| Zero-Copy Loading | Partial | Full (mmap, < 0.1 ms p95 release — F2) |
 | Quantization | Int8 | Int4/Int8/FP16 |
 | Streaming | No | Yes |
 | Signature | Optional | Ed25519 default |
@@ -212,14 +226,17 @@ cargo fmt --all -- --check
 name = "apr-cookbook"
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.75"
+rust-version = "1.89"
 license = "MIT"
 description = "Idiomatic Rust examples for the APR ML format - Toyota Way principles"
 
 [dependencies]
-aprender = { version = "0.27", features = ["format-compression"] }
-trueno = "0.16"
-entrenar = "0.7"
+# APR-MONO v0.31.2 — canonical crate names from crates.io.
+# Root `aprender` facade doesn't forward features, so depend on aprender-core
+# (whose lib name is "aprender") with a package rename.
+aprender = { version = "0.31.2", package = "aprender-core", features = ["format-compression"] }
+aprender-compute = "0.31.2"   # package `aprender-compute`, lib name `trueno`
+aprender-train = "0.31.2"     # package `aprender-train`, lib name `entrenar`
 ndarray = "0.16"
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }
@@ -236,30 +253,64 @@ flate2 = "1"
 [dev-dependencies]
 proptest = "1"
 criterion = { version = "0.5", features = ["html_reports"] }
+memmap2 = "0.9"   # F2 zero-copy falsification
+# In-process contract validation (replaces external `pv` binary dep)
+aprender-contracts = "0.31.2"   # lib = `provable_contracts`
 
 [features]
 default = []
 encryption = ["aprender/format-encryption"]
 full = ["encryption"]
+
+# Local-development override: point the four APR-MONO deps at a co-checked-out
+# ../aprender monorepo instead of crates.io. Uncomment when iterating on both
+# repos simultaneously.
+# [patch.crates-io]
+# aprender-core = { path = "../aprender/crates/aprender-core" }
+# aprender-compute = { path = "../aprender/crates/aprender-compute" }
+# aprender-train = { path = "../aprender/crates/aprender-train" }
+# aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 ```
 
-**Note**: GPU (realizar), distributed (repartir), and speech (whisper-apr) capabilities are **simulated** in cookbook examples. The recipes demonstrate the algorithms and patterns without requiring these optional sovereign-stack crates as compile-time dependencies.
+**Note**: GPU (aprender-gpu / aprender-cuda-edge), distributed (aprender-distribute), and speech (aprender-core/audio) capabilities are **simulated** in cookbook examples. The recipes demonstrate algorithms and patterns without requiring GPU drivers at compile time. Real-hardware numbers for those paths live in sibling repos (candle-vs-apr, apr-leaderboard) and are cited as claims N1–N4, not re-run here.
 
 ---
 
 ## Falsifiable Claims Summary
 
-| Code | Claim | Threshold | Refutation | Contract |
-|------|-------|-----------|------------|----------|
-| F1 | LZ4 decompression throughput | >= 3 GB/s (AVX2) | < 2.5 GB/s | `lz4-decompression-v1` |
-| F2 | Zero-copy mmap latency (<=100MB) | < 1ms | p95 > 2ms | `mmap-inference-v1` |
-| F3 | Int4 quantization accuracy loss | < 2% | > 2.5% | `int4-quantization-v1` |
-| F4 | AES-256-GCM decrypt latency (100MB) | < 5ms | p95 > 10ms | `aes256-gcm-decrypt-v1` |
-| F5 | whisper.apr WER (LibriSpeech) | < 10% | > 12% | `whisper-wer-v1` |
-| F6 | FlashAttention speedup (seq>=1024) | >= 2x | < 1.5x | `flash-attention-v1` |
-| F7 | AVX-512 matmul GFLOPS (1024x1024) | >= 80 | < 60 | `avx512-matmul-v1` |
+Two categories: **in-process** claims are exercised by `tests/falsification.rs` in this repo; **cited** claims reference external measurements with reproducible source paths. All published thresholds match the actual test assertion or the cited source file.
 
-All claims are backed by 11 provable-contracts YAML in `contracts/` (0 errors, mean score 0.54, 0 Lean proofs). All 219 recipe files reference ≥1 contract via `Contract:` header (Invariant B: 100%). See [Quality Gates](components/quality-gates.md) for the full contract inventory and gap analysis.
+### In-process claims (exercised here)
+
+| Code | Claim | Threshold | Refutation | Test | Contract |
+|------|-------|-----------|------------|------|----------|
+| F2 | Zero-copy mmap-backed load | p95 < 0.1 ms (release) | p95 > 0.2 ms (release) or > 10 ms (debug) | `f2_zero_copy_loading_latency` | `mmap-inference-v1` |
+
+### Cited claims (measured elsewhere — verified source paths)
+
+| Code | Claim | Threshold | Measured | Source |
+|------|-------|-----------|----------|--------|
+| N1 | Decode throughput, c=1, RTX 4090, GGUF Q4_K_M | ≥ 270 tok/s | 273.8 tok/s | [candle-vs-apr/performance.md:85](https://github.com/paiml/candle-vs-apr/blob/main/performance.md) |
+| N2 | Batch scaling, c=1 → c=32, v5 scheduler | ≥ 10× | 13.4× | [candle-vs-apr/performance.md:150](https://github.com/paiml/candle-vs-apr/blob/main/performance.md) |
+| N3 | Load-time parity across APR / GGUF / SafeTensors | within 1.5× | 0.028 / 0.024 / 0.029 ms | [aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:88-93](https://github.com/paiml/aprender/blob/main/docs/benchmarks/FORMAT_PARITY_REPORT.md) |
+| N4 | Decode advantage vs Candle on identical hardware | ≥ 1.15× | 1.20× (273.8 / 227.4 tok/s) | [candle-vs-apr/performance.md:85](https://github.com/paiml/candle-vs-apr/blob/main/performance.md) |
+
+### Deleted claims (previously in spec — no evidence exists)
+
+The following claims were asserted in prior spec versions but are **removed** from v5.0 because no measurement exists in any sibling repo. They must not be re-introduced without a committed harness.
+
+| Code | Original claim | Why removed |
+|------|----------------|-------------|
+| F1 | LZ4 decompression ≥ 3 GB/s (AVX2) | No LZ4 throughput benchmark in trueno / aprender-compute |
+| F3 | Int4 quantization NMSE < 2% | aprender-quant benches measure throughput only, never accuracy delta |
+| F4 | AES-256-GCM decrypt ≥ 100 MB/s | Prior test used BLAKE3 as proxy; no crypto bench in any repo |
+| F5 | Whisper WER < 10% on LibriSpeech | Threshold defined in [whisper.apr/THRESHOLDS.md:74](https://github.com/paiml/whisper.apr) but no measured WER logged; prior test simulated WER on hand-written strings, not audio. Re-add when whisper.apr publishes measured results. |
+| F6 | FlashAttention ≥ 2× speedup | Prior CPU-tiled proxy never hits 2×; GPU harness not hosted here |
+| F7 | AVX-512 matmul ≥ 80 GFLOPS | Trueno SDE infrastructure exists but no published GFLOPS numbers |
+
+### Contract backing
+
+All surviving claims (F2 + N1–N4) are backed by provable-contracts YAML in `contracts/` (11 files total). Every YAML parses and validates in-process via `cargo test --test contracts`, which replaces the prior external `pv validate` dependency. 219/219 cargo `[[example]]` recipes reference ≥1 contract via `//! Contract:` header (Invariant B). Contract inventory: see [Quality Gates](components/quality-gates.md).
 
 ## Five Coverage Invariants
 
@@ -273,7 +324,7 @@ Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
 ∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
 ```
 
-**Baseline (2026-04-06)**: 57/57 = 100%. **Gate**: `make cli-parity` (exits non-zero on regression).
+**Baseline (2026-04-22)**: 57/57 = 100%. **Gate**: `make cli-parity` (exits non-zero on regression).
 
 ### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — ENFORCED
 
@@ -288,7 +339,7 @@ Every recipe should reference a provable-contract (`../provable-contracts` YAML)
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-**Baseline (2026-04-06)**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
+**Baseline (2026-04-22)**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
 ### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — ENFORCED
 
@@ -305,7 +356,7 @@ Every recipe that operates on a model file should demonstrate all three canonica
 - `apr encrypt` only supports `.apr` → 1 variant sufficient
 - `apr import hf://…` outputs `.apr` only → 1 variant sufficient
 
-**Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
+**Baseline (2026-04-22)**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
 ### Invariant D — arXiv Citation (F-ARXIV-001) — ENFORCED
 
@@ -323,7 +374,7 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 ```
 
-**Baseline (2026-04-06)**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
+**Baseline (2026-04-22)**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
 ### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — ENFORCED
 
@@ -336,7 +387,7 @@ Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook ch
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
 
-**Baseline (2026-04-06)**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, and `book/src/**/*.md`. 3 excluded: `CHANGELOG.md`, `deep-context.md` (generated), `docs/specifications-advanced-demos.md` (orphan). **Gate**: `make docs-validate` — **ENFORCED**.
+**Baseline (2026-04-22)**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, and `book/src/**/*.md`. 3 excluded: `CHANGELOG.md`, `deep-context.md` (generated), `docs/specifications-advanced-demos.md` (orphan). **Gate**: `make docs-validate` — **ENFORCED**.
 
 ---
 
@@ -350,4 +401,4 @@ See [Quality Gates](components/quality-gates.md) for the target fleet, full defe
 
 ---
 
-*Specification Version: 4.0.0 — Five Coverage Invariants (A-E) + Parity/POC ecosystem cross-references*
+*Specification Version: 5.0.0 — APR-MONO v0.31.2 Integration; falsification set trimmed to evidence-backed claims (F2 in-process, N1–N4 cited); six unsupported claims (F1/F3/F4/F5/F6/F7) removed.*

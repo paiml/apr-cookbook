@@ -65,9 +65,12 @@ When grep IS acceptable: Searching non-code files (TOML, YAML, Markdown).
 Examples Layer (this repo)
     ↓
 Framework Layer (dependencies)
-├── aprender 0.25: ML algorithms, .apr format, quantization
-├── trueno 0.14: SIMD/GPU tensor operations
-└── entrenar 0.5: Training, monitoring, autograd
+├── aprender-core 0.31.2 (pkg `aprender-core`, lib `aprender`): ML algorithms, .apr format, quantization
+├── aprender-compute 0.31.2 (pkg `aprender-compute`, lib `trueno`): SIMD/GPU tensor operations
+├── aprender-train 0.31.2 (pkg `aprender-train`, lib `entrenar`): Training, monitoring, autograd
+└── aprender-contracts 0.31.2 (dev-dep, lib `provable_contracts`): In-process YAML contract validation
+
+All consolidated in the APR-MONO workspace at ../aprender (v0.31.2). Path deps, no crates.io deprecation shims.
 ```
 
 ### Example Categories

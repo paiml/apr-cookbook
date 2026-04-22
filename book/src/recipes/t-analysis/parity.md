@@ -18,4 +18,4 @@ cargo run --example analysis_parity
 ```
 
 ## Source
-[`examples/analysis/analysis_parity.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_parity.rs)
+[`examples/analysis/analysis_parity/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_parity/main.rs)

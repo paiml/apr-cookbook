@@ -18,4 +18,4 @@ cargo run --example distributed_ring_allreduce
 ```
 
 ## Source
-[`examples/distributed/distributed_ring_allreduce.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_ring_allreduce.rs)
+[`examples/distributed/distributed_ring_allreduce/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_ring_allreduce/main.rs)

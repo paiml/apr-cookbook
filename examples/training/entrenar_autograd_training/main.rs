@@ -37,7 +37,7 @@
 //!
 //! - **Category**: Training
 //! - **Complexity**: Intermediate
-//! - **Dependencies**: entrenar 0.3+, aprender 0.21+
+//! - **Dependencies**: aprender-train 0.31+, aprender-core 0.31+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
 //!
 //!

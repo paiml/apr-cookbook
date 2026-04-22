@@ -23,8 +23,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           # pull_request_target defaults to checking out the base branch (main),
-          # which means CI would lint/test the pre-PR code. Pin to the PR head
-          # SHA so the gate actually evaluates the PR's changes.
+          # which means CI would lint/test the pre-PR code and pass/fail on bugs
+          # that have nothing to do with the PR. Pin to the PR head SHA so the
+          # gate actually evaluates the PR's changes.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: dtolnay/rust-toolchain@stable

@@ -1,0 +1,119 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "1:1 parity invariant — every apr-cli subcommand and variant maps to a cookbook recipe + provable contract + Lean proof"
+  references:
+    - "APR Cookbook Spec v3.4.0, CLI Parity Invariant"
+    - "paiml/apr-cli (58 subcommands, ~400 variants)"
+  registry: false
+  tags:
+    - cli
+    - parity
+    - coverage
+
+equations:
+  subcommand_coverage:
+    formula: "∀ s ∈ apr.subcommands: ∃ r ∈ recipes: r.cli_equivalent = s"
+    domain: "s: String (apr --help subcommand)"
+    codomain: "recipe: examples/<category>/<name>.rs"
+    invariants:
+      - "Every apr subcommand from `apr --help` has ≥1 cookbook recipe"
+      - "Recipe doc comment contains `CLI Equivalent: apr <subcommand>`"
+      - "No orphan recipes (recipes without an apr counterpart must be flagged)"
+
+  variant_coverage:
+    formula: "∀ (s, f, v) ∈ apr.variants: ∃ r ∈ recipes: (s, f, v) ∈ r.demonstrates"
+    domain: "(subcommand, flag, value) triple from `apr <sub> --help`"
+    codomain: "recipe variant demonstration"
+    invariants:
+      - "Every documented flag of every subcommand has ≥1 recipe demonstrating it"
+      - "Every non-trivial flag value (enum, strategy name) has a recipe"
+      - "Recipes list demonstrated variants in their doc comment"
+
+  contract_binding:
+    formula: "∀ r ∈ recipes: ∃ c ∈ contracts/: r.behavior ⊨ c.obligations"
+    domain: "recipe function"
+    codomain: "YAML contract obligations"
+    invariants:
+      - "Every recipe references ≥1 provable contract"
+      - "Contract obligations are verified by the recipe's test assertions"
+      - "pv lint passes for every referenced contract"
+
+  lean_proof:
+    formula: "∀ c ∈ contracts/: pv lean-status(c) ≥ L2"
+    domain: "contract YAML file"
+    codomain: "Lean 4 proof level (L1–L5)"
+    invariants:
+      - "Every contract has a Lean 4 proof at level L2 or higher"
+      - "pv lean-status passes with no `sorry` in critical theorems"
+
+proof_obligations:
+  - type: invariant
+    property: "Subcommand coverage — no gaps"
+    formal: "|{s ∈ apr.subcommands : ∄ recipe}| = 0"
+    applies_to: subcommand_coverage
+  - type: invariant
+    property: "Variant coverage — every flag demonstrated"
+    formal: "|{(s,f) : flag f of subcommand s has no recipe}| = 0"
+    applies_to: variant_coverage
+  - type: invariant
+    property: "No orphan recipes"
+    formal: "∀ r: r.cli_equivalent ≠ ∅ ∧ r.cli_equivalent ∈ apr.subcommands"
+    applies_to: subcommand_coverage
+  - type: precondition
+    property: "Contract binding exists"
+    formal: "recipe.contracts ≠ ∅"
+    applies_to: contract_binding
+  - type: postcondition
+    property: "Lean proof present"
+    formal: "∀ c ∈ recipe.contracts: lean_status(c) ≥ 2"
+    applies_to: lean_proof
+
+falsification_tests:
+  - id: FALSIFY-CLIPARITY-001
+    rule: "Subcommand coverage"
+    prediction: "Every apr subcommand has a recipe"
+    test: "diff <(apr --help subcommands) <(grep -r 'CLI Equivalent: apr' examples/ | awk); assert empty"
+    if_fails: "New subcommand added to apr without cookbook update"
+  - id: FALSIFY-CLIPARITY-002
+    rule: "Variant coverage"
+    prediction: "Every flag of every subcommand has a demonstration"
+    test: "For each subcommand s, for each flag f in `apr s --help`, grep recipes for `--f`"
+    if_fails: "Flag added to apr without cookbook variant"
+  - id: FALSIFY-CLIPARITY-003
+    rule: "No orphan recipes"
+    prediction: "Every recipe maps to an apr subcommand"
+    test: "grep -r 'CLI Equivalent:' examples/ | awk; assert subset of apr --help"
+    if_fails: "Recipe demonstrates a command that no longer exists in apr"
+  - id: FALSIFY-CLIPARITY-004
+    rule: "Contract binding"
+    prediction: "Every recipe names ≥1 contract YAML"
+    test: "For each recipe, check doc comment for 'Contract: contracts/*.yaml'"
+    if_fails: "Recipe added without linking to a contract"
+  - id: FALSIFY-CLIPARITY-005
+    rule: "Lean proof"
+    prediction: "Every bound contract has Lean proof ≥ L2"
+    test: "pv lean-status contracts/ | assert all L2+"
+    if_fails: "Contract added without Lean proof or regressed below L2"
+
+kani_harnesses:
+  - id: KANI-CLIPARITY-001
+    obligation: "Subcommand coverage — no gaps"
+    bound: 4
+    strategy: bounded_int
+  - id: KANI-CLIPARITY-002
+    obligation: "Contract binding exists"
+    bound: 4
+    strategy: bounded_int
+
+qa_gate:
+  id: F-CLIPARITY-001
+  name: "CLI Parity Invariant"
+  description: "Every apr-cli subcommand and variant has a cookbook recipe + contract + Lean proof"
+  checks:
+    - "subcommand_coverage"
+    - "variant_coverage"
+    - "contract_binding"
+    - "lean_proof"
+  pass_criteria: "subcommand coverage = 100%, variant coverage ≥ 90%, all contracts pv lint PASS, all Lean proofs ≥ L2"

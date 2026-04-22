@@ -22,9 +22,9 @@ cargo run --example analysis_oracle
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/analysis/analysis_oracle.rs}}
+{{#include ../../../../examples/analysis/analysis_oracle/main.rs}}
 ```
 
 ## Source
 
-[`examples/analysis/analysis_oracle.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_oracle.rs)
+[`examples/analysis/analysis_oracle/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_oracle/main.rs)

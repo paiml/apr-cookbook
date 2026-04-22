@@ -18,4 +18,4 @@ cargo run --example speech_vad
 ```
 
 ## Source
-[`examples/speech/speech_vad.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_vad.rs)
+[`examples/speech/speech_vad/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_vad/main.rs)

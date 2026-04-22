@@ -18,4 +18,4 @@ cargo run --example analysis_slice
 ```
 
 ## Source
-[`examples/analysis/analysis_slice.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_slice.rs)
+[`examples/analysis/analysis_slice/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_slice/main.rs)

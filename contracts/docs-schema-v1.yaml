@@ -1,0 +1,125 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "Documentation schema — all *.md files are factually validated via pmat validate-readme and enforce provable-contracts frontmatter schema"
+  references:
+    - "APR Cookbook Spec v3.4.0, Docs Schema Enforcement"
+    - "pmat validate-readme (factual accuracy + hallucination detection)"
+    - "paiml/provable-contracts schema"
+  registry: false
+  tags:
+    - docs
+    - schema
+    - validation
+
+equations:
+  factual_accuracy:
+    formula: "∀ m ∈ *.md: pmat.validate_readme(m) ⊨ {unverified = 0, contradictions = 0}"
+    domain: "m: markdown file"
+    codomain: "validation report"
+    invariants:
+      - "No unverified claims (confidence < 0.9 threshold)"
+      - "No contradictions against project deep-context"
+      - "All CLI commands referenced in docs are actual apr subcommands"
+      - "All file paths referenced exist"
+      - "All version numbers match Cargo.toml"
+
+  schema_compliance:
+    formula: "∀ m ∈ docs/specifications/**/*.md: m.frontmatter ⊨ provable_contracts.doc_schema"
+    domain: "spec markdown file"
+    codomain: "frontmatter validity"
+    invariants:
+      - "Every spec component has a version number"
+      - "Every spec component references contracts/ YAML where applicable"
+      - "Every benchmark claim has F-code + contract reference"
+      - "Every performance claim is falsifiable (has threshold + refutation)"
+
+  link_integrity:
+    formula: "∀ link ∈ *.md: link.target.exists"
+    domain: "markdown link"
+    codomain: "{valid, broken}"
+    invariants:
+      - "Every relative link in *.md resolves to an existing file"
+      - "Every contract reference (contracts/*.yaml) exists"
+      - "Every example reference (examples/**/*.rs) exists"
+      - "No dead section anchors within the repo"
+
+  cli_binding:
+    formula: "∀ claim ∈ README.md ∪ docs/**/*.md: claim.references_apr_cmd ⟹ cmd ∈ apr.subcommands"
+    domain: "CLI command mention in docs"
+    codomain: "apr subcommand existence"
+    invariants:
+      - "Every `apr <cmd>` in docs corresponds to a real apr subcommand"
+      - "Every documented flag exists in `apr <cmd> --help`"
+      - "Documentation version never claims features absent from installed apr"
+
+proof_obligations:
+  - type: invariant
+    property: "No unverified claims"
+    formal: "pmat.validate_readme(*.md).unverified = 0"
+    applies_to: factual_accuracy
+  - type: invariant
+    property: "No contradictions"
+    formal: "pmat.validate_readme(*.md).contradictions = 0"
+    applies_to: factual_accuracy
+  - type: invariant
+    property: "Schema compliance for specs"
+    formal: "∀ m ∈ spec: validates(m.frontmatter, doc_schema)"
+    applies_to: schema_compliance
+  - type: invariant
+    property: "Link integrity"
+    formal: "∀ l ∈ links: exists(l.target)"
+    applies_to: link_integrity
+  - type: invariant
+    property: "CLI binding integrity"
+    formal: "∀ cmd ∈ docs: cmd ∈ apr.subcommands"
+    applies_to: cli_binding
+
+falsification_tests:
+  - id: FALSIFY-DOCS-001
+    rule: "Factual accuracy"
+    prediction: "README.md has 0 unverified claims and 0 contradictions"
+    test: "pmat validate-readme --targets README.md --fail-on-contradiction --fail-on-unverified"
+    if_fails: "README contains hallucinated features or contradicts code"
+  - id: FALSIFY-DOCS-002
+    rule: "Spec accuracy"
+    prediction: "All spec components pass factual validation"
+    test: "pmat validate-readme --targets docs/specifications/**/*.md --deep-context=deep-context.md"
+    if_fails: "Spec drifted from codebase reality"
+  - id: FALSIFY-DOCS-003
+    rule: "Link integrity"
+    prediction: "All markdown links resolve"
+    test: "pmat validate-docs --root . --fail-on-error"
+    if_fails: "Broken internal links"
+  - id: FALSIFY-DOCS-004
+    rule: "CLI binding"
+    prediction: "Every `apr <cmd>` mention exists in `apr --help`"
+    test: "grep -rhoE 'apr [a-z][a-z-]+' *.md docs/**/*.md | awk | diff <(apr --help subs)"
+    if_fails: "Doc references nonexistent or deprecated subcommand"
+  - id: FALSIFY-DOCS-005
+    rule: "Schema compliance"
+    prediction: "All spec frontmatter parses + validates"
+    test: "pv validate --schema-docs docs/specifications/**/*.md"
+    if_fails: "Spec file missing version, missing contract refs, or invalid frontmatter"
+
+kani_harnesses:
+  - id: KANI-DOCS-001
+    obligation: "Link integrity"
+    bound: 4
+    strategy: bounded_int
+  - id: KANI-DOCS-002
+    obligation: "CLI binding integrity"
+    bound: 4
+    strategy: bounded_int
+
+qa_gate:
+  id: F-DOCS-001
+  name: "Documentation Schema Enforcement"
+  description: "All *.md files in the repo are factually validated by pmat and schema-conformant to provable-contracts"
+  checks:
+    - "factual_accuracy"
+    - "schema_compliance"
+    - "link_integrity"
+    - "cli_binding"
+  pass_criteria: "pmat validate-readme PASS, pmat validate-docs PASS, 100% CLI-binding integrity, all spec files have version+contract refs"

@@ -22,9 +22,9 @@ cargo run --example analysis_inspect
 ## Code
 
 ```rust,ignore
-{{#include ../../../../examples/analysis/analysis_inspect.rs}}
+{{#include ../../../../examples/analysis/analysis_inspect/main.rs}}
 ```
 
 ## Source
 
-[`examples/analysis/analysis_inspect.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_inspect.rs)
+[`examples/analysis/analysis_inspect/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_inspect/main.rs)
