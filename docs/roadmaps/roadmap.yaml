@@ -966,11 +966,27 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'DEBT: push refactor/aprender-monorepo-v31 branch — blocked on user consent since ''main'' is protected'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-04-22T09:55:39Z
-  updated: 2026-04-22T09:55:39Z
+  updated: 2026-04-22T10:30:13.015643081+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-045
+  github_issue: null
+  item_type: task
+  title: 'DEBT: paiml/apr-cookbook is archived on GitHub (isArchived: true) — cannot push refactor/aprender-monorepo-v31 or open PR; requires un-archive by repo admin'
+  status: planned
+  priority: critical
+  assigned_to: null
+  created: 2026-04-22T10:27:43Z
+  updated: 2026-04-22T10:27:43Z
   spec: null
   acceptance_criteria: []
   phases: []
