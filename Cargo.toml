@@ -1357,3 +1357,92 @@ path = "examples/monitoring/monitor_realtime.rs"
 [[example]]
 name = "monitor_alerting"
 path = "examples/monitoring/monitor_alerting.rs"
+
+# PMAT-050c Sprint C: oracle/parity/pipeline/probar/profile/ptx/ptx-map/publish/pull/qualify/quantize additions (Invariant F)
+[[example]]
+name = "oracle_classifier"
+path = "examples/analysis/oracle_classifier.rs"
+
+[[example]]
+name = "oracle_ensemble_vote"
+path = "examples/analysis/oracle_ensemble_vote.rs"
+
+[[example]]
+name = "parity_quantization"
+path = "examples/analysis/parity_quantization.rs"
+
+[[example]]
+name = "parity_format"
+path = "examples/analysis/parity_format.rs"
+
+[[example]]
+name = "pipeline_3stage"
+path = "examples/inference/pipeline_3stage.rs"
+
+[[example]]
+name = "pipeline_resilient"
+path = "examples/inference/pipeline_resilient.rs"
+
+[[example]]
+name = "probar_suite_runner"
+path = "examples/analysis/probar_suite_runner.rs"
+
+[[example]]
+name = "probar_regression_diff"
+path = "examples/analysis/probar_regression_diff.rs"
+
+[[example]]
+name = "profile_memory_layers"
+path = "examples/analysis/profile_memory_layers.rs"
+
+[[example]]
+name = "profile_roofline"
+path = "examples/analysis/profile_roofline.rs"
+
+[[example]]
+name = "ptx_disassembly"
+path = "examples/gpu/ptx_disassembly.rs"
+
+[[example]]
+name = "ptx_register_usage"
+path = "examples/gpu/ptx_register_usage.rs"
+
+[[example]]
+name = "ptx_map_sass_to_ptx"
+path = "examples/gpu/ptx_map_sass_to_ptx.rs"
+
+[[example]]
+name = "ptx_map_hot_regions"
+path = "examples/gpu/ptx_map_hot_regions.rs"
+
+[[example]]
+name = "publish_dry_run"
+path = "examples/format/publish_dry_run.rs"
+
+[[example]]
+name = "publish_multi_registry"
+path = "examples/format/publish_multi_registry.rs"
+
+[[example]]
+name = "pull_resume"
+path = "examples/format/pull_resume.rs"
+
+[[example]]
+name = "pull_verify_decompress"
+path = "examples/format/pull_verify_decompress.rs"
+
+[[example]]
+name = "qualify_scorecard"
+path = "examples/analysis/qualify_scorecard.rs"
+
+[[example]]
+name = "qualify_remediation"
+path = "examples/analysis/qualify_remediation.rs"
+
+[[example]]
+name = "quantize_gptq"
+path = "examples/optimize/quantize_gptq.rs"
+
+[[example]]
+name = "quantize_mixed_precision"
+path = "examples/optimize/quantize_mixed_precision.rs"
