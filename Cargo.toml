@@ -1162,3 +1162,20 @@ path = "examples/format/validate_manifest_sha_mismatch.rs"
 [[example]]
 name = "validate_manifest_live_check"
 path = "examples/format/validate_manifest_live_check.rs"
+
+# Category: Analysis + Inference additions (PMAT-051 — Invariant F)
+[[example]]
+name = "analysis_compare_hf_threshold"
+path = "examples/analysis/analysis_compare_hf_threshold.rs"
+
+[[example]]
+name = "analysis_qa_report"
+path = "examples/analysis/analysis_qa_report.rs"
+
+[[example]]
+name = "analysis_tensors_stats"
+path = "examples/analysis/analysis_tensors_stats.rs"
+
+[[example]]
+name = "inference_run_temperature_sweep"
+path = "examples/inference/inference_run_temperature_sweep.rs"
