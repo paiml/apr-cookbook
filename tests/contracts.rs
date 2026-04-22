@@ -104,9 +104,7 @@ fn contract_inventory_matches_disk() {
         .map(|e| e.file_name().to_string_lossy().into_owned())
         .filter(|n| {
             // YAML extension is case-sensitive in this project — reject `.YAML`, `.Yaml`.
-            std::path::Path::new(n)
-                .extension()
-                .is_some_and(|e| e == "yaml")
+            Path::new(n).extension().is_some_and(|e| e == "yaml")
         })
         .collect();
     on_disk.sort();
