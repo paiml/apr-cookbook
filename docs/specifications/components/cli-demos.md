@@ -149,10 +149,10 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 | 47 | `analysis_parity.rs` | `apr parity` | Cross-format parity check |
 | 48 | `analysis_compare_hf.rs` | `apr compare-hf` | Compare with HuggingFace model |
 | 49 | `analysis_probar.rs` | `apr probar` | Progress-bar inference testing |
-| 50 | `analysis_slice.rs` | `apr slice` | Tensor slicing analysis |
+| 50 | `analysis_slice.rs` | `apr tensors` (slice-oriented) | Tensor slicing analysis |
 | 51 | `analysis_tensors.rs` | `apr tensors` | Tensor listing and inspection |
 | 52 | `analysis_qa_capability.rs` | `apr qa --capability` | QA capability matrix |
-| 53 | `analysis_model_fingerprint.rs` | `apr fingerprint` | Content-addressable model hashing |
+| 53 | `analysis_model_fingerprint.rs` | `apr inspect` (hash-oriented) | Content-addressable model hashing |
 
 ---
 
@@ -170,7 +170,7 @@ Example: `apr run` accepts all three → recipe must show `apr run model.apr`, `
 | 61 | `format_publish.rs` | `apr publish` | HuggingFace upload |
 | 62 | `format_pull_cache.rs` | `apr pull` | Download and cache |
 | 63 | `format_batch_export.rs` | `apr export --batch gguf,mlx,safetensors` | Batch multi-format export |
-| 64 | `format_migration_pipeline.rs` | `apr migrate` | Format migration pipeline |
+| 64 | `format_migration_pipeline.rs` | `apr convert` (pipeline composition) | Format migration pipeline |
 
 ---
 
