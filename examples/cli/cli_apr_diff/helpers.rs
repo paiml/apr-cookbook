@@ -1,3 +1,6 @@
+//! Support module for the sibling `main.rs` recipe.
+//!
+//! Contract: contracts/recipe-iiur-v1.yaml (inherited from main.rs — Invariant B)
 #![allow(
     dead_code,
     unused_imports,
