@@ -1037,3 +1037,128 @@ path = "examples/format/format_batch_export.rs"
 [[example]]
 name = "format_migration_pipeline"
 path = "examples/format/format_migration_pipeline/main.rs"
+
+# Category: Lint (PMAT-049 — Invariant F)
+[[example]]
+name = "awq_lint_happy"
+path = "examples/lint/awq_lint_happy.rs"
+
+[[example]]
+name = "awq_lint_violation"
+path = "examples/lint/awq_lint_violation.rs"
+
+[[example]]
+name = "awq_lint_batch"
+path = "examples/lint/awq_lint_batch.rs"
+
+[[example]]
+name = "dry_sampling_lint_happy"
+path = "examples/lint/dry_sampling_lint_happy.rs"
+
+[[example]]
+name = "dry_sampling_lint_repetition"
+path = "examples/lint/dry_sampling_lint_repetition.rs"
+
+[[example]]
+name = "dry_sampling_lint_pipeline"
+path = "examples/lint/dry_sampling_lint_pipeline.rs"
+
+[[example]]
+name = "gbnf_lint_happy"
+path = "examples/lint/gbnf_lint_happy.rs"
+
+[[example]]
+name = "gbnf_lint_malformed"
+path = "examples/lint/gbnf_lint_malformed.rs"
+
+[[example]]
+name = "gbnf_lint_pipeline"
+path = "examples/lint/gbnf_lint_pipeline.rs"
+
+[[example]]
+name = "ollama_chat_lint_happy"
+path = "examples/lint/ollama_chat_lint_happy.rs"
+
+[[example]]
+name = "ollama_chat_lint_stream"
+path = "examples/lint/ollama_chat_lint_stream.rs"
+
+[[example]]
+name = "ollama_chat_lint_schema_violation"
+path = "examples/lint/ollama_chat_lint_schema_violation.rs"
+
+[[example]]
+name = "oom_lint_happy"
+path = "examples/lint/oom_lint_happy.rs"
+
+[[example]]
+name = "oom_lint_missing_breadcrumb"
+path = "examples/lint/oom_lint_missing_breadcrumb.rs"
+
+[[example]]
+name = "oom_lint_allocation_trace"
+path = "examples/lint/oom_lint_allocation_trace.rs"
+
+[[example]]
+name = "tool_use_lint_happy"
+path = "examples/lint/tool_use_lint_happy.rs"
+
+[[example]]
+name = "tool_use_lint_invalid_args"
+path = "examples/lint/tool_use_lint_invalid_args.rs"
+
+[[example]]
+name = "tool_use_lint_streaming"
+path = "examples/lint/tool_use_lint_streaming.rs"
+
+# Category: MCP (PMAT-049 — Invariant F)
+[[example]]
+name = "mcp_stdio_server"
+path = "examples/mcp/mcp_stdio_server.rs"
+
+[[example]]
+name = "mcp_tool_discovery"
+path = "examples/mcp/mcp_tool_discovery.rs"
+
+[[example]]
+name = "mcp_client_simulation"
+path = "examples/mcp/mcp_client_simulation.rs"
+
+# Category C additions (PMAT-049 — pretrain subcommand)
+[[example]]
+name = "pretrain_synthetic_decreasing"
+path = "examples/training/pretrain_synthetic_decreasing.rs"
+
+[[example]]
+name = "pretrain_nan_guard"
+path = "examples/training/pretrain_nan_guard.rs"
+
+[[example]]
+name = "pretrain_checkpoint_resume"
+path = "examples/training/pretrain_checkpoint_resume.rs"
+
+# Category E additions (PMAT-049 — registry aliases)
+[[example]]
+name = "registry_aliases_list"
+path = "examples/registry/registry_aliases_list.rs"
+
+[[example]]
+name = "registry_aliases_resolve"
+path = "examples/registry/registry_aliases_resolve.rs"
+
+[[example]]
+name = "registry_aliases_diff"
+path = "examples/registry/registry_aliases_diff.rs"
+
+# Format additions (PMAT-049 — validate-manifest)
+[[example]]
+name = "validate_manifest_happy"
+path = "examples/format/validate_manifest_happy.rs"
+
+[[example]]
+name = "validate_manifest_sha_mismatch"
+path = "examples/format/validate_manifest_sha_mismatch.rs"
+
+[[example]]
+name = "validate_manifest_live_check"
+path = "examples/format/validate_manifest_live_check.rs"
