@@ -1446,3 +1446,92 @@ path = "examples/optimize/quantize_gptq.rs"
 [[example]]
 name = "quantize_mixed_precision"
 path = "examples/optimize/quantize_mixed_precision.rs"
+
+# PMAT-050d Sprint D: rm/runs/serve/showcase/tokenize/trace/train/tree/tui/tune/validate additions (Invariant F — final)
+[[example]]
+name = "rm_dry_run"
+path = "examples/cli/rm_dry_run.rs"
+
+[[example]]
+name = "rm_retention_policy"
+path = "examples/cli/rm_retention_policy.rs"
+
+[[example]]
+name = "runs_filter_sort"
+path = "examples/cli/runs_filter_sort.rs"
+
+[[example]]
+name = "runs_diff"
+path = "examples/cli/runs_diff.rs"
+
+[[example]]
+name = "serve_rate_limited"
+path = "examples/serve/serve_rate_limited.rs"
+
+[[example]]
+name = "serve_grpc_stream"
+path = "examples/serve/serve_grpc_stream.rs"
+
+[[example]]
+name = "showcase_gallery"
+path = "examples/advanced/showcase_gallery.rs"
+
+[[example]]
+name = "showcase_markdown"
+path = "examples/advanced/showcase_markdown.rs"
+
+[[example]]
+name = "tokenize_bpe_trace"
+path = "examples/cli/tokenize_bpe_trace.rs"
+
+[[example]]
+name = "tokenize_compare_vocabs"
+path = "examples/cli/tokenize_compare_vocabs.rs"
+
+[[example]]
+name = "trace_per_op_latency"
+path = "examples/analysis/trace_per_op_latency.rs"
+
+[[example]]
+name = "trace_run_diff"
+path = "examples/analysis/trace_run_diff.rs"
+
+[[example]]
+name = "train_grad_accum"
+path = "examples/training/train_grad_accum.rs"
+
+[[example]]
+name = "train_distributed_sim"
+path = "examples/training/train_distributed_sim.rs"
+
+[[example]]
+name = "tree_param_rollup"
+path = "examples/analysis/tree_param_rollup.rs"
+
+[[example]]
+name = "tree_arch_diff"
+path = "examples/analysis/tree_arch_diff.rs"
+
+[[example]]
+name = "tui_health_dashboard"
+path = "examples/cli/tui_health_dashboard.rs"
+
+[[example]]
+name = "tui_log_tail"
+path = "examples/cli/tui_log_tail.rs"
+
+[[example]]
+name = "tune_bayesian"
+path = "examples/optimize/tune_bayesian.rs"
+
+[[example]]
+name = "tune_grid_early_stop"
+path = "examples/optimize/tune_grid_early_stop.rs"
+
+[[example]]
+name = "validate_fix_suggestions"
+path = "examples/cli/validate_fix_suggestions.rs"
+
+[[example]]
+name = "validate_batch"
+path = "examples/cli/validate_batch.rs"
