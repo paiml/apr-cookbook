@@ -14,10 +14,10 @@ use super::types::*;
 
 /// Style transfer engine
 pub struct StyleTransfer {
-    /// Gaussian blur kernel
-    blur_kernel: Kernel3x3,
+    /// Gaussian blur kernel (read by main.rs tests for visibility check)
+    pub blur_kernel: Kernel3x3,
     /// Edge detection kernel (Sobel X)
-    sobel_x: Kernel3x3,
+    pub sobel_x: Kernel3x3,
     /// Edge detection kernel (Sobel Y)
     pub sobel_y: Kernel3x3,
     /// Sharpen kernel

@@ -307,7 +307,7 @@ mod tests {
         let embed_params: usize = entries
             .iter()
             .filter(|e| e.component == FlowComponent::Embedding)
-            .map(TensorEntry::param_count)
+            .map(types::TensorEntry::param_count)
             .sum();
         assert_eq!(embed_params, 32000 * 4096);
     }
