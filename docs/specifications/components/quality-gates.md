@@ -367,19 +367,19 @@ A `make docs-validate` target chains these. Docs validation is a **mandatory pre
 
 ---
 
-## Five Coverage Invariants
+## Six Coverage Invariants
 
-These are the **master quality gates** for the cookbook. All five invariants are measured; A–E are enforced via `make` targets.
+These are the **master quality gates** for the cookbook. A–E are enforced via `make` targets. F is currently TARGET (aspirational) pending backlog work.
 
 ### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
-Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe.
+Every apr-cli subcommand (excluding `help`) must have ≥1 cookbook recipe. APR-MONO v0.31.2 exposes **66 subcommands** (up from 57 in v4.0 — see `apr --help`).
 
 ```
 ∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
 ```
 
-**Baseline**: 57/57 = **100%**. **Gate**: `make cli-parity` (exits non-zero on regression).
+**Baseline**: 56/66 = **85%** (10 new v0.31.2 subcommands uncovered — see PMAT-049). **Gate**: `make cli-parity` (exits non-zero on regression).
 
 ### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — ENFORCED
 
@@ -443,9 +443,37 @@ Every documentation artifact — `README.md`, `CLAUDE.md`, mdbook chapters, spec
 
 **Baseline**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, `book/src/**/*.md`. **Gate**: `make docs-validate` — **ENFORCED**.
 
+### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — TARGET
+
+Every apr-cli subcommand must have **≥3 distinct cookbook recipes**. Single-example coverage is necessary (Invariant A) but not sufficient — learners need multiple worked examples per subcommand to internalize idiomatic usage. Three maps to Toyota *kata*: happy path, edge case, composition.
+
+```
+∀ s ∈ apr.subcommands \ {help}:
+  |{ r ∈ recipes : r.cli_equivalent = s }| ≥ 3
+```
+
+**Baseline (2026-04-22)**: 8/66 = **12%** at ≥3; 48/66 at exactly 1–2; 10/66 at 0. **Gate**: `make variant-depth` — **TARGET**, not ENFORCED (reaching ENFORCED requires ≥128 new recipes; backlog is PMAT-049 / -050 / -051).
+
+#### Current ≥3-coverage subcommands
+
+| Subcommand | Count | Recipes |
+|------------|-------|---------|
+| `prune` | 5 | magnitude, structured, depth, wanda, gradual_schedule |
+| `merge` | 5 | average, weighted, slerp, ties, dare (+ hierarchical) |
+| `finetune` | 5 | lora, qlora, merge_adapter, plan_vram |
+| `distill` | 4 | standard_kl, progressive, ensemble, checkpoint |
+| `chat` | 4 | chatml, llama2, mistral, multi-format |
+| `rosetta` | 3 | convert, chain, verify |
+| `export` | 3 | safetensors, gguf, batch |
+| `convert` | 3 | safetensors↔apr, gguf→apr, apr→gguf |
+
+#### Zero-coverage (PMAT-049 blocks)
+
+10 APR-MONO v0.31.2 subcommands still have no recipe: `awq-lint`, `dry-sampling-lint`, `gbnf-lint`, `mcp`, `ollama-chat-lint`, `oom-lint`, `pretrain`, `registry`, `tool-use-lint`, `validate-manifest`. Each needs 3 recipes per Invariant F.
+
 ### Variant definition
 
-A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 57 subcommands, apr-cli exposes ~468 distinct flag variants.
+A **variant** is a distinct (subcommand, flag, value) triple exposed in `apr <sub> --help`. For example, `apr run` has ~20 flags; `apr merge --strategy` has 5 values (average, weighted, slerp, ties, dare), yielding 5 variants just for `--strategy`. Over 66 subcommands, apr-cli exposes ~500 distinct flag variants.
 
 ### Recipe doc-comment contract
 
@@ -475,12 +503,13 @@ The `make cli-parity` regex matches all of:
 
 | Dimension | Baseline | Target | Gate | Status |
 |-----------|----------|--------|------|--------|
-| Subcommands with ≥1 recipe | 57/57 (100%) | 57/57 | `make cli-parity` | **ENFORCED** |
+| Subcommands with ≥1 recipe | 56/66 (85%) | 66/66 | `make cli-parity` | **ENFORCED** |
+| Subcommands with ≥3 recipes | 8/66 (12%) | 66/66 | `make variant-depth` | **TARGET** |
 | Recipes with contract reference | 219/219 (100%) | 219/219 | `make contract-grade` | **ENFORCED** |
 | Recipes with all format variants | 219/219 (100%) | 100% applicable | `make format-coverage` | **ENFORCED** |
 | Recipes with arXiv/DOI citation | 219/219 (100%) | 219/219 | `make citation-check` | **ENFORCED** |
 | Docs validated by contract | 264/267 (98.9%) | 267/267 | `make docs-validate` | **ENFORCED** |
-| Flag variants | ~468 | ~468 | `make variant-coverage` | measured |
+| Flag variants | ~500 | ~500 | `make variant-coverage` | measured |
 | Contracts with Lean proof ≥ L2 | 0/11 | 80%+ | `pv lean-status` | TARGET |
 
 ### Pre-commit enforcement
@@ -491,5 +520,6 @@ make contract-grade          # Invariant B: every recipe has grade-A contract
 make format-coverage         # Invariant C: APR/GGUF/SafeTensors variants
 make citation-check          # Invariant D: arXiv citation per recipe
 make docs-validate           # Invariant E: docs contract coverage
+make variant-depth           # Invariant F: ≥3 recipes per subcommand (TARGET)
 make variant-coverage        # Detailed per-subcommand flag matrix
 ```

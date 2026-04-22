@@ -312,19 +312,19 @@ The following claims were asserted in prior spec versions but are **removed** fr
 
 All surviving claims (F2 + N1–N4) are backed by provable-contracts YAML in `contracts/` (11 files total). Every YAML parses and validates in-process via `cargo test --test contracts`, which replaces the prior external `pv validate` dependency. 219/219 cargo `[[example]]` recipes reference ≥1 contract via `//! Contract:` header (Invariant B). Contract inventory: see [Quality Gates](components/quality-gates.md).
 
-## Five Coverage Invariants
+## Six Coverage Invariants
 
-The spec defines five coverage invariants. Each has a formal definition, a `make` target for enforcement, and a measured baseline. All five are enforced.
+The spec defines six coverage invariants. Each has a formal definition, a `make` target for enforcement, and a measured baseline.
 
 ### Invariant A — CLI Recipe Parity (F-CLIPARITY-001) — ENFORCED
 
-Every one of the **57 non-help apr-cli subcommands** has ≥1 cookbook recipe.
+Every one of the **66 non-help apr-cli subcommands** (APR-MONO v0.31.2) has ≥1 cookbook recipe.
 
 ```
 ∀ s ∈ apr.subcommands \ {help}: ∃ r ∈ recipes: r.cli_equivalent = s
 ```
 
-**Baseline (2026-04-22)**: 57/57 = 100%. **Gate**: `make cli-parity` (exits non-zero on regression).
+**Baseline (2026-04-22)**: 56/66 = 85% (10 subcommands added by APR-MONO v0.31.2 still uncovered — see PMAT-049). **Gate**: `make cli-parity` (exits non-zero on regression).
 
 ### Invariant B — Recipe Contract Grade (F-CONTRACT-GRADE-001) — ENFORCED
 
@@ -386,6 +386,19 @@ Every documentation artifact in the repo — `README.md`, `CLAUDE.md`, mdbook ch
   pv lint(c) = PASS
   pmat validate-readme(d) ⊨ {unverified = 0, contradictions = 0}
 ```
+
+### Invariant F — Variant Depth (F-VARIANT-DEPTH-001) — TARGET
+
+Every apr-cli subcommand must have **≥3 distinct cookbook recipes** demonstrating different variants (different flag values, input shapes, deployment targets, or workflows). Single-example coverage is necessary (Invariant A) but not sufficient — real users need multiple worked examples per subcommand to learn idiomatic usage.
+
+```
+∀ s ∈ apr.subcommands \ {help}:
+  |{ r ∈ recipes : r.cli_equivalent = s }| ≥ 3
+```
+
+**Rationale**: A single recipe demonstrates that a subcommand exists; three demonstrate the *variance* (happy path, edge case, composition). This maps directly to Toyota *kata* — three repetitions make the pattern concrete.
+
+**Baseline (2026-04-22)**: 8/66 = 12% (only `prune`, `merge`, `finetune`, `distill`, `chat`, `rosetta`, `export`, `convert` currently meet the bar). **Gate**: `make variant-depth` — **TARGET**, not yet enforced (raising it to ENFORCED requires ≥128 new recipes; see PMAT-049/050/051 backlog).
 
 **Baseline (2026-04-22)**: 264/267 = **98.9%**. `make docs-validate` covers `README.md`, `CLAUDE.md`, `docs/specifications/**/*.md`, and `book/src/**/*.md`. 3 excluded: `CHANGELOG.md`, `deep-context.md` (generated), `docs/specifications-advanced-demos.md` (orphan). **Gate**: `make docs-validate` — **ENFORCED**.
 

@@ -205,6 +205,33 @@ cli-parity: ## Verify every apr subcommand has ≥1 cookbook recipe (F-CLIPARITY
 	fi
 	@echo "✅ CLI parity: all $$( wc -l < /tmp/apr-subs.txt | tr -d ' ') subcommands have ≥1 recipe"
 
+variant-depth: ## Invariant F: verify every apr subcommand has ≥3 cookbook recipes (F-VARIANT-DEPTH-001)
+	@echo "🔁 Checking variant-depth (≥3 recipes per subcommand)..."
+	@apr --help 2>&1 | awk '/^  [a-z]/ {print $$1}' | sort -u | grep -v '^help$$' > /tmp/apr-subs.txt
+	@grep -rhoiE 'CLI [Ee]quivalent[*: ]+`?apr [a-z][a-z-]+' examples/ 2>/dev/null \
+		| grep -oiE 'apr [a-z][a-z-]+' | awk '{print tolower($$2)}' | sort | uniq -c \
+		| awk '{printf "%-25s %s\n", $$2, $$1}' > /tmp/sub-counts.txt
+	@TOTAL=$$(wc -l < /tmp/apr-subs.txt); \
+	OK=$$(while read sub; do \
+		count=$$(awk -v s="$$sub" '$$1==s{print $$2; exit}' /tmp/sub-counts.txt || echo 0); \
+		count=$${count:-0}; \
+		if [ "$$count" -ge 3 ]; then echo "$$sub"; fi; \
+	done < /tmp/apr-subs.txt | wc -l); \
+	SHORT=$$(while read sub; do \
+		count=$$(awk -v s="$$sub" '$$1==s{print $$2; exit}' /tmp/sub-counts.txt || echo 0); \
+		count=$${count:-0}; \
+		if [ "$$count" -lt 3 ]; then printf "    apr %-20s  (%d recipes)\n" "$$sub" "$$count"; fi; \
+	done < /tmp/apr-subs.txt); \
+	printf "  Subcommands:   %3d\n  At ≥3 depth:   %3d\n  Coverage:      %d%%\n" "$$TOTAL" "$$OK" "$$((100*OK/TOTAL))"; \
+	if [ -n "$$SHORT" ]; then \
+		echo "⚠️  Below variant-depth target (<3 recipes — TARGET, not yet ENFORCED):"; \
+		echo "$$SHORT"; \
+		echo "    See: docs/specifications/components/quality-gates.md#invariant-f"; \
+		echo "    Backlog: PMAT-049 / -050 / -051"; \
+	fi
+	@# TARGET gate: don't fail CI yet. Change `exit 0` → `exit 1` when ENFORCED.
+	@exit 0
+
 variant-coverage: ## Report per-subcommand flag/variant coverage
 	@echo "📊 Per-subcommand variant coverage:"
 	@printf "  %-15s %8s %8s %6s\n" "SUBCOMMAND" "FLAGS" "RECIPES" "COV%"
