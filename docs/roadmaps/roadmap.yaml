@@ -1186,3 +1186,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-058
+  github_issue: null
+  item_type: task
+  title: Add runtime throughput tests (lz4 + matmul) to lift lz4/avx512 bindings pending → implemented
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:22:29Z
+  updated: 2026-04-23T08:22:29.431394677+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

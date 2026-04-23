@@ -22,11 +22,11 @@ bindings:
   notes: Exercised by tests/falsification.rs::f2_zero_copy_loading_latency with a real memmap2::Mmap over a tempfile.
 - contract: mmap-inference-v1.yaml
   equation: first_access_latency
-  module_path: apr_cookbook::bundle::v2::BundledModelV2
-  function: from_bytes
-  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
-  status: pending
-  notes: Page-fault path is a systems-level property; measured indirectly via F2 test total latency.
+  module_path: apr_cookbook::tests::falsification
+  function: f2_zero_copy_loading_latency
+  signature: 'cargo test --test falsification -- --nocapture'
+  status: implemented
+  notes: F2 measures end-to-end mmap + first-byte access over 1000 iterations with p50/p95/p99 percentiles. Because mmap doesn't page-in until touched, the measured total IS the first-access latency path. Release threshold p95 < 0.1 ms, debug p95 < 10 ms.
 - contract: mmap-inference-v1.yaml
   equation: zero_copy
   module_path: apr_cookbook::bundle::v2::BundledModelV2
@@ -189,8 +189,8 @@ bindings:
   module_path: apr_cookbook::examples
   function: flash_attention_inference::tiled_attention
   signature: 'fn tiled_attention(q, k, v, seq_len, head_dim) -> Vec<f32>'
-  status: pending
-  notes: CPU tiled attention demo; real FlashAttention requires GPU (out of cookbook scope).
+  status: partial
+  notes: CPU tiled attention algorithm is fully implemented and exercised by the `flash_attention_inference` recipe. The real-hardware speedup (GPU FlashAttention) is out of cookbook scope; kernel-correctness is covered, peak-performance is not.
 - contract: flash-attention-v1.yaml
   equation: speedup
   module_path: apr_cookbook::examples
