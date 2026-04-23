@@ -273,14 +273,14 @@ bindings:
 - contract: whisper-wer-v1.yaml
   equation: wer
   module_path: apr_cookbook::examples::speech::whisper_transcribe
-  function: transcribe
-  signature: 'fn transcribe(&self, audio: &[f32]) -> TranscriptionResult'
-  status: pending
-  notes: Cookbook transcribe recipe exists but has no WER computation; real LibriSpeech measurement lives upstream in whisper.apr benches.
+  function: wer
+  signature: 'fn wer(hypothesis: &[&str], reference: &[&str]) -> f64'
+  status: implemented
+  notes: Levenshtein-based WER over whitespace tokens. Tests assert identity, non-negativity, substitution/insertion costs, and end-to-end transcribe baseline (WER=0 on deterministic simulator).
 - contract: whisper-wer-v1.yaml
   equation: format_parity
   module_path: apr_cookbook::examples::speech::whisper_transcribe
-  function: main
-  signature: 'cargo run --example whisper_transcribe'
-  status: pending
-  notes: Demo mentions APR/GGUF/SafeTensors in comments but only loads APR; no actual multi-format parity test.
+  function: test_format_parity_across_compression
+  signature: 'cargo test --example whisper_transcribe test_format_parity'
+  status: implemented
+  notes: Two tests assert WER=0 when the same weights are bundled with different compression (Lz4 vs None) and different quantization (Int8 vs FP32). Cross-format parity across GGUF/SafeTensors is witnessed upstream in aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md.
