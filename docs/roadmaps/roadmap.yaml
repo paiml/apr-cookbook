@@ -1142,11 +1142,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-050 Sprint D (final): 20 recipes for 10 subs (rm, runs, serve, showcase, tokenize, trace, train, tree, tui, tune, validate) — brings Invariant F to 66/66 ENFORCED'
-  status: inprogress
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-04-22T16:46:19Z
-  updated: 2026-04-23T01:40:34.544925874+00:00
+  updated: 2026-04-23T01:41:56.469635458+00:00
   spec: null
   acceptance_criteria: []
   phases: []
