@@ -115,10 +115,17 @@ kani_harnesses:
     obligation: "Lossless decompression"
     bound: 64
     strategy: bounded_int
+    harness: "kani_harnesses::lz4_lossless_decompression"
   - id: KANI-LZ4-002
     obligation: "Throughput meets F1 threshold"
     bound: 8
     strategy: stub_float
+    harness: "kani_harnesses::lz4_throughput_f1_bound"
+  - id: KANI-LZ4-003
+    obligation: "SIMD speedup"
+    bound: 8
+    strategy: bounded_int
+    harness: "kani_harnesses::lz4_simd_speedup_monotonic"
 
 qa_gate:
   id: F-LZ4-001

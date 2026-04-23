@@ -117,6 +117,17 @@ kani_harnesses:
     obligation: "WER non-negative"
     bound: 8
     strategy: bounded_int
+    harness: "kani_harnesses::wer_non_negative"
+  - id: KANI-WER-002
+    obligation: "WER under 10%"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::wer_under_10_percent"
+  - id: KANI-WER-003
+    obligation: "Format parity"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::wer_format_parity"
 
 qa_gate:
   id: F-WER-001

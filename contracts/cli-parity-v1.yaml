@@ -180,10 +180,27 @@ kani_harnesses:
     obligation: "Subcommand coverage — no gaps"
     bound: 4
     strategy: bounded_int
+    harness: "kani_harnesses::cliparity_subcommand_coverage"
   - id: KANI-CLIPARITY-002
     obligation: "Contract binding exists"
     bound: 4
     strategy: bounded_int
+    harness: "kani_harnesses::cliparity_contract_binding_exists"
+  - id: KANI-CLIPARITY-003
+    obligation: "Variant coverage — every flag demonstrated"
+    bound: 4
+    strategy: compositional
+    harness: "kani_harnesses::cliparity_variant_coverage"
+  - id: KANI-CLIPARITY-004
+    obligation: "No orphan recipes"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::cliparity_no_orphan_recipes"
+  - id: KANI-CLIPARITY-005
+    obligation: "Lean proof present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::cliparity_lean_proof_present"
 
 qa_gate:
   id: F-CLIPARITY-001

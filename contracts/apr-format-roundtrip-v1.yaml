@@ -152,10 +152,22 @@ kani_harnesses:
     obligation: "Shape preservation"
     bound: 8
     strategy: bounded_int
+    harness: "kani_harnesses::fmt_shape_preservation"
   - id: KANI-FMT-002
     obligation: "Count preservation"
     bound: 4
     strategy: exhaustive
+    harness: "kani_harnesses::fmt_count_preservation"
+  - id: KANI-FMT-003
+    obligation: "Lossless tensor roundtrip"
+    bound: 16
+    strategy: bounded_int
+    harness: "kani_harnesses::fmt_lossless_tensor_roundtrip"
+  - id: KANI-FMT-004
+    obligation: "Metadata preservation"
+    bound: 4
+    strategy: compositional
+    harness: "kani_harnesses::fmt_metadata_preservation"
 
 qa_gate:
   id: F-FMT-001
