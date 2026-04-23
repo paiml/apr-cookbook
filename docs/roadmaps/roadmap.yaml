@@ -998,7 +998,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'Grade A sprint part 1: Kani — write #[kani::proof] harnesses for 32 uncovered proof_obligations across 11 contracts (lifts D3 0.33 → 1.00)'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-04-22T12:59:04Z
@@ -1014,7 +1014,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'Grade A sprint part 2: Lean — scaffold Lean 4 project + 33 theorem stubs; flip lean.status wip→proved as each proof lands (lifts D4 0.00 → 1.00)'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-04-22T12:59:04Z
@@ -1030,7 +1030,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'Grade A sprint part 3: Binding — create --binding registry YAML mapping each contract to its implementing Rust kernel (lifts D5 0.00 → 1.00)'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-04-22T12:59:04Z
