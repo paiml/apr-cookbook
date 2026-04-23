@@ -173,7 +173,7 @@ docs-validate: ## Validate all *.md via pmat validate-readme + link integrity + 
 
 contracts-lint: ## Run pv lint + lean-status on all contracts (F-DOCS-001, F-CLIPARITY-001)
 	@echo "📜 Linting provable-contracts (pv from ../aprender monorepo)..."
-	@$(PV) lint contracts/ || (echo "❌ pv lint FAILED"; exit 1)
+	@$(PV) lint contracts/ --binding contracts/binding.yaml || (echo "❌ pv lint FAILED"; exit 1)
 	@echo "  → Lean proof status..."
 	@$(PV) lean-status contracts/ || true
 	@echo "  → Proof level report..."
