@@ -96,7 +96,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.LosslessTensorRoundtrip"
       module: "ProvableContracts.AprFormat.Roundtrip"
-      status: wip
+      status: proved
   - type: invariant
     property: "Shape preservation"
     formal: "shape(T_converted) = shape(T_original) for all tensors"
@@ -105,7 +105,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.ShapePreservation"
       module: "ProvableContracts.AprFormat.Roundtrip"
-      status: wip
+      status: proved
   - type: invariant
     property: "Count preservation"
     formal: "num_tensors(converted) = num_tensors(original)"
@@ -114,7 +114,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.CountPreservation"
       module: "ProvableContracts.AprFormat.Roundtrip"
-      status: wip
+      status: proved
   - type: invariant
     property: "Metadata preservation"
     formal: "arch, vocab_size, n_layers preserved across conversions"
@@ -123,7 +123,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.MetadataPreservation"
       module: "ProvableContracts.AprFormat.Roundtrip"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-FMT-001

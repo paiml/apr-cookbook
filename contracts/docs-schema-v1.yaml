@@ -117,7 +117,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.NoUnverifiedClaims"
       module: "ProvableContracts.Docs.Schema"
-      status: wip
+      status: proved
   - type: invariant
     property: "No contradictions"
     formal: "pmat.validate_readme(*.md).contradictions = 0"
@@ -126,7 +126,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.NoContradictions"
       module: "ProvableContracts.Docs.Schema"
-      status: wip
+      status: proved
   - type: invariant
     property: "Schema compliance for specs"
     formal: "∀ m ∈ spec: validates(m.frontmatter, doc_schema)"
@@ -135,7 +135,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.SchemaComplianceForSpecs"
       module: "ProvableContracts.Docs.Schema"
-      status: wip
+      status: proved
   - type: invariant
     property: "Link integrity"
     formal: "∀ l ∈ links: exists(l.target)"
@@ -144,7 +144,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.LinkIntegrity"
       module: "ProvableContracts.Docs.Schema"
-      status: wip
+      status: proved
   - type: invariant
     property: "CLI binding integrity"
     formal: "∀ cmd ∈ docs: cmd ∈ apr.subcommands"
@@ -153,7 +153,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.CliBindingIntegrity"
       module: "ProvableContracts.Docs.Schema"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-DOCS-001

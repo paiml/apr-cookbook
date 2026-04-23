@@ -89,7 +89,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.QuantDequantDeterministic"
       module: "ProvableContracts.Int4.Quantization"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-Q4-001

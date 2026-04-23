@@ -1,0 +1,6 @@
+name = "provableContracts"
+defaultTargets = ["ProvableContracts"]
+
+[[lean_lib]]
+name = "ProvableContracts"
+srcDir = "."

@@ -84,7 +84,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.FormatParity"
       module: "ProvableContracts.Whisper.Wer"
-      status: wip
+      status: proved
   - type: invariant
     property: "WER non-negative"
     formal: "WER >= 0 for all inputs"
@@ -93,7 +93,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.WerNonNegative"
       module: "ProvableContracts.Whisper.Wer"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-WER-001

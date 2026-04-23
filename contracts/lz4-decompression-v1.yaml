@@ -82,7 +82,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.LosslessDecompression"
       module: "ProvableContracts.Lz4.Decompression"
-      status: wip
+      status: proved
   - type: monotonicity
     property: "SIMD speedup"
     formal: "T(avx2) >= T(scalar) for all inputs"

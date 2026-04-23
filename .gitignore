@@ -29,3 +29,7 @@ examples/advanced/rag_pipeline.proptest-regressions
 .pmat/workspace.idx/
 .pmat/deps-cache.json
 .cargo/config.toml
+
+# Lean build artifacts (PMAT-047)
+lean/.lake/
+lean/lake-manifest.json
