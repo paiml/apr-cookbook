@@ -144,11 +144,12 @@ Before submitting a recipe, verify:
 
 | Invariant | Gate | Baseline | Status |
 |-----------|------|----------|--------|
-| A: CLI Recipe Parity | `make cli-parity` | 57/57 (100%) | **ENFORCED** |
-| B: Recipe Contract Grade A | `make contract-grade` | 219/219 (100%) | **ENFORCED** |
-| C: Model Format Coverage | `make format-coverage` | 219/219 (100%) | **ENFORCED** |
-| D: arXiv Citation | `make citation-check` | 219/219 (100%) | **ENFORCED** |
+| A: CLI Recipe Parity | `make cli-parity` | 66/66 (100%) | **ENFORCED** |
+| B: Recipe Contract Grade A | `make contract-grade` | 341/341 (100%) | **ENFORCED** |
+| C: Model Format Coverage | `make format-coverage` | 341/341 (100%) | **ENFORCED** |
+| D: arXiv Citation | `make citation-check` | 341/341 (100%) | **ENFORCED** |
 | E: Docs Contract Coverage | `make docs-validate` | 264/267 (98.9%) | **ENFORCED** |
+| F: Variant Depth (≥3 recipes/sub) | `make variant-depth` | 66/66 (100%) | **ENFORCED** |
 
 ### Quality Gates Summary
 
@@ -171,7 +172,7 @@ Coverage:     95%+ minimum          Verified
 
 ### QA Review Checklist
 
-- [ ] All 219 recipes execute without error
+- [x] All 341 recipes execute without error (330/341 pass <10s, 11 compute-heavy benchmarks need 60s — verified 2026-04-23)
 - [ ] mdbook builds successfully
 - [ ] CI pipeline passes on all platforms
 - [ ] Git hooks enforce quality gates
