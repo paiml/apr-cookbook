@@ -1282,3 +1282,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-064
+  github_issue: null
+  item_type: task
+  title: 'Fix GitHub Pages book deploy: migrate book.yml from peaceiris/actions-gh-pages to actions/deploy-pages to match workflow-based Pages config'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-23T13:19:51Z
+  updated: 2026-04-23T13:19:55.490125658+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
