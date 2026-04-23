@@ -1126,11 +1126,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-050 Sprint C: 22 recipes for 11 subs (oracle, parity, pipeline, probar, profile, ptx, ptx-map, publish, pull, qualify, quantize) — Invariant F'
-  status: inprogress
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-04-22T16:20:33Z
-  updated: 2026-04-23T01:40:17.369163111+00:00
+  updated: 2026-04-23T01:41:54.517973160+00:00
   spec: null
   acceptance_criteria: []
   phases: []
