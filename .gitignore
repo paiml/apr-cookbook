@@ -32,6 +32,11 @@ examples/advanced/rag_pipeline.proptest-regressions
 .pmat/context.db
 .pmat/context.db-shm
 .pmat/context.db-wal
+.pmat/workspace.db
+.pmat/workspace.db-shm
+.pmat/workspace.db-wal
+# Generated project context snapshot (pmat context --output deep-context.md)
+deep-context.md
 # Per-commit session metadata written by `pmat work start` (PMAT-062)
 .pmat-metrics/commit-*.json
 # pv (aprender-contracts-cli) local lint cache

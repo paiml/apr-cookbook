@@ -1254,7 +1254,7 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'Gitignore hygiene: exclude .pmat-metrics/commit-*.json + .pmat/context.db* transient SQLite files; mark PMAT-061 complete'
-  status: inprogress
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-04-23T10:16:05Z
