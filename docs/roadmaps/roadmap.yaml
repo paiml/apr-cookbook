@@ -1154,3 +1154,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-056
+  github_issue: null
+  item_type: task
+  title: 'Lift whisper-wer-v1 from Grade C: add real wer() edit-distance function + format-parity test to examples/speech/whisper_transcribe.rs; flip 2 pending bindings to implemented'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T07:17:02Z
+  updated: 2026-04-23T07:17:05.839231372+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
