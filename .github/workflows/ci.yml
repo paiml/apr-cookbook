@@ -77,21 +77,63 @@ jobs:
       pr_sha: ${{ github.event.pull_request.head.sha || github.sha }}
     secrets: inherit
 
-  # Summary job that reports GREEN if the local Quality Gate passed, regardless
-  # of the unified gate's self-hosted-runner health. This is the job branch
-  # protection should require — not `unified`.
+  # Lean gate — builds the ProvableContracts Lake project under `lean/`.
+  # Catches regressions in the PMAT-047 theorem scaffold (e.g. a theorem
+  # body stops compiling, or the lakefile/module graph drifts). Uses elan
+  # to install the toolchain pinned in `lean/lean-toolchain`.
+  #
+  # Note: `lake build` emits `declaration uses 'sorry'` warnings for the
+  # 16 unproven theorems — that's expected and honest. We don't fail on
+  # warnings here; the real regression signal is the build exit code.
+  lean-gate:
+    name: Lean Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install elan (Lean toolchain manager)
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | \
+            sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Lean toolchain check
+        working-directory: lean
+        run: lean --version
+
+      - uses: actions/cache@v4
+        with:
+          path: lean/.lake
+          key: lean-${{ runner.os }}-${{ hashFiles('lean/lean-toolchain', 'lean/lakefile.toml') }}
+
+      - name: Build Lean theorem scaffold
+        working-directory: lean
+        run: lake build
+
+  # Summary job that reports GREEN if the local Quality Gate + Lean Gate passed,
+  # regardless of the self-hosted unified gate's health. Branch protection
+  # should require this job — not `unified`.
   ci-status:
     name: CI Status
     runs-on: ubuntu-latest
-    needs: [gate]
+    needs: [gate, lean-gate]
     if: always()
     steps:
-      - name: Report local quality gate outcome
+      - name: Report local quality + lean gate outcomes
         run: |
-          if [ "${{ needs.gate.result }}" = "success" ]; then
-            echo "✅ Local Quality Gate passed (clippy + test --all-features)"
-            exit 0
-          else
-            echo "❌ Local Quality Gate: ${{ needs.gate.result }}"
-            exit 1
-          fi
+          failed=0
+          for result_name in gate lean-gate; do
+            case "$result_name" in
+              gate)      r="${{ needs.gate.result }}" ;;
+              lean-gate) r="${{ needs.lean-gate.result }}" ;;
+            esac
+            if [ "$r" = "success" ]; then
+              echo "✅ $result_name: success"
+            else
+              echo "❌ $result_name: $r"
+              failed=1
+            fi
+          done
+          exit $failed
