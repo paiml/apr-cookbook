@@ -106,6 +106,12 @@ fn contract_inventory_matches_disk() {
             // YAML extension is case-sensitive in this project — reject `.YAML`, `.Yaml`.
             Path::new(n).extension().is_some_and(|e| e == "yaml")
         })
+        .filter(|n| {
+            // `binding.yaml` is the pv binding registry (contract → Rust kernel map),
+            // not a contract definition. It lives alongside contracts by `pv` convention
+            // but isn't in CONTRACT_FILES.
+            n != "binding.yaml"
+        })
         .collect();
     on_disk.sort();
 

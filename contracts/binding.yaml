@@ -1,0 +1,286 @@
+version: 1.0.0
+target_crate: apr-cookbook
+# Maps each contract equation to the Rust kernel (or meta-target) that implements it.
+# status values: implemented | partial | pending | not_implemented
+#   implemented   — real Rust code exists and is exercised by tests
+#   partial       — kernel exists but only some obligations are covered
+#   pending       — kernel exists upstream (aprender-core) but no cookbook harness
+#   not_implemented — no binding (fully aspirational)
+# Meta-contracts about the repo itself (cli-parity, docs-schema) bind to
+# Makefile targets under the conventional `cookbook::make::<target>` module
+# path, which pv accepts as the "implementing kernel" for structural invariants.
+bindings:
+# ============================================================================
+# mmap-inference-v1 — F2 in-process falsification (tests/falsification.rs)
+# ============================================================================
+- contract: mmap-inference-v1.yaml
+  equation: mmap_latency
+  module_path: apr_cookbook::bundle::v2::BundledModelV2
+  function: from_bytes
+  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
+  status: implemented
+  notes: Exercised by tests/falsification.rs::f2_zero_copy_loading_latency with a real memmap2::Mmap over a tempfile.
+- contract: mmap-inference-v1.yaml
+  equation: first_access_latency
+  module_path: apr_cookbook::bundle::v2::BundledModelV2
+  function: from_bytes
+  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
+  status: pending
+  notes: Page-fault path is a systems-level property; measured indirectly via F2 test total latency.
+- contract: mmap-inference-v1.yaml
+  equation: zero_copy
+  module_path: apr_cookbook::bundle::v2::BundledModelV2
+  function: from_bytes
+  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
+  status: implemented
+  notes: Returns slice views into the mmap region; no heap copies. Verified via memmap2 semantics.
+
+# ============================================================================
+# apr-format-roundtrip-v1 — bundle build / load round-trip
+# ============================================================================
+- contract: apr-format-roundtrip-v1.yaml
+  equation: tensor_roundtrip
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: build
+  signature: 'fn build(self) -> Vec<u8>'
+  status: implemented
+  notes: Build + from_bytes round-trip covered by bundle/v2_tests.rs::test_v2_tensor_index.
+- contract: apr-format-roundtrip-v1.yaml
+  equation: quantized_roundtrip
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: with_quantization
+  signature: 'fn with_quantization(self, q: Quantization) -> Self'
+  status: implemented
+  notes: Round-trip for FP32/FP16/Int8/Int4 via test_v2_quantization_types.
+- contract: apr-format-roundtrip-v1.yaml
+  equation: metadata_preservation
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: with_name
+  signature: 'fn with_name(self, name: impl Into<String>) -> Self'
+  status: implemented
+  notes: Name/description/compression/quantization/signature all survive round-trip.
+
+# ============================================================================
+# aes256-gcm-decrypt-v1 — encryption is an aprender-core feature
+# ============================================================================
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: decrypt_latency
+  module_path: aprender::format::encryption
+  function: load_encrypted
+  signature: 'fn load_encrypted(path: &Path, passphrase: &[u8]) -> Result<...>'
+  status: pending
+  notes: Real AES-256-GCM path lives in aprender-core behind `format-encryption` feature; not measured here.
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: authenticity
+  module_path: aprender::format::encryption
+  function: load_encrypted
+  signature: 'fn load_encrypted(path: &Path, passphrase: &[u8]) -> Result<...>'
+  status: pending
+  notes: GCM tag verification is intrinsic to aes-gcm crate; no in-cookbook test yet (see PMAT follow-up).
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: roundtrip
+  module_path: apr_cookbook::bundle
+  function: (see examples/bundling/bundle_encrypted_model.rs)
+  signature: 'cookbook recipe'
+  status: implemented
+  notes: End-to-end encrypt+decrypt demo behind `encryption` feature flag.
+
+# ============================================================================
+# avx512-matmul-v1 — performance claim deleted in v5.0 (F7); kernel is upstream
+# ============================================================================
+- contract: avx512-matmul-v1.yaml
+  equation: matmul
+  module_path: trueno::Matrix
+  function: matmul
+  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
+  status: implemented
+  notes: SIMD matmul lives in aprender-compute (lib trueno). No published AVX-512 GFLOPS measurement in this repo.
+- contract: avx512-matmul-v1.yaml
+  equation: throughput
+  module_path: trueno::Matrix
+  function: matmul
+  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
+  status: pending
+  notes: No throughput harness in cookbook; see trueno benches for upstream numbers.
+- contract: avx512-matmul-v1.yaml
+  equation: scalar_equivalence
+  module_path: trueno::Matrix
+  function: matmul
+  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
+  status: pending
+  notes: SIMD↔scalar parity is an aprender-compute invariant, not re-tested here.
+
+# ============================================================================
+# cli-parity-v1 — meta-contract (structural). Bound to Makefile target.
+# ============================================================================
+- contract: cli-parity-v1.yaml
+  equation: subcommand_coverage
+  module_path: cookbook::make
+  function: cli-parity
+  signature: 'make cli-parity  # Invariant A gate'
+  status: implemented
+  notes: Enforced by Makefile target cli-parity; baseline 66/66 (100%).
+- contract: cli-parity-v1.yaml
+  equation: variant_coverage
+  module_path: cookbook::make
+  function: variant-depth
+  signature: 'make variant-depth  # Invariant F gate'
+  status: implemented
+  notes: Enforced by Makefile target variant-depth; baseline 66/66 at ≥3 recipes each.
+- contract: cli-parity-v1.yaml
+  equation: contract_binding
+  module_path: cookbook::make
+  function: contract-grade
+  signature: 'make contract-grade  # Invariant B gate'
+  status: implemented
+  notes: Enforced by Makefile target contract-grade; baseline 219/219 (100%).
+- contract: cli-parity-v1.yaml
+  equation: lean_proof
+  module_path: cookbook::lean
+  function: (none — aspirational)
+  signature: 'n/a'
+  status: pending
+  notes: Tracked by PMAT-047 Lean sprint; proof/.lean files pending.
+
+# ============================================================================
+# docs-schema-v1 — meta-contract. Bound to make docs-validate.
+# ============================================================================
+- contract: docs-schema-v1.yaml
+  equation: factual_accuracy
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # pmat validate-readme + link integrity'
+  status: implemented
+  notes: pmat validate-readme enforces factual-accuracy + hallucination detection.
+- contract: docs-schema-v1.yaml
+  equation: schema_compliance
+  module_path: apr_cookbook::tests
+  function: contracts
+  signature: 'cargo test --test contracts'
+  status: implemented
+  notes: tests/contracts.rs validates every YAML via aprender-contracts schema.
+- contract: docs-schema-v1.yaml
+  equation: link_integrity
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # pmat validate-docs --fail-on-error'
+  status: implemented
+  notes: Checks every *.md internal + GitHub blob link.
+- contract: docs-schema-v1.yaml
+  equation: cli_binding
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # grep apr <cmd> vs apr --help'
+  status: implemented
+  notes: Rejects docs mentioning nonexistent apr subcommands.
+
+# ============================================================================
+# flash-attention-v1 — F6 claim deleted; CPU tiled version lives in example
+# ============================================================================
+- contract: flash-attention-v1.yaml
+  equation: naive_attention
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::naive_attention
+  signature: 'fn naive_attention(q, k, v, seq_len, head_dim) -> Vec<f32>'
+  status: implemented
+  notes: Teaching baseline in examples/gpu/flash_attention_inference/.
+- contract: flash-attention-v1.yaml
+  equation: flash_attention
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::tiled_attention
+  signature: 'fn tiled_attention(q, k, v, seq_len, head_dim) -> Vec<f32>'
+  status: pending
+  notes: CPU tiled attention demo; real FlashAttention requires GPU (out of cookbook scope).
+- contract: flash-attention-v1.yaml
+  equation: speedup
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::main
+  signature: 'fn main() -> Result<()>'
+  status: pending
+  notes: F6 ≥2× claim deleted in v5.0 — CPU tiled proxy never achieves 2×.
+- contract: flash-attention-v1.yaml
+  equation: numerical_equivalence
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference
+  signature: 'assert naive ≈ tiled (abs_tol=1e-5)'
+  status: implemented
+  notes: Example asserts output agreement between naive and tiled paths.
+
+# ============================================================================
+# int4-quantization-v1 — F3 claim deleted; quantization lives in aprender-core
+# ============================================================================
+- contract: int4-quantization-v1.yaml
+  equation: accuracy_loss
+  module_path: aprender::format::quantization
+  function: quantize_int4
+  signature: 'fn quantize_int4(tensor: &Tensor) -> Vec<u8>'
+  status: pending
+  notes: Quantization kernel is upstream; cookbook F3 measurement deleted (no NMSE bench).
+- contract: int4-quantization-v1.yaml
+  equation: quantization_error
+  module_path: aprender::format::quantization
+  function: dequantize_int4
+  signature: 'fn dequantize_int4(bytes: &[u8]) -> Vec<f32>'
+  status: pending
+  notes: Round-trip quantize/dequantize exists upstream; cookbook has no NMSE measurement.
+
+# ============================================================================
+# lz4-decompression-v1 — F1 claim deleted; compression lives in aprender-core
+# ============================================================================
+- contract: lz4-decompression-v1.yaml
+  equation: throughput
+  module_path: aprender::format::compression
+  function: decompress
+  signature: 'fn decompress(bytes: &[u8]) -> Result<Vec<u8>>'
+  status: pending
+  notes: LZ4 decompress path is in aprender-core; cookbook has no GB/s harness.
+- contract: lz4-decompression-v1.yaml
+  equation: compression_ratio
+  module_path: aprender::format::compression
+  function: compress
+  signature: 'fn compress(bytes: &[u8]) -> Vec<u8>'
+  status: implemented
+  notes: Ratio measurements exist in aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md.
+
+# ============================================================================
+# recipe-iiur-v1 — structural invariant; bound to Rust types in src/recipe/
+# ============================================================================
+- contract: recipe-iiur-v1.yaml
+  equation: isolation
+  module_path: apr_cookbook::recipe::context::RecipeContext
+  function: new
+  signature: 'fn new(name: &str) -> Result<Self>'
+  status: implemented
+  notes: Every recipe uses RecipeContext::new which allocates a fresh tempdir per run.
+- contract: recipe-iiur-v1.yaml
+  equation: idempotency
+  module_path: apr_cookbook::recipe::context::RecipeContext
+  function: verify_idempotency
+  signature: 'fn verify_idempotency<F>(f: F) -> bool  where F: Fn()'
+  status: implemented
+  notes: Helper in context.rs; hash-of-output stays constant across two runs with the same seed.
+- contract: recipe-iiur-v1.yaml
+  equation: reproducibility
+  module_path: apr_cookbook::recipe::testdata
+  function: hash_name_to_seed
+  signature: 'fn hash_name_to_seed(name: &str) -> u64'
+  status: implemented
+  notes: Deterministic BLAKE3-derived seed keyed on recipe name.
+
+# ============================================================================
+# whisper-wer-v1 — F5 claim deleted; threshold defined in whisper.apr
+# ============================================================================
+- contract: whisper-wer-v1.yaml
+  equation: wer
+  module_path: apr_cookbook::examples
+  function: whisper_transcribe
+  signature: 'fn main() -> Result<()>  # examples/speech/whisper_transcribe.rs'
+  status: pending
+  notes: Cookbook transcribe recipe simulates WER on synthetic text; real whisper.apr harness measures on LibriSpeech.
+- contract: whisper-wer-v1.yaml
+  equation: format_parity
+  module_path: apr_cookbook::examples
+  function: whisper_transcribe
+  signature: 'fn main() -> Result<()>'
+  status: pending
+  notes: APR/GGUF/SafeTensors parity demo only; no measured WER.
