@@ -132,10 +132,17 @@ kani_harnesses:
     obligation: "Deterministic output"
     bound: 4
     strategy: bounded_int
+    harness: "kani_harnesses::mm_deterministic_output"
   - id: KANI-MM-002
     obligation: "SIMD matches scalar"
     bound: 8
     strategy: stub_float
+    harness: "kani_harnesses::mm_simd_matches_scalar"
+  - id: KANI-MM-003
+    obligation: "Throughput meets F7 threshold"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::mm_throughput_f7_bound"
 
 qa_gate:
   id: F-MM-001

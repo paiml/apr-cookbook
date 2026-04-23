@@ -187,10 +187,27 @@ kani_harnesses:
     obligation: "Link integrity"
     bound: 4
     strategy: bounded_int
+    harness: "kani_harnesses::docs_link_integrity"
   - id: KANI-DOCS-002
     obligation: "CLI binding integrity"
     bound: 4
     strategy: bounded_int
+    harness: "kani_harnesses::docs_cli_binding_integrity"
+  - id: KANI-DOCS-003
+    obligation: "No unverified claims"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::docs_no_unverified_claims"
+  - id: KANI-DOCS-004
+    obligation: "No contradictions"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::docs_no_contradictions"
+  - id: KANI-DOCS-005
+    obligation: "Schema compliance for specs"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::docs_schema_compliance_specs"
 
 qa_gate:
   id: F-DOCS-001

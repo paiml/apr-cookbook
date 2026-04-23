@@ -149,10 +149,22 @@ kani_harnesses:
     obligation: "Isolation — no side effects"
     bound: 4
     strategy: exhaustive
+    harness: "kani_harnesses::iiur_isolation_no_side_effects"
   - id: KANI-IIUR-002
     obligation: "Cleanup — no temp leaks"
     bound: 4
     strategy: exhaustive
+    harness: "kani_harnesses::iiur_cleanup_no_temp_leaks"
+  - id: KANI-IIUR-003
+    obligation: "Idempotency — same output"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::iiur_idempotency_same_output"
+  - id: KANI-IIUR-004
+    obligation: "Cross-platform reproducibility"
+    bound: 4
+    strategy: compositional
+    harness: "kani_harnesses::iiur_cross_platform_reproducibility"
 
 qa_gate:
   id: F-IIUR-001

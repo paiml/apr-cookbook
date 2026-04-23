@@ -133,10 +133,17 @@ kani_harnesses:
     obligation: "Encrypt/decrypt lossless"
     bound: 32
     strategy: bounded_int
+    harness: "kani_harnesses::aes_encrypt_decrypt_roundtrip"
   - id: KANI-AES-002
     obligation: "Tamper detection"
     bound: 16
     strategy: exhaustive
+    harness: "kani_harnesses::aes_tamper_detection"
+  - id: KANI-AES-003
+    obligation: "Decrypt latency under 5ms"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::aes_decrypt_latency_bound"
 
 qa_gate:
   id: F-AES-001

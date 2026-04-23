@@ -132,6 +132,17 @@ kani_harnesses:
     obligation: "Zero heap allocations"
     bound: 4
     strategy: exhaustive
+    harness: "kani_harnesses::mmap_zero_heap_allocations"
+  - id: KANI-MMAP-002
+    obligation: "mmap latency under 1ms"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::mmap_latency_bound"
+  - id: KANI-MMAP-003
+    obligation: "O(1) in file size"
+    bound: 8
+    strategy: compositional
+    harness: "kani_harnesses::mmap_o1_in_file_size"
 
 qa_gate:
   id: F-MMAP-001

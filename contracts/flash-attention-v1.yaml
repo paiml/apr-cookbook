@@ -151,6 +151,17 @@ kani_harnesses:
     obligation: "Numerical equivalence"
     bound: 8
     strategy: stub_float
+    harness: "kani_harnesses::fa_numerical_equivalence"
+  - id: KANI-FA-002
+    obligation: "Speedup >= 2x at seq >= 1024"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::fa_speedup_bound"
+  - id: KANI-FA-003
+    obligation: "Linear memory"
+    bound: 8
+    strategy: bounded_int
+    harness: "kani_harnesses::fa_linear_memory"
 
 qa_gate:
   id: F-FA-001

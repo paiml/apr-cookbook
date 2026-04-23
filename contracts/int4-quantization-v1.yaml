@@ -113,6 +113,17 @@ kani_harnesses:
     obligation: "Quant/dequant deterministic"
     bound: 16
     strategy: bounded_int
+    harness: "kani_harnesses::q4_quant_dequant_deterministic"
+  - id: KANI-Q4-002
+    obligation: "Accuracy loss under 2%"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::q4_accuracy_loss_bound"
+  - id: KANI-Q4-003
+    obligation: "Quantization error bounded"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::q4_quantization_error_bounded"
 
 qa_gate:
   id: F-Q4-001
