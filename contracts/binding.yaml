@@ -98,10 +98,10 @@ bindings:
 - contract: avx512-matmul-v1.yaml
   equation: throughput
   module_path: apr_cookbook::tests::throughput
-  function: matmul_throughput_above_1_gflops
+  function: matmul_throughput_above_floor
   signature: 'cargo test --test throughput -- --nocapture'
   status: implemented
-  notes: Conservative 1 GFLOPS floor via `trueno::Matrix::matmul` on 256×256 f32. Measured 110 GFLOPS release. The deleted F7 ≥ 80 GFLOPS AVX-512 peak claim is still out of scope (platform-specific).
+  notes: Conservative 0.1 GFLOPS floor via `trueno::Matrix::matmul` on 256×256 f32. CI debug hits ~0.5 GFLOPS, local release hits 100+ GFLOPS. The deleted F7 ≥ 80 GFLOPS AVX-512 peak claim is out of scope (platform-specific).
 - contract: avx512-matmul-v1.yaml
   equation: scalar_equivalence
   module_path: apr_cookbook::tests::throughput
