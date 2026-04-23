@@ -1234,3 +1234,35 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-061
+  github_issue: null
+  item_type: task
+  title: Add lean-build to CI so Lean 4 theorem scaffold regressions are caught in PR
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T10:00:53Z
+  updated: 2026-04-23T10:00:57.062428779+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-062
+  github_issue: null
+  item_type: task
+  title: 'Gitignore hygiene: exclude .pmat-metrics/commit-*.json + .pmat/context.db* transient SQLite files; mark PMAT-061 complete'
+  status: inprogress
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T10:16:05Z
+  updated: 2026-04-23T10:16:09.302956964+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

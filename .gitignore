@@ -28,6 +28,15 @@ examples/advanced/rag_pipeline.proptest-regressions
 .pmat/context.idx/
 .pmat/workspace.idx/
 .pmat/deps-cache.json
+# Per-session SQLite cache + WAL/shared-memory transients (PMAT-062)
+.pmat/context.db
+.pmat/context.db-shm
+.pmat/context.db-wal
+# Per-commit session metadata written by `pmat work start` (PMAT-062)
+.pmat-metrics/commit-*.json
+# pv (aprender-contracts-cli) local lint cache
+.pv/
+contracts/.pv/
 .cargo/config.toml
 
 # Lean build artifacts (PMAT-047)
