@@ -28,9 +28,9 @@ Only claims with reproducible measurements are listed. See [Quality Gates](quali
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   APR Cookbook v4.0                          │
+│                   APR Cookbook v5.0                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Examples Layer (219 recipes across 24 categories)          │
+│  Examples Layer (341 recipes across 24 categories)          │
 │  ├── Model Bundling (include_bytes!, APR v2 compression)    │
 │  ├── Format Conversion (SafeTensors -> APR v2 -> GGUF)     │
 │  ├── Speech Recognition (simulated whisper pipelines)       │

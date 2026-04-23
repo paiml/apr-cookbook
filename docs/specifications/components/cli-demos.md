@@ -23,11 +23,12 @@ See [Quality Gates § Five Coverage Invariants](quality-gates.md#five-coverage-i
 
 | Invariant | Gate | Baseline | Status |
 |-----------|------|----------|--------|
-| **A** CLI Recipe Parity | `make cli-parity` | 57/57 (100%) | **ENFORCED** |
-| **B** Recipe Contract Grade A | `make contract-grade` | 219/219 (100%) | **ENFORCED** |
-| **C** Model Format Coverage | `make format-coverage` | 219/219 (100%) | **ENFORCED** |
-| **D** arXiv Citation | `make citation-check` | 219/219 (100%) | **ENFORCED** |
+| **A** CLI Recipe Parity | `make cli-parity` | 66/66 (100%) | **ENFORCED** |
+| **B** Recipe Contract Grade A | `make contract-grade` | 341/341 (100%) | **ENFORCED** |
+| **C** Model Format Coverage | `make format-coverage` | 341/341 (100%) | **ENFORCED** |
+| **D** arXiv Citation | `make citation-check` | 341/341 (100%) | **ENFORCED** |
 | **E** Docs Contract Coverage | `make docs-validate` | 264/267 (98.9%) | **ENFORCED** |
+| **F** Variant Depth (≥3 recipes/sub) | `make variant-depth` | 66/66 (100%) | **ENFORCED** |
 
 Every new `.rs` recipe under `examples/` **must** include a doc comment header of the form:
 

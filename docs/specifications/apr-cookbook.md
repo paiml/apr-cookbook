@@ -31,8 +31,8 @@ APR Cookbook v5.0 — APR-MONO Integration
 ├── Examples Layer (this repo)
 │   ├── 91 IIUR recipes (Categories A-L)
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
-│   ├── 64 other recipes (acceleration, advanced, inference, etc.)
-│   └── 219 total examples across 24 categories
+│   ├── 186 variant-depth recipes (PMAT-049/050/051 sprints — ≥3 per subcommand)
+│   └── 341 total examples across 24 categories (2026-04-23)
 ├── Framework Layer — APR-MONO v0.31.2 crates from crates.io
 │   │   (optional `[patch.crates-io]` override for local ../aprender co-dev)
 │   ├── aprender-core 0.31.2         — package `aprender-core`, lib `aprender`
@@ -276,6 +276,25 @@ full = ["encryption"]
 
 ---
 
+## What the demos **don't** cover
+
+Everything builds and runs (330/341 under 10s, 11 compute-heavy benchmarks under 60s, 0 failures — 2026-04-23). But several categories are *deliberately* simulated or feature-gated and are worth calling out so a reader doesn't mistake a passing demo for a real-hardware measurement.
+
+| Category | What's simulated | Why | How to get the real thing |
+|---|---|---|---|
+| **GPU** (14 demos) | `cuda`, `vulkan`, `multi_gpu`, `tensor_cores`, `flash_attention_inference` all run a CPU tiled/scalar proxy. | Cookbook compiles without CUDA/ROCm drivers. | Run the same kernel via `aprender-compute` (`trueno`) on a CUDA-enabled host; see `candle-vs-apr/performance.md` for measured numbers. |
+| **Distributed** (5 demos) | `distributed_inference`, `sharding`, `ring_allreduce`, `pipeline_parallel`, `gossip` simulate with in-process workers. | Zero-dependency demo; no sockets. | Use `aprender-distribute`/`repartir` on a real multi-node setup. |
+| **Speech** (5 demos) | `whisper_transcribe` returns a deterministic "Hello, world!" from any audio; real Whisper-small weights never load. | No model checkpoint bundled. | Load a real whisper.apr bundle (out of scope for zero-dep cookbook) or use the LibriSpeech harness in sibling `whisper-apr`. |
+| **WASM** (6 demos) | Build as native binaries with WASM-feature flags; browser deployment is not exercised here. | Cookbook focuses on Rust-side; browser deploy needs `wasm-pack` + page scaffolding. | `cargo install wasm-pack && wasm-pack build --target web` — see `book/src/advanced/wasm/` for a page template. |
+| **Serverless** (5 demos) | Build Lambda package layouts, measure cold-start, but never deploy. | Would require AWS credentials and network. | Ship the generated `bootstrap` with the template; see `book/src/advanced/serverless/`. |
+| **Encryption** (1 demo) | `bundle_encrypted_model` works end-to-end but requires `--features encryption`. | Optional feature-gate. | `cargo run --example bundle_encrypted_model --features encryption`. |
+| **4 B-grade contracts** | `aes256-gcm-decrypt-v1`, `avx512-matmul-v1`, `flash-attention-v1`, `lz4-decompression-v1` each carry 2–3 `pending` bindings on runtime measurements (latency, throughput, FP equivalence). | The kernel lives upstream (aprender-core/compute benches) and the cookbook does not re-measure. | Wire an in-cookbook benchmark harness for each, then flip the `binding.yaml` status to `implemented`. Not currently ticketed — see `contracts/binding.yaml`. |
+| **16 Lean `sorry` theorems** | Runtime/hardware claims (latency, throughput, FP numerical equivalence, AES correctness, O(N) memory scaling) remain `:= by sorry`. | Not derivable from pure Lean semantics without Mathlib + a cost-model. | Status kept as `wip` — honest; do not flip to `proved` without a real proof body. |
+
+Everything else — algorithm correctness, round-trip preservation, structural invariants — is either Lean-proved, Kani-verified, or both.
+
+---
+
 ## Falsifiable Claims Summary
 
 Two categories: **in-process** claims are exercised by `tests/falsification.rs` in this repo; **cited** claims reference external measurements with reproducible source paths. All published thresholds match the actual test assertion or the cited source file.
@@ -310,7 +329,21 @@ The following claims were asserted in prior spec versions but are **removed** fr
 
 ### Contract backing
 
-All surviving claims (F2 + N1–N4) are backed by provable-contracts YAML in `contracts/` (11 files total). Every YAML parses and validates in-process via `cargo test --test contracts`, which replaces the prior external `pv validate` dependency. 219/219 cargo `[[example]]` recipes reference ≥1 contract via `//! Contract:` header (Invariant B). Contract inventory: see [Quality Gates](components/quality-gates.md).
+All surviving claims (F2 + N1–N4) are backed by provable-contracts YAML in `contracts/` (11 files total). Every YAML parses and validates in-process via `cargo test --test contracts`, which replaces the prior external `pv validate` dependency. 341/341 cargo `[[example]]` recipes reference ≥1 contract via `//! Contract:` header (Invariant B). Contract inventory: see [Quality Gates](components/quality-gates.md).
+
+**Provability scoreboard (2026-04-23, post-PMAT-046/047/048/056):**
+
+| Dimension | Score |
+|---|---|
+| Codebase simple mean | **0.92 (A)** |
+| PVScore 10-dim | **94.8 (A)** |
+| Per-contract mean | 0.89 (B) |
+| Kani harnesses landed | 39/39 |
+| Lean theorems proved | 23/39 (16 honest `sorry` for runtime/hardware claims) |
+| Binding coverage | 76% |
+| Grade C contracts | **0** |
+
+**Demo-run baseline (2026-04-23):** 330/341 examples pass in <10s; 11 compute-heavy benchmarks (matmul, SIMD, cache-tiling, distributed sim) require a longer timeout and are tracked in `docs/specifications/components/quality-gates.md#demo-run-baseline`. Zero failures.
 
 ## Six Coverage Invariants
 
@@ -339,7 +372,7 @@ Every recipe should reference a provable-contract (`../provable-contracts` YAML)
 
 Grade A requires: complete `metadata` (incl. academic references), ≥3 `proof_obligations`, matching `falsification_tests`, ≥1 `kani_harness`, and a passing `qa_gate`.
 
-**Baseline (2026-04-22)**: 219/219 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
+**Baseline (2026-04-22)**: 341/341 = **100%**. 11 contracts exist, mean `pv lint` score 0.54. **Gate**: `make contract-grade` — **ENFORCED**.
 
 ### Invariant C — Model Format Coverage (F-FORMAT-COV-001) — ENFORCED
 
@@ -356,7 +389,7 @@ Every recipe that operates on a model file should demonstrate all three canonica
 - `apr encrypt` only supports `.apr` → 1 variant sufficient
 - `apr import hf://…` outputs `.apr` only → 1 variant sufficient
 
-**Baseline (2026-04-22)**: 219/219 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
+**Baseline (2026-04-22)**: 341/341 = **100%**. **Gate**: `make format-coverage` — **ENFORCED**.
 
 ### Invariant D — arXiv Citation (F-ARXIV-001) — ENFORCED
 
@@ -374,7 +407,7 @@ Doc comment format:
 //! - Hu et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 ```
 
-**Baseline (2026-04-22)**: 219/219 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
+**Baseline (2026-04-22)**: 341/341 = **100%**. **Gate**: `make citation-check` — **ENFORCED**.
 
 ### Invariant E — Docs Contract Coverage (F-DOCS-CONTRACT-001) — ENFORCED
 
