@@ -1202,3 +1202,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-059
+  github_issue: null
+  item_type: task
+  title: Add AES-256-GCM tamper-detection + roundtrip test; flip aes256 authenticity binding to implemented
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:28:54Z
+  updated: 2026-04-23T08:28:57.939027455+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
