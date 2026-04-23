@@ -137,10 +137,10 @@ bindings:
 - contract: cli-parity-v1.yaml
   equation: lean_proof
   module_path: cookbook::lean
-  function: (none — aspirational)
-  signature: 'n/a'
-  status: pending
-  notes: Tracked by PMAT-047 Lean sprint; proof/.lean files pending.
+  function: ProvableContracts
+  signature: 'lean/ProvableContracts.lean  # 11 modules, 39 theorems (23 proved, 16 sorry)'
+  status: implemented
+  notes: PMAT-047 landed — `lean/` Lake project builds; 23/39 theorems have real proof bodies. Runtime/hardware claims remain `:= by sorry` honestly.
 
 # ============================================================================
 # docs-schema-v1 — meta-contract. Bound to make docs-validate.
@@ -211,18 +211,18 @@ bindings:
 # ============================================================================
 - contract: int4-quantization-v1.yaml
   equation: accuracy_loss
-  module_path: aprender::format::quantization
+  module_path: apr_cookbook::examples::acceleration_quantized_matmul
   function: quantize_int4
-  signature: 'fn quantize_int4(tensor: &Tensor) -> Vec<u8>'
-  status: pending
-  notes: Quantization kernel is upstream; cookbook F3 measurement deleted (no NMSE bench).
+  signature: 'fn quantize_int4(weights: &[f64], rows: usize, cols: usize) -> QuantizedWeights'
+  status: implemented
+  notes: Cookbook demo that packs 2 INT4 values per byte with symmetric scale/zero-point. Exercised by `cargo run --example acceleration_quantized_matmul`.
 - contract: int4-quantization-v1.yaml
   equation: quantization_error
-  module_path: aprender::format::quantization
-  function: dequantize_int4
-  signature: 'fn dequantize_int4(bytes: &[u8]) -> Vec<f32>'
-  status: pending
-  notes: Round-trip quantize/dequantize exists upstream; cookbook has no NMSE measurement.
+  module_path: apr_cookbook::examples::acceleration_quantized_matmul
+  function: dequantize_weight
+  signature: 'fn dequantize_weight(qw: &QuantizedWeights, index: usize) -> f64'
+  status: implemented
+  notes: Inverse of quantize_int4 (generic dequantize for FP32/FP16/Int8/Int4). Demo's tests assert cosine_similarity and max_abs_error bounds per quantization level.
 
 # ============================================================================
 # lz4-decompression-v1 — F1 claim deleted; compression lives in aprender-core
@@ -272,15 +272,15 @@ bindings:
 # ============================================================================
 - contract: whisper-wer-v1.yaml
   equation: wer
-  module_path: apr_cookbook::examples
-  function: whisper_transcribe
-  signature: 'fn main() -> Result<()>  # examples/speech/whisper_transcribe.rs'
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: transcribe
+  signature: 'fn transcribe(&self, audio: &[f32]) -> TranscriptionResult'
   status: pending
-  notes: Cookbook transcribe recipe simulates WER on synthetic text; real whisper.apr harness measures on LibriSpeech.
+  notes: Cookbook transcribe recipe exists but has no WER computation; real LibriSpeech measurement lives upstream in whisper.apr benches.
 - contract: whisper-wer-v1.yaml
   equation: format_parity
-  module_path: apr_cookbook::examples
-  function: whisper_transcribe
-  signature: 'fn main() -> Result<()>'
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: main
+  signature: 'cargo run --example whisper_transcribe'
   status: pending
-  notes: APR/GGUF/SafeTensors parity demo only; no measured WER.
+  notes: Demo mentions APR/GGUF/SafeTensors in comments but only loads APR; no actual multi-format parity test.
