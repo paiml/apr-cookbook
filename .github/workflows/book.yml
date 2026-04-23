@@ -1,20 +1,37 @@
+# Book — build mdBook and deploy to GitHub Pages.
+#
+# Uses the modern `actions/deploy-pages` path (artifact upload) to match
+# the repo's Pages config (`build_type: workflow`). The previous
+# `peaceiris/actions-gh-pages` flow pushed to a `gh-pages` branch, which
+# Pages no longer serves from — that's why the site was 404.
+
 name: mdBook CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'book/**'
       - '.github/workflows/book.yml'
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'book/**'
       - '.github/workflows/book.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  test:
-    name: Test Book Build
+  build:
+    name: Build book
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,45 +39,35 @@ jobs:
       - name: Install mdBook
         run: |
           mkdir -p ~/bin
-          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.36/mdbook-v0.4.36-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C ~/bin
-          echo "$HOME/bin" >> $GITHUB_PATH
-
-      - name: Build book (test phase)
-        run: |
-          cd book
-          mdbook build
-          echo "Book built successfully!"
-
-      - name: Verify book structure
-        run: |
-          test -f book/book/index.html
-          test -f book/book/print.html
-          echo "Book structure validated!"
-
-  deploy:
-    name: Build and Deploy Book
-    runs-on: ubuntu-latest
-    needs: test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install mdBook
-        run: |
-          mkdir -p ~/bin
-          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.36/mdbook-v0.4.36-x86_64-unknown-linux-gnu.tar.gz | tar -xz -C ~/bin
-          echo "$HOME/bin" >> $GITHUB_PATH
+          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.36/mdbook-v0.4.36-x86_64-unknown-linux-gnu.tar.gz \
+            | tar -xz -C ~/bin
+          echo "$HOME/bin" >> "$GITHUB_PATH"
 
       - name: Build book
         run: |
           cd book
           mdbook build
 
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Verify book structure
+        run: |
+          test -f book/book/index.html
+          test -f book/book/print.html
+
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        uses: actions/upload-pages-artifact@v3
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./book/book
-          publish_branch: gh-pages
+          path: ./book/book
+
+  deploy:
+    name: Deploy to GitHub Pages
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4
