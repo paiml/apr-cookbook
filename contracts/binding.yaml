@@ -72,11 +72,11 @@ bindings:
   notes: Real AES-256-GCM path lives in aprender-core behind `format-encryption` feature; not measured here.
 - contract: aes256-gcm-decrypt-v1.yaml
   equation: authenticity
-  module_path: aprender::format::encryption
-  function: load_encrypted
-  signature: 'fn load_encrypted(path: &Path, passphrase: &[u8]) -> Result<...>'
-  status: pending
-  notes: GCM tag verification is intrinsic to aes-gcm crate; no in-cookbook test yet (see PMAT follow-up).
+  module_path: apr_cookbook::tests::encryption
+  function: aes_gcm_tamper_detection_single_byte_flip
+  signature: 'cargo test --test encryption --features encryption'
+  status: implemented
+  notes: Witnesses GHASH tag verification — flipping one byte of the encrypted payload causes `load_encrypted` to fail. Also covers wrong-password rejection in `aes_gcm_wrong_password_rejected`. CI runs `cargo test --all-features` so this executes on every PR.
 - contract: aes256-gcm-decrypt-v1.yaml
   equation: roundtrip
   module_path: apr_cookbook::bundle
