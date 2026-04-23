@@ -1218,3 +1218,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-060
+  github_issue: null
+  item_type: task
+  title: 'P0: fix matmul threshold flake on CI + unblock unified-gate infra failure'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-23T08:43:21Z
+  updated: 2026-04-23T08:43:25.733574387+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
