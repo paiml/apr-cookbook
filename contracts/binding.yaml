@@ -97,18 +97,18 @@ bindings:
   notes: SIMD matmul lives in aprender-compute (lib trueno). No published AVX-512 GFLOPS measurement in this repo.
 - contract: avx512-matmul-v1.yaml
   equation: throughput
-  module_path: trueno::Matrix
-  function: matmul
-  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
-  status: pending
-  notes: No throughput harness in cookbook; see trueno benches for upstream numbers.
+  module_path: apr_cookbook::tests::throughput
+  function: matmul_throughput_above_1_gflops
+  signature: 'cargo test --test throughput -- --nocapture'
+  status: implemented
+  notes: Conservative 1 GFLOPS floor via `trueno::Matrix::matmul` on 256×256 f32. Measured 110 GFLOPS release. The deleted F7 ≥ 80 GFLOPS AVX-512 peak claim is still out of scope (platform-specific).
 - contract: avx512-matmul-v1.yaml
   equation: scalar_equivalence
-  module_path: trueno::Matrix
-  function: matmul
-  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
-  status: pending
-  notes: SIMD↔scalar parity is an aprender-compute invariant, not re-tested here.
+  module_path: apr_cookbook::tests::throughput
+  function: matmul_matches_naive_reference
+  signature: 'cargo test --test throughput matmul_matches_naive_reference'
+  status: implemented
+  notes: Verifies trueno `matmul` on a 2×2 input matches the naive reference element-wise within 1e-4 tolerance. Acts as a regression tripwire for SIMD↔scalar parity.
 
 # ============================================================================
 # cli-parity-v1 — meta-contract (structural). Bound to Makefile target.
@@ -229,11 +229,11 @@ bindings:
 # ============================================================================
 - contract: lz4-decompression-v1.yaml
   equation: throughput
-  module_path: aprender::format::compression
-  function: decompress
-  signature: 'fn decompress(bytes: &[u8]) -> Result<Vec<u8>>'
-  status: pending
-  notes: LZ4 decompress path is in aprender-core; cookbook has no GB/s harness.
+  module_path: apr_cookbook::tests::throughput
+  function: lz4_decompress_throughput_above_100mbps
+  signature: 'cargo test --test throughput -- --nocapture'
+  status: implemented
+  notes: Conservative 100 MB/s floor via `lz4_flex::decompress_size_prepended` on a 1 MiB realistic-entropy payload. Measured 13.5 GB/s release / ~500 MB/s debug. The deleted F1 ≥ 3 GB/s peak claim is still out of scope.
 - contract: lz4-decompression-v1.yaml
   equation: compression_ratio
   module_path: aprender::format::compression
