@@ -1170,3 +1170,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-057
+  github_issue: null
+  item_type: task
+  title: Refresh all docs to 341 recipes + 341/341 demo-run baseline; pmat comply migrate 3.7.0 → 3.15.0
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:19:13Z
+  updated: 2026-04-23T08:19:21.422421156+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
