@@ -1266,3 +1266,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-063
+  github_issue: null
+  item_type: task
+  title: Mark unified gate continue-on-error so workflow-level CI badge reflects required-check state, not infra state
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T12:45:15Z
+  updated: 2026-04-23T12:45:19.508197042+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
