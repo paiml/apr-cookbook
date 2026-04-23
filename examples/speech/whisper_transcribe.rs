@@ -256,6 +256,41 @@ struct Segment {
     confidence: f32,
 }
 
+/// Word Error Rate — Levenshtein distance over tokens, normalized by reference length.
+///
+/// `WER = (substitutions + insertions + deletions) / max(reference_len, 1)`.
+/// The cookbook's transcribe pipeline is a simulated decoder, so `WER` is used here
+/// to validate the transcript-invariance properties we care about (identity, symmetry,
+/// format parity), not to claim anything about upstream Whisper accuracy.
+///
+/// # Contract
+/// Binds `whisper-wer-v1.yaml::wer`. Property `WerNonNegative` proven in
+/// `lean/ProvableContracts/Whisper/Wer.lean`.
+pub fn wer(hypothesis: &[&str], reference: &[&str]) -> f64 {
+    if reference.is_empty() {
+        return f64::from(u32::from(!hypothesis.is_empty()));
+    }
+    let (n, m) = (hypothesis.len(), reference.len());
+    let mut prev: Vec<usize> = (0..=m).collect();
+    let mut curr = vec![0usize; m + 1];
+    for i in 1..=n {
+        curr[0] = i;
+        for j in 1..=m {
+            let cost = usize::from(hypothesis[i - 1] != reference[j - 1]);
+            curr[j] = (prev[j] + 1) // deletion
+                .min(curr[j - 1] + 1) // insertion
+                .min(prev[j - 1] + cost); // substitution
+        }
+        std::mem::swap(&mut prev, &mut curr);
+    }
+    prev[m] as f64 / m as f64
+}
+
+/// Split text into whitespace-delimited words for WER computation.
+pub fn tokenize(text: &str) -> Vec<&str> {
+    text.split_whitespace().collect()
+}
+
 /// Generate synthetic audio for testing
 fn generate_test_audio(duration_seconds: f32, sample_rate: usize) -> Vec<f32> {
     let n_samples = (duration_seconds * sample_rate as f32) as usize;
@@ -485,5 +520,121 @@ mod tests {
     fn test_max_audio_length() {
         let audio = generate_test_audio(MAX_AUDIO_SECONDS as f32, SAMPLE_RATE);
         assert_eq!(audio.len(), SAMPLE_RATE * MAX_AUDIO_SECONDS);
+    }
+
+    // -------------------------------------------------------------------------
+    // whisper-wer-v1.yaml::wer — real Levenshtein-based WER
+    // -------------------------------------------------------------------------
+
+    #[test]
+    fn test_wer_identity() {
+        let words = ["hello", "world"];
+        assert_eq!(wer(&words, &words), 0.0);
+    }
+
+    #[test]
+    fn test_wer_empty_reference() {
+        assert_eq!(wer(&[], &[]), 0.0);
+        assert_eq!(wer(&["a"], &[]), 1.0);
+    }
+
+    #[test]
+    fn test_wer_single_substitution() {
+        let hyp = ["hello", "world"];
+        let refr = ["hello", "there"];
+        // 1 substitution over 2 reference words = 0.5
+        assert!((wer(&hyp, &refr) - 0.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn test_wer_insertion_and_deletion() {
+        let hyp = ["a", "b", "c"];
+        let refr = ["a", "c"];
+        // 1 insertion over 2 reference words = 0.5
+        assert!((wer(&hyp, &refr) - 0.5).abs() < 1e-9);
+    }
+
+    #[test]
+    fn test_wer_nonnegative_property() {
+        // Proven in lean/ProvableContracts/Whisper/Wer.lean::WerNonNegative
+        for (hyp, refr) in [
+            (vec!["a"], vec!["b"]),
+            (vec!["x", "y", "z"], vec!["x"]),
+            (vec![], vec!["only"]),
+        ] {
+            let result = wer(&hyp, &refr);
+            assert!(result >= 0.0, "wer should be non-negative, got {result}");
+        }
+    }
+
+    #[test]
+    fn test_transcribe_wer_baseline() {
+        // End-to-end: transcribe synthetic audio, compute WER against expected transcript.
+        // The simulated decoder always returns "Hello, world!" so WER against that
+        // reference must be 0.
+        let model = WhisperModel::new("parity-test", Quantization::Int8);
+        let audio = generate_test_audio(2.0, SAMPLE_RATE);
+        let result = model.transcribe(&audio);
+        let hyp_tokens = tokenize(&result.text);
+        let ref_tokens = ["Hello,", "world!"];
+        assert_eq!(wer(&hyp_tokens, &ref_tokens), 0.0);
+    }
+
+    // -------------------------------------------------------------------------
+    // whisper-wer-v1.yaml::format_parity — same weights → same transcript
+    // -------------------------------------------------------------------------
+
+    fn build_parity_bundle(compression: Compression, quantization: Quantization) -> Vec<u8> {
+        let encoder_weights = vec![0u8; 1024 * 768 * 4];
+        let decoder_weights = vec![0u8; 1024 * 768 * 4];
+        ModelBundleV2::new()
+            .with_name("whisper-parity")
+            .with_compression(compression)
+            .with_quantization(quantization)
+            .add_tensor("encoder.embed", vec![1024, 768], encoder_weights)
+            .add_tensor("decoder.output", vec![1024, 768], decoder_weights)
+            .build()
+    }
+
+    #[test]
+    fn test_format_parity_across_compression() {
+        // Same tensor bytes + different compression → identical transcript.
+        // Exercises the format_parity binding on the format dimension we actually
+        // control in-cookbook. Cross-format parity (GGUF/SafeTensors) is witnessed
+        // upstream in aprender's FORMAT_PARITY_REPORT.md.
+        let audio = generate_test_audio(1.5, SAMPLE_RATE);
+
+        let bundle_lz4 = build_parity_bundle(Compression::Lz4, Quantization::Int8);
+        let bundle_none = build_parity_bundle(Compression::None, Quantization::Int8);
+
+        let model_lz4 = WhisperModel::from_apr(&bundle_lz4).unwrap();
+        let model_none = WhisperModel::from_apr(&bundle_none).unwrap();
+
+        let out_lz4 = model_lz4.transcribe(&audio);
+        let out_none = model_none.transcribe(&audio);
+
+        assert_eq!(out_lz4.text, out_none.text);
+        assert_eq!(out_lz4.language, out_none.language);
+
+        let lz4_tokens = tokenize(&out_lz4.text);
+        let none_tokens = tokenize(&out_none.text);
+        assert_eq!(wer(&lz4_tokens, &none_tokens), 0.0);
+    }
+
+    #[test]
+    fn test_format_parity_across_quantization() {
+        // Same shape + different quantization → identical transcript (decoder is
+        // deterministic in the simulator).
+        let audio = generate_test_audio(1.0, SAMPLE_RATE);
+
+        let int8 = build_parity_bundle(Compression::Lz4, Quantization::Int8);
+        let fp32 = build_parity_bundle(Compression::Lz4, Quantization::FP32);
+
+        let out_int8 = WhisperModel::from_apr(&int8).unwrap().transcribe(&audio);
+        let out_fp32 = WhisperModel::from_apr(&fp32).unwrap().transcribe(&audio);
+
+        let a = tokenize(&out_int8.text);
+        let b = tokenize(&out_fp32.text);
+        assert_eq!(wer(&a, &b), 0.0);
     }
 }
