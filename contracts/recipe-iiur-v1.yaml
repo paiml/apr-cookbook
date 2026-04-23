@@ -93,7 +93,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.IsolationNoSideEffects"
       module: "ProvableContracts.Recipe.Iiur"
-      status: wip
+      status: proved
   - type: determinism
     property: "Idempotency — same output"
     formal: "run(recipe) = run(recipe) for all recipes"
@@ -102,7 +102,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.IdempotencySameOutput"
       module: "ProvableContracts.Recipe.Iiur"
-      status: wip
+      status: proved
   - type: invariant
     property: "Cleanup — no temp leaks"
     formal: "temp_dir does not exist after RecipeContext drops"
@@ -111,7 +111,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.CleanupNoTempLeaks"
       module: "ProvableContracts.Recipe.Iiur"
-      status: wip
+      status: proved
   - type: equivalence
     property: "Cross-platform reproducibility"
     formal: "output(linux) = output(macos) for all recipes"
@@ -120,7 +120,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.CrossPlatformReproducibility"
       module: "ProvableContracts.Recipe.Iiur"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-IIUR-001

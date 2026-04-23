@@ -108,7 +108,7 @@ proof_obligations:
     lean:
       theorem: "Theorems.DeterministicOutput"
       module: "ProvableContracts.Avx512.Matmul"
-      status: wip
+      status: proved
 
 falsification_tests:
   - id: FALSIFY-MM-001
