@@ -1302,11 +1302,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Migrate sovereign-ai-cookbook (recipes + stacks + jetson)'
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-04T20:32:12Z
-  updated: 2026-05-04T20:33:24.543460805+00:00
+  updated: 2026-05-04T20:53:45.096690028+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-100 (renumbered). Copy 14 sovereign YAMLs to examples/deployment-stacks/recipes/, 10 stacks to examples/deployment-stacks/stacks/ (with 09-qwen-coder→10-qwen-coder rename), jetson machine config to examples/machines/jetson/. Generate 14 Rust loader wrappers per iiur-conformance.md Strategy A. Add contracts/recipe-iiur-config-v1.yaml. Author Deployment Stacks book chapters.
@@ -1412,4 +1412,23 @@ roadmap:
   - centralize-cookbooks
   - archive
   - deferred
+  notes: null
+- id: PMAT-071
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE-DEBT: Pre-existing tui_log_tail E0716 + book chapter file refs'
+  status: planned
+  priority: low
+  assigned_to: null
+  created: 2026-05-04T20:52:59Z
+  updated: 2026-05-04T20:52:59Z
+  spec: null
+  acceptance_criteria:
+  - Discovered during PMAT-065. tui_log_tail.rs:194 has E0716 lifetime error (let binding scope). c-training and k-distillation book chapters reference example .rs files that are actually directories. mdbook html template missing 'github' font. Out of scope for centralize-cookbooks; track separately.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - debt
+  - pre-existing
   notes: null
