@@ -5,7 +5,11 @@
 <h1 align="center">apr-cookbook</h1>
 
 <p align="center">
-  <strong>Production Recipes for ML Model Deployment in Pure Rust</strong>
+  <strong>The umbrella cookbook for the PAIML sovereign AI stack — model bundling, data loading, deployment-as-recipe, and visualization, all in pure Rust.</strong>
+</p>
+
+<p align="center">
+  <em>v6.0.0 (2026-05-04) consolidates sovereign-ai-cookbook, alimentar examples, and presentar examples into this repository per <a href="docs/specifications/centralize-cookbooks.md">centralize-cookbooks</a>.</em>
 </p>
 
 <p align="center">
