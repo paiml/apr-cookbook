@@ -120,6 +120,8 @@ aprender-contracts = "0.31.2"
 # package `aprender-data`, lib name `alimentar` — use directly, no deprecation shim
 alimentar = { version = "0.31.2", package = "aprender-data", features = ["doctest"] }
 arrow = { version = "57", default-features = false, features = ["prettyprint", "ipc"] }
+# Note: serde_yaml moved to [dependencies] by PMAT-065 (validate_recipe in lib);
+# PMAT-067's visualization validator uses the same dep transitively.
 
 # ---------------------------------------------------------------------------
 # Local-development patch: point the four APR-MONO deps at a co-checked-out
@@ -1687,3 +1689,9 @@ path = "examples/data-loading/transforms_pipeline.rs"
 [[example]]
 name = "tui_viewer"
 path = "examples/data-loading/tui_viewer.rs"
+
+# --- Visualization (PMAT-067 centralize-cookbooks, ex-presentar) ---
+
+[[example]]
+name = "load_visualization"
+path = "examples/visualization/load_visualization.rs"
