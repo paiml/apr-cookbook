@@ -32,6 +32,7 @@
 pub mod aprender_integration;
 pub mod bundle;
 pub mod convert;
+pub mod deployment_stack;
 pub mod error;
 pub mod explainable;
 pub mod recipe;
@@ -61,6 +62,7 @@ pub mod prelude {
     pub use crate::convert::{
         AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,
     };
+    pub use crate::deployment_stack::{validate_recipe, ParsedRecipe};
     pub use crate::error::{CookbookError, Result};
     pub use crate::recipe::{
         generate_model_payload, generate_test_data, hash_name_to_seed, MetricValue, RecipeContext,

@@ -74,6 +74,8 @@ clap = { version = "4", features = ["derive"] }
 # Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# YAML parsing for deployment-stack recipe wrappers (PMAT-065)
+serde_yaml = "0.9"
 
 # Error handling
 thiserror = "1"
@@ -1535,3 +1537,61 @@ path = "examples/cli/validate_fix_suggestions.rs"
 [[example]]
 name = "validate_batch"
 path = "examples/cli/validate_batch.rs"
+
+# --- Deployment Stacks (PMAT-065 centralize-cookbooks, ex-sovereign-ai-cookbook) ---
+
+[[example]]
+name = "alimentar_ingest"
+path = "examples/deployment-stacks/alimentar_ingest.rs"
+
+[[example]]
+name = "apr_inference_server"
+path = "examples/deployment-stacks/apr_inference_server.rs"
+
+[[example]]
+name = "batuta_agent"
+path = "examples/deployment-stacks/batuta_agent.rs"
+
+[[example]]
+name = "entrenar_train"
+path = "examples/deployment-stacks/entrenar_train.rs"
+
+[[example]]
+name = "jetson_edge_base"
+path = "examples/deployment-stacks/jetson_edge_base.rs"
+
+[[example]]
+name = "pacha_registry"
+path = "examples/deployment-stacks/pacha_registry.rs"
+
+[[example]]
+name = "pepita_sandbox"
+path = "examples/deployment-stacks/pepita_sandbox.rs"
+
+[[example]]
+name = "realizar_serve"
+path = "examples/deployment-stacks/realizar_serve.rs"
+
+[[example]]
+name = "renacer_observability"
+path = "examples/deployment-stacks/renacer_observability.rs"
+
+[[example]]
+name = "repartir_worker"
+path = "examples/deployment-stacks/repartir_worker.rs"
+
+[[example]]
+name = "sovereign_ai_stack"
+path = "examples/deployment-stacks/sovereign_ai_stack.rs"
+
+[[example]]
+name = "trueno_db_analytics"
+path = "examples/deployment-stacks/trueno_db_analytics.rs"
+
+[[example]]
+name = "trueno_rag_pipeline"
+path = "examples/deployment-stacks/trueno_rag_pipeline.rs"
+
+[[example]]
+name = "whisper_apr_asr"
+path = "examples/deployment-stacks/whisper_apr_asr.rs"

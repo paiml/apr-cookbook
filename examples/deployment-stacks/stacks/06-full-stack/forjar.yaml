@@ -1,0 +1,280 @@
+version: "1.0"
+name: sovereign-full-stack
+description: |
+  Complete sovereign AI lab.
+  Composes all PAIML stack components: inference, training, RAG,
+  speech recognition, autonomous agent, distributed workers,
+  observability, and registry.
+
+params:
+  model_path: "/opt/models/llama-2-7b.gguf"
+  dataset_path: "/opt/datasets/training-data"
+
+machines:
+  gpu-box:
+    hostname: gpu-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, inference, training]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-full-gpu
+      ephemeral: true
+      privileged: true
+      init: true
+
+  rag-box:
+    hostname: rag-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [rag, speech]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-full-rag
+      ephemeral: true
+      privileged: true
+      init: true
+
+  worker-box:
+    hostname: worker-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [worker]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-full-worker
+      ephemeral: true
+      privileged: true
+      init: true
+
+  monitor-box:
+    hostname: monitor-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [observability, registry]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-full-monitor
+      ephemeral: true
+      privileged: true
+      init: true
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+resources:
+  # Layer 1: Observability (deploy first — monitors everything)
+  observability:
+    type: recipe
+    machine: monitor-box
+    recipe: renacer-observability
+    inputs:
+      otlp_endpoint: "http://localhost:4317"
+      grafana_port: 3000
+      jaeger_port: 16686
+      retention_days: 7
+      user: renacer
+
+  # Layer 2: Model/data registry (after observability to serialize cargo installs on monitor-box)
+  registry:
+    type: recipe
+    machine: monitor-box
+    recipe: pacha-registry
+    depends_on: [observability]
+    inputs:
+      port: 8070
+      storage_dir: /opt/pacha/storage
+      max_storage_gb: 100
+      user: pacha
+
+  # Layer 3: Distributed workers
+  worker:
+    type: recipe
+    machine: worker-box
+    recipe: repartir-worker
+    inputs:
+      listen_port: 9000
+      tls_cert: certs/worker-cert.pem
+      tls_key: certs/worker-key.pem
+      max_tasks: 4
+      backends: cpu
+      user: repartir
+
+  # Layer 4: Vector database + RAG
+  vector-db:
+    type: recipe
+    machine: rag-box
+    recipe: trueno-db-analytics
+    inputs:
+      port: 5433
+      data_dir: /opt/trueno-db/data
+      max_memory_mb: 2048
+      user: trueno
+
+  rag-pipeline:
+    type: recipe
+    machine: rag-box
+    recipe: trueno-rag-pipeline
+    depends_on: [vector-db]
+    inputs:
+      db_port: 5433
+      rag_port: 8090
+      embedding_dim: 384
+      chunk_size: 512
+      user: trueno
+
+  # Layer 5: Speech recognition (after rag-pipeline to serialize cargo installs on rag-box)
+  asr:
+    type: recipe
+    machine: rag-box
+    recipe: whisper-apr-asr
+    depends_on: [rag-pipeline]
+    inputs:
+      model_size: base
+      port: 8095
+      language: en
+      beam_size: 5
+      gpu_device: 0
+      user: whisper
+
+  # Layer 6: Inference server
+  inference:
+    type: recipe
+    machine: gpu-box
+    recipe: realizar-serve
+    inputs:
+      model_path: "{{params.model_path}}"
+      model_format: gguf
+      quantization: q4_k_m
+      port: 8080
+      workers: 1
+      gpu_device: 0
+      user: realizar
+
+  # Layer 7: Autonomous agent (after inference to serialize cargo installs on gpu-box)
+  agent:
+    type: recipe
+    machine: gpu-box
+    recipe: batuta-agent
+    depends_on: [inference]
+    inputs:
+      port: 8100
+      manifest_name: sovereign-agent
+      model_path: "{{params.model_path}}"
+      max_iterations: 20
+      max_tool_calls: 50
+      capabilities: '"Rag", "Memory"'
+      privacy: Sovereign
+      user: batuta
+
+  # Layer 8: Training pipeline (after agent to serialize cargo installs on gpu-box)
+  training:
+    type: recipe
+    machine: gpu-box
+    recipe: entrenar-train
+    depends_on: [agent]
+    inputs:
+      dataset_path: "{{params.dataset_path}}"
+      output_dir: /opt/entrenar/output
+      learning_rate: "2e-5"
+      epochs: 3
+      batch_size: 8
+      lora_rank: 16
+      gpu_device: 0
+      user: entrenar
+
+  # Layer 9: Coordination
+  fleet-inventory:
+    type: file
+    machine: monitor-box
+    path: /opt/forjar-stack/fleet.yaml
+    content: |
+      # Sovereign AI Stack — Fleet Inventory
+      stack:
+        inference:
+          host: gpu-box
+          port: 8080
+          model: {{params.model_path}}
+        training:
+          host: gpu-box
+          dataset: {{params.dataset_path}}
+        rag:
+          host: rag-box
+          db_port: 5433
+          rag_port: 8090
+        speech:
+          host: rag-box
+          port: 8095
+        workers:
+          - host: worker-box
+            port: 9000
+        observability:
+          host: monitor-box
+          grafana: 3000
+          jaeger: 16686
+        agent:
+          host: gpu-box
+          port: 8100
+        registry:
+          host: monitor-box
+          port: 8070
+    owner: root
+    mode: "0644"
+    depends_on: []
+    tags: [config]
+
+  health-script:
+    type: file
+    machine: monitor-box
+    path: /opt/forjar-stack/health-check.sh
+    content: |
+      #!/bin/bash
+      set -euo pipefail
+      echo "=== Sovereign AI Stack Health ==="
+      echo "--- Inference (gpu-box:8080) ---"
+      curl -sf http://gpu-box:8080/health && echo " OK" || echo " FAIL"
+      echo "--- RAG (rag-box:8090) ---"
+      curl -sf http://rag-box:8090/health && echo " OK" || echo " FAIL"
+      echo "--- Vector DB (rag-box:5433) ---"
+      curl -sf http://rag-box:5433/health && echo " OK" || echo " FAIL"
+      echo "--- ASR (rag-box:8095) ---"
+      curl -sf http://rag-box:8095/health && echo " OK" || echo " FAIL"
+      echo "--- Agent (gpu-box:8100) ---"
+      curl -sf http://gpu-box:8100/health && echo " OK" || echo " FAIL"
+      echo "--- Worker (worker-box:9000) ---"
+      curl -sf http://worker-box:9000/status && echo " OK" || echo " FAIL"
+      echo "--- Registry (localhost:8070) ---"
+      curl -sf http://localhost:8070/health && echo " OK" || echo " FAIL"
+      echo "--- Grafana (localhost:3000) ---"
+      curl -sf http://localhost:3000/api/health && echo " OK" || echo " FAIL"
+    owner: root
+    mode: "0755"
+    depends_on: [fleet-inventory]
+    tags: [config, scripts]
+
+  health-cron:
+    type: cron
+    machine: monitor-box
+    name: "sovereign-stack-health"
+    schedule: "*/15 * * * *"
+    command: "/opt/forjar-stack/health-check.sh >> /opt/forjar-stack/health.log 2>&1"
+    owner: root
+    depends_on: [health-script]
+    tags: [monitoring]
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true
+  parallel_machines: true

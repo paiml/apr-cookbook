@@ -1,0 +1,205 @@
+# Recipe: batuta-agent — Autonomous agent runtime
+#
+# Deploys batuta agent as a persistent daemon:
+#   1. Service user + workspace directories
+#   2. batuta binary (cargo install --features agents)
+#   3. Agent manifest (TOML), systemd unit
+#   4. Firewall rule + health check
+#
+# The agent runs a Perceive → Reason → Act loop with configurable
+# capabilities (RAG, Memory, Compute, Shell) and connects to a
+# local model via realizar or a remote API endpoint.
+#
+# Inputs:
+#   port (int, default: 8100) — agent API port
+#   manifest_name (string, default: agent) — TOML manifest name
+#   model_path (string) — path to local GGUF/SafeTensors model
+#   max_iterations (int, default: 20) — loop iteration budget (Jidoka)
+#   max_tool_calls (int, default: 50) — total tool call budget
+#   max_tokens (int, default: 4096) — completion max tokens
+#   temperature (string, default: "0.3") — sampling temperature
+#   capabilities (string, default: "Rag, Memory") — granted capabilities
+#   privacy (enum, default: Sovereign) — privacy tier
+#   user (string, default: batuta) — service account
+
+recipe:
+  name: batuta-agent
+  version: "1.0"
+  description: "Batuta autonomous agent — Perceive/Reason/Act loop with Jidoka safety"
+  inputs:
+    port:
+      type: int
+      default: 8100
+      min: 1
+      max: 65535
+    manifest_name:
+      type: string
+      default: agent
+      description: "Name for the agent manifest file (without .toml)"
+    model_path:
+      type: string
+      description: "Path to local GGUF/SafeTensors model file"
+    max_iterations:
+      type: int
+      default: 20
+      min: 1
+      max: 1000
+      description: "Loop iteration budget (Jidoka termination)"
+    max_tool_calls:
+      type: int
+      default: 50
+      min: 1
+      max: 10000
+    max_tokens:
+      type: int
+      default: 4096
+      min: 256
+      max: 131072
+    temperature:
+      type: string
+      default: "0.3"
+      description: "Sampling temperature [0.0, 2.0]"
+    capabilities:
+      type: string
+      default: "Rag, Memory"
+      description: "Comma-separated capabilities: Rag, Memory, Compute, Shell, Browser"
+    privacy:
+      type: enum
+      choices: [Sovereign, Private, Standard]
+      default: Sovereign
+    user:
+      type: string
+      default: batuta
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/batuta
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/batuta
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  manifests-dir:
+    type: file
+    state: directory
+    path: /opt/batuta/manifests
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  memory-dir:
+    type: file
+    state: directory
+    path: /opt/batuta/memory
+    owner: "{{inputs.user}}"
+    mode: "0700"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  logs-dir:
+    type: file
+    state: directory
+    path: /opt/batuta/logs
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  batuta-pkg:
+    type: package
+    provider: cargo
+    packages: ["batuta[agents]"]
+    depends_on: []
+    tags: [packages]
+
+  manifest:
+    type: file
+    path: /opt/batuta/manifests/{{inputs.manifest_name}}.toml
+    content: |
+      name = "{{inputs.manifest_name}}"
+      version = "0.1.0"
+      description = "Sovereign agent deployed via forjar"
+
+      [model]
+      model_path = "{{inputs.model_path}}"
+      max_tokens = {{inputs.max_tokens}}
+      temperature = {{inputs.temperature}}
+      system_prompt = "You are a sovereign AI agent. Use tools when needed."
+
+      [resources]
+      max_iterations = {{inputs.max_iterations}}
+      max_tool_calls = {{inputs.max_tool_calls}}
+      max_cost_usd = 0.0
+
+      capabilities = [{{inputs.capabilities}}]
+      privacy = "{{inputs.privacy}}"
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [manifests-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/batuta-agent.service
+    content: |
+      [Unit]
+      Description=Batuta Autonomous Agent
+      After=network.target realizar.service
+      Wants=realizar.service
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/batuta agent run \
+        --manifest /opt/batuta/manifests/{{inputs.manifest_name}}.toml \
+        --daemon
+      Restart=on-failure
+      RestartSec=10
+      Environment=BATUTA_LOG_DIR=/opt/batuta/logs
+      Environment=BATUTA_MEMORY_DIR=/opt/batuta/memory
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [batuta-pkg, manifest]
+    tags: [config, systemd]
+
+  batuta-service:
+    type: service
+    name: batuta-agent
+    state: running
+    enabled: true
+    restart_on: [systemd-unit, manifest]
+    depends_on: [systemd-unit]
+    tags: [services]
+
+  firewall:
+    type: network
+    port: "{{inputs.port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [batuta-service]
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "batuta-agent-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.port}}/health || systemctl restart batuta-agent"
+    user: root
+    depends_on: [batuta-service]
+    tags: [monitoring]

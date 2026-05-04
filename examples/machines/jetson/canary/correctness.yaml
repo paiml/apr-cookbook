@@ -1,0 +1,51 @@
+# Correctness test suite for Jetson canary
+# Used by: probador llm test --config correctness.yaml
+# Tests the compiled apr binary serving on Jetson via OpenAI-compatible API
+tests:
+  - name: basic_math
+    messages:
+      - role: user
+        content: "What is 7 * 8? Reply with just the number."
+    expect_contains: "56"
+    max_tokens: 32
+    temperature: 0.0
+
+  - name: python_fibonacci
+    messages:
+      - role: user
+        content: "Write a Python function that returns the nth fibonacci number."
+    expect_contains: "def fib"
+    max_tokens: 256
+    temperature: 0.0
+
+  - name: rust_hello
+    messages:
+      - role: user
+        content: "Write a Rust program that prints hello world."
+    expect_contains: "fn main"
+    max_tokens: 128
+    temperature: 0.0
+
+  - name: json_output
+    messages:
+      - role: user
+        content: "Return a JSON object with keys 'name' and 'age'. Name is Alice, age is 30."
+    expect_pattern: '"name".*"Alice"'
+    max_tokens: 128
+    temperature: 0.0
+
+  - name: code_explanation
+    messages:
+      - role: user
+        content: "What does `vec![1,2,3].iter().map(|x| x*2).collect::<Vec<_>>()` do in Rust?"
+    expect_pattern: "(?i)(double|multiply|2)"
+    max_tokens: 256
+    temperature: 0.0
+
+  - name: sql_query
+    messages:
+      - role: user
+        content: "Write a SQL query to find the top 5 users by order count."
+    expect_pattern: "(?i)SELECT.*ORDER BY.*LIMIT"
+    max_tokens: 256
+    temperature: 0.0

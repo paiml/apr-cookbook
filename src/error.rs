@@ -46,6 +46,16 @@ pub enum CookbookError {
     /// Underlying aprender error.
     #[error("aprender error: {0}")]
     Aprender(String),
+
+    /// Generic recipe-validation error (used by deployment-stack wrappers).
+    #[error("validation error: {0}")]
+    Validation(String),
+}
+
+impl From<serde_yaml::Error> for CookbookError {
+    fn from(err: serde_yaml::Error) -> Self {
+        Self::Serialization(err.to_string())
+    }
 }
 
 impl CookbookError {

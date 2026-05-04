@@ -314,6 +314,41 @@
 
 ---
 
+# Deployment Stacks
+
+- [Overview](./deployment-stacks/overview.md)
+- [Recipes](./deployment-stacks/recipes/index.md)
+  - [alimentar-ingest](./deployment-stacks/recipes/alimentar-ingest.md)
+  - [apr-inference-server](./deployment-stacks/recipes/apr-inference-server.md)
+  - [batuta-agent](./deployment-stacks/recipes/batuta-agent.md)
+  - [entrenar-train](./deployment-stacks/recipes/entrenar-train.md)
+  - [jetson-edge-base](./deployment-stacks/recipes/jetson-edge-base.md)
+  - [pacha-registry](./deployment-stacks/recipes/pacha-registry.md)
+  - [pepita-sandbox](./deployment-stacks/recipes/pepita-sandbox.md)
+  - [realizar-serve](./deployment-stacks/recipes/realizar-serve.md)
+  - [renacer-observability](./deployment-stacks/recipes/renacer-observability.md)
+  - [repartir-worker](./deployment-stacks/recipes/repartir-worker.md)
+  - [sovereign-ai-stack](./deployment-stacks/recipes/sovereign-ai-stack.md)
+  - [trueno-db-analytics](./deployment-stacks/recipes/trueno-db-analytics.md)
+  - [trueno-rag-pipeline](./deployment-stacks/recipes/trueno-rag-pipeline.md)
+  - [whisper-apr-asr](./deployment-stacks/recipes/whisper-apr-asr.md)
+- [Stacks](./deployment-stacks/stacks/index.md)
+  - [01 Inference](./deployment-stacks/stacks/01-inference.md)
+  - [02 Training](./deployment-stacks/stacks/02-training.md)
+  - [03 RAG](./deployment-stacks/stacks/03-rag.md)
+  - [04 Speech](./deployment-stacks/stacks/04-speech.md)
+  - [05 Distributed Inference](./deployment-stacks/stacks/05-distributed-inference.md)
+  - [06 Full Stack](./deployment-stacks/stacks/06-full-stack.md)
+  - [07 Data Pipeline](./deployment-stacks/stacks/07-data-pipeline.md)
+  - [08 Observability](./deployment-stacks/stacks/08-observability.md)
+  - [09 Edge Inference](./deployment-stacks/stacks/09-edge-inference.md)
+  - [10 Qwen-Coder](./deployment-stacks/stacks/10-qwen-coder.md)
+- [Machines](./deployment-stacks/machines/index.md)
+  - [Jetson](./deployment-stacks/machines/jetson.md)
+- [forjar Integration](./deployment-stacks/forjar-integration.md)
+
+---
+
 # Reference
 
 - [API Documentation](./reference/api.md)

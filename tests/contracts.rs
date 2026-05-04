@@ -32,6 +32,7 @@ const CONTRACT_FILES: &[&str] = &[
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
+    "recipe-iiur-config-v1.yaml",
     "recipe-iiur-v1.yaml",
     "whisper-wer-v1.yaml",
 ];
