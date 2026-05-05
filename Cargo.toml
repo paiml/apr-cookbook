@@ -2025,3 +2025,41 @@ path = "examples/lint/shared_cache_lint_dedup_audit.rs"
 [[example]]
 name = "shared_cache_lint_permission_matrix"
 path = "examples/lint/shared_cache_lint_permission_matrix.rs"
+
+# --- ollama-tools / typical-p / imatrix lint coverage (PMAT-091 expand-cookbooks followup) ---
+
+[[example]]
+name = "ollama_tools_lint_happy"
+path = "examples/lint/ollama_tools_lint_happy.rs"
+
+[[example]]
+name = "ollama_tools_lint_allowlist_gate"
+path = "examples/lint/ollama_tools_lint_allowlist_gate.rs"
+
+[[example]]
+name = "ollama_tools_lint_streaming_ndjson"
+path = "examples/lint/ollama_tools_lint_streaming_ndjson.rs"
+
+[[example]]
+name = "typical_p_lint_happy"
+path = "examples/lint/typical_p_lint_happy.rs"
+
+[[example]]
+name = "typical_p_lint_entropy_truncation"
+path = "examples/lint/typical_p_lint_entropy_truncation.rs"
+
+[[example]]
+name = "typical_p_lint_min_keep_floor"
+path = "examples/lint/typical_p_lint_min_keep_floor.rs"
+
+[[example]]
+name = "imatrix_lint_happy"
+path = "examples/lint/imatrix_lint_happy.rs"
+
+[[example]]
+name = "imatrix_lint_nan_detection"
+path = "examples/lint/imatrix_lint_nan_detection.rs"
+
+[[example]]
+name = "imatrix_lint_corpus_entropy"
+path = "examples/lint/imatrix_lint_corpus_entropy.rs"
