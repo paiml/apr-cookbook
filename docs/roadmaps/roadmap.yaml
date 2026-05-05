@@ -1550,11 +1550,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: MCP M5 transports + notifications'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:33.989765857+00:00
   spec: null
   acceptance_criteria:
   - '4 recipes: mcp_sse_server, mcp_websocket_server, mcp_notification_progress, mcp_byte_parity_pmcp.'
