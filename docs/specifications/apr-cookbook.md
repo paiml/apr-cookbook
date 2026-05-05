@@ -1,11 +1,13 @@
 # APR Cookbook Specification
 
-**Version**: 6.0.0
+**Version**: 6.1.0
 **Status**: ACTIVE
 **MSRV**: 1.89
 **Date**: 2026-05-05
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
 **Sovereign Stack**: APR-MONO v0.31.2 ([github.com/paiml/aprender](https://github.com/paiml/aprender))
+
+**v6.1.0 (2026-05-05)**: Closes the **expand-cookbooks initiative** (spec: [`expand-cookbooks.md`](expand-cookbooks.md)). Adds **44 recipes** across 6 new categories (`code/`, `tsp/`, `shell/`, `monte-carlo/`, `cgp/`, `contracts-macros/`) and 8 extended categories (`cli/`, `serve/`, `mcp/`, `analysis/`, `acceleration/`, `bundling/`, `conversion/`, `distillation/`). Closes the gap between the cookbook and aprender 0.31.0..0.31.2 (Unreleased): Claude Code parity (`apr code`), GPU/CPU oracle bisection (the silent-GPU-gibberish canary), apr publish end-to-end, apr serve anthropic (Claude Messages API drop-in), MCP M5 transports (SSE/WebSocket/notifications), and the 6 published sister crates (`aprender-{mcp,tsp,shell,monte-carlo,cgp,contracts-macros}` v0.31.2) each with ≥3 recipes. Cookbook now at 420 recipes across 34 categories.
 
 **v5.1.0 (2026-05-05)**: Add **SHIP-TWO-001 fine-tune-from-init workflow** cross-reference (new §"SHIP-TWO-001 Workflow" section below). The aprender §50.4 cascade landed `apr pretrain --init <PATH>.apr` end-to-end on 2026-05-05 (PRs #1471-#1494, post-INTEGRATION-COMPLETE per aprender SPEC-SHIP-TWO-001 §53). Companion recipes for fine-tuning from public Qwen2.5-Coder-0.5B-Instruct via `apr tokenize import-hf` + `apr tokenize encode-corpus` + `apr pretrain --init` are tracked here as the operator-facing cookbook surface for the SHIP-TWO-001 spec.
 
