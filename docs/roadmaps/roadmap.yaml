@@ -1432,3 +1432,307 @@ roadmap:
   - debt
   - pre-existing
   notes: null
+- id: PMAT-072
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Author expand-cookbooks spec (master + 5 component files)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T13:26:37Z
+  updated: 2026-05-05T13:26:37Z
+  spec: null
+  acceptance_criteria:
+  - 'Spec for closing aprender-0.31.x coverage gap: 44 new recipes across 6 new categories + 8 extended categories. PMAT-073..086 to be created from this spec. See docs/specifications/expand-cookbooks.md.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - spec
+  notes: null
+- id: PMAT-073
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Cargo.toml + 6 new category scaffolding'
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:12:47.147989707+00:00
+  spec: null
+  acceptance_criteria:
+  - Add 6 sister-crate dev-deps + 6 new examples/ subdirs + SUMMARY/recipe-catalog stubs. Per docs/specifications/expand-cookbooks/tickets.md PMAT-072 (renumbered to next available).
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - scaffold
+  notes: null
+- id: PMAT-074
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr code (Claude Code parity) recipes'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '7 recipes for apr-code-parity-v1.yaml: mcp-client-register, slash-command, hook-session-start, subagent-spawn, custom-agent-discovery, skill-discovery, worktree+permission. Per recipe-catalog.md code/ section.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-075
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: GPU/CPU oracle bisection recipes'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: cli_trace_save_tensor_layer0, cli_diff_values_aprt_stage, analysis_cpu_vs_gpu_parity_gate. Per gap-inventory.md Tier 1 1.1.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-076
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr publish end-to-end recipes'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes for publish-manifest-v1: publish_manifest_full, validate_manifest_live_safetensors_dtype, parent_chain. Per gap-inventory.md Tier 1 1.3.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-077
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr serve anthropic + serve plan hf://'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '2 recipes: serve_anthropic_messages_api_drop_in (claude-proxy), serve_plan_hf_dryrun_no_weights.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-078
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: MCP M5 transports + notifications'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '4 recipes: mcp_sse_server, mcp_websocket_server, mcp_notification_progress, mcp_byte_parity_pmcp.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-079
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-mcp embedded recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes per subcrate-coverage.md: embedded_server_minimal, embedded_register_custom_tool, embedded_byte_parity_pmcp.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-080
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-tsp recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: tsp_personalized_route_apr, tsp_local_2opt_optimization, tsp_train_personalized_apr_model.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-081
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-shell recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: shell_history_to_apr_corpus, shell_completion_train_local, shell_completion_serve_inline.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-082
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-monte-carlo recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: mc_stock_price_simulation_gbm, mc_business_revenue_forecast, mc_value_at_risk_historical_vs_parametric.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-083
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-cgp recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: cgp_unified_kernel_profile, cgp_perf_regression_gate_ci, cgp_cross_backend_comparison_report.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-084
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-contracts-macros recipes'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: contracts_macros_attribute_basic, compile_time_precondition, yaml_codegen_roundtrip.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-085
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Tier 3 perf bench recipes'
+  status: planned
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '5 recipes: moe_rayon_dispatch_bench, mmap_per_tensor_diff_bench, bundle_streaming_q4k_large, conversion_gguf_legacy_quant_fallback, inference_qwen3_moe_numerical_parity.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - perf
+  notes: null
+- id: PMAT-086
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Tier 4 authoring patterns + distill against contract'
+  status: planned
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - '4 recipes: contract_algorithm_binding_pattern, pv_check_parity_authoring, json_schema_draft7_meta_validation, distill_against_contract_v1.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - authoring
+  notes: null
+- id: PMAT-087
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Bump cookbook spec to v6.1.0 + tag'
+  status: planned
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:11:26Z
+  spec: null
+  acceptance_criteria:
+  - Bump apr-cookbook.md 6.0.0->6.1.0; update tech stack diagram with 6 new categories + sister crates; README umbrella scope refresh; tag v6.1.0. Closes expand-cookbooks initiative.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - spec
+  notes: null

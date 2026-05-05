@@ -1704,3 +1704,17 @@ path = "examples/data-loading/tui_viewer.rs"
 [[example]]
 name = "load_visualization"
 path = "examples/visualization/load_visualization.rs"
+
+# --- aprender-mcp embedded recipes (PMAT-079 expand-cookbooks) ---
+
+[[example]]
+name = "mcp_embedded_initialize_handshake"
+path = "examples/mcp/mcp_embedded_initialize_handshake.rs"
+
+[[example]]
+name = "mcp_embedded_tools_list_discovery"
+path = "examples/mcp/mcp_embedded_tools_list_discovery.rs"
+
+[[example]]
+name = "mcp_embedded_protocol_invariants"
+path = "examples/mcp/mcp_embedded_protocol_invariants.rs"
