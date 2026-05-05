@@ -1645,11 +1645,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: aprender-cgp recipes'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:43.145580978+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes: cgp_unified_kernel_profile, cgp_perf_regression_gate_ci, cgp_cross_backend_comparison_report.'
