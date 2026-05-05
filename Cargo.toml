@@ -98,6 +98,8 @@ blake3 = "1"
 lz4_flex = "0.11.3"
 zstd = "0.13.3"
 ed25519-dalek = "2.1.1"
+# Rayon for the MoE dispatch parallelism bench (PMAT-085)
+rayon = "1.10"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
@@ -1870,3 +1872,42 @@ path = "examples/mcp/mcp_notification_progress_token.rs"
 [[example]]
 name = "mcp_byte_parity_dispatcher_swap"
 path = "examples/mcp/mcp_byte_parity_dispatcher_swap.rs"
+# --- Tier 3 perf benches (PMAT-085 expand-cookbooks) ---
+
+[[example]]
+name = "acceleration_moe_rayon_dispatch_bench"
+path = "examples/acceleration/acceleration_moe_rayon_dispatch_bench.rs"
+
+[[example]]
+name = "acceleration_mmap_per_tensor_diff_bench"
+path = "examples/acceleration/acceleration_mmap_per_tensor_diff_bench.rs"
+
+[[example]]
+name = "bundle_streaming_q4k_large_model"
+path = "examples/bundling/bundle_streaming_q4k_large_model.rs"
+
+[[example]]
+name = "conversion_gguf_legacy_quant_fallback"
+path = "examples/conversion/conversion_gguf_legacy_quant_fallback.rs"
+
+[[example]]
+name = "inference_qwen3_moe_numerical_parity_smoke"
+path = "examples/inference/inference_qwen3_moe_numerical_parity_smoke.rs"
+
+# --- Tier 4 authoring patterns + distill (PMAT-086 expand-cookbooks) ---
+
+[[example]]
+name = "analysis_contract_algorithm_binding_pattern"
+path = "examples/analysis/analysis_contract_algorithm_binding_pattern.rs"
+
+[[example]]
+name = "analysis_pv_check_parity_authoring"
+path = "examples/analysis/analysis_pv_check_parity_authoring.rs"
+
+[[example]]
+name = "analysis_json_schema_draft7_meta_validation"
+path = "examples/analysis/analysis_json_schema_draft7_meta_validation.rs"
+
+[[example]]
+name = "distill_against_contract_v1"
+path = "examples/distillation/distill_against_contract_v1.rs"
