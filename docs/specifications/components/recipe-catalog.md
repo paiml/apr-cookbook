@@ -276,3 +276,85 @@ Per [centralize-cookbooks/iiur-conformance.md](../centralize-cookbooks/iiur-conf
 - **D (arXiv citation)** — EXTENDED. Every new recipe header MUST cite. Gaps marked `Citation: N/A — see PMAT-066/067`.
 - **E (Docs contract coverage)** — EXTENDED. Book chapters under `data-loading/` and `visualization/` count toward the docs ratio.
 - **F (Variant depth)** — CARVED OUT. Does not apply to deployment-stacks (one config per service) or machines (one config per platform). Applies to data-loading and visualization at threshold ≥1.
+
+## Expand-Cookbooks Categories (v6.1, 2026-05-05)
+
+Six new categories and 8 extended categories added by [expand-cookbooks](../expand-cookbooks.md) PMAT-073..087. 44 new recipes / 167 new tests across the initiative; full per-recipe catalog in [expand-cookbooks/recipe-catalog.md](../expand-cookbooks/recipe-catalog.md).
+
+### Category: code (apr code agentic surface, PMAT-074)
+
+| # | Recipe | Parity row |
+|---|--------|------------|
+| C.1 | `code_mcp_client_config` | PMAT-CODE-MCP-CLIENT-001 |
+| C.2 | `code_slash_command_extension` | PMAT-CODE-SLASH-PARITY-001 |
+| C.3 | `code_hook_session_start` | PMAT-CODE-HOOKS-001 |
+| C.4 | `code_subagent_spawn_payload` | PMAT-CODE-SPAWN-PARITY-001 |
+| C.5 | `code_custom_agent_definition` | PMAT-CODE-CUSTOM-AGENTS-001 |
+| C.6 | `code_skill_discovery` | PMAT-CODE-SKILLS-001 |
+| C.7 | `code_worktree_isolation_permission_mode` | PMAT-CODE-WORKTREE-001 + PMAT-CODE-PERMISSIONS-001 |
+
+### Category: tsp (aprender-tsp, PMAT-080)
+
+| # | Recipe |
+|---|--------|
+| TSP.1 | `tsp_solve_with_tabu` |
+| TSP.2 | `tsp_distance_matrix_explicit` |
+| TSP.3 | `tsp_compare_tabu_vs_genetic` |
+
+### Category: shell (aprender-shell, PMAT-081)
+
+| # | Recipe |
+|---|--------|
+| SH.1 | `shell_history_parse_zsh` |
+| SH.2 | `shell_corpus_from_string` |
+| SH.3 | `shell_trie_prefix_completion` |
+
+### Category: monte-carlo (aprender-monte-carlo, PMAT-082)
+
+| # | Recipe |
+|---|--------|
+| MC.1 | `mc_stock_price_simulation_gbm` |
+| MC.2 | `mc_business_revenue_forecast` |
+| MC.3 | `mc_value_at_risk_historical_vs_parametric` |
+
+### Category: cgp (aprender-cgp, PMAT-083)
+
+| # | Recipe |
+|---|--------|
+| CGP.1 | `cgp_regression_detector_baseline_vs_current` |
+| CGP.2 | `cgp_roofline_classify_kernel` |
+| CGP.3 | `cgp_roofline_ridge_point_per_precision` |
+
+### Category: contracts-macros (aprender-contracts-macros, PMAT-084)
+
+| # | Recipe |
+|---|--------|
+| CM.1 | `contracts_macros_attribute_basic` |
+| CM.2 | `contracts_macros_env_key_convention` |
+| CM.3 | `contracts_macros_runtime_validator_bridge` |
+
+### Extended categories — Tier 1 + Tier 3 + Tier 4 additions
+
+| Category | New recipes | Tickets |
+|----------|-------------|---------|
+| `cli/` | `cli_trace_save_tensor_layer0`, `cli_diff_values_aprt_stage`, `cli_publish_manifest_full`, `cli_validate_manifest_safetensors_dtype`, `cli_publish_parent_chain_termination` | PMAT-075 + PMAT-076 |
+| `serve/` | `serve_anthropic_messages_api_drop_in`, `serve_plan_hf_dryrun_no_weights` | PMAT-077 |
+| `mcp/` | `mcp_embedded_*` (3), `mcp_sse_event_envelope`, `mcp_websocket_frame_envelope`, `mcp_notification_progress_token`, `mcp_byte_parity_dispatcher_swap` | PMAT-078 + PMAT-079 |
+| `analysis/` | `analysis_cpu_vs_gpu_parity_gate`, `analysis_contract_algorithm_binding_pattern`, `analysis_pv_check_parity_authoring`, `analysis_json_schema_draft7_meta_validation` | PMAT-075 + PMAT-086 |
+| `acceleration/` | `acceleration_moe_rayon_dispatch_bench`, `acceleration_mmap_per_tensor_diff_bench` | PMAT-085 |
+| `bundling/` | `bundle_streaming_q4k_large_model` | PMAT-085 |
+| `conversion/` | `conversion_gguf_legacy_quant_fallback` | PMAT-085 |
+| `distillation/` | `distill_against_contract_v1` | PMAT-086 |
+| `inference/` | `inference_qwen3_moe_numerical_parity_smoke` | PMAT-085 |
+
+## v6.1 spec acceptance summary
+
+Per [expand-cookbooks.md](../expand-cookbooks.md) §"Acceptance Criteria":
+
+- ✅ Recipe count: 44/44 specced delivered, 18/18 sister-crate ≥3 satisfied
+- ✅ IIUR grade: every recipe carries `Contract: contracts/recipe-iiur-v1.yaml` header
+- ✅ CLI parity (Invariant A) extended for new `apr` subcommands
+- ✅ Cargo.toml: 6 sister-crate dev-deps declared
+- ✅ README recipe table regenerated to 420 recipes
+- ✅ mdBook: 6 new category overview chapters + SUMMARY.md wiring
+- ✅ Recipe-catalog spec extended with 6 new category sections (this section)
