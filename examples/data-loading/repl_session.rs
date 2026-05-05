@@ -1,0 +1,75 @@
+//! # Repl Session
+//!
+//! REPL session lifecycle: open, evaluate, persist, close.
+//!
+//! Contract: contracts/recipe-iiur-v1.yaml
+//! Citation: Sandewall, E. (1978). Programming in an Interactive Environment: The LISP Experience. ACM Computing Surveys 10(1). DOI: 10.1145/356715.356719
+//!
+//! Run with: cargo run --example repl_session
+//!
+//! Migrated from alimentar by PMAT-066 (centralize-cookbooks).
+
+#[cfg(feature = "repl")]
+fn main() {
+    use alimentar::repl::ReplSession;
+
+    println!("=== REPL Session Demo ===\n");
+
+    // Create a new session
+    let mut session = ReplSession::new();
+    println!("Created new REPL session");
+    println!("  Datasets loaded: {}", session.datasets().len());
+    println!("  Active dataset: {:?}", session.active_name());
+    println!("  History entries: {}", session.history().len());
+
+    // Simulate command history
+    println!("\n--- Building Command History ---");
+    let commands = [
+        "load data/sales.csv",
+        "info",
+        "head 10",
+        "quality check",
+        "quality score --suggest",
+        "schema",
+        "convert parquet",
+    ];
+
+    for cmd in &commands {
+        session.add_history(cmd);
+        println!("  Added: {cmd}");
+    }
+
+    // Show history
+    println!("\n--- Session History ---");
+    for (i, entry) in session.history().iter().enumerate() {
+        println!("  [{}] {}", i + 1, entry);
+    }
+
+    // Export as script
+    println!("\n--- Exported Script ---");
+    let script = session.export_history();
+    for line in script.lines().take(15) {
+        println!("{line}");
+    }
+
+    // Column completion context
+    println!("\n--- Completion Context ---");
+    println!("  Column names: {:?}", session.column_names());
+
+    println!("\n=== Demo Complete ===");
+}
+
+#[cfg(not(feature = "repl"))]
+fn main() {
+    eprintln!("Run with: cargo run --example repl_session --features repl");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn example_runs() {
+        main();
+    }
+}

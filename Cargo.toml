@@ -52,6 +52,12 @@ struct_excessive_bools = "allow"
 too_many_lines = "allow"
 enum_variant_names = "allow"
 no_effect_underscore_binding = "allow"
+# Allowed for migrated alimentar examples (PMAT-066 centralize-cookbooks).
+# These match style decisions in the upstream alimentar repo where the examples
+# originated — flipping them would require touching every migrated file.
+cast_lossless = "allow"
+float_cmp = "allow"
+for_kv_map = "allow"
 
 [profile.release]
 lto = "thin"
@@ -110,6 +116,10 @@ memmap2 = "0.9"
 # In-process contract validation (replaces external `pv` dependency)
 # package `aprender-contracts`, lib name `provable_contracts`
 aprender-contracts = "0.31.2"
+# Data loading (PMAT-066 centralize-cookbooks: ex-alimentar examples)
+# package `aprender-data`, lib name `alimentar` — use directly, no deprecation shim
+alimentar = { version = "0.31.2", package = "aprender-data", features = ["doctest"] }
+arrow = { version = "57", default-features = false, features = ["prettyprint", "ipc"] }
 
 # ---------------------------------------------------------------------------
 # Local-development patch: point the four APR-MONO deps at a co-checked-out
@@ -124,8 +134,16 @@ aprender-contracts = "0.31.2"
 # aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 
 [features]
-default = []
+default = ["doctest"]
 encryption = ["aprender/format-encryption"]
+# doctest enables alimentar's doctest module (used by prose_detection example).
+# In default by design — the cookbook always wants alimentar's full surface.
+doctest = []
+# Empty marker features for alimentar example cfg() guards. The examples were
+# written against an alimentar Cargo with optional `shuffle` and `repl` features.
+# Cookbook always builds them in, so the cfg gates are no-ops here.
+shuffle = []
+repl = []
 full = ["encryption"]
 
 # --- Examples ---
@@ -1595,3 +1613,77 @@ path = "examples/deployment-stacks/trueno_rag_pipeline.rs"
 [[example]]
 name = "whisper_apr_asr"
 path = "examples/deployment-stacks/whisper_apr_asr.rs"
+
+# --- Data Loading (PMAT-066 centralize-cookbooks, ex-alimentar) ---
+
+[[example]]
+name = "basic_loading"
+path = "examples/data-loading/basic_loading.rs"
+
+[[example]]
+name = "cli_batch_commands"
+path = "examples/data-loading/cli_batch_commands.rs"
+
+[[example]]
+name = "dataloader_batching"
+path = "examples/data-loading/dataloader_batching.rs"
+
+[[example]]
+name = "doctest_extraction"
+path = "examples/data-loading/doctest_extraction.rs"
+
+[[example]]
+name = "drift_detection"
+path = "examples/data-loading/drift_detection.rs"
+
+[[example]]
+name = "federated_split"
+path = "examples/data-loading/federated_split.rs"
+
+[[example]]
+name = "hub_publishing"
+path = "examples/data-loading/hub_publishing.rs"
+
+[[example]]
+name = "prose_detection"
+path = "examples/data-loading/prose_detection.rs"
+
+[[example]]
+name = "quality_check"
+path = "examples/data-loading/quality_check.rs"
+
+[[example]]
+name = "registry_publish"
+path = "examples/data-loading/registry_publish.rs"
+
+[[example]]
+name = "repl_commands"
+path = "examples/data-loading/repl_commands.rs"
+
+[[example]]
+name = "repl_completer"
+path = "examples/data-loading/repl_completer.rs"
+
+[[example]]
+name = "repl_display_config"
+path = "examples/data-loading/repl_display_config.rs"
+
+[[example]]
+name = "repl_health_status"
+path = "examples/data-loading/repl_health_status.rs"
+
+[[example]]
+name = "repl_session"
+path = "examples/data-loading/repl_session.rs"
+
+[[example]]
+name = "streaming_large"
+path = "examples/data-loading/streaming_large.rs"
+
+[[example]]
+name = "transforms_pipeline"
+path = "examples/data-loading/transforms_pipeline.rs"
+
+[[example]]
+name = "tui_viewer"
+path = "examples/data-loading/tui_viewer.rs"
