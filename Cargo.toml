@@ -1746,3 +1746,17 @@ path = "examples/contracts-macros/contracts_macros_env_key_convention.rs"
 [[example]]
 name = "contracts_macros_runtime_validator_bridge"
 path = "examples/contracts-macros/contracts_macros_runtime_validator_bridge.rs"
+
+# --- aprender-tsp recipes (PMAT-080 expand-cookbooks) ---
+
+[[example]]
+name = "tsp_solve_with_tabu"
+path = "examples/tsp/tsp_solve_with_tabu.rs"
+
+[[example]]
+name = "tsp_distance_matrix_explicit"
+path = "examples/tsp/tsp_distance_matrix_explicit.rs"
+
+[[example]]
+name = "tsp_compare_tabu_vs_genetic"
+path = "examples/tsp/tsp_compare_tabu_vs_genetic.rs"
