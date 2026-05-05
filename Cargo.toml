@@ -1853,3 +1853,20 @@ path = "examples/cli/cli_validate_manifest_safetensors_dtype.rs"
 [[example]]
 name = "cli_publish_parent_chain_termination"
 path = "examples/cli/cli_publish_parent_chain_termination.rs"
+# --- MCP M5 transports + notifications (PMAT-078 expand-cookbooks) ---
+
+[[example]]
+name = "mcp_sse_event_envelope"
+path = "examples/mcp/mcp_sse_event_envelope.rs"
+
+[[example]]
+name = "mcp_websocket_frame_envelope"
+path = "examples/mcp/mcp_websocket_frame_envelope.rs"
+
+[[example]]
+name = "mcp_notification_progress_token"
+path = "examples/mcp/mcp_notification_progress_token.rs"
+
+[[example]]
+name = "mcp_byte_parity_dispatcher_swap"
+path = "examples/mcp/mcp_byte_parity_dispatcher_swap.rs"
