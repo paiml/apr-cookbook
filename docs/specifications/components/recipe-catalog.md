@@ -199,3 +199,80 @@ All 91 IIUR recipes depend on `aprender` (core ML library). Additional dependenc
 | L (CLI) | Required | — | — | — |
 
 GPU (realizar), distributed (repartir), and speech (whisper-apr) patterns are **simulated** in cookbook examples without requiring these crates as compile-time dependencies.
+
+---
+
+## Centralize-Cookbooks Categories (v6.0, 2026-05-04)
+
+Four new categories added by [centralize-cookbooks](../centralize-cookbooks.md) PMAT-065..067. These do NOT count toward the 91 IIUR recipe denominator; they are graded against either `recipe-iiur-v1.yaml` (Rust examples) or `recipe-iiur-config-v1.yaml` (declarative-config wrappers).
+
+### Category: deployment-stacks (ex-sovereign-ai-cookbook, PMAT-065)
+
+| # | Recipe | Wrapper |
+|---|--------|---------|
+| DS.1 | `alimentar-ingest` | `cargo run --example alimentar_ingest` |
+| DS.2 | `apr-inference-server` | `cargo run --example apr_inference_server` |
+| DS.3 | `batuta-agent` | `cargo run --example batuta_agent` |
+| DS.4 | `entrenar-train` | `cargo run --example entrenar_train` |
+| DS.5 | `jetson-edge-base` | `cargo run --example jetson_edge_base` |
+| DS.6 | `pacha-registry` | `cargo run --example pacha_registry` |
+| DS.7 | `pepita-sandbox` | `cargo run --example pepita_sandbox` |
+| DS.8 | `realizar-serve` | `cargo run --example realizar_serve` |
+| DS.9 | `renacer-observability` | `cargo run --example renacer_observability` |
+| DS.10 | `repartir-worker` | `cargo run --example repartir_worker` |
+| DS.11 | `sovereign-ai-stack` | `cargo run --example sovereign_ai_stack` |
+| DS.12 | `trueno-db-analytics` | `cargo run --example trueno_db_analytics` |
+| DS.13 | `trueno-rag-pipeline` | `cargo run --example trueno_rag_pipeline` |
+| DS.14 | `whisper-apr-asr` | `cargo run --example whisper_apr_asr` |
+
+Plus 10 multi-recipe stack compositions under `examples/deployment-stacks/stacks/`.
+
+### Category: data-loading (ex-alimentar, PMAT-066)
+
+| # | Recipe | Topic |
+|---|--------|-------|
+| DL.1 | `basic_loading` | CSV/JSON/Parquet via Arrow |
+| DL.2 | `cli_batch_commands` | CLI batch operations |
+| DL.3 | `dataloader_batching` | DataLoader batching |
+| DL.4 | `doctest_extraction` | Doctest extraction |
+| DL.5 | `drift_detection` | Dataset drift |
+| DL.6 | `federated_split` | Federated learning split |
+| DL.7 | `hub_publishing` | HuggingFace Hub publish |
+| DL.8 | `prose_detection` | Prose vs code |
+| DL.9 | `quality_check` | Dataset QA |
+| DL.10 | `registry_publish` | Registry publish |
+| DL.11..15 | `repl_*` | REPL components |
+| DL.16 | `streaming_large` | Streaming datasets |
+| DL.17 | `transforms_pipeline` | Transform composition |
+| DL.18 | `tui_viewer` | TUI dataset viewer |
+
+### Category: visualization (ex-presentar, PMAT-067)
+
+| Subdir | Count | Format |
+|--------|-------|--------|
+| `ald/` | 6 | `.yaml` |
+| `apr/` | 7 | `.yaml` |
+| `charts/` | 3 | `.yaml` |
+| `dashboards/` | 5 | `.yaml` |
+| `edge_cases/` | 2 | `.yaml` |
+| `prs/` | 5 | `.prs` |
+| **Total** | **28** | All loaded by `load_visualization` validator |
+
+### Category: machines (PMAT-065)
+
+| Machine | Path |
+|---------|------|
+| `jetson` | `examples/machines/jetson/` |
+
+---
+
+## Six Coverage Invariants — v6.0 carve-outs (PMAT-068)
+
+Per [centralize-cookbooks/iiur-conformance.md](../centralize-cookbooks/iiur-conformance.md) §"Coverage Invariants — Update":
+
+- **A (CLI parity)** — UNCHANGED. Numerator stays scoped to `apr-cli` subcommands.
+- **B (Contract grade)** — EXTENDED. Includes `recipe-iiur-config-v1.yaml`; denominator grows.
+- **C (Format variants)** — CONDITIONAL. Applies to data-loading (CSV/JSON/Parquet) and visualization (YAML/.prs); not deployment-stacks.
+- **D (arXiv citation)** — EXTENDED. Every new recipe header MUST cite. Gaps marked `Citation: N/A — see PMAT-066/067`.
+- **E (Docs contract coverage)** — EXTENDED. Book chapters under `data-loading/` and `visualization/` count toward the docs ratio.
+- **F (Variant depth)** — CARVED OUT. Does not apply to deployment-stacks (one config per service) or machines (one config per platform). Applies to data-loading and visualization at threshold ≥1.

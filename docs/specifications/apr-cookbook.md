@@ -1,6 +1,6 @@
 # APR Cookbook Specification
 
-**Version**: 5.1.0
+**Version**: 6.0.0
 **Status**: ACTIVE
 **MSRV**: 1.89
 **Date**: 2026-05-05
@@ -13,7 +13,9 @@
 
 ## Executive Summary
 
-The APR Cookbook is the technical manual for production ML deployment using the `.apr` format. It provides idiomatic Rust examples that demonstrate model bundling, format conversion, browser/edge deployment (WASM), SIMD/GPU acceleration, and CLI tooling — all as single-binary artifacts with zero Python/CUDA runtime dependency (CPU path; GPU path requires CUDA libraries at inference time).
+The APR Cookbook is the **umbrella technical manual for the PAIML sovereign AI stack**: model bundling and deployment (`.apr`), data loading (`alimentar`/`aprender-data`), declarative visualization (`presentar`), and infrastructure-as-recipes (`sovereign`/`forjar`). All examples are idiomatic Rust, all artifacts are IIUR-graded, all performance claims are falsifiable. Everything ships as single-binary artifacts with zero Python/CUDA runtime dependency (CPU path; GPU path requires CUDA libraries at inference time).
+
+v6.0.0 reflects the centralization of three previously-separate cookbooks (sovereign-ai-cookbook, alimentar's example tree, presentar's example tree) into this repository per [docs/specifications/centralize-cookbooks.md](centralize-cookbooks.md). The repository slug, crate name, and Pages URL are preserved; the scope is what expanded.
 
 **APR v2 Format** introduces binary tensor indices, LZ4/ZSTD compression, zero-copy mmap loading, and Int4/Int8 quantization. Fair BF16 → Int4+LZ4 size comparison yields ~2–3× reduction (measured in [aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:17](https://github.com/paiml/aprender/blob/main/docs/benchmarks/FORMAT_PARITY_REPORT.md)). Larger ratios (e.g. 6.3× for F32 → Q4_K_M) confuse precision drop with format advantage.
 
@@ -29,12 +31,17 @@ The APR Cookbook is the technical manual for production ML deployment using the 
 ## Technology Stack
 
 ```
-APR Cookbook v5.0 — APR-MONO Integration
+APR Cookbook v6.0 — Umbrella Sovereign-Stack Cookbook
 ├── Examples Layer (this repo)
 │   ├── 91 IIUR recipes (Categories A-L)
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
 │   ├── 186 variant-depth recipes (PMAT-049/050/051 sprints — ≥3 per subcommand)
-│   └── 341 total examples across 24 categories (2026-04-23)
+│   ├── 14 deployment-stack wrappers + 10 stack compositions + 1 jetson tree
+│   │     (PMAT-065 centralize-cookbooks, ex-sovereign-ai-cookbook)
+│   ├── 18 data-loading examples (PMAT-066 centralize-cookbooks, ex-alimentar)
+│   ├── 1 visualization validator + 28 declarative configs
+│   │     (PMAT-067 centralize-cookbooks, ex-presentar)
+│   └── ~388 total examples across 28 categories (2026-05-04)
 ├── Framework Layer — APR-MONO v0.31.2 crates from crates.io
 │   │   (optional `[patch.crates-io]` override for local ../aprender co-dev)
 │   ├── aprender-core 0.31.2         — package `aprender-core`, lib `aprender`
