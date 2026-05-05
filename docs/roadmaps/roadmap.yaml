@@ -1436,11 +1436,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: Author expand-cookbooks spec (master + 5 component files)'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-05T13:26:37Z
-  updated: 2026-05-05T13:26:37Z
+  updated: 2026-05-05T17:03:24.062303164+00:00
   spec: null
   acceptance_criteria:
   - 'Spec for closing aprender-0.31.x coverage gap: 44 new recipes across 6 new categories + 8 extended categories. PMAT-073..086 to be created from this spec. See docs/specifications/expand-cookbooks.md.'
