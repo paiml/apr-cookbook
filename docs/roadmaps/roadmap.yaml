@@ -1531,11 +1531,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: apr serve anthropic + serve plan hf://'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:32.142284822+00:00
   spec: null
   acceptance_criteria:
   - '2 recipes: serve_anthropic_messages_api_drop_in (claude-proxy), serve_plan_hf_dryrun_no_weights.'
