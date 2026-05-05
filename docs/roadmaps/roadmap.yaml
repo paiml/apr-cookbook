@@ -1397,11 +1397,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Archive sovereign-ai-cookbook/alimentar/presentar repos'
-  status: inprogress
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-05-04T20:32:41Z
-  updated: 2026-05-05T11:35:25.737129252+00:00
+  updated: 2026-05-05T11:59:51.334634920+00:00
   spec: null
   acceptance_criteria:
   - 'Per docs/specifications/centralize-cookbooks/archive-checklist.md (PMAT-105 renumbered). GATED on PMAT-065..069 merged + 7-day quiet period + scripts/centralize-verify.sh --strict green. Per repo: tag pre-archive-2026-05, REDIRECT.md PR, gh api archive=true. 24h pause between repos. Order: sovereign → presentar → alimentar.'
