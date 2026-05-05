@@ -2101,3 +2101,41 @@ path = "examples/lint/grad_norm_spike_detection.rs"
 [[example]]
 name = "grad_norm_divergence_run"
 path = "examples/lint/grad_norm_divergence_run.rs"
+
+# --- oracle / probar / qa coverage (PMAT-093 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_oracle_family_introspection"
+path = "examples/cli/cli_oracle_family_introspection.rs"
+
+[[example]]
+name = "cli_oracle_compliance_gate"
+path = "examples/cli/cli_oracle_compliance_gate.rs"
+
+[[example]]
+name = "cli_oracle_size_constraint_filter"
+path = "examples/cli/cli_oracle_size_constraint_filter.rs"
+
+[[example]]
+name = "cli_probar_export_envelope"
+path = "examples/cli/cli_probar_export_envelope.rs"
+
+[[example]]
+name = "cli_probar_golden_diff"
+path = "examples/cli/cli_probar_golden_diff.rs"
+
+[[example]]
+name = "cli_probar_layer_pattern_filter"
+path = "examples/cli/cli_probar_layer_pattern_filter.rs"
+
+[[example]]
+name = "cli_qa_assertion_envelope"
+path = "examples/cli/cli_qa_assertion_envelope.rs"
+
+[[example]]
+name = "cli_qa_warmup_iteration_budget"
+path = "examples/cli/cli_qa_warmup_iteration_budget.rs"
+
+[[example]]
+name = "cli_qa_safetensors_parity_required"
+path = "examples/cli/cli_qa_safetensors_parity_required.rs"
