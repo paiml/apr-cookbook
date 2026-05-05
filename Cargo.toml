@@ -1840,3 +1840,16 @@ path = "examples/cli/cli_diff_values_aprt_stage.rs"
 [[example]]
 name = "analysis_cpu_vs_gpu_parity_gate"
 path = "examples/analysis/analysis_cpu_vs_gpu_parity_gate.rs"
+# --- apr publish end-to-end (PMAT-076 expand-cookbooks) ---
+
+[[example]]
+name = "cli_publish_manifest_full"
+path = "examples/cli/cli_publish_manifest_full.rs"
+
+[[example]]
+name = "cli_validate_manifest_safetensors_dtype"
+path = "examples/cli/cli_validate_manifest_safetensors_dtype.rs"
+
+[[example]]
+name = "cli_publish_parent_chain_termination"
+path = "examples/cli/cli_publish_parent_chain_termination.rs"
