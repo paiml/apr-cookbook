@@ -1359,11 +1359,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Update Six Coverage Invariants for new categories'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-04T20:32:30Z
-  updated: 2026-05-04T20:32:30Z
+  updated: 2026-05-05T12:01:19.373862632+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-103 (renumbered). Update scripts/coverage-invariants.sh to extend B/C/D/E/F across deployment-stacks/data-loading/visualization/machines categories per iiur-conformance.md. Update MEMORY.md project-stats line. Update components/recipe-catalog.md with 4 new category tables.
