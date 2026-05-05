@@ -1340,11 +1340,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Migrate presentar examples + book'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-04T20:32:24Z
-  updated: 2026-05-04T20:32:24Z
+  updated: 2026-05-05T12:01:17.036494316+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-102 (renumbered). Copy 28 .yaml/.prs configs to examples/visualization/{ald,apr,charts,dashboards,edge_cases,prs}/ preserving subdir layout. Author single load_visualization.rs validator per iiur-conformance.md Strategy B. Copy ~110 book chapters to book/src/visualization/ (drop development/ + ecosystem/).
