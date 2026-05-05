@@ -1702,11 +1702,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: Tier 4 authoring patterns + distill against contract'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:48.609066790+00:00
   spec: null
   acceptance_criteria:
   - '4 recipes: contract_algorithm_binding_pattern, pv_check_parity_authoring, json_schema_draft7_meta_validation, distill_against_contract_v1.'
