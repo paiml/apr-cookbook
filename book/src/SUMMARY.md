@@ -482,6 +482,32 @@
 
 ---
 
+# Code (apr code agentic surface)
+
+- [Overview](./code/overview.md)
+
+# TSP (aprender-tsp)
+
+- [Overview](./tsp/overview.md)
+
+# Shell (aprender-shell)
+
+- [Overview](./shell/overview.md)
+
+# Monte Carlo (aprender-monte-carlo)
+
+- [Overview](./monte-carlo/overview.md)
+
+# CGP (aprender-cgp)
+
+- [Overview](./cgp/overview.md)
+
+# Contracts Macros (aprender-contracts-macros)
+
+- [Overview](./contracts-macros/overview.md)
+
+---
+
 # Reference
 
 - [API Documentation](./reference/api.md)
