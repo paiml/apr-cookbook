@@ -1,0 +1,198 @@
+# Stack: 09-edge-inference
+# Jetson Orin Nano 8GB — edge inference + canary hardware gate
+#
+# Two-machine stack: intel cross-compiles, jetson runs.
+# Provisions both machines for the full canary pipeline:
+#   intel: aarch64 cross-toolchain, source repos, model cache
+#   jetson: JetPack CUDA, sovereign tools, canary model dir
+#
+# Usage:
+#   forjar apply -f stacks/09-edge-inference/forjar.yaml
+#   forjar plan  -f stacks/09-edge-inference/forjar.yaml
+
+version: '1.0'
+name: sovereign-edge-inference
+description: |
+  Jetson Orin Nano 8GB edge inference + canary hardware gate.
+  intel (x86_64, 283GB) cross-compiles apr-cli for aarch64.
+  jetson (aarch64, 8GB unified) runs pre-built binaries.
+  Canary pipeline: build -> deploy -> probe -> kernel -> model -> profile.
+
+params:
+  user: noah
+  home: /home/noah
+  src_dir: /home/noah/src
+  data_dir: /home/noah/data
+  model_path: /home/noah/data/models
+  canary_model_dir: /home/noah/data/models/canary
+  serve_port: "8080"
+  cross_target: aarch64-unknown-linux-gnu
+  cross_linker: aarch64-linux-gnu-gcc
+  cross_dir: /tmp/cross-jetson
+
+machines:
+  intel:
+    hostname: intel
+    addr: 192.168.50.100
+    user: noah
+    ssh_key: ~/.ssh/id_ed25519
+    arch: x86_64
+    roles: [builder, ci-runner]
+
+  jetson:
+    hostname: jetson
+    addr: 192.168.50.53
+    user: noah
+    ssh_key: ~/.ssh/id_ed25519
+    arch: aarch64
+    roles: [edge-inference, canary-runner]
+
+resources:
+  # ═══════════════════════════════════════════════════════════════
+  # JETSON — Edge inference node
+  # ═══════════════════════════════════════════════════════════════
+
+  # ── Base provisioning (bloat strip + CUDA + Rust + tools) ──────
+  base:
+    type: recipe
+    machine: jetson
+    recipe: jetson-edge-base
+    inputs:
+      user: "{{params.user}}"
+      home: "{{params.home}}"
+    tags: [edge, base]
+
+  # ── NVMe data partition ────────────────────────────────────────
+  models-dir:
+    type: file
+    machine: jetson
+    state: directory
+    path: "{{params.model_path}}"
+    owner: "{{params.user}}"
+    mode: "0755"
+    depends_on: [base]
+    tags: [edge, models]
+
+  # ── Canary model directory ─────────────────────────────────────
+  canary-model-dir:
+    type: file
+    machine: jetson
+    state: directory
+    path: "{{params.canary_model_dir}}"
+    owner: "{{params.user}}"
+    mode: "0755"
+    depends_on: [models-dir]
+    tags: [edge, canary]
+
+  # ── MAXN SUPER power mode ──────────────────────────────────────
+  maxn-super:
+    type: task
+    machine: jetson
+    command: "sudo nvpmodel -m 0 2>/dev/null || true && sudo jetson_clocks 2>/dev/null || true"
+    depends_on: [base]
+    tags: [edge, power]
+
+  # ── SSH hardening ──────────────────────────────────────────────
+  ssh-config:
+    type: file
+    machine: jetson
+    path: /etc/ssh/sshd_config.d/forjar-edge.conf
+    owner: root
+    mode: '0644'
+    sudo: true
+    content: |
+      PermitRootLogin no
+      PasswordAuthentication no
+    depends_on: [base]
+    tags: [edge, security]
+
+  # ═══════════════════════════════════════════════════════════════
+  # INTEL — Cross-compile builder for aarch64
+  # ═══════════════════════════════════════════════════════════════
+
+  # ── Cross-compile toolchain (apt) ──────────────────────────────
+  cross-compile-deps:
+    type: package
+    machine: intel
+    provider: apt
+    packages:
+      - gcc-aarch64-linux-gnu
+      - g++-aarch64-linux-gnu
+    tags: [builder, cross-compile]
+
+  # ── Rust aarch64 target (stable) ───────────────────────────────
+  cross-compile-target-stable:
+    type: task
+    machine: intel
+    command: "rustup target add {{params.cross_target}}"
+    completion_check: "rustup target list --installed | grep -q {{params.cross_target}}"
+    depends_on: [cross-compile-deps]
+    tags: [builder, cross-compile]
+
+  # ── Rust aarch64 target (nightly) ──────────────────────────────
+  cross-compile-target-nightly:
+    type: task
+    machine: intel
+    command: "rustup +nightly target add {{params.cross_target}}"
+    completion_check: "rustup +nightly target list --installed | grep -q {{params.cross_target}}"
+    depends_on: [cross-compile-deps]
+    tags: [builder, cross-compile]
+
+  # ── SSH config for intel -> jetson ─────────────────────────────
+  intel-ssh-jetson:
+    type: file
+    machine: intel
+    path: "{{params.home}}/.ssh/config.d/jetson"
+    owner: "{{params.user}}"
+    mode: "0600"
+    content: |
+      Host jetson
+          HostName 192.168.50.53
+          User noah
+          IdentityFile ~/.ssh/id_ed25519
+          IdentitiesOnly yes
+          StrictHostKeyChecking accept-new
+    tags: [builder, ssh]
+
+  # ── Cross-compile output directory ─────────────────────────────
+  cross-dir:
+    type: file
+    machine: intel
+    state: directory
+    path: "{{params.cross_dir}}"
+    owner: "{{params.user}}"
+    mode: "0755"
+    tags: [builder, cross-compile]
+
+  # ── Model cache on intel ───────────────────────────────────────
+  intel-canary-model-dir:
+    type: file
+    machine: intel
+    state: directory
+    path: "{{params.canary_model_dir}}"
+    owner: "{{params.user}}"
+    mode: "0755"
+    tags: [builder, canary]
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true
+  parallel_machines: true
+
+outputs:
+  jetson_ip:
+    value: "192.168.50.53"
+    description: "Jetson LAN IP"
+  intel_ip:
+    value: "192.168.50.100"
+    description: "Intel builder LAN IP"
+  arch:
+    value: "aarch64"
+    description: "Target architecture"
+  cuda_home:
+    value: "/usr/local/cuda"
+    description: "CUDA installation path"
+  cross_target:
+    value: "{{params.cross_target}}"
+    description: "Rust cross-compile target triple"

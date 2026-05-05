@@ -1,0 +1,194 @@
+# Recipe: realizar-serve — Model serving with realizar
+#
+# Deploys a complete model serving stack:
+#   1. NVIDIA driver + CUDA toolkit (gpu resource)
+#   2. Model download + BLAKE3 verification (model resource)
+#   3. realizar systemd unit (file resource)
+#   4. Service management (service resource)
+#   5. Firewall rule (network resource)
+#   6. Health check cron (cron resource)
+#
+# Inputs:
+#   model_path (path) — path to model file or directory
+#   model_format (enum, default: gguf) — model format
+#   quantization (string, default: q4_k_m) — quantization level
+#   port (int, default: 8080) — HTTP listen port
+#   workers (int, default: 1) — inference worker count
+#   gpu_device (int, default: 0) — CUDA device index
+#   user (string, default: realizar) — service account
+
+recipe:
+  name: realizar-serve
+  version: "1.0"
+  description: "Realizar model server — GGUF/safetensors serving with GPU acceleration"
+  inputs:
+    model_path:
+      type: string
+      description: "Path to model file or HuggingFace repo ID"
+    model_format:
+      type: enum
+      choices: [gguf, safetensors, apr]
+      default: gguf
+    quantization:
+      type: string
+      default: q4_k_m
+      description: "Quantization level (q4_k_m, q5_k_m, q8_0, f16)"
+    port:
+      type: int
+      default: 8080
+      min: 1
+      max: 65535
+    workers:
+      type: int
+      default: 1
+      min: 1
+      max: 16
+    gpu_device:
+      type: int
+      default: 0
+      min: 0
+      max: 7
+    user:
+      type: string
+      default: realizar
+    gpu_backend:
+      type: string
+      default: nvidia
+      description: "GPU backend: nvidia, rocm, or cpu"
+    gpu_driver_version:
+      type: string
+      default: "550"
+      description: "Driver version (nvidia driver or amdgpu-dkms)"
+    gpu_toolkit_version:
+      type: string
+      default: "12.4"
+      description: "CUDA version (nvidia) or ROCm version (rocm)"
+
+resources:
+  gpu-driver:
+    type: gpu
+    gpu_backend: "{{inputs.gpu_backend}}"
+    driver_version: "{{inputs.gpu_driver_version}}"
+    cuda_version: "{{inputs.gpu_toolkit_version}}"
+    rocm_version: "{{inputs.gpu_toolkit_version}}"
+    persistence_mode: true
+    compute_mode: default
+    depends_on: []
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [setup, gpu]
+
+  model-download:
+    type: model
+    name: "realizar-model"
+    source: "{{inputs.model_path}}"
+    format: "{{inputs.model_format}}"
+    quantization: "{{inputs.quantization}}"
+    path: "/opt/realizar/models/{{inputs.model_format}}"
+    cache_dir: /opt/realizar/cache
+    owner: "{{inputs.user}}"
+    depends_on: [gpu-driver]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [setup, models]
+
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/realizar
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  data-dir:
+    type: file
+    state: directory
+    path: /opt/realizar
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  models-dir:
+    type: file
+    state: directory
+    path: /opt/realizar/models
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [data-dir]
+    tags: [setup, dirs]
+
+  cache-dir:
+    type: file
+    state: directory
+    path: /opt/realizar/cache
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [data-dir]
+    tags: [setup, dirs]
+
+  realizar-pkg:
+    type: package
+    provider: cargo
+    packages: [realizar]
+    depends_on: []
+    tags: [packages]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/realizar.service
+    content: |
+      [Unit]
+      Description=Realizar Model Server
+      After=network.target nvidia-persistenced.service
+      Wants=nvidia-persistenced.service
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/realizar serve \
+        --model /opt/realizar/models/{{inputs.model_format}} \
+        --port {{inputs.port}} \
+        --workers {{inputs.workers}} \
+        --device {{inputs.gpu_device}} \
+        --quantization {{inputs.quantization}}
+      Restart=on-failure
+      RestartSec=10
+      Environment=CUDA_VISIBLE_DEVICES={{inputs.gpu_device}}
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [realizar-pkg, model-download, data-dir]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [config, systemd]
+
+  realizar-service:
+    type: service
+    name: realizar
+    state: running
+    enabled: true
+    restart_on: [systemd-unit, model-download]
+    depends_on: [systemd-unit]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [services]
+
+  firewall:
+    type: network
+    port: "{{inputs.port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [realizar-service]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "realizar-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.port}}/health || systemctl restart realizar"
+    user: root
+    depends_on: [realizar-service]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [monitoring]

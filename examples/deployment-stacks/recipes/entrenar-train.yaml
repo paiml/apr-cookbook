@@ -1,0 +1,196 @@
+# Recipe: entrenar-train — Training pipeline with entrenar
+#
+# Deploys a training environment:
+#   1. NVIDIA driver + CUDA toolkit (gpu resource)
+#   2. entrenar binary (cargo install)
+#   3. Dataset + output directories
+#   4. Training config file
+#   5. Systemd unit for batch training jobs
+#
+# Inputs:
+#   dataset_path (path) — path to training dataset
+#   output_dir (path, default: /opt/entrenar/output) — model output directory
+#   learning_rate (string, default: 2e-5) — learning rate
+#   epochs (int, default: 3) — number of training epochs
+#   batch_size (int, default: 8) — training batch size
+#   lora_rank (int, default: 16) — LoRA rank (0 = full fine-tune)
+#   gpu_device (int, default: 0) — CUDA device index
+#   user (string, default: entrenar) — service account
+
+recipe:
+  name: entrenar-train
+  version: "1.0"
+  description: "Entrenar training pipeline — LoRA, quantization, model merging"
+  inputs:
+    dataset_path:
+      type: string
+      description: "Path to training dataset directory"
+    output_dir:
+      type: string
+      default: /opt/entrenar/output
+      description: "Model output directory"
+    learning_rate:
+      type: string
+      default: "2e-5"
+    epochs:
+      type: int
+      default: 3
+      min: 1
+      max: 1000
+    batch_size:
+      type: int
+      default: 8
+      min: 1
+      max: 512
+    lora_rank:
+      type: int
+      default: 16
+      min: 0
+      max: 256
+    gpu_device:
+      type: int
+      default: 0
+      min: 0
+      max: 7
+    user:
+      type: string
+      default: entrenar
+    gpu_backend:
+      type: string
+      default: nvidia
+      description: "GPU backend: nvidia, rocm, or cpu"
+    gpu_driver_version:
+      type: string
+      default: "550"
+      description: "Driver version (nvidia driver or amdgpu-dkms)"
+    gpu_toolkit_version:
+      type: string
+      default: "12.4"
+      description: "CUDA version (nvidia) or ROCm version (rocm)"
+
+resources:
+  gpu-driver:
+    type: gpu
+    gpu_backend: "{{inputs.gpu_backend}}"
+    driver_version: "{{inputs.gpu_driver_version}}"
+    cuda_version: "{{inputs.gpu_toolkit_version}}"
+    rocm_version: "{{inputs.gpu_toolkit_version}}"
+    persistence_mode: true
+    compute_mode: default
+    depends_on: []
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [setup, gpu]
+
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/entrenar
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/entrenar
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  output-dir:
+    type: file
+    state: directory
+    path: "{{inputs.output_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  checkpoints-dir:
+    type: file
+    state: directory
+    path: /opt/entrenar/checkpoints
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  logs-dir:
+    type: file
+    state: directory
+    path: /opt/entrenar/logs
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  entrenar-pkg:
+    type: package
+    provider: cargo
+    packages: [entrenar]
+    depends_on: []
+    tags: [packages]
+
+  training-config:
+    type: file
+    path: /opt/entrenar/config.yaml
+    content: |
+      # Entrenar Training Configuration
+      dataset: {{inputs.dataset_path}}
+      output: {{inputs.output_dir}}
+      checkpoints: /opt/entrenar/checkpoints
+
+      hyperparams:
+        learning_rate: {{inputs.learning_rate}}
+        epochs: {{inputs.epochs}}
+        batch_size: {{inputs.batch_size}}
+        warmup_steps: 100
+        weight_decay: 0.01
+        gradient_accumulation: 4
+
+      lora:
+        rank: {{inputs.lora_rank}}
+        alpha: 32
+        dropout: 0.05
+
+      hardware:
+        device: {{inputs.gpu_device}}
+        mixed_precision: bf16
+        gradient_checkpointing: true
+
+      logging:
+        dir: /opt/entrenar/logs
+        interval: 10
+        save_steps: 500
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [output-dir, checkpoints-dir, logs-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/entrenar.service
+    content: |
+      [Unit]
+      Description=Entrenar Training Service
+      After=network.target nvidia-persistenced.service
+      Wants=nvidia-persistenced.service
+
+      [Service]
+      Type=oneshot
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/entrenar train --config /opt/entrenar/config.yaml
+      Environment=CUDA_VISIBLE_DEVICES={{inputs.gpu_device}}
+      TimeoutStartSec=infinity
+      LimitNOFILE=65535
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [entrenar-pkg, training-config, gpu-driver]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [config, systemd]

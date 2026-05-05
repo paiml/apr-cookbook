@@ -1,0 +1,179 @@
+# Recipe: whisper-apr-asr — Speech recognition with whisper-apr
+#
+# Deploys whisper-apr for automatic speech recognition:
+#   1. GPU driver setup
+#   2. whisper-apr binary (cargo install)
+#   3. Model download, service config
+#   4. Systemd unit, firewall, health check
+#
+# Inputs:
+#   model_size (enum, default: base) — whisper model size
+#   port (int, default: 8095) — HTTP API port
+#   language (string, default: en) — default language
+#   beam_size (int, default: 5) — beam search width
+#   gpu_device (int, default: 0) — CUDA device index
+#   user (string, default: whisper) — service account
+
+recipe:
+  name: whisper-apr-asr
+  version: "1.0"
+  description: "Whisper-APR speech recognition — real-time ASR with GPU acceleration"
+  inputs:
+    model_size:
+      type: enum
+      choices: [tiny, base, small, medium, large]
+      default: base
+    port:
+      type: int
+      default: 8095
+      min: 1
+      max: 65535
+    language:
+      type: string
+      default: en
+    beam_size:
+      type: int
+      default: 5
+      min: 1
+      max: 20
+    gpu_device:
+      type: int
+      default: 0
+      min: 0
+      max: 7
+    user:
+      type: string
+      default: whisper
+    gpu_backend:
+      type: string
+      default: nvidia
+      description: "GPU backend: nvidia, rocm, or cpu"
+    gpu_driver_version:
+      type: string
+      default: "550"
+      description: "Driver version (nvidia driver or amdgpu-dkms)"
+    gpu_toolkit_version:
+      type: string
+      default: "12.4"
+      description: "CUDA version (nvidia) or ROCm version (rocm)"
+
+resources:
+  gpu-driver:
+    type: gpu
+    gpu_backend: "{{inputs.gpu_backend}}"
+    driver_version: "{{inputs.gpu_driver_version}}"
+    cuda_version: "{{inputs.gpu_toolkit_version}}"
+    rocm_version: "{{inputs.gpu_toolkit_version}}"
+    persistence_mode: true
+    compute_mode: default
+    depends_on: []
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [setup, gpu]
+
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/whisper-apr
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/whisper-apr
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  models-dir:
+    type: file
+    state: directory
+    path: /opt/whisper-apr/models
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  whisper-pkg:
+    type: package
+    provider: cargo
+    packages: ["whisper-apr[cli]"]
+    depends_on: []
+    tags: [packages]
+
+  config:
+    type: file
+    state: file
+    path: /opt/whisper-apr/config.yaml
+    content: |
+      # whisper-apr configuration
+      listen: 0.0.0.0:{{inputs.port}}
+      model_size: {{inputs.model_size}}
+      model_dir: /opt/whisper-apr/models
+      language: {{inputs.language}}
+      beam_size: {{inputs.beam_size}}
+      device: {{inputs.gpu_device}}
+      vad_enabled: true
+      compute_type: float16
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [models-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/whisper-apr.service
+    content: |
+      [Unit]
+      Description=Whisper-APR Speech Recognition
+      After=network.target nvidia-persistenced.service
+      Wants=nvidia-persistenced.service
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/whisper-apr serve --config /opt/whisper-apr/config.yaml
+      Restart=on-failure
+      RestartSec=10
+      Environment=CUDA_VISIBLE_DEVICES={{inputs.gpu_device}}
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [whisper-pkg, config, gpu-driver]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [config, systemd]
+
+  whisper-service:
+    type: service
+    name: whisper-apr
+    state: running
+    enabled: true
+    restart_on: [systemd-unit, config]
+    depends_on: [systemd-unit]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [services]
+
+  firewall:
+    type: network
+    port: "{{inputs.port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [whisper-service]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "whisper-apr-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.port}}/health || systemctl restart whisper-apr"
+    user: root
+    depends_on: [whisper-service]
+    when: '{{inputs.gpu_backend}} != "cpu"'
+    tags: [monitoring]

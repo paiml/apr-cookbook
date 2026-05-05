@@ -1,0 +1,44 @@
+version: "1.0"
+name: sovereign-speech
+description: |
+  Speech recognition with whisper-apr.
+  Deploys a GPU-accelerated ASR service for real-time transcription.
+
+params:
+  model_size: base
+  language: en
+  asr_port: "8095"
+
+machines:
+  asr-box:
+    hostname: asr-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, speech]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-speech
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  asr-server:
+    type: recipe
+    machine: asr-box
+    recipe: whisper-apr-asr
+    inputs:
+      model_size: base
+      port: 8095
+      language: "{{params.language}}"
+      beam_size: 5
+      gpu_device: 0
+      user: whisper
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

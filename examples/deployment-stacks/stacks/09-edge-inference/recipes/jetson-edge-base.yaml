@@ -1,0 +1,152 @@
+# Recipe: jetson-edge-base
+# Reusable recipe for Jetson Orin Nano provisioning.
+# Strips JetPack bloat, installs CUDA via apt, Rust toolchain,
+# and sovereign stack tools.
+#
+# Inputs:
+#   user       — target user (default: noah)
+#   home       — home directory (default: /home/noah)
+
+recipe:
+  name: jetson-edge-base
+  version: "1.0"
+  description: "Jetson Orin Nano base: strip bloat, CUDA apt, Rust, sovereign tools"
+  inputs:
+    user:
+      type: string
+      default: noah
+    home:
+      type: string
+      default: /home/noah
+    src_dir:
+      type: string
+      default: /home/noah/src
+    data_dir:
+      type: string
+      default: /home/noah/data
+
+resources:
+  # ── Strip JetPack desktop bloat ────────────────────────────────
+  purge-desktop:
+    type: task
+    command: |
+      apt-get purge -y \
+        libreoffice-* thunderbird chromium-browser rhythmbox shotwell \
+        totem cheese gnome-calendar gnome-mines gnome-sudoku aisleriot \
+        gnome-mahjongg ubuntu-desktop gdm3 gnome-shell nautilus gedit \
+        eog evince gnome-terminal 2>/dev/null || true
+      apt-get autoremove -y
+      apt-get clean
+    run_as: root
+    creates: /etc/forjar/.purge-desktop-done
+    tags: [jetson, cleanup]
+
+  # ── Install CUDA toolkit from JetPack apt repo ────────────────
+  cuda-toolkit:
+    type: package
+    provider: apt
+    packages:
+      - nvidia-jetpack
+    depends_on: [purge-desktop]
+    tags: [jetson, cuda]
+
+  # ── Build essentials ───────────────────────────────────────────
+  build-deps:
+    type: package
+    provider: apt
+    packages:
+      - build-essential
+      - pkg-config
+      - libssl-dev
+      - curl
+      - git
+      - vim
+      - tmux
+      - htop
+    depends_on: [purge-desktop]
+    tags: [jetson, deps]
+
+  # ── Directory structure ────────────────────────────────────────
+  src-dir:
+    type: file
+    state: directory
+    path: "{{inputs.src_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    tags: [jetson, dirs]
+
+  data-dir:
+    type: file
+    state: directory
+    path: "{{inputs.data_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    tags: [jetson, dirs]
+
+  models-dir:
+    type: file
+    state: directory
+    path: "{{inputs.data_dir}}/models"
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [data-dir]
+    tags: [jetson, dirs]
+
+  # ── Rust toolchain ────────────────────────────────────────────
+  rustup-install:
+    type: task
+    command: "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+    run_as: "{{inputs.user}}"
+    creates: "{{inputs.home}}/.cargo/bin/rustup"
+    depends_on: [build-deps]
+    tags: [jetson, rust]
+
+  # ── Sovereign stack tools ──────────────────────────────────────
+  stack-tools:
+    type: package
+    provider: cargo
+    packages:
+      - forjar
+      - pmat
+      - pzsh
+      - copia
+    depends_on: [rustup-install]
+    tags: [jetson, sovereign]
+
+  # ── Shell config with CUDA paths ───────────────────────────────
+  bashrc:
+    type: file
+    path: "{{inputs.home}}/.bashrc"
+    owner: "{{inputs.user}}"
+    mode: "0644"
+    content: |
+      # Sovereign AI Stack — managed by forjar
+      export PATH="$HOME/.cargo/bin:$HOME/.local/bin:/usr/local/bin:$PATH"
+      export CUDA_HOME=/usr/local/cuda
+      export PATH=$CUDA_HOME/bin:$PATH
+      export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH
+      alias ll='ls -alF'
+      alias gs='git status'
+      alias gl='git log --oneline -20'
+    depends_on: [stack-tools, cuda-toolkit]
+    tags: [jetson, config]
+
+  # ── Git config ─────────────────────────────────────────────────
+  gitconfig:
+    type: file
+    path: "{{inputs.home}}/.gitconfig"
+    owner: "{{inputs.user}}"
+    mode: "0644"
+    content: |
+      [user]
+          name = Noah Gift
+          email = noah@paiml.com
+      [core]
+          editor = vim
+      [pull]
+          rebase = true
+      [push]
+          default = current
+      [init]
+          defaultBranch = main
+    tags: [jetson, config]
