@@ -1788,3 +1788,33 @@ path = "examples/shell/shell_corpus_from_string.rs"
 [[example]]
 name = "shell_trie_prefix_completion"
 path = "examples/shell/shell_trie_prefix_completion.rs"
+
+# --- apr code agentic recipes (PMAT-074 expand-cookbooks) ---
+
+[[example]]
+name = "code_custom_agent_definition"
+path = "examples/code/code_custom_agent_definition.rs"
+
+[[example]]
+name = "code_skill_discovery"
+path = "examples/code/code_skill_discovery.rs"
+
+[[example]]
+name = "code_hook_session_start"
+path = "examples/code/code_hook_session_start.rs"
+
+[[example]]
+name = "code_mcp_client_config"
+path = "examples/code/code_mcp_client_config.rs"
+
+[[example]]
+name = "code_slash_command_extension"
+path = "examples/code/code_slash_command_extension.rs"
+
+[[example]]
+name = "code_subagent_spawn_payload"
+path = "examples/code/code_subagent_spawn_payload.rs"
+
+[[example]]
+name = "code_worktree_isolation_permission_mode"
+path = "examples/code/code_worktree_isolation_permission_mode.rs"

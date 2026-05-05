@@ -1474,11 +1474,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: apr code (Claude Code parity) recipes'
-  status: planned
+  status: inprogress
   priority: high
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T16:01:08.963339751+00:00
   spec: null
   acceptance_criteria:
   - '7 recipes for apr-code-parity-v1.yaml: mcp-client-register, slash-command, hook-session-start, subagent-spawn, custom-agent-discovery, skill-discovery, worktree+permission. Per recipe-catalog.md code/ section.'
