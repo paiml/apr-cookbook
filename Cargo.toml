@@ -1732,3 +1732,17 @@ path = "examples/monte-carlo/mc_value_at_risk_historical_vs_parametric.rs"
 [[example]]
 name = "mc_business_revenue_forecast"
 path = "examples/monte-carlo/mc_business_revenue_forecast.rs"
+
+# --- aprender-contracts-macros recipes (PMAT-084 expand-cookbooks) ---
+
+[[example]]
+name = "contracts_macros_attribute_basic"
+path = "examples/contracts-macros/contracts_macros_attribute_basic.rs"
+
+[[example]]
+name = "contracts_macros_env_key_convention"
+path = "examples/contracts-macros/contracts_macros_env_key_convention.rs"
+
+[[example]]
+name = "contracts_macros_runtime_validator_bridge"
+path = "examples/contracts-macros/contracts_macros_runtime_validator_bridge.rs"
