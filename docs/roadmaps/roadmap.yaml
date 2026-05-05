@@ -1321,11 +1321,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Migrate alimentar examples + book'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-04T20:32:17Z
-  updated: 2026-05-04T20:32:17Z
+  updated: 2026-05-05T12:01:14.695195619+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-101 (renumbered). Copy 18 alimentar examples to examples/data-loading/ with IIUR header retrofit (RecipeContext, Contract+Citation header, tests module, remove unwrap-allow blocks). Copy ~95 book chapters to book/src/data-loading/ (drop development/ + ecosystem/). Wire examples into Cargo.toml.
