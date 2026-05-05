@@ -1911,3 +1911,41 @@ path = "examples/analysis/analysis_json_schema_draft7_meta_validation.rs"
 [[example]]
 name = "distill_against_contract_v1"
 path = "examples/distillation/distill_against_contract_v1.rs"
+
+# --- apr stamp + compare-hf + check (PMAT-088 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_stamp_provenance_basic"
+path = "examples/cli/cli_stamp_provenance_basic.rs"
+
+[[example]]
+name = "cli_stamp_preserves_tensor_bytes"
+path = "examples/cli/cli_stamp_preserves_tensor_bytes.rs"
+
+[[example]]
+name = "cli_stamp_spdx_validation"
+path = "examples/cli/cli_stamp_spdx_validation.rs"
+
+[[example]]
+name = "cli_compare_hf_tensor_filter"
+path = "examples/cli/cli_compare_hf_tensor_filter.rs"
+
+[[example]]
+name = "cli_compare_hf_threshold_gate"
+path = "examples/cli/cli_compare_hf_threshold_gate.rs"
+
+[[example]]
+name = "cli_compare_hf_offline_safety"
+path = "examples/cli/cli_compare_hf_offline_safety.rs"
+
+[[example]]
+name = "cli_check_pipeline_integrity_smoke"
+path = "examples/cli/cli_check_pipeline_integrity_smoke.rs"
+
+[[example]]
+name = "cli_check_skip_contract_diagnostic"
+path = "examples/cli/cli_check_skip_contract_diagnostic.rs"
+
+[[example]]
+name = "cli_check_json_output_schema"
+path = "examples/cli/cli_check_json_output_schema.rs"

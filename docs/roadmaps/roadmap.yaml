@@ -1736,3 +1736,23 @@ roadmap:
   - expand-cookbooks
   - spec
   notes: null
+- id: PMAT-088
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND-FOLLOWUP: apr stamp + compare-hf + check recipes (9 recipes)'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T21:06:39Z
+  updated: 2026-05-05T21:06:39Z
+  spec: null
+  acceptance_criteria:
+  - 'Follow-up to expand-cookbooks initiative. Found 2 apr subcommands with 0 recipes (stamp, compare-hf) and 1 with thin coverage (check). Author 3 recipes per surface = 9 total. Targets: apr stamp (provenance: license/data_source/data_license fields), apr compare-hf (APR vs HuggingFace source comparison), apr check (10-stage pipeline integrity per APR-TRACE-001).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - followup
+  - recipes
+  notes: null
