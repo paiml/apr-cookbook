@@ -1493,11 +1493,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: GPU/CPU oracle bisection recipes'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:28.414934974+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes: cli_trace_save_tensor_layer0, cli_diff_values_aprt_stage, analysis_cpu_vs_gpu_parity_gate. Per gap-inventory.md Tier 1 1.1.'
