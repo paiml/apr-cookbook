@@ -2139,3 +2139,41 @@ path = "examples/cli/cli_qa_warmup_iteration_budget.rs"
 [[example]]
 name = "cli_qa_safetensors_parity_required"
 path = "examples/cli/cli_qa_safetensors_parity_required.rs"
+
+# --- cbtop / qualify / rosetta coverage (PMAT-094 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_cbtop_ci_threshold_gate"
+path = "examples/cli/cli_cbtop_ci_threshold_gate.rs"
+
+[[example]]
+name = "cli_cbtop_speculative_decoding_envelope"
+path = "examples/cli/cli_cbtop_speculative_decoding_envelope.rs"
+
+[[example]]
+name = "cli_cbtop_headless_json_schema"
+path = "examples/cli/cli_cbtop_headless_json_schema.rs"
+
+[[example]]
+name = "cli_qualify_tier_progression"
+path = "examples/cli/cli_qualify_tier_progression.rs"
+
+[[example]]
+name = "cli_qualify_skip_list_filter"
+path = "examples/cli/cli_qualify_skip_list_filter.rs"
+
+[[example]]
+name = "cli_qualify_timeout_budget"
+path = "examples/cli/cli_qualify_timeout_budget.rs"
+
+[[example]]
+name = "cli_rosetta_chain_planner"
+path = "examples/cli/cli_rosetta_chain_planner.rs"
+
+[[example]]
+name = "cli_rosetta_round_trip_verify"
+path = "examples/cli/cli_rosetta_round_trip_verify.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_stats"
+path = "examples/cli/cli_rosetta_fingerprint_stats.rs"
