@@ -123,6 +123,15 @@ arrow = { version = "57", default-features = false, features = ["prettyprint", "
 # Note: serde_yaml moved to [dependencies] by PMAT-065 (validate_recipe in lib);
 # PMAT-067's visualization validator uses the same dep transitively.
 
+# Sister crates (PMAT-073 expand-cookbooks: 6 crates, 18 recipes minimum).
+# Lib names differ from package names — see subcrate-coverage.md for usage.
+aprender-mcp = "0.31.2"               # lib `aprender_mcp`
+aprender-tsp = "0.31.2"               # lib `aprender_tsp`
+aprender-shell = "0.31.2"             # lib `aprender_shell`
+aprender-monte-carlo = "0.31.2"       # lib `aprender_monte_carlo`
+aprender-cgp = "0.31.2"               # lib `cgp` (CUDA feature opt-in via local cargo features)
+aprender-contracts-macros = "0.31.2"  # lib `provable_contracts_macros` (proc-macro)
+
 # ---------------------------------------------------------------------------
 # Local-development patch: point the four APR-MONO deps at a co-checked-out
 # ../aprender monorepo instead of the crates.io-published versions. Uncomment
@@ -1695,3 +1704,87 @@ path = "examples/data-loading/tui_viewer.rs"
 [[example]]
 name = "load_visualization"
 path = "examples/visualization/load_visualization.rs"
+
+# --- aprender-mcp embedded recipes (PMAT-079 expand-cookbooks) ---
+
+[[example]]
+name = "mcp_embedded_initialize_handshake"
+path = "examples/mcp/mcp_embedded_initialize_handshake.rs"
+
+[[example]]
+name = "mcp_embedded_tools_list_discovery"
+path = "examples/mcp/mcp_embedded_tools_list_discovery.rs"
+
+[[example]]
+name = "mcp_embedded_protocol_invariants"
+path = "examples/mcp/mcp_embedded_protocol_invariants.rs"
+
+# --- aprender-monte-carlo recipes (PMAT-082 expand-cookbooks) ---
+
+[[example]]
+name = "mc_stock_price_simulation_gbm"
+path = "examples/monte-carlo/mc_stock_price_simulation_gbm.rs"
+
+[[example]]
+name = "mc_value_at_risk_historical_vs_parametric"
+path = "examples/monte-carlo/mc_value_at_risk_historical_vs_parametric.rs"
+
+[[example]]
+name = "mc_business_revenue_forecast"
+path = "examples/monte-carlo/mc_business_revenue_forecast.rs"
+
+# --- aprender-contracts-macros recipes (PMAT-084 expand-cookbooks) ---
+
+[[example]]
+name = "contracts_macros_attribute_basic"
+path = "examples/contracts-macros/contracts_macros_attribute_basic.rs"
+
+[[example]]
+name = "contracts_macros_env_key_convention"
+path = "examples/contracts-macros/contracts_macros_env_key_convention.rs"
+
+[[example]]
+name = "contracts_macros_runtime_validator_bridge"
+path = "examples/contracts-macros/contracts_macros_runtime_validator_bridge.rs"
+
+# --- aprender-tsp recipes (PMAT-080 expand-cookbooks) ---
+
+[[example]]
+name = "tsp_solve_with_tabu"
+path = "examples/tsp/tsp_solve_with_tabu.rs"
+
+[[example]]
+name = "tsp_distance_matrix_explicit"
+path = "examples/tsp/tsp_distance_matrix_explicit.rs"
+
+[[example]]
+name = "tsp_compare_tabu_vs_genetic"
+path = "examples/tsp/tsp_compare_tabu_vs_genetic.rs"
+
+# --- aprender-cgp recipes (PMAT-083 expand-cookbooks) ---
+
+[[example]]
+name = "cgp_regression_detector_baseline_vs_current"
+path = "examples/cgp/cgp_regression_detector_baseline_vs_current.rs"
+
+[[example]]
+name = "cgp_roofline_classify_kernel"
+path = "examples/cgp/cgp_roofline_classify_kernel.rs"
+
+[[example]]
+name = "cgp_roofline_ridge_point_per_precision"
+path = "examples/cgp/cgp_roofline_ridge_point_per_precision.rs"
+
+# --- aprender-shell recipes (PMAT-081 expand-cookbooks) ---
+
+[[example]]
+name = "shell_history_parse_zsh"
+path = "examples/shell/shell_history_parse_zsh.rs"
+
+[[example]]
+name = "shell_corpus_from_string"
+path = "examples/shell/shell_corpus_from_string.rs"
+
+[[example]]
+name = "shell_trie_prefix_completion"
+path = "examples/shell/shell_trie_prefix_completion.rs"
