@@ -1512,11 +1512,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: apr publish end-to-end recipes'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:30.254246762+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes for publish-manifest-v1: publish_manifest_full, validate_manifest_live_safetensors_dtype, parent_chain. Per gap-inventory.md Tier 1 1.3.'
