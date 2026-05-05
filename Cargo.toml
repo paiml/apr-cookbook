@@ -1987,3 +1987,41 @@ path = "examples/lint/gptq_lint_cosine_violation.rs"
 [[example]]
 name = "gptq_lint_flag_combinations"
 path = "examples/lint/gptq_lint_flag_combinations.rs"
+
+# --- registry / cache lint coverage (PMAT-090 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_quota_lint_happy"
+path = "examples/lint/registry_quota_lint_happy.rs"
+
+[[example]]
+name = "registry_quota_lint_atomic_violation"
+path = "examples/lint/registry_quota_lint_atomic_violation.rs"
+
+[[example]]
+name = "registry_quota_lint_tenant_overage"
+path = "examples/lint/registry_quota_lint_tenant_overage.rs"
+
+[[example]]
+name = "rm_gc_lint_happy"
+path = "examples/lint/rm_gc_lint_happy.rs"
+
+[[example]]
+name = "rm_gc_lint_orphan_detection"
+path = "examples/lint/rm_gc_lint_orphan_detection.rs"
+
+[[example]]
+name = "rm_gc_lint_refcount_conservation"
+path = "examples/lint/rm_gc_lint_refcount_conservation.rs"
+
+[[example]]
+name = "shared_cache_lint_happy"
+path = "examples/lint/shared_cache_lint_happy.rs"
+
+[[example]]
+name = "shared_cache_lint_dedup_audit"
+path = "examples/lint/shared_cache_lint_dedup_audit.rs"
+
+[[example]]
+name = "shared_cache_lint_permission_matrix"
+path = "examples/lint/shared_cache_lint_permission_matrix.rs"
