@@ -1760,3 +1760,31 @@ path = "examples/tsp/tsp_distance_matrix_explicit.rs"
 [[example]]
 name = "tsp_compare_tabu_vs_genetic"
 path = "examples/tsp/tsp_compare_tabu_vs_genetic.rs"
+
+# --- aprender-cgp recipes (PMAT-083 expand-cookbooks) ---
+
+[[example]]
+name = "cgp_regression_detector_baseline_vs_current"
+path = "examples/cgp/cgp_regression_detector_baseline_vs_current.rs"
+
+[[example]]
+name = "cgp_roofline_classify_kernel"
+path = "examples/cgp/cgp_roofline_classify_kernel.rs"
+
+[[example]]
+name = "cgp_roofline_ridge_point_per_precision"
+path = "examples/cgp/cgp_roofline_ridge_point_per_precision.rs"
+
+# --- aprender-shell recipes (PMAT-081 expand-cookbooks) ---
+
+[[example]]
+name = "shell_history_parse_zsh"
+path = "examples/shell/shell_history_parse_zsh.rs"
+
+[[example]]
+name = "shell_corpus_from_string"
+path = "examples/shell/shell_corpus_from_string.rs"
+
+[[example]]
+name = "shell_trie_prefix_completion"
+path = "examples/shell/shell_trie_prefix_completion.rs"
