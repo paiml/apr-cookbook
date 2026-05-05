@@ -1818,3 +1818,12 @@ path = "examples/code/code_subagent_spawn_payload.rs"
 [[example]]
 name = "code_worktree_isolation_permission_mode"
 path = "examples/code/code_worktree_isolation_permission_mode.rs"
+# --- apr serve recipes (PMAT-077 expand-cookbooks) ---
+
+[[example]]
+name = "serve_anthropic_messages_api_drop_in"
+path = "examples/serve/serve_anthropic_messages_api_drop_in.rs"
+
+[[example]]
+name = "serve_plan_hf_dryrun_no_weights"
+path = "examples/serve/serve_plan_hf_dryrun_no_weights.rs"
