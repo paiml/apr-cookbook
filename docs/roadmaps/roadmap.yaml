@@ -1588,11 +1588,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: aprender-tsp recipes'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:37.621664524+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes: tsp_personalized_route_apr, tsp_local_2opt_optimization, tsp_train_personalized_apr_model.'
