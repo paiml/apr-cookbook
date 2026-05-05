@@ -1607,11 +1607,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: aprender-shell recipes'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:39.468019221+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes: shell_history_to_apr_corpus, shell_completion_train_local, shell_completion_serve_inline.'
