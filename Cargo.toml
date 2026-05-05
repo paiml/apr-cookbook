@@ -123,6 +123,15 @@ arrow = { version = "57", default-features = false, features = ["prettyprint", "
 # Note: serde_yaml moved to [dependencies] by PMAT-065 (validate_recipe in lib);
 # PMAT-067's visualization validator uses the same dep transitively.
 
+# Sister crates (PMAT-073 expand-cookbooks: 6 crates, 18 recipes minimum).
+# Lib names differ from package names — see subcrate-coverage.md for usage.
+aprender-mcp = "0.31.2"               # lib `aprender_mcp`
+aprender-tsp = "0.31.2"               # lib `aprender_tsp`
+aprender-shell = "0.31.2"             # lib `aprender_shell`
+aprender-monte-carlo = "0.31.2"       # lib `aprender_monte_carlo`
+aprender-cgp = "0.31.2"               # lib `cgp` (CUDA feature opt-in via local cargo features)
+aprender-contracts-macros = "0.31.2"  # lib `provable_contracts_macros` (proc-macro)
+
 # ---------------------------------------------------------------------------
 # Local-development patch: point the four APR-MONO deps at a co-checked-out
 # ../aprender monorepo instead of the crates.io-published versions. Uncomment
