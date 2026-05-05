@@ -1683,11 +1683,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: Tier 3 perf bench recipes'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:46.769535208+00:00
   spec: null
   acceptance_criteria:
   - '5 recipes: moe_rayon_dispatch_bench, mmap_per_tensor_diff_bench, bundle_streaming_q4k_large, conversion_gguf_legacy_quant_fallback, inference_qwen3_moe_numerical_parity.'
