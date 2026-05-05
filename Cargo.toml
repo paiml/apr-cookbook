@@ -1718,3 +1718,17 @@ path = "examples/mcp/mcp_embedded_tools_list_discovery.rs"
 [[example]]
 name = "mcp_embedded_protocol_invariants"
 path = "examples/mcp/mcp_embedded_protocol_invariants.rs"
+
+# --- aprender-monte-carlo recipes (PMAT-082 expand-cookbooks) ---
+
+[[example]]
+name = "mc_stock_price_simulation_gbm"
+path = "examples/monte-carlo/mc_stock_price_simulation_gbm.rs"
+
+[[example]]
+name = "mc_value_at_risk_historical_vs_parametric"
+path = "examples/monte-carlo/mc_value_at_risk_historical_vs_parametric.rs"
+
+[[example]]
+name = "mc_business_revenue_forecast"
+path = "examples/monte-carlo/mc_business_revenue_forecast.rs"
