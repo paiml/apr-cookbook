@@ -2177,3 +2177,41 @@ path = "examples/cli/cli_rosetta_round_trip_verify.rs"
 [[example]]
 name = "cli_rosetta_fingerprint_stats"
 path = "examples/cli/cli_rosetta_fingerprint_stats.rs"
+
+# --- diagnose / decrypt / tokenize coverage (PMAT-095 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_diagnose_five_whys_chain"
+path = "examples/cli/cli_diagnose_five_whys_chain.rs"
+
+[[example]]
+name = "cli_diagnose_jsonl_corpus_validator"
+path = "examples/cli/cli_diagnose_jsonl_corpus_validator.rs"
+
+[[example]]
+name = "cli_diagnose_model_size_inference"
+path = "examples/cli/cli_diagnose_model_size_inference.rs"
+
+[[example]]
+name = "cli_decrypt_invocation_envelope"
+path = "examples/cli/cli_decrypt_invocation_envelope.rs"
+
+[[example]]
+name = "cli_decrypt_key_format_validation"
+path = "examples/cli/cli_decrypt_key_format_validation.rs"
+
+[[example]]
+name = "cli_decrypt_aead_tag_verification"
+path = "examples/cli/cli_decrypt_aead_tag_verification.rs"
+
+[[example]]
+name = "cli_tokenize_plan_estimator"
+path = "examples/cli/cli_tokenize_plan_estimator.rs"
+
+[[example]]
+name = "cli_tokenize_hf_import_validation"
+path = "examples/cli/cli_tokenize_hf_import_validation.rs"
+
+[[example]]
+name = "cli_tokenize_corpus_shard_planner"
+path = "examples/cli/cli_tokenize_corpus_shard_planner.rs"
