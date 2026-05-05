@@ -1321,11 +1321,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Migrate alimentar examples + book'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-04T20:32:17Z
-  updated: 2026-05-04T20:32:17Z
+  updated: 2026-05-05T12:01:14.695195619+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-101 (renumbered). Copy 18 alimentar examples to examples/data-loading/ with IIUR header retrofit (RecipeContext, Contract+Citation header, tests module, remove unwrap-allow blocks). Copy ~95 book chapters to book/src/data-loading/ (drop development/ + ecosystem/). Wire examples into Cargo.toml.
@@ -1340,11 +1340,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Migrate presentar examples + book'
-  status: planned
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-04T20:32:24Z
-  updated: 2026-05-04T20:32:24Z
+  updated: 2026-05-05T12:01:17.036494316+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-102 (renumbered). Copy 28 .yaml/.prs configs to examples/visualization/{ald,apr,charts,dashboards,edge_cases,prs}/ preserving subdir layout. Author single load_visualization.rs validator per iiur-conformance.md Strategy B. Copy ~110 book chapters to book/src/visualization/ (drop development/ + ecosystem/).
@@ -1359,11 +1359,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Update Six Coverage Invariants for new categories'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-04T20:32:30Z
-  updated: 2026-05-04T20:32:30Z
+  updated: 2026-05-05T12:01:19.373862632+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-103 (renumbered). Update scripts/coverage-invariants.sh to extend B/C/D/E/F across deployment-stacks/data-loading/visualization/machines categories per iiur-conformance.md. Update MEMORY.md project-stats line. Update components/recipe-catalog.md with 4 new category tables.
@@ -1378,11 +1378,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-CENTRALIZE: Bump cookbook spec to v6.0.0 (umbrella scope)'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-04T20:32:35Z
-  updated: 2026-05-04T20:32:35Z
+  updated: 2026-05-05T12:01:21.692620711+00:00
   spec: null
   acceptance_criteria:
   - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-104 (renumbered). Bump apr-cookbook.md 5.0.0 → 6.0.0. Rewrite executive summary per scope.md. Update tech stack diagram with 4 new categories. Update README hero text and category list. Restructure book/src/SUMMARY.md per book-consolidation.md ordering policy. Tag v6.0.0.
