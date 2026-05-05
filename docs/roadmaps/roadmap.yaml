@@ -1569,11 +1569,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: aprender-mcp embedded recipes'
-  status: planned
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:35.814743580+00:00
   spec: null
   acceptance_criteria:
   - '3 recipes per subcrate-coverage.md: embedded_server_minimal, embedded_register_custom_tool, embedded_byte_parity_pmcp.'
