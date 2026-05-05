@@ -1721,11 +1721,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: 'PMAT-EXPAND: Bump cookbook spec to v6.1.0 + tag'
-  status: planned
+  status: completed
   priority: low
   assigned_to: null
   created: 2026-05-05T14:11:26Z
-  updated: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:50.433081718+00:00
   spec: null
   acceptance_criteria:
   - Bump apr-cookbook.md 6.0.0->6.1.0; update tech stack diagram with 6 new categories + sister crates; README umbrella scope refresh; tag v6.1.0. Closes expand-cookbooks initiative.
