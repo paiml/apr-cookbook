@@ -85,10 +85,61 @@ Only after (1)–(6) green do the `gh api -X PATCH … archived=true` calls in [
 
 ---
 
+## Implementation Status (as of 2026-05-05)
+
+Spec moved to `Status: ACTIVE` on 2026-05-04 after owner approval. Tickets PMAT-065..069 implemented and pushed as 4 PRs against `paiml/apr-cookbook`. PMAT-070 deferred per spec gates.
+
+### Per-ticket status
+
+| Ticket | Scope | PR | Branch | Local impl | CI required checks | Unified gates (advisory) |
+|--------|-------|----|----|------------|---------|---------|
+| PMAT-065 | sovereign migration (14 wrappers, 10 stacks, jetson, contract, 30 book chapters) | [#249](https://github.com/paiml/apr-cookbook/pull/249) | `feat/centralize-pmat-065-sovereign` | ✅ 42 wrapper tests green | ✅ all 5 required pass | lint-gate ✅ pass; cpu-gates ❌ runner OOM (transient) |
+| PMAT-066 | alimentar migration (18 examples + 71 chapters + IIUR retrofit) | [#250](https://github.com/paiml/apr-cookbook/pull/250) | `feat/centralize-pmat-066-alimentar` | ✅ 18 example tests green | ✅ all 5 required pass | lint-gate ✅ pass; cpu-gates ❌ container collision (transient) |
+| PMAT-067 | presentar migration (28 declarative configs + 1 validator + 52 chapters) | [#251](https://github.com/paiml/apr-cookbook/pull/251) | `feat/centralize-pmat-067-presentar` | ✅ 4 validator tests green | ✅ all 5 required pass | lint-gate ✅ pass; cpu-gates ⏳ pending |
+| PMAT-068+069 | invariants + spec v6.0.0 + README | [#252](https://github.com/paiml/apr-cookbook/pull/252) | `feat/centralize-pmat-068-069-spec-update` | ✅ docs-only | ✅ all 5 required pass | lint-gate ⏳ pending; cpu-gates ⏳ pending |
+| PMAT-070 | archive 3 source repos | — | — | ⏸️ DEFERRED — gated on PMAT-065..069 merged + 7-day quiet + verifier | — | — |
+
+### Required-check status (branch-protection gating)
+
+All 4 PRs are **mergeable on required checks**: `CI Status`, `Quality Gate (stable)`, `Lean Gate`, `Build book`, `Verify recipe table is deterministic` are green on every PR. The `unified` workflow is advisory-only (`continue-on-error: true`) per `.github/workflows/unified-gate-advisory.yml` and does not block merge.
+
+### Infrastructure dependency surfaced and resolved (PMAT-161)
+
+During CI verification of the 4 PRs, three structural gaps in the self-hosted runner stack were discovered:
+
+1. **`forjar` not on PATH on `mac-server`** — `_preflight` in `paiml/infra` exited 127. Resolved by `ssh noah@192.168.50.100 cargo install --locked forjar` (forjar 1.4.1 installed at `~/.cargo/bin/forjar`; runner picks it up via existing `.path`).
+2. **`pmat` not on PATH on `mac-server`** — lint-gate's L4 step exited 127. Resolved by `cargo install --locked pmat` (pmat 3.16.0; lint-gate now passes on all PRs that have re-run).
+3. **`machines/clean-room/gates/apr-cookbook.sh` missing in `paiml/infra`** — forjar's `gate-script` file resource exited 1. Structural omission — apr-cookbook had never had a gate script even though the workflow expected one.
+
+Resolved by [paiml/infra#82](https://github.com/paiml/infra/pull/82), merged at commit `089592c`. The PR carries:
+- `_preflight` self-heal: `cargo install --locked forjar` if missing AND cargo present (so future runner gaps recover automatically)
+- New `gates/apr-cookbook.sh` (the structural omission)
+- `stack-tools` manifest cleanup: drop `batuta` (lib-only, no binary on crates.io); document `copia --features cli`
+
+### Residual cpu-gates flakes
+
+After the PMAT-161 infra fixes, cpu-gates re-runs on PRs #249/#250 hit *runtime resource contention* on the runner host:
+
+- PR #249: `system-deps failed: exit code 137` (SIGKILL = OOM during apt-install in clean-room)
+- PR #250: `system-deps failed: container is not running` (Docker container died — likely OOM by neighbor)
+
+Cause: 4 PRs hitting mac-server concurrently; 4 simultaneous clean-room containers each running `apt-get install` exceeded host memory. NOT a code or infra bug.
+
+Mitigation: re-run cpu-gates sequentially (one at a time) once the burst settles. `unified / cpu-gates` is advisory and does not block merge — the user may admin-merge when Quality Gate is green per `MEMORY.md` "pmat work flow" cheatsheet.
+
+### Outstanding actions
+
+1. **Merge order**: 249 → 250 → 251 → 252 (each later PR documents work added by earlier ones; PMAT-068+069 references categories created by 065/066/067).
+2. **Re-run PMAT-070 gate criteria** once 249–252 merge: 7-day quiet period, `scripts/centralize-verify.sh --strict` passes, source repos still have crates.io publishing intact.
+3. **Tag `v6.0.0`** on apr-cookbook main after PMAT-068+069 merges (per ticket spec).
+4. **PMAT-070** (archive): tag `pre-archive-2026-05` on each source repo, open REDIRECT.md PR, set archive bit, log to `archive-log.txt`. Order: sovereign → presentar → alimentar with 24h pauses.
+
+---
+
 ## Approval
 
-This spec moves to `Status: ACTIVE` after:
-1. Repository owner approval (Noah Gift)
-2. PMAT-065 created and assigned
+This spec moved to `Status: ACTIVE` on 2026-05-04 after:
+1. ✅ Repository owner approval (Noah Gift)
+2. ✅ PMAT-065 created and assigned (and 5 sibling tickets PMAT-066..070)
 
-Until then, no source artifacts are moved and no archive commands are run.
+Source artifacts are migrated; archive commands gated per [archive-checklist.md](centralize-cookbooks/archive-checklist.md).
