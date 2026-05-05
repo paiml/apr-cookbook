@@ -2063,3 +2063,41 @@ path = "examples/lint/imatrix_lint_nan_detection.rs"
 [[example]]
 name = "imatrix_lint_corpus_entropy"
 path = "examples/lint/imatrix_lint_corpus_entropy.rs"
+
+# --- embeddings / unified-search / grad-norm lint coverage (PMAT-092 expand-cookbooks followup) ---
+
+[[example]]
+name = "embeddings_lint_happy"
+path = "examples/lint/embeddings_lint_happy.rs"
+
+[[example]]
+name = "embeddings_lint_l2_norm_check"
+path = "examples/lint/embeddings_lint_l2_norm_check.rs"
+
+[[example]]
+name = "embeddings_lint_dim_consistency"
+path = "examples/lint/embeddings_lint_dim_consistency.rs"
+
+[[example]]
+name = "unified_search_lint_happy"
+path = "examples/lint/unified_search_lint_happy.rs"
+
+[[example]]
+name = "unified_search_lint_rrf_recompute"
+path = "examples/lint/unified_search_lint_rrf_recompute.rs"
+
+[[example]]
+name = "unified_search_lint_offline_consistency"
+path = "examples/lint/unified_search_lint_offline_consistency.rs"
+
+[[example]]
+name = "grad_norm_happy"
+path = "examples/lint/grad_norm_happy.rs"
+
+[[example]]
+name = "grad_norm_spike_detection"
+path = "examples/lint/grad_norm_spike_detection.rs"
+
+[[example]]
+name = "grad_norm_divergence_run"
+path = "examples/lint/grad_norm_divergence_run.rs"
