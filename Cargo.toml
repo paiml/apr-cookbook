@@ -1949,3 +1949,41 @@ path = "examples/cli/cli_check_skip_contract_diagnostic.rs"
 [[example]]
 name = "cli_check_json_output_schema"
 path = "examples/cli/cli_check_json_output_schema.rs"
+
+# --- FP8 / NF4 / GPTQ lint coverage (PMAT-089 expand-cookbooks followup) ---
+
+[[example]]
+name = "fp8_lint_happy"
+path = "examples/lint/fp8_lint_happy.rs"
+
+[[example]]
+name = "fp8_lint_saturation_violation"
+path = "examples/lint/fp8_lint_saturation_violation.rs"
+
+[[example]]
+name = "fp8_lint_capability_gate"
+path = "examples/lint/fp8_lint_capability_gate.rs"
+
+[[example]]
+name = "nf4_lint_happy"
+path = "examples/lint/nf4_lint_happy.rs"
+
+[[example]]
+name = "nf4_lint_codebook_violation"
+path = "examples/lint/nf4_lint_codebook_violation.rs"
+
+[[example]]
+name = "nf4_lint_double_quant_parity"
+path = "examples/lint/nf4_lint_double_quant_parity.rs"
+
+[[example]]
+name = "gptq_lint_happy"
+path = "examples/lint/gptq_lint_happy.rs"
+
+[[example]]
+name = "gptq_lint_cosine_violation"
+path = "examples/lint/gptq_lint_cosine_violation.rs"
+
+[[example]]
+name = "gptq_lint_flag_combinations"
+path = "examples/lint/gptq_lint_flag_combinations.rs"
