@@ -4359,3 +4359,41 @@ path = "examples/gpu/gpu_cuda_graph_capture.rs"
 [[example]]
 name = "gpu_shared_mem_bank"
 path = "examples/gpu/gpu_shared_mem_bank.rs"
+
+# --- bundling / conversion / format round 4 (PMAT-153 post-milestone) ---
+
+[[example]]
+name = "bundle_zero_copy_handoff"
+path = "examples/bundling/bundle_zero_copy_handoff.rs"
+
+[[example]]
+name = "bundle_partial_load"
+path = "examples/bundling/bundle_partial_load.rs"
+
+[[example]]
+name = "bundle_signing_attestation"
+path = "examples/bundling/bundle_signing_attestation.rs"
+
+[[example]]
+name = "convert_safetensors_header_to_apr"
+path = "examples/conversion/convert_safetensors_header_to_apr.rs"
+
+[[example]]
+name = "convert_dtype_promote"
+path = "examples/conversion/convert_dtype_promote.rs"
+
+[[example]]
+name = "convert_quant_calibration"
+path = "examples/conversion/convert_quant_calibration.rs"
+
+[[example]]
+name = "format_pickle_safety"
+path = "examples/format/format_pickle_safety.rs"
+
+[[example]]
+name = "format_npy_header"
+path = "examples/format/format_npy_header.rs"
+
+[[example]]
+name = "format_protobuf_varint"
+path = "examples/format/format_protobuf_varint.rs"
