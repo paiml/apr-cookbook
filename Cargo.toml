@@ -5993,3 +5993,41 @@ path = "examples/tui/tui_status_history_compact.rs"
 [[example]]
 name = "tui_chart_legend_swatch"
 path = "examples/tui/tui_chart_legend_swatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-196) ---
+
+[[example]]
+name = "contracts_macros_obligation_audit_log"
+path = "examples/contracts-macros/contracts_macros_obligation_audit_log.rs"
+
+[[example]]
+name = "contracts_macros_yaml_anchor_unused"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_unused.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_runtime_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_runtime_audit.rs"
+
+[[example]]
+name = "mc_chi_squared_uniformity"
+path = "examples/monte-carlo/mc_chi_squared_uniformity.rs"
+
+[[example]]
+name = "mc_walking_meander"
+path = "examples/monte-carlo/mc_walking_meander.rs"
+
+[[example]]
+name = "mc_priority_inversion_detect"
+path = "examples/monte-carlo/mc_priority_inversion_detect.rs"
+
+[[example]]
+name = "tui_button_kbd_mnemonic"
+path = "examples/tui/tui_button_kbd_mnemonic.rs"
+
+[[example]]
+name = "tui_input_max_length_indicator"
+path = "examples/tui/tui_input_max_length_indicator.rs"
+
+[[example]]
+name = "tui_overflow_marker_render"
+path = "examples/tui/tui_overflow_marker_render.rs"
