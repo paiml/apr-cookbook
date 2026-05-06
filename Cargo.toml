@@ -5879,3 +5879,41 @@ path = "examples/tui/tui_drag_drop_constrain.rs"
 [[example]]
 name = "tui_typeahead_completion"
 path = "examples/tui/tui_typeahead_completion.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-193) ---
+
+[[example]]
+name = "contracts_macros_obligation_type_consistency"
+path = "examples/contracts-macros/contracts_macros_obligation_type_consistency.rs"
+
+[[example]]
+name = "contracts_macros_yaml_dotted_path_lookup"
+path = "examples/contracts-macros/contracts_macros_yaml_dotted_path_lookup.rs"
+
+[[example]]
+name = "contracts_macros_recipe_review_round_count"
+path = "examples/contracts-macros/contracts_macros_recipe_review_round_count.rs"
+
+[[example]]
+name = "mc_clock_drift_compensation"
+path = "examples/monte-carlo/mc_clock_drift_compensation.rs"
+
+[[example]]
+name = "mc_lru_admission_filter"
+path = "examples/monte-carlo/mc_lru_admission_filter.rs"
+
+[[example]]
+name = "mc_geo_distance_routing"
+path = "examples/monte-carlo/mc_geo_distance_routing.rs"
+
+[[example]]
+name = "tui_toast_notification_render"
+path = "examples/tui/tui_toast_notification_render.rs"
+
+[[example]]
+name = "tui_search_replace_preview"
+path = "examples/tui/tui_search_replace_preview.rs"
+
+[[example]]
+name = "tui_undo_redo_stack"
+path = "examples/tui/tui_undo_redo_stack.rs"
