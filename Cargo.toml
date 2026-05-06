@@ -3203,3 +3203,41 @@ path = "examples/cli/cli_tui_resize_event_throttle.rs"
 [[example]]
 name = "cli_tui_pager_buffer_planner"
 path = "examples/cli/cli_tui_pager_buffer_planner.rs"
+
+# --- speech / wasm / simd extension (PMAT-123 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_audio_format_validator"
+path = "examples/speech/speech_audio_format_validator.rs"
+
+[[example]]
+name = "speech_vad_threshold_classifier"
+path = "examples/speech/speech_vad_threshold_classifier.rs"
+
+[[example]]
+name = "speech_chunk_overlap_planner"
+path = "examples/speech/speech_chunk_overlap_planner.rs"
+
+[[example]]
+name = "wasm_memory_growth_policy"
+path = "examples/wasm/wasm_memory_growth_policy.rs"
+
+[[example]]
+name = "wasm_capability_check"
+path = "examples/wasm/wasm_capability_check.rs"
+
+[[example]]
+name = "wasm_module_cache_strategy"
+path = "examples/wasm/wasm_module_cache_strategy.rs"
+
+[[example]]
+name = "simd_alignment_validator"
+path = "examples/simd/simd_alignment_validator.rs"
+
+[[example]]
+name = "simd_unroll_factor_picker"
+path = "examples/simd/simd_unroll_factor_picker.rs"
+
+[[example]]
+name = "simd_horizontal_reduce_dispatcher"
+path = "examples/simd/simd_horizontal_reduce_dispatcher.rs"
