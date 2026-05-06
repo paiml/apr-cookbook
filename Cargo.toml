@@ -2861,3 +2861,41 @@ path = "examples/cli/cli_quantize_calibration_budget.rs"
 [[example]]
 name = "cli_quantize_scale_zero_point_validator"
 path = "examples/cli/cli_quantize_scale_zero_point_validator.rs"
+
+# --- distill / finetune / prune extension (PMAT-113 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_distill_layer_pairer"
+path = "examples/cli/cli_distill_layer_pairer.rs"
+
+[[example]]
+name = "cli_distill_loss_combiner"
+path = "examples/cli/cli_distill_loss_combiner.rs"
+
+[[example]]
+name = "cli_distill_ensemble_weighter"
+path = "examples/cli/cli_distill_ensemble_weighter.rs"
+
+[[example]]
+name = "cli_finetune_lora_rank_picker"
+path = "examples/cli/cli_finetune_lora_rank_picker.rs"
+
+[[example]]
+name = "cli_finetune_lr_scheduler_picker"
+path = "examples/cli/cli_finetune_lr_scheduler_picker.rs"
+
+[[example]]
+name = "cli_finetune_grad_accum_budget"
+path = "examples/cli/cli_finetune_grad_accum_budget.rs"
+
+[[example]]
+name = "cli_prune_wanda_activation_scorer"
+path = "examples/cli/cli_prune_wanda_activation_scorer.rs"
+
+[[example]]
+name = "cli_prune_sparsity_ramp_validator"
+path = "examples/cli/cli_prune_sparsity_ramp_validator.rs"
+
+[[example]]
+name = "cli_prune_lottery_ticket_warmup"
+path = "examples/cli/cli_prune_lottery_ticket_warmup.rs"
