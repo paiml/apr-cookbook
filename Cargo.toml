@@ -2785,3 +2785,41 @@ path = "examples/cli/cli_tensors_limit_truncator.rs"
 [[example]]
 name = "cli_tensors_stats_aggregator"
 path = "examples/cli/cli_tensors_stats_aggregator.rs"
+
+# --- parity / ptx / tune extension (PMAT-111 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_parity_token_divergence_classifier"
+path = "examples/cli/cli_parity_token_divergence_classifier.rs"
+
+[[example]]
+name = "cli_parity_default_prompt_envelope"
+path = "examples/cli/cli_parity_default_prompt_envelope.rs"
+
+[[example]]
+name = "cli_parity_assert_mode_exit_codes"
+path = "examples/cli/cli_parity_assert_mode_exit_codes.rs"
+
+[[example]]
+name = "cli_ptx_register_pressure_threshold"
+path = "examples/cli/cli_ptx_register_pressure_threshold.rs"
+
+[[example]]
+name = "cli_ptx_strict_mode_whitelist"
+path = "examples/cli/cli_ptx_strict_mode_whitelist.rs"
+
+[[example]]
+name = "cli_ptx_kernel_name_parser"
+path = "examples/cli/cli_ptx_kernel_name_parser.rs"
+
+[[example]]
+name = "cli_tune_strategy_picker"
+path = "examples/cli/cli_tune_strategy_picker.rs"
+
+[[example]]
+name = "cli_tune_scheduler_dispatcher"
+path = "examples/cli/cli_tune_scheduler_dispatcher.rs"
+
+[[example]]
+name = "cli_tune_budget_compat_matrix"
+path = "examples/cli/cli_tune_budget_compat_matrix.rs"
