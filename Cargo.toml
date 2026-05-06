@@ -3887,3 +3887,41 @@ path = "examples/gpu/gpu_warp_scheduler_dispatch.rs"
 [[example]]
 name = "gpu_l1_shared_mem_partition"
 path = "examples/gpu/gpu_l1_shared_mem_partition.rs"
+
+# --- distillation / monitoring / advanced round 3 (PMAT-141 expand-cookbooks followup) ---
+
+[[example]]
+name = "distill_quantile_calibration"
+path = "examples/distillation/distill_quantile_calibration.rs"
+
+[[example]]
+name = "distill_attention_transfer_loss"
+path = "examples/distillation/distill_attention_transfer_loss.rs"
+
+[[example]]
+name = "distill_intermediate_feature_match"
+path = "examples/distillation/distill_intermediate_feature_match.rs"
+
+[[example]]
+name = "monitor_log_sampling"
+path = "examples/monitoring/monitor_log_sampling.rs"
+
+[[example]]
+name = "monitor_capacity_planner"
+path = "examples/monitoring/monitor_capacity_planner.rs"
+
+[[example]]
+name = "monitor_circuit_log_emit"
+path = "examples/monitoring/monitor_circuit_log_emit.rs"
+
+[[example]]
+name = "adv_kv_cache_eviction"
+path = "examples/advanced/adv_kv_cache_eviction.rs"
+
+[[example]]
+name = "adv_chunked_prefill"
+path = "examples/advanced/adv_chunked_prefill.rs"
+
+[[example]]
+name = "adv_request_priority_router"
+path = "examples/advanced/adv_request_priority_router.rs"
