@@ -3279,3 +3279,41 @@ path = "examples/monitoring/monitor_sla_uptime_calc.rs"
 [[example]]
 name = "monitor_aggregation_window_dispatcher"
 path = "examples/monitoring/monitor_aggregation_window_dispatcher.rs"
+
+# --- chat / api / code extension (PMAT-125 expand-cookbooks followup) ---
+
+[[example]]
+name = "chat_role_state_machine"
+path = "examples/chat/chat_role_state_machine.rs"
+
+[[example]]
+name = "chat_token_budget_truncation"
+path = "examples/chat/chat_token_budget_truncation.rs"
+
+[[example]]
+name = "chat_template_renderer"
+path = "examples/chat/chat_template_renderer.rs"
+
+[[example]]
+name = "api_token_bucket_rate_limiter"
+path = "examples/api/api_token_bucket_rate_limiter.rs"
+
+[[example]]
+name = "api_request_id_correlation"
+path = "examples/api/api_request_id_correlation.rs"
+
+[[example]]
+name = "api_response_cache_ttl"
+path = "examples/api/api_response_cache_ttl.rs"
+
+[[example]]
+name = "code_diff_hunk_parser"
+path = "examples/code/code_diff_hunk_parser.rs"
+
+[[example]]
+name = "code_indent_normalizer"
+path = "examples/code/code_indent_normalizer.rs"
+
+[[example]]
+name = "code_lint_severity_aggregator"
+path = "examples/code/code_lint_severity_aggregator.rs"
