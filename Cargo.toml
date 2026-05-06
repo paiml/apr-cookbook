@@ -5347,3 +5347,41 @@ path = "examples/tui/tui_marquee_scroll.rs"
 [[example]]
 name = "tui_calendar_grid"
 path = "examples/tui/tui_calendar_grid.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-179) ---
+
+[[example]]
+name = "contracts_macros_obligation_count_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_count_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_unicode_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_unicode_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_orphan_detector"
+path = "examples/contracts-macros/contracts_macros_recipe_orphan_detector.rs"
+
+[[example]]
+name = "mc_load_balancer_least_conn"
+path = "examples/monte-carlo/mc_load_balancer_least_conn.rs"
+
+[[example]]
+name = "mc_request_coalescing"
+path = "examples/monte-carlo/mc_request_coalescing.rs"
+
+[[example]]
+name = "mc_circuit_breaker_recovery"
+path = "examples/monte-carlo/mc_circuit_breaker_recovery.rs"
+
+[[example]]
+name = "tui_breadcrumb_collapse"
+path = "examples/tui/tui_breadcrumb_collapse.rs"
+
+[[example]]
+name = "tui_color_contrast_pass"
+path = "examples/tui/tui_color_contrast_pass.rs"
+
+[[example]]
+name = "tui_keybinding_dispatch"
+path = "examples/tui/tui_keybinding_dispatch.rs"
