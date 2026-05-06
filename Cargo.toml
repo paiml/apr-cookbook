@@ -2519,3 +2519,41 @@ path = "examples/cli/cli_eval_dataset_dispatcher.rs"
 [[example]]
 name = "cli_eval_pass_at_k_temperature_pairing"
 path = "examples/cli/cli_eval_pass_at_k_temperature_pairing.rs"
+
+# --- pretrain / finetune / prune extension (PMAT-104 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_pretrain_divergence_guard"
+path = "examples/cli/cli_pretrain_divergence_guard.rs"
+
+[[example]]
+name = "cli_pretrain_mode_dispatcher"
+path = "examples/cli/cli_pretrain_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_pretrain_run_dir_layout"
+path = "examples/cli/cli_pretrain_run_dir_layout.rs"
+
+[[example]]
+name = "cli_finetune_method_picker"
+path = "examples/cli/cli_finetune_method_picker.rs"
+
+[[example]]
+name = "cli_finetune_checkpoint_format_csv"
+path = "examples/cli/cli_finetune_checkpoint_format_csv.rs"
+
+[[example]]
+name = "cli_finetune_merge_mode_envelope"
+path = "examples/cli/cli_finetune_merge_mode_envelope.rs"
+
+[[example]]
+name = "cli_prune_method_validator"
+path = "examples/cli/cli_prune_method_validator.rs"
+
+[[example]]
+name = "cli_prune_remove_layers_parser"
+path = "examples/cli/cli_prune_remove_layers_parser.rs"
+
+[[example]]
+name = "cli_prune_target_ratio_band"
+path = "examples/cli/cli_prune_target_ratio_band.rs"
