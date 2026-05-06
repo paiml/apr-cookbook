@@ -5233,3 +5233,41 @@ path = "examples/tui/tui_progress_indeterminate.rs"
 [[example]]
 name = "tui_password_mask"
 path = "examples/tui/tui_password_mask.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-176) ---
+
+[[example]]
+name = "contracts_macros_recipe_status_summary"
+path = "examples/contracts-macros/contracts_macros_recipe_status_summary.rs"
+
+[[example]]
+name = "contracts_macros_invariant_witness_pair"
+path = "examples/contracts-macros/contracts_macros_invariant_witness_pair.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_routing"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_routing.rs"
+
+[[example]]
+name = "mc_token_compress_ratio"
+path = "examples/monte-carlo/mc_token_compress_ratio.rs"
+
+[[example]]
+name = "mc_consensus_quorum_failure"
+path = "examples/monte-carlo/mc_consensus_quorum_failure.rs"
+
+[[example]]
+name = "mc_eviction_thrashing"
+path = "examples/monte-carlo/mc_eviction_thrashing.rs"
+
+[[example]]
+name = "tui_progress_multi_bar"
+path = "examples/tui/tui_progress_multi_bar.rs"
+
+[[example]]
+name = "tui_input_autocomplete"
+path = "examples/tui/tui_input_autocomplete.rs"
+
+[[example]]
+name = "tui_status_dot_indicator"
+path = "examples/tui/tui_status_dot_indicator.rs"
