@@ -3165,3 +3165,41 @@ path = "examples/cli/cli_pipeline_concurrency_limiter.rs"
 [[example]]
 name = "cli_pipeline_stage_skip_predicate"
 path = "examples/cli/cli_pipeline_stage_skip_predicate.rs"
+
+# --- contracts-macros / monte-carlo / tui extension (PMAT-122 expand-cookbooks followup) ---
+
+[[example]]
+name = "contracts_macros_multi_equation_dispatch"
+path = "examples/contracts-macros/contracts_macros_multi_equation_dispatch.rs"
+
+[[example]]
+name = "contracts_macros_pre_post_envelope"
+path = "examples/contracts-macros/contracts_macros_pre_post_envelope.rs"
+
+[[example]]
+name = "contracts_macros_no_op_degradation"
+path = "examples/contracts-macros/contracts_macros_no_op_degradation.rs"
+
+[[example]]
+name = "mc_correlated_portfolio_var"
+path = "examples/monte-carlo/mc_correlated_portfolio_var.rs"
+
+[[example]]
+name = "mc_mm1_queue_little_law"
+path = "examples/monte-carlo/mc_mm1_queue_little_law.rs"
+
+[[example]]
+name = "mc_safety_stock_planner"
+path = "examples/monte-carlo/mc_safety_stock_planner.rs"
+
+[[example]]
+name = "cli_tui_color_theme_dispatcher"
+path = "examples/cli/cli_tui_color_theme_dispatcher.rs"
+
+[[example]]
+name = "cli_tui_resize_event_throttle"
+path = "examples/cli/cli_tui_resize_event_throttle.rs"
+
+[[example]]
+name = "cli_tui_pager_buffer_planner"
+path = "examples/cli/cli_tui_pager_buffer_planner.rs"
