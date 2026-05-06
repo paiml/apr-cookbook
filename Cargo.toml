@@ -4267,3 +4267,41 @@ path = "examples/registry/registry_oci_index.rs"
 [[example]]
 name = "registry_pull_secret_validator"
 path = "examples/registry/registry_pull_secret_validator.rs"
+
+# --- wasm / monitoring / training (PMAT-151 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_relaxed_simd"
+path = "examples/wasm/wasm_relaxed_simd.rs"
+
+[[example]]
+name = "wasm_component_export"
+path = "examples/wasm/wasm_component_export.rs"
+
+[[example]]
+name = "wasm_function_table_growth"
+path = "examples/wasm/wasm_function_table_growth.rs"
+
+[[example]]
+name = "monitor_aggregation_window"
+path = "examples/monitoring/monitor_aggregation_window.rs"
+
+[[example]]
+name = "monitor_log_pii_redact"
+path = "examples/monitoring/monitor_log_pii_redact.rs"
+
+[[example]]
+name = "monitor_synthetic_probe"
+path = "examples/monitoring/monitor_synthetic_probe.rs"
+
+[[example]]
+name = "training_attention_dropout"
+path = "examples/training/training_attention_dropout.rs"
+
+[[example]]
+name = "training_label_smoothing"
+path = "examples/training/training_label_smoothing.rs"
+
+[[example]]
+name = "training_warmup_steps"
+path = "examples/training/training_warmup_steps.rs"
