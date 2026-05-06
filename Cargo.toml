@@ -5765,3 +5765,41 @@ path = "examples/tui/tui_window_layout_anchor.rs"
 [[example]]
 name = "tui_breadcrumb_search_filter"
 path = "examples/tui/tui_breadcrumb_search_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-190) ---
+
+[[example]]
+name = "contracts_macros_obligation_export_csv"
+path = "examples/contracts-macros/contracts_macros_obligation_export_csv.rs"
+
+[[example]]
+name = "contracts_macros_yaml_alias_resolution_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_alias_resolution_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signature_diff"
+path = "examples/contracts-macros/contracts_macros_recipe_signature_diff.rs"
+
+[[example]]
+name = "mc_random_graph_connectedness"
+path = "examples/monte-carlo/mc_random_graph_connectedness.rs"
+
+[[example]]
+name = "mc_throttle_token_bucket_fairness"
+path = "examples/monte-carlo/mc_throttle_token_bucket_fairness.rs"
+
+[[example]]
+name = "mc_warehouse_pick_path_length"
+path = "examples/monte-carlo/mc_warehouse_pick_path_length.rs"
+
+[[example]]
+name = "tui_clipboard_history_circular"
+path = "examples/tui/tui_clipboard_history_circular.rs"
+
+[[example]]
+name = "tui_progress_throughput_avg"
+path = "examples/tui/tui_progress_throughput_avg.rs"
+
+[[example]]
+name = "tui_resize_safe_truncate"
+path = "examples/tui/tui_resize_safe_truncate.rs"
