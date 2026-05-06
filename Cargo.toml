@@ -3241,3 +3241,41 @@ path = "examples/simd/simd_unroll_factor_picker.rs"
 [[example]]
 name = "simd_horizontal_reduce_dispatcher"
 path = "examples/simd/simd_horizontal_reduce_dispatcher.rs"
+
+# --- distributed / distillation / monitoring extension (PMAT-124 expand-cookbooks followup) ---
+
+[[example]]
+name = "distributed_shard_partition_planner"
+path = "examples/distributed/distributed_shard_partition_planner.rs"
+
+[[example]]
+name = "distributed_allreduce_strategy"
+path = "examples/distributed/distributed_allreduce_strategy.rs"
+
+[[example]]
+name = "distributed_failure_recovery"
+path = "examples/distributed/distributed_failure_recovery.rs"
+
+[[example]]
+name = "distill_temperature_search_envelope"
+path = "examples/distillation/distill_temperature_search_envelope.rs"
+
+[[example]]
+name = "distill_dataset_synth_ratio"
+path = "examples/distillation/distill_dataset_synth_ratio.rs"
+
+[[example]]
+name = "distill_self_distill_bootstrap"
+path = "examples/distillation/distill_self_distill_bootstrap.rs"
+
+[[example]]
+name = "monitor_anomaly_z_score_classifier"
+path = "examples/monitoring/monitor_anomaly_z_score_classifier.rs"
+
+[[example]]
+name = "monitor_sla_uptime_calc"
+path = "examples/monitoring/monitor_sla_uptime_calc.rs"
+
+[[example]]
+name = "monitor_aggregation_window_dispatcher"
+path = "examples/monitoring/monitor_aggregation_window_dispatcher.rs"
