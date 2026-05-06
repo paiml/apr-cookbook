@@ -2937,3 +2937,41 @@ path = "examples/cli/cli_monitor_drift_threshold_gate.rs"
 [[example]]
 name = "cli_monitor_log_rotation_budget"
 path = "examples/cli/cli_monitor_log_rotation_budget.rs"
+
+# --- encrypt / profile / import extension (PMAT-115 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_encrypt_kdf_iterations_validator"
+path = "examples/cli/cli_encrypt_kdf_iterations_validator.rs"
+
+[[example]]
+name = "cli_encrypt_nonce_uniqueness_checker"
+path = "examples/cli/cli_encrypt_nonce_uniqueness_checker.rs"
+
+[[example]]
+name = "cli_encrypt_aad_envelope"
+path = "examples/cli/cli_encrypt_aad_envelope.rs"
+
+[[example]]
+name = "cli_profile_sampling_rate_budget"
+path = "examples/cli/cli_profile_sampling_rate_budget.rs"
+
+[[example]]
+name = "cli_profile_flame_depth_limit"
+path = "examples/cli/cli_profile_flame_depth_limit.rs"
+
+[[example]]
+name = "cli_profile_hot_function_classifier"
+path = "examples/cli/cli_profile_hot_function_classifier.rs"
+
+[[example]]
+name = "cli_import_format_auto_detector"
+path = "examples/cli/cli_import_format_auto_detector.rs"
+
+[[example]]
+name = "cli_import_dtype_coercion_validator"
+path = "examples/cli/cli_import_dtype_coercion_validator.rs"
+
+[[example]]
+name = "cli_import_sharding_plan_validator"
+path = "examples/cli/cli_import_sharding_plan_validator.rs"

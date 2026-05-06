@@ -1804,3 +1804,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-092
+  github_issue: null
+  item_type: task
+  title: 'PMAT-115: apr encrypt + profile + import (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T06:57:38Z
+  updated: 2026-05-06T06:57:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
