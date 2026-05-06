@@ -2595,3 +2595,41 @@ path = "examples/cli/cli_merge_weights_csv_parser.rs"
 [[example]]
 name = "cli_merge_dare_drop_rate_band"
 path = "examples/cli/cli_merge_dare_drop_rate_band.rs"
+
+# --- distill / train / data extension (PMAT-106 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_distill_strategy_dispatcher"
+path = "examples/cli/cli_distill_strategy_dispatcher.rs"
+
+[[example]]
+name = "cli_distill_temperature_alpha_band"
+path = "examples/cli/cli_distill_temperature_alpha_band.rs"
+
+[[example]]
+name = "cli_distill_stage_dispatcher"
+path = "examples/cli/cli_distill_stage_dispatcher.rs"
+
+[[example]]
+name = "cli_train_watch_restart_policy"
+path = "examples/cli/cli_train_watch_restart_policy.rs"
+
+[[example]]
+name = "cli_train_sweep_grid_generator"
+path = "examples/cli/cli_train_sweep_grid_generator.rs"
+
+[[example]]
+name = "cli_train_halving_round_planner"
+path = "examples/cli/cli_train_halving_round_planner.rs"
+
+[[example]]
+name = "cli_data_split_stratified_ratios"
+path = "examples/cli/cli_data_split_stratified_ratios.rs"
+
+[[example]]
+name = "cli_data_balance_strategy_picker"
+path = "examples/cli/cli_data_balance_strategy_picker.rs"
+
+[[example]]
+name = "cli_data_decontaminate_ngram_overlap"
+path = "examples/cli/cli_data_decontaminate_ngram_overlap.rs"
