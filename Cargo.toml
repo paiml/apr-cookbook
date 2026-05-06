@@ -5613,3 +5613,41 @@ path = "examples/tui/tui_command_line_history_dedupe.rs"
 [[example]]
 name = "tui_progress_band_color"
 path = "examples/tui/tui_progress_band_color.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-186) ---
+
+[[example]]
+name = "contracts_macros_obligation_satisfied_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_satisfied_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_comment_density"
+path = "examples/contracts-macros/contracts_macros_yaml_comment_density.rs"
+
+[[example]]
+name = "contracts_macros_recipe_diff_minimum"
+path = "examples/contracts-macros/contracts_macros_recipe_diff_minimum.rs"
+
+[[example]]
+name = "mc_dropout_dependency"
+path = "examples/monte-carlo/mc_dropout_dependency.rs"
+
+[[example]]
+name = "mc_traveling_salesman_random"
+path = "examples/monte-carlo/mc_traveling_salesman_random.rs"
+
+[[example]]
+name = "mc_bloom_filter_false_positive"
+path = "examples/monte-carlo/mc_bloom_filter_false_positive.rs"
+
+[[example]]
+name = "tui_split_button_render"
+path = "examples/tui/tui_split_button_render.rs"
+
+[[example]]
+name = "tui_text_search_match_count"
+path = "examples/tui/tui_text_search_match_count.rs"
+
+[[example]]
+name = "tui_aspect_ratio_grid"
+path = "examples/tui/tui_aspect_ratio_grid.rs"
