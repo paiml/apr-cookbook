@@ -5651,3 +5651,41 @@ path = "examples/tui/tui_text_search_match_count.rs"
 [[example]]
 name = "tui_aspect_ratio_grid"
 path = "examples/tui/tui_aspect_ratio_grid.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-187) ---
+
+[[example]]
+name = "contracts_macros_obligation_review_age"
+path = "examples/contracts-macros/contracts_macros_obligation_review_age.rs"
+
+[[example]]
+name = "contracts_macros_yaml_macros_expansion_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_macros_expansion_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_link_health"
+path = "examples/contracts-macros/contracts_macros_recipe_link_health.rs"
+
+[[example]]
+name = "mc_packet_loss_burst_pattern"
+path = "examples/monte-carlo/mc_packet_loss_burst_pattern.rs"
+
+[[example]]
+name = "mc_quorum_read_consistency"
+path = "examples/monte-carlo/mc_quorum_read_consistency.rs"
+
+[[example]]
+name = "mc_lazy_replication_lag"
+path = "examples/monte-carlo/mc_lazy_replication_lag.rs"
+
+[[example]]
+name = "tui_unicode_emoji_width"
+path = "examples/tui/tui_unicode_emoji_width.rs"
+
+[[example]]
+name = "tui_clipboard_paste_filter"
+path = "examples/tui/tui_clipboard_paste_filter.rs"
+
+[[example]]
+name = "tui_search_jump_list"
+path = "examples/tui/tui_search_jump_list.rs"
