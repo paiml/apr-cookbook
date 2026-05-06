@@ -187,16 +187,24 @@ case "${1:-}" in
             echo "Add $START_MARKER and $END_MARKER markers to README.md first."
             exit 1
         fi
-        # Replace block between markers
-        ESCAPED_BLOCK=$(echo "$FULL_BLOCK" | sed 's/[&/\]/\\&/g')
-        # Use awk for reliable multi-line replacement
-        awk -v start="$START_MARKER" -v end="$END_MARKER" -v block="$FULL_BLOCK" '
+        # Replace block between markers via temp file (FULL_BLOCK can exceed
+        # ARG_MAX once the catalog grows past ~1200 recipes).
+        BLOCK_FILE=$(mktemp)
+        printf '%s\n' "$FULL_BLOCK" > "$BLOCK_FILE"
+        awk -v start="$START_MARKER" -v end="$END_MARKER" -v block_file="$BLOCK_FILE" '
+            BEGIN {
+                printing=1
+                while ((getline line < block_file) > 0) {
+                    block = (block == "" ? line : block "\n" line)
+                }
+                close(block_file)
+            }
             $0 ~ start { printing=0; print block; next }
             $0 ~ end { printing=1; next }
             printing!=0 { print }
-            BEGIN { printing=1 }
         ' "$README" > "$README.tmp"
         mv "$README.tmp" "$README"
+        rm -f "$BLOCK_FILE"
         echo "Updated README.md with $TOTAL recipes"
         ;;
     *)
