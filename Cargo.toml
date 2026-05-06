@@ -3013,3 +3013,41 @@ path = "examples/cli/cli_diagnose_param_count_sanity.rs"
 [[example]]
 name = "cli_diagnose_weight_histogram_classifier"
 path = "examples/cli/cli_diagnose_weight_histogram_classifier.rs"
+
+# --- export / debug / pretrain extension (PMAT-117 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_export_target_dtype_validator"
+path = "examples/cli/cli_export_target_dtype_validator.rs"
+
+[[example]]
+name = "cli_export_opset_compat_matrix"
+path = "examples/cli/cli_export_opset_compat_matrix.rs"
+
+[[example]]
+name = "cli_export_output_naming_pattern"
+path = "examples/cli/cli_export_output_naming_pattern.rs"
+
+[[example]]
+name = "cli_debug_layer_glob_matcher"
+path = "examples/cli/cli_debug_layer_glob_matcher.rs"
+
+[[example]]
+name = "cli_debug_breakpoint_planner"
+path = "examples/cli/cli_debug_breakpoint_planner.rs"
+
+[[example]]
+name = "cli_debug_tensor_diff_tolerance"
+path = "examples/cli/cli_debug_tensor_diff_tolerance.rs"
+
+[[example]]
+name = "cli_pretrain_curriculum_validator"
+path = "examples/cli/cli_pretrain_curriculum_validator.rs"
+
+[[example]]
+name = "cli_pretrain_epoch_budget_calc"
+path = "examples/cli/cli_pretrain_epoch_budget_calc.rs"
+
+[[example]]
+name = "cli_pretrain_grad_clip_threshold"
+path = "examples/cli/cli_pretrain_grad_clip_threshold.rs"
