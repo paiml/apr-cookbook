@@ -4397,3 +4397,41 @@ path = "examples/format/format_npy_header.rs"
 [[example]]
 name = "format_protobuf_varint"
 path = "examples/format/format_protobuf_varint.rs"
+
+# --- distillation / monitoring / advanced (PMAT-154 post-milestone) ---
+
+[[example]]
+name = "distill_teacher_ensemble"
+path = "examples/distillation/distill_teacher_ensemble.rs"
+
+[[example]]
+name = "distill_continual_replay"
+path = "examples/distillation/distill_continual_replay.rs"
+
+[[example]]
+name = "distill_capacity_match"
+path = "examples/distillation/distill_capacity_match.rs"
+
+[[example]]
+name = "monitor_correlated_failures"
+path = "examples/monitoring/monitor_correlated_failures.rs"
+
+[[example]]
+name = "monitor_canary_metric"
+path = "examples/monitoring/monitor_canary_metric.rs"
+
+[[example]]
+name = "monitor_query_pattern"
+path = "examples/monitoring/monitor_query_pattern.rs"
+
+[[example]]
+name = "adv_chunked_response_buffer"
+path = "examples/advanced/adv_chunked_response_buffer.rs"
+
+[[example]]
+name = "adv_provenance_chain"
+path = "examples/advanced/adv_provenance_chain.rs"
+
+[[example]]
+name = "adv_response_redactor"
+path = "examples/advanced/adv_response_redactor.rs"
