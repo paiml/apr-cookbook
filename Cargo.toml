@@ -2291,3 +2291,41 @@ path = "examples/cli/cli_rosetta_fingerprint_diff_mode.rs"
 [[example]]
 name = "cli_rosetta_fingerprint_json_envelope"
 path = "examples/cli/cli_rosetta_fingerprint_json_envelope.rs"
+
+# --- rosetta inspect/convert + publish extension (PMAT-098 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_rosetta_inspect_format_detector"
+path = "examples/cli/cli_rosetta_inspect_format_detector.rs"
+
+[[example]]
+name = "cli_rosetta_inspect_hexdump_window"
+path = "examples/cli/cli_rosetta_inspect_hexdump_window.rs"
+
+[[example]]
+name = "cli_rosetta_inspect_tensor_table"
+path = "examples/cli/cli_rosetta_inspect_tensor_table.rs"
+
+[[example]]
+name = "cli_rosetta_convert_quantize_envelope"
+path = "examples/cli/cli_rosetta_convert_quantize_envelope.rs"
+
+[[example]]
+name = "cli_rosetta_convert_extension_inference"
+path = "examples/cli/cli_rosetta_convert_extension_inference.rs"
+
+[[example]]
+name = "cli_rosetta_convert_external_tokenizer"
+path = "examples/cli/cli_rosetta_convert_external_tokenizer.rs"
+
+[[example]]
+name = "cli_publish_repo_id_validator"
+path = "examples/cli/cli_publish_repo_id_validator.rs"
+
+[[example]]
+name = "cli_publish_pipeline_tag_allowlist"
+path = "examples/cli/cli_publish_pipeline_tag_allowlist.rs"
+
+[[example]]
+name = "cli_publish_dry_run_diff"
+path = "examples/cli/cli_publish_dry_run_diff.rs"
