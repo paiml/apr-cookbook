@@ -5955,3 +5955,41 @@ path = "examples/tui/tui_table_pagination_indicator.rs"
 [[example]]
 name = "tui_resize_split_constraint"
 path = "examples/tui/tui_resize_split_constraint.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-195) ---
+
+[[example]]
+name = "contracts_macros_obligation_namespace_collision"
+path = "examples/contracts-macros/contracts_macros_obligation_namespace_collision.rs"
+
+[[example]]
+name = "contracts_macros_yaml_inline_array_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_inline_array_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_breaking_change_log"
+path = "examples/contracts-macros/contracts_macros_recipe_breaking_change_log.rs"
+
+[[example]]
+name = "mc_load_test_ramp_up"
+path = "examples/monte-carlo/mc_load_test_ramp_up.rs"
+
+[[example]]
+name = "mc_session_affinity_routing"
+path = "examples/monte-carlo/mc_session_affinity_routing.rs"
+
+[[example]]
+name = "mc_priority_queue_aging"
+path = "examples/monte-carlo/mc_priority_queue_aging.rs"
+
+[[example]]
+name = "tui_form_field_tab_order"
+path = "examples/tui/tui_form_field_tab_order.rs"
+
+[[example]]
+name = "tui_status_history_compact"
+path = "examples/tui/tui_status_history_compact.rs"
+
+[[example]]
+name = "tui_chart_legend_swatch"
+path = "examples/tui/tui_chart_legend_swatch.rs"
