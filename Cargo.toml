@@ -5195,3 +5195,41 @@ path = "examples/tui/tui_clipboard_buffer.rs"
 [[example]]
 name = "tui_command_history"
 path = "examples/tui/tui_command_history.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-175 — crosses 1200) ---
+
+[[example]]
+name = "contracts_macros_obligation_compose"
+path = "examples/contracts-macros/contracts_macros_obligation_compose.rs"
+
+[[example]]
+name = "contracts_macros_recipe_lifecycle"
+path = "examples/contracts-macros/contracts_macros_recipe_lifecycle.rs"
+
+[[example]]
+name = "contracts_macros_yaml_schema_diff"
+path = "examples/contracts-macros/contracts_macros_yaml_schema_diff.rs"
+
+[[example]]
+name = "mc_warm_vs_cold_cache"
+path = "examples/monte-carlo/mc_warm_vs_cold_cache.rs"
+
+[[example]]
+name = "mc_priority_starvation"
+path = "examples/monte-carlo/mc_priority_starvation.rs"
+
+[[example]]
+name = "mc_idempotency_collision"
+path = "examples/monte-carlo/mc_idempotency_collision.rs"
+
+[[example]]
+name = "tui_search_index_navigate"
+path = "examples/tui/tui_search_index_navigate.rs"
+
+[[example]]
+name = "tui_progress_indeterminate"
+path = "examples/tui/tui_progress_indeterminate.rs"
+
+[[example]]
+name = "tui_password_mask"
+path = "examples/tui/tui_password_mask.rs"
