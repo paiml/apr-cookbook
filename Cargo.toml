@@ -2899,3 +2899,41 @@ path = "examples/cli/cli_prune_sparsity_ramp_validator.rs"
 [[example]]
 name = "cli_prune_lottery_ticket_warmup"
 path = "examples/cli/cli_prune_lottery_ticket_warmup.rs"
+
+# --- registry / explain / monitor extension (PMAT-114 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_registry_uri_parser"
+path = "examples/cli/cli_registry_uri_parser.rs"
+
+[[example]]
+name = "cli_registry_lineage_cycle_detector"
+path = "examples/cli/cli_registry_lineage_cycle_detector.rs"
+
+[[example]]
+name = "cli_registry_semver_tag_matcher"
+path = "examples/cli/cli_registry_semver_tag_matcher.rs"
+
+[[example]]
+name = "cli_explain_saliency_rank_classifier"
+path = "examples/cli/cli_explain_saliency_rank_classifier.rs"
+
+[[example]]
+name = "cli_explain_ig_steps_validator"
+path = "examples/cli/cli_explain_ig_steps_validator.rs"
+
+[[example]]
+name = "cli_explain_ablation_envelope"
+path = "examples/cli/cli_explain_ablation_envelope.rs"
+
+[[example]]
+name = "cli_monitor_quantile_picker"
+path = "examples/cli/cli_monitor_quantile_picker.rs"
+
+[[example]]
+name = "cli_monitor_drift_threshold_gate"
+path = "examples/cli/cli_monitor_drift_threshold_gate.rs"
+
+[[example]]
+name = "cli_monitor_log_rotation_budget"
+path = "examples/cli/cli_monitor_log_rotation_budget.rs"
