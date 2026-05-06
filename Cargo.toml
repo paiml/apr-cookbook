@@ -4701,3 +4701,41 @@ path = "examples/tui/tui_truncate_ellipsis.rs"
 [[example]]
 name = "tui_severity_color"
 path = "examples/tui/tui_severity_color.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-162) ---
+
+[[example]]
+name = "contracts_macros_pre_violation_classify"
+path = "examples/contracts-macros/contracts_macros_pre_violation_classify.rs"
+
+[[example]]
+name = "contracts_macros_module_binding"
+path = "examples/contracts-macros/contracts_macros_module_binding.rs"
+
+[[example]]
+name = "contracts_macros_pure_check"
+path = "examples/contracts-macros/contracts_macros_pure_check.rs"
+
+[[example]]
+name = "mc_load_shed_threshold"
+path = "examples/monte-carlo/mc_load_shed_threshold.rs"
+
+[[example]]
+name = "mc_cache_warmup_curve"
+path = "examples/monte-carlo/mc_cache_warmup_curve.rs"
+
+[[example]]
+name = "mc_decode_branching_path"
+path = "examples/monte-carlo/mc_decode_branching_path.rs"
+
+[[example]]
+name = "tui_breadcrumb_path"
+path = "examples/tui/tui_breadcrumb_path.rs"
+
+[[example]]
+name = "tui_modal_focus_stack"
+path = "examples/tui/tui_modal_focus_stack.rs"
+
+[[example]]
+name = "tui_input_buffer"
+path = "examples/tui/tui_input_buffer.rs"
