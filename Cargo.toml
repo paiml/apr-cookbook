@@ -2405,3 +2405,41 @@ path = "examples/cli/cli_flow_dot_renderer.rs"
 [[example]]
 name = "cli_flow_layer_aggregation"
 path = "examples/cli/cli_flow_layer_aggregation.rs"
+
+# --- monitor / pull / debug extension (PMAT-101 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_monitor_refresh_throttle"
+path = "examples/cli/cli_monitor_refresh_throttle.rs"
+
+[[example]]
+name = "cli_monitor_format_dispatcher"
+path = "examples/cli/cli_monitor_format_dispatcher.rs"
+
+[[example]]
+name = "cli_monitor_metrics_envelope"
+path = "examples/cli/cli_monitor_metrics_envelope.rs"
+
+[[example]]
+name = "cli_pull_alias_resolver"
+path = "examples/cli/cli_pull_alias_resolver.rs"
+
+[[example]]
+name = "cli_pull_dataset_glob_filter"
+path = "examples/cli/cli_pull_dataset_glob_filter.rs"
+
+[[example]]
+name = "cli_pull_revision_pin_resolver"
+path = "examples/cli/cli_pull_revision_pin_resolver.rs"
+
+[[example]]
+name = "cli_debug_string_extractor"
+path = "examples/cli/cli_debug_string_extractor.rs"
+
+[[example]]
+name = "cli_debug_drama_classifier"
+path = "examples/cli/cli_debug_drama_classifier.rs"
+
+[[example]]
+name = "cli_debug_limit_truncator"
+path = "examples/cli/cli_debug_limit_truncator.rs"
