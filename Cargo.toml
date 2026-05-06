@@ -5271,3 +5271,41 @@ path = "examples/tui/tui_input_autocomplete.rs"
 [[example]]
 name = "tui_status_dot_indicator"
 path = "examples/tui/tui_status_dot_indicator.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-177) ---
+
+[[example]]
+name = "contracts_macros_proof_obligation_score"
+path = "examples/contracts-macros/contracts_macros_proof_obligation_score.rs"
+
+[[example]]
+name = "contracts_macros_recipe_change_log"
+path = "examples/contracts-macros/contracts_macros_recipe_change_log.rs"
+
+[[example]]
+name = "contracts_macros_yaml_indent_check"
+path = "examples/contracts-macros/contracts_macros_yaml_indent_check.rs"
+
+[[example]]
+name = "mc_burst_buffer_overflow"
+path = "examples/monte-carlo/mc_burst_buffer_overflow.rs"
+
+[[example]]
+name = "mc_distill_label_corruption"
+path = "examples/monte-carlo/mc_distill_label_corruption.rs"
+
+[[example]]
+name = "mc_jit_amortization"
+path = "examples/monte-carlo/mc_jit_amortization.rs"
+
+[[example]]
+name = "tui_layout_constraint_solver"
+path = "examples/tui/tui_layout_constraint_solver.rs"
+
+[[example]]
+name = "tui_chart_bar_render"
+path = "examples/tui/tui_chart_bar_render.rs"
+
+[[example]]
+name = "tui_dialog_button_focus"
+path = "examples/tui/tui_dialog_button_focus.rs"
