@@ -2215,3 +2215,41 @@ path = "examples/cli/cli_tokenize_hf_import_validation.rs"
 [[example]]
 name = "cli_tokenize_corpus_shard_planner"
 path = "examples/cli/cli_tokenize_corpus_shard_planner.rs"
+
+# --- showcase / ptx-map / rosetta compare-inference (PMAT-096 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_showcase_tier_baseline_matrix"
+path = "examples/cli/cli_showcase_tier_baseline_matrix.rs"
+
+[[example]]
+name = "cli_showcase_step_dispatcher"
+path = "examples/cli/cli_showcase_step_dispatcher.rs"
+
+[[example]]
+name = "cli_showcase_runs_floor_enforcement"
+path = "examples/cli/cli_showcase_runs_floor_enforcement.rs"
+
+[[example]]
+name = "cli_ptx_map_kernel_filter"
+path = "examples/cli/cli_ptx_map_kernel_filter.rs"
+
+[[example]]
+name = "cli_ptx_map_reverse_lookup"
+path = "examples/cli/cli_ptx_map_reverse_lookup.rs"
+
+[[example]]
+name = "cli_ptx_map_prefill_vs_decode"
+path = "examples/cli/cli_ptx_map_prefill_vs_decode.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_envelope"
+path = "examples/cli/cli_rosetta_compare_inference_envelope.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_logit_diff"
+path = "examples/cli/cli_rosetta_compare_inference_logit_diff.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_temperature_modes"
+path = "examples/cli/cli_rosetta_compare_inference_temperature_modes.rs"
