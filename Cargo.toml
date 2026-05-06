@@ -4229,3 +4229,41 @@ path = "examples/advanced/adv_tool_call_validator.rs"
 [[example]]
 name = "adv_safety_classifier_threshold"
 path = "examples/advanced/adv_safety_classifier_threshold.rs"
+
+# --- distributed / gpu / registry (PMAT-150 expand-cookbooks followup) ---
+
+[[example]]
+name = "distributed_ring_chunks"
+path = "examples/distributed/distributed_ring_chunks.rs"
+
+[[example]]
+name = "distributed_grad_compression"
+path = "examples/distributed/distributed_grad_compression.rs"
+
+[[example]]
+name = "distributed_collective_overlap"
+path = "examples/distributed/distributed_collective_overlap.rs"
+
+[[example]]
+name = "gpu_tensor_core_alignment"
+path = "examples/gpu/gpu_tensor_core_alignment.rs"
+
+[[example]]
+name = "gpu_dynamic_shape_handler"
+path = "examples/gpu/gpu_dynamic_shape_handler.rs"
+
+[[example]]
+name = "gpu_warp_size_dispatch"
+path = "examples/gpu/gpu_warp_size_dispatch.rs"
+
+[[example]]
+name = "registry_artifact_size_quota"
+path = "examples/registry/registry_artifact_size_quota.rs"
+
+[[example]]
+name = "registry_oci_index"
+path = "examples/registry/registry_oci_index.rs"
+
+[[example]]
+name = "registry_pull_secret_validator"
+path = "examples/registry/registry_pull_secret_validator.rs"
