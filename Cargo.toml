@@ -5917,3 +5917,41 @@ path = "examples/tui/tui_search_replace_preview.rs"
 [[example]]
 name = "tui_undo_redo_stack"
 path = "examples/tui/tui_undo_redo_stack.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-194) ---
+
+[[example]]
+name = "contracts_macros_obligation_lifecycle_state"
+path = "examples/contracts-macros/contracts_macros_obligation_lifecycle_state.rs"
+
+[[example]]
+name = "contracts_macros_yaml_max_nesting_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_max_nesting_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_dependency_height"
+path = "examples/contracts-macros/contracts_macros_recipe_dependency_height.rs"
+
+[[example]]
+name = "mc_random_polygon_area"
+path = "examples/monte-carlo/mc_random_polygon_area.rs"
+
+[[example]]
+name = "mc_token_pricing_arbitrage"
+path = "examples/monte-carlo/mc_token_pricing_arbitrage.rs"
+
+[[example]]
+name = "mc_event_correlation_window"
+path = "examples/monte-carlo/mc_event_correlation_window.rs"
+
+[[example]]
+name = "tui_breadcrumb_separator_style"
+path = "examples/tui/tui_breadcrumb_separator_style.rs"
+
+[[example]]
+name = "tui_table_pagination_indicator"
+path = "examples/tui/tui_table_pagination_indicator.rs"
+
+[[example]]
+name = "tui_resize_split_constraint"
+path = "examples/tui/tui_resize_split_constraint.rs"
