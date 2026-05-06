@@ -4001,3 +4001,41 @@ path = "examples/gpu/gpu_warp_specialization.rs"
 [[example]]
 name = "gpu_async_memcpy_overlap"
 path = "examples/gpu/gpu_async_memcpy_overlap.rs"
+
+# --- serverless / training / monitoring (PMAT-144 expand-cookbooks followup) ---
+
+[[example]]
+name = "serverless_image_layer_caching"
+path = "examples/serverless/serverless_image_layer_caching.rs"
+
+[[example]]
+name = "serverless_concurrency_limit"
+path = "examples/serverless/serverless_concurrency_limit.rs"
+
+[[example]]
+name = "serverless_step_function_router"
+path = "examples/serverless/serverless_step_function_router.rs"
+
+[[example]]
+name = "training_grad_accum_steps"
+path = "examples/training/training_grad_accum_steps.rs"
+
+[[example]]
+name = "training_optimizer_state_memory"
+path = "examples/training/training_optimizer_state_memory.rs"
+
+[[example]]
+name = "training_loss_scaler"
+path = "examples/training/training_loss_scaler.rs"
+
+[[example]]
+name = "monitor_health_check_endpoint"
+path = "examples/monitoring/monitor_health_check_endpoint.rs"
+
+[[example]]
+name = "monitor_metric_cardinality"
+path = "examples/monitoring/monitor_metric_cardinality.rs"
+
+[[example]]
+name = "monitor_trace_sampling"
+path = "examples/monitoring/monitor_trace_sampling.rs"
