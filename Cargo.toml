@@ -3393,3 +3393,41 @@ path = "examples/conversion/convert_tensor_name_remapper.rs"
 [[example]]
 name = "convert_format_version_matrix"
 path = "examples/conversion/convert_format_version_matrix.rs"
+
+# --- visualization / advanced / cgp extension (PMAT-128 expand-cookbooks followup) ---
+
+[[example]]
+name = "viz_color_palette_picker"
+path = "examples/visualization/viz_color_palette_picker.rs"
+
+[[example]]
+name = "viz_axis_scale_classifier"
+path = "examples/visualization/viz_axis_scale_classifier.rs"
+
+[[example]]
+name = "viz_legend_placement_optimizer"
+path = "examples/visualization/viz_legend_placement_optimizer.rs"
+
+[[example]]
+name = "adv_recipe_dependency_dag"
+path = "examples/advanced/adv_recipe_dependency_dag.rs"
+
+[[example]]
+name = "adv_iiur_compliance_scorer"
+path = "examples/advanced/adv_iiur_compliance_scorer.rs"
+
+[[example]]
+name = "adv_capability_manifest_validator"
+path = "examples/advanced/adv_capability_manifest_validator.rs"
+
+[[example]]
+name = "cgp_baseline_diff_classifier"
+path = "examples/cgp/cgp_baseline_diff_classifier.rs"
+
+[[example]]
+name = "cgp_kernel_metric_aggregator"
+path = "examples/cgp/cgp_kernel_metric_aggregator.rs"
+
+[[example]]
+name = "cgp_proof_status_dispatcher"
+path = "examples/cgp/cgp_proof_status_dispatcher.rs"
