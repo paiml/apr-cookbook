@@ -2633,3 +2633,41 @@ path = "examples/cli/cli_data_balance_strategy_picker.rs"
 [[example]]
 name = "cli_data_decontaminate_ngram_overlap"
 path = "examples/cli/cli_data_decontaminate_ngram_overlap.rs"
+
+# --- pipeline / gpu / mcp extension (PMAT-107 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_pipeline_dag_topological_sort"
+path = "examples/cli/cli_pipeline_dag_topological_sort.rs"
+
+[[example]]
+name = "cli_pipeline_status_state_machine"
+path = "examples/cli/cli_pipeline_status_state_machine.rs"
+
+[[example]]
+name = "cli_pipeline_validate_manifest_schema"
+path = "examples/cli/cli_pipeline_validate_manifest_schema.rs"
+
+[[example]]
+name = "cli_gpu_vram_reservation_planner"
+path = "examples/cli/cli_gpu_vram_reservation_planner.rs"
+
+[[example]]
+name = "cli_gpu_device_capability_filter"
+path = "examples/cli/cli_gpu_device_capability_filter.rs"
+
+[[example]]
+name = "cli_gpu_oom_recovery_advisor"
+path = "examples/cli/cli_gpu_oom_recovery_advisor.rs"
+
+[[example]]
+name = "cli_mcp_tool_manifest_envelope"
+path = "examples/cli/cli_mcp_tool_manifest_envelope.rs"
+
+[[example]]
+name = "cli_mcp_jsonrpc_request_validator"
+path = "examples/cli/cli_mcp_jsonrpc_request_validator.rs"
+
+[[example]]
+name = "cli_mcp_error_response_codes"
+path = "examples/cli/cli_mcp_error_response_codes.rs"
