@@ -3089,3 +3089,41 @@ path = "examples/cli/cli_experiment_metric_compare_gate.rs"
 [[example]]
 name = "cli_experiment_hypothesis_envelope"
 path = "examples/cli/cli_experiment_hypothesis_envelope.rs"
+
+# --- mcp / ollama / gpu extension (PMAT-120 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_mcp_resource_uri_scheme"
+path = "examples/cli/cli_mcp_resource_uri_scheme.rs"
+
+[[example]]
+name = "cli_mcp_transport_dispatcher"
+path = "examples/cli/cli_mcp_transport_dispatcher.rs"
+
+[[example]]
+name = "cli_mcp_batch_request_envelope"
+path = "examples/cli/cli_mcp_batch_request_envelope.rs"
+
+[[example]]
+name = "cli_ollama_model_name_parser"
+path = "examples/cli/cli_ollama_model_name_parser.rs"
+
+[[example]]
+name = "cli_ollama_embed_dim_validator"
+path = "examples/cli/cli_ollama_embed_dim_validator.rs"
+
+[[example]]
+name = "cli_ollama_token_rate_gate"
+path = "examples/cli/cli_ollama_token_rate_gate.rs"
+
+[[example]]
+name = "cli_gpu_nccl_strategy_picker"
+path = "examples/cli/cli_gpu_nccl_strategy_picker.rs"
+
+[[example]]
+name = "cli_gpu_peer_access_topology"
+path = "examples/cli/cli_gpu_peer_access_topology.rs"
+
+[[example]]
+name = "cli_gpu_fp8_capability_checker"
+path = "examples/cli/cli_gpu_fp8_capability_checker.rs"
