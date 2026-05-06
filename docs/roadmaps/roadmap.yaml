@@ -1756,3 +1756,19 @@ roadmap:
   - followup
   - recipes
   notes: null
+- id: PMAT-089
+  github_issue: null
+  item_type: task
+  title: 'PMAT-112: apr eval + merge + quantize (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T05:58:24Z
+  updated: 2026-05-06T05:58:24Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
