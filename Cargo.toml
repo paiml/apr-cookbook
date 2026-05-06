@@ -5727,3 +5727,41 @@ path = "examples/tui/tui_alphabetical_index_jump.rs"
 [[example]]
 name = "tui_animation_easing_curve"
 path = "examples/tui/tui_animation_easing_curve.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-189) ---
+
+[[example]]
+name = "contracts_macros_obligation_test_traceability"
+path = "examples/contracts-macros/contracts_macros_obligation_test_traceability.rs"
+
+[[example]]
+name = "contracts_macros_yaml_block_scalar_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_block_scalar_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_categorize_by_keyword"
+path = "examples/contracts-macros/contracts_macros_recipe_categorize_by_keyword.rs"
+
+[[example]]
+name = "mc_two_armed_bandit_thompson"
+path = "examples/monte-carlo/mc_two_armed_bandit_thompson.rs"
+
+[[example]]
+name = "mc_simulated_annealing_optimum"
+path = "examples/monte-carlo/mc_simulated_annealing_optimum.rs"
+
+[[example]]
+name = "mc_monty_hall_problem"
+path = "examples/monte-carlo/mc_monty_hall_problem.rs"
+
+[[example]]
+name = "tui_segmented_control_render"
+path = "examples/tui/tui_segmented_control_render.rs"
+
+[[example]]
+name = "tui_window_layout_anchor"
+path = "examples/tui/tui_window_layout_anchor.rs"
+
+[[example]]
+name = "tui_breadcrumb_search_filter"
+path = "examples/tui/tui_breadcrumb_search_filter.rs"
