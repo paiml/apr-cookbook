@@ -3431,3 +3431,41 @@ path = "examples/cgp/cgp_kernel_metric_aggregator.rs"
 [[example]]
 name = "cgp_proof_status_dispatcher"
 path = "examples/cgp/cgp_proof_status_dispatcher.rs"
+
+# --- tsp / registry / inference extension (PMAT-129 expand-cookbooks followup) ---
+
+[[example]]
+name = "tsp_christofides_ratio"
+path = "examples/tsp/tsp_christofides_ratio.rs"
+
+[[example]]
+name = "tsp_nearest_neighbor"
+path = "examples/tsp/tsp_nearest_neighbor.rs"
+
+[[example]]
+name = "tsp_two_opt_swap_improver"
+path = "examples/tsp/tsp_two_opt_swap_improver.rs"
+
+[[example]]
+name = "registry_manifest_schema"
+path = "examples/registry/registry_manifest_schema.rs"
+
+[[example]]
+name = "registry_hash_pin_enforcer"
+path = "examples/registry/registry_hash_pin_enforcer.rs"
+
+[[example]]
+name = "registry_gc_policy"
+path = "examples/registry/registry_gc_policy.rs"
+
+[[example]]
+name = "inference_kv_cache_lru"
+path = "examples/inference/inference_kv_cache_lru.rs"
+
+[[example]]
+name = "inference_beam_search_width"
+path = "examples/inference/inference_beam_search_width.rs"
+
+[[example]]
+name = "inference_top_p_nucleus"
+path = "examples/inference/inference_top_p_nucleus.rs"
