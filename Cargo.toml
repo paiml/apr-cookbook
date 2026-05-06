@@ -3697,3 +3697,41 @@ path = "examples/data-loading/data_sample_quota_balancer.rs"
 [[example]]
 name = "data_train_val_test_split"
 path = "examples/data-loading/data_train_val_test_split.rs"
+
+# --- bundling / conversion / format round 2 (PMAT-136 expand-cookbooks followup) ---
+
+[[example]]
+name = "bundle_mmap_offset_calculator"
+path = "examples/bundling/bundle_mmap_offset_calculator.rs"
+
+[[example]]
+name = "bundle_metadata_versioning"
+path = "examples/bundling/bundle_metadata_versioning.rs"
+
+[[example]]
+name = "bundle_tensor_dedup"
+path = "examples/bundling/bundle_tensor_dedup.rs"
+
+[[example]]
+name = "convert_endianness_swapper"
+path = "examples/conversion/convert_endianness_swapper.rs"
+
+[[example]]
+name = "convert_dtype_widener"
+path = "examples/conversion/convert_dtype_widener.rs"
+
+[[example]]
+name = "convert_sparse_csr_to_dense"
+path = "examples/conversion/convert_sparse_csr_to_dense.rs"
+
+[[example]]
+name = "format_magic_bytes_validator"
+path = "examples/format/format_magic_bytes_validator.rs"
+
+[[example]]
+name = "format_version_compat_matrix"
+path = "examples/format/format_version_compat_matrix.rs"
+
+[[example]]
+name = "format_tensor_name_canonicalizer"
+path = "examples/format/format_tensor_name_canonicalizer.rs"
