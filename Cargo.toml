@@ -3963,3 +3963,41 @@ path = "examples/advanced/adv_quantize_pipeline.rs"
 [[example]]
 name = "adv_replica_failover"
 path = "examples/advanced/adv_replica_failover.rs"
+
+# --- registry / api / gpu round (PMAT-143 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_immutable_tag_policy"
+path = "examples/registry/registry_immutable_tag_policy.rs"
+
+[[example]]
+name = "registry_alias_resolver_chain"
+path = "examples/registry/registry_alias_resolver_chain.rs"
+
+[[example]]
+name = "registry_pull_throttle"
+path = "examples/registry/registry_pull_throttle.rs"
+
+[[example]]
+name = "api_streaming_chunk_size"
+path = "examples/api/api_streaming_chunk_size.rs"
+
+[[example]]
+name = "api_idempotency_key_dedup"
+path = "examples/api/api_idempotency_key_dedup.rs"
+
+[[example]]
+name = "api_oauth_token_refresh_window"
+path = "examples/api/api_oauth_token_refresh_window.rs"
+
+[[example]]
+name = "gpu_register_spill"
+path = "examples/gpu/gpu_register_spill.rs"
+
+[[example]]
+name = "gpu_warp_specialization"
+path = "examples/gpu/gpu_warp_specialization.rs"
+
+[[example]]
+name = "gpu_async_memcpy_overlap"
+path = "examples/gpu/gpu_async_memcpy_overlap.rs"
