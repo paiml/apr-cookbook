@@ -5157,3 +5157,41 @@ path = "examples/tui/tui_split_pane_resize.rs"
 [[example]]
 name = "tui_keyboard_repeat_rate"
 path = "examples/tui/tui_keyboard_repeat_rate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-174) ---
+
+[[example]]
+name = "contracts_macros_field_default_inference"
+path = "examples/contracts-macros/contracts_macros_field_default_inference.rs"
+
+[[example]]
+name = "contracts_macros_recipe_hash_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_hash_consistency.rs"
+
+[[example]]
+name = "contracts_macros_obligation_parametric"
+path = "examples/contracts-macros/contracts_macros_obligation_parametric.rs"
+
+[[example]]
+name = "mc_request_size_log_normal"
+path = "examples/monte-carlo/mc_request_size_log_normal.rs"
+
+[[example]]
+name = "mc_concurrency_collapse"
+path = "examples/monte-carlo/mc_concurrency_collapse.rs"
+
+[[example]]
+name = "mc_token_dropout_resilience"
+path = "examples/monte-carlo/mc_token_dropout_resilience.rs"
+
+[[example]]
+name = "tui_table_cell_render"
+path = "examples/tui/tui_table_cell_render.rs"
+
+[[example]]
+name = "tui_clipboard_buffer"
+path = "examples/tui/tui_clipboard_buffer.rs"
+
+[[example]]
+name = "tui_command_history"
+path = "examples/tui/tui_command_history.rs"
