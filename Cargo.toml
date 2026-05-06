@@ -4625,3 +4625,41 @@ path = "examples/advanced/adv_response_diff_validator.rs"
 [[example]]
 name = "adv_correlation_id_propagator"
 path = "examples/advanced/adv_correlation_id_propagator.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-160) ---
+
+[[example]]
+name = "contracts_macros_inverse_postcond"
+path = "examples/contracts-macros/contracts_macros_inverse_postcond.rs"
+
+[[example]]
+name = "contracts_macros_tolerance_propagation"
+path = "examples/contracts-macros/contracts_macros_tolerance_propagation.rs"
+
+[[example]]
+name = "contracts_macros_status_provenance"
+path = "examples/contracts-macros/contracts_macros_status_provenance.rs"
+
+[[example]]
+name = "mc_inference_p99_estimator"
+path = "examples/monte-carlo/mc_inference_p99_estimator.rs"
+
+[[example]]
+name = "mc_capacity_planner"
+path = "examples/monte-carlo/mc_capacity_planner.rs"
+
+[[example]]
+name = "mc_failure_chain_propagation"
+path = "examples/monte-carlo/mc_failure_chain_propagation.rs"
+
+[[example]]
+name = "tui_progress_state"
+path = "examples/tui/tui_progress_state.rs"
+
+[[example]]
+name = "tui_layout_split"
+path = "examples/tui/tui_layout_split.rs"
+
+[[example]]
+name = "tui_keymap_dispatch"
+path = "examples/tui/tui_keymap_dispatch.rs"
