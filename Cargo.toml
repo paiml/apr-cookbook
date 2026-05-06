@@ -3811,3 +3811,41 @@ path = "examples/simd/simd_alignment_strategy.rs"
 [[example]]
 name = "simd_aos_to_soa"
 path = "examples/simd/simd_aos_to_soa.rs"
+
+# --- wasm / distributed / advanced extension (PMAT-139 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_module_size_budget"
+path = "examples/wasm/wasm_module_size_budget.rs"
+
+[[example]]
+name = "wasm_export_table_validator"
+path = "examples/wasm/wasm_export_table_validator.rs"
+
+[[example]]
+name = "wasm_browser_compat_matrix"
+path = "examples/wasm/wasm_browser_compat_matrix.rs"
+
+[[example]]
+name = "distributed_pipeline_microbatch"
+path = "examples/distributed/distributed_pipeline_microbatch.rs"
+
+[[example]]
+name = "distributed_lamport_clock"
+path = "examples/distributed/distributed_lamport_clock.rs"
+
+[[example]]
+name = "distributed_phi_failure_detector"
+path = "examples/distributed/distributed_phi_failure_detector.rs"
+
+[[example]]
+name = "adv_pipeline_dag"
+path = "examples/advanced/adv_pipeline_dag.rs"
+
+[[example]]
+name = "adv_canary_promotion_gate"
+path = "examples/advanced/adv_canary_promotion_gate.rs"
+
+[[example]]
+name = "adv_speculative_decode_window"
+path = "examples/advanced/adv_speculative_decode_window.rs"
