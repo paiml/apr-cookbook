@@ -4853,3 +4853,41 @@ path = "examples/tui/tui_modal_keymap.rs"
 [[example]]
 name = "tui_scroll_state"
 path = "examples/tui/tui_scroll_state.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-166) ---
+
+[[example]]
+name = "contracts_macros_recipe_id_canon"
+path = "examples/contracts-macros/contracts_macros_recipe_id_canon.rs"
+
+[[example]]
+name = "contracts_macros_constant_propagation"
+path = "examples/contracts-macros/contracts_macros_constant_propagation.rs"
+
+[[example]]
+name = "contracts_macros_pre_post_partition"
+path = "examples/contracts-macros/contracts_macros_pre_post_partition.rs"
+
+[[example]]
+name = "mc_throughput_concurrency_curve"
+path = "examples/monte-carlo/mc_throughput_concurrency_curve.rs"
+
+[[example]]
+name = "mc_calibration_drift"
+path = "examples/monte-carlo/mc_calibration_drift.rs"
+
+[[example]]
+name = "mc_data_freshness_lag"
+path = "examples/monte-carlo/mc_data_freshness_lag.rs"
+
+[[example]]
+name = "tui_text_search_highlight"
+path = "examples/tui/tui_text_search_highlight.rs"
+
+[[example]]
+name = "tui_tree_view_collapse"
+path = "examples/tui/tui_tree_view_collapse.rs"
+
+[[example]]
+name = "tui_clip_to_visible"
+path = "examples/tui/tui_clip_to_visible.rs"
