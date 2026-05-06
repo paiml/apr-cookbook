@@ -2481,3 +2481,41 @@ path = "examples/cli/cli_runs_show_metric_summary.rs"
 [[example]]
 name = "cli_runs_diff_two_runs"
 path = "examples/cli/cli_runs_diff_two_runs.rs"
+
+# --- encrypt / registry-aliases / eval extension (PMAT-103 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_encrypt_passphrase_strength"
+path = "examples/cli/cli_encrypt_passphrase_strength.rs"
+
+[[example]]
+name = "cli_encrypt_keystream_envelope"
+path = "examples/cli/cli_encrypt_keystream_envelope.rs"
+
+[[example]]
+name = "cli_encrypt_force_overwrite_policy"
+path = "examples/cli/cli_encrypt_force_overwrite_policy.rs"
+
+[[example]]
+name = "cli_registry_aliases_yaml_loader"
+path = "examples/cli/cli_registry_aliases_yaml_loader.rs"
+
+[[example]]
+name = "cli_registry_aliases_json_envelope"
+path = "examples/cli/cli_registry_aliases_json_envelope.rs"
+
+[[example]]
+name = "cli_registry_aliases_collision_detection"
+path = "examples/cli/cli_registry_aliases_collision_detection.rs"
+
+[[example]]
+name = "cli_eval_perplexity_threshold_gate"
+path = "examples/cli/cli_eval_perplexity_threshold_gate.rs"
+
+[[example]]
+name = "cli_eval_dataset_dispatcher"
+path = "examples/cli/cli_eval_dataset_dispatcher.rs"
+
+[[example]]
+name = "cli_eval_pass_at_k_temperature_pairing"
+path = "examples/cli/cli_eval_pass_at_k_temperature_pairing.rs"
