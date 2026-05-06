@@ -3355,3 +3355,41 @@ path = "examples/serverless/serverless_lambda_pricing_matrix.rs"
 [[example]]
 name = "serverless_concurrency_validator"
 path = "examples/serverless/serverless_concurrency_validator.rs"
+
+# --- creation / bundling / conversion extension (PMAT-127 expand-cookbooks followup) ---
+
+[[example]]
+name = "create_init_scheme_dispatcher"
+path = "examples/creation/create_init_scheme_dispatcher.rs"
+
+[[example]]
+name = "create_vocab_size_validator"
+path = "examples/creation/create_vocab_size_validator.rs"
+
+[[example]]
+name = "create_embedding_tying_envelope"
+path = "examples/creation/create_embedding_tying_envelope.rs"
+
+[[example]]
+name = "bundle_manifest_header_validator"
+path = "examples/bundling/bundle_manifest_header_validator.rs"
+
+[[example]]
+name = "bundle_compression_ratio_calc"
+path = "examples/bundling/bundle_compression_ratio_calc.rs"
+
+[[example]]
+name = "bundle_signing_chain_builder"
+path = "examples/bundling/bundle_signing_chain_builder.rs"
+
+[[example]]
+name = "convert_dtype_loss_estimator"
+path = "examples/conversion/convert_dtype_loss_estimator.rs"
+
+[[example]]
+name = "convert_tensor_name_remapper"
+path = "examples/conversion/convert_tensor_name_remapper.rs"
+
+[[example]]
+name = "convert_format_version_matrix"
+path = "examples/conversion/convert_format_version_matrix.rs"
