@@ -5537,3 +5537,41 @@ path = "examples/tui/tui_text_alignment.rs"
 [[example]]
 name = "tui_focus_ring_traversal"
 path = "examples/tui/tui_focus_ring_traversal.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-184) ---
+
+[[example]]
+name = "contracts_macros_phase_dependency_check"
+path = "examples/contracts-macros/contracts_macros_phase_dependency_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_envelope_size_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_envelope_size_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_benchmark_envelope"
+path = "examples/contracts-macros/contracts_macros_recipe_benchmark_envelope.rs"
+
+[[example]]
+name = "mc_kafka_partition_skew"
+path = "examples/monte-carlo/mc_kafka_partition_skew.rs"
+
+[[example]]
+name = "mc_garbage_collection_pause"
+path = "examples/monte-carlo/mc_garbage_collection_pause.rs"
+
+[[example]]
+name = "mc_random_walk_2d_diffusion"
+path = "examples/monte-carlo/mc_random_walk_2d_diffusion.rs"
+
+[[example]]
+name = "tui_truncate_path_with_dots"
+path = "examples/tui/tui_truncate_path_with_dots.rs"
+
+[[example]]
+name = "tui_kbd_chord_render"
+path = "examples/tui/tui_kbd_chord_render.rs"
+
+[[example]]
+name = "tui_tag_chip_render"
+path = "examples/tui/tui_tag_chip_render.rs"
