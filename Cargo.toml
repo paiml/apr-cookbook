@@ -4815,3 +4815,41 @@ path = "examples/tui/tui_spinner_frame.rs"
 [[example]]
 name = "tui_paragraph_wrap"
 path = "examples/tui/tui_paragraph_wrap.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-165) ---
+
+[[example]]
+name = "contracts_macros_kani_status"
+path = "examples/contracts-macros/contracts_macros_kani_status.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signature"
+path = "examples/contracts-macros/contracts_macros_recipe_signature.rs"
+
+[[example]]
+name = "contracts_macros_metric_threshold"
+path = "examples/contracts-macros/contracts_macros_metric_threshold.rs"
+
+[[example]]
+name = "mc_dropout_resilience"
+path = "examples/monte-carlo/mc_dropout_resilience.rs"
+
+[[example]]
+name = "mc_eval_split_significance"
+path = "examples/monte-carlo/mc_eval_split_significance.rs"
+
+[[example]]
+name = "mc_birthday_collision"
+path = "examples/monte-carlo/mc_birthday_collision.rs"
+
+[[example]]
+name = "tui_command_palette"
+path = "examples/tui/tui_command_palette.rs"
+
+[[example]]
+name = "tui_modal_keymap"
+path = "examples/tui/tui_modal_keymap.rs"
+
+[[example]]
+name = "tui_scroll_state"
+path = "examples/tui/tui_scroll_state.rs"
