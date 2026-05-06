@@ -3849,3 +3849,41 @@ path = "examples/advanced/adv_canary_promotion_gate.rs"
 [[example]]
 name = "adv_speculative_decode_window"
 path = "examples/advanced/adv_speculative_decode_window.rs"
+
+# --- speech / monitoring / gpu round 3 (PMAT-140 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_audio_resampler"
+path = "examples/speech/speech_audio_resampler.rs"
+
+[[example]]
+name = "speech_word_timestamp_align"
+path = "examples/speech/speech_word_timestamp_align.rs"
+
+[[example]]
+name = "speech_language_id_confidence"
+path = "examples/speech/speech_language_id_confidence.rs"
+
+[[example]]
+name = "monitor_inference_cost"
+path = "examples/monitoring/monitor_inference_cost.rs"
+
+[[example]]
+name = "monitor_percentile_summary"
+path = "examples/monitoring/monitor_percentile_summary.rs"
+
+[[example]]
+name = "monitor_dropped_request_classifier"
+path = "examples/monitoring/monitor_dropped_request_classifier.rs"
+
+[[example]]
+name = "gpu_collective_op_picker"
+path = "examples/gpu/gpu_collective_op_picker.rs"
+
+[[example]]
+name = "gpu_warp_scheduler_dispatch"
+path = "examples/gpu/gpu_warp_scheduler_dispatch.rs"
+
+[[example]]
+name = "gpu_l1_shared_mem_partition"
+path = "examples/gpu/gpu_l1_shared_mem_partition.rs"
