@@ -4777,3 +4777,41 @@ path = "examples/tui/tui_diff_renderer.rs"
 [[example]]
 name = "tui_dropdown_filter"
 path = "examples/tui/tui_dropdown_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-164 — crosses 1100) ---
+
+[[example]]
+name = "contracts_macros_falsification_witness"
+path = "examples/contracts-macros/contracts_macros_falsification_witness.rs"
+
+[[example]]
+name = "contracts_macros_alphabet_check"
+path = "examples/contracts-macros/contracts_macros_alphabet_check.rs"
+
+[[example]]
+name = "contracts_macros_obligation_severity"
+path = "examples/contracts-macros/contracts_macros_obligation_severity.rs"
+
+[[example]]
+name = "mc_drop_in_replacement_test"
+path = "examples/monte-carlo/mc_drop_in_replacement_test.rs"
+
+[[example]]
+name = "mc_dataset_split_uniformity"
+path = "examples/monte-carlo/mc_dataset_split_uniformity.rs"
+
+[[example]]
+name = "mc_request_size_pareto"
+path = "examples/monte-carlo/mc_request_size_pareto.rs"
+
+[[example]]
+name = "tui_form_validation"
+path = "examples/tui/tui_form_validation.rs"
+
+[[example]]
+name = "tui_spinner_frame"
+path = "examples/tui/tui_spinner_frame.rs"
+
+[[example]]
+name = "tui_paragraph_wrap"
+path = "examples/tui/tui_paragraph_wrap.rs"
