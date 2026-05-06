@@ -1916,3 +1916,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-099
+  github_issue: null
+  item_type: task
+  title: 'PMAT-122: contracts-macros + monte-carlo + tui (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:47:35Z
+  updated: 2026-05-06T08:47:35Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
