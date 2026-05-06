@@ -3925,3 +3925,41 @@ path = "examples/advanced/adv_chunked_prefill.rs"
 [[example]]
 name = "adv_request_priority_router"
 path = "examples/advanced/adv_request_priority_router.rs"
+
+# --- wasm / distributed / advanced (PMAT-142 crosses 900 recipes) ---
+
+[[example]]
+name = "wasm_memory_growth_strategy"
+path = "examples/wasm/wasm_memory_growth_strategy.rs"
+
+[[example]]
+name = "wasm_export_section_size"
+path = "examples/wasm/wasm_export_section_size.rs"
+
+[[example]]
+name = "wasm_imported_function_count"
+path = "examples/wasm/wasm_imported_function_count.rs"
+
+[[example]]
+name = "distributed_zero_copy_rdma"
+path = "examples/distributed/distributed_zero_copy_rdma.rs"
+
+[[example]]
+name = "distributed_byzantine_quorum"
+path = "examples/distributed/distributed_byzantine_quorum.rs"
+
+[[example]]
+name = "distributed_eventual_consistency_window"
+path = "examples/distributed/distributed_eventual_consistency_window.rs"
+
+[[example]]
+name = "adv_continuous_batching"
+path = "examples/advanced/adv_continuous_batching.rs"
+
+[[example]]
+name = "adv_quantize_pipeline"
+path = "examples/advanced/adv_quantize_pipeline.rs"
+
+[[example]]
+name = "adv_replica_failover"
+path = "examples/advanced/adv_replica_failover.rs"
