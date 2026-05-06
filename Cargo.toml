@@ -5575,3 +5575,41 @@ path = "examples/tui/tui_kbd_chord_render.rs"
 [[example]]
 name = "tui_tag_chip_render"
 path = "examples/tui/tui_tag_chip_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-185) ---
+
+[[example]]
+name = "contracts_macros_obligation_assignee_balance"
+path = "examples/contracts-macros/contracts_macros_obligation_assignee_balance.rs"
+
+[[example]]
+name = "contracts_macros_yaml_required_field_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_required_field_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_count_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_count_audit.rs"
+
+[[example]]
+name = "mc_p_value_under_null"
+path = "examples/monte-carlo/mc_p_value_under_null.rs"
+
+[[example]]
+name = "mc_bayesian_ab_winrate"
+path = "examples/monte-carlo/mc_bayesian_ab_winrate.rs"
+
+[[example]]
+name = "mc_voting_majority_consensus"
+path = "examples/monte-carlo/mc_voting_majority_consensus.rs"
+
+[[example]]
+name = "tui_diff_three_way_render"
+path = "examples/tui/tui_diff_three_way_render.rs"
+
+[[example]]
+name = "tui_command_line_history_dedupe"
+path = "examples/tui/tui_command_line_history_dedupe.rs"
+
+[[example]]
+name = "tui_progress_band_color"
+path = "examples/tui/tui_progress_band_color.rs"
