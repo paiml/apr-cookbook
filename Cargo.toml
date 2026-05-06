@@ -4663,3 +4663,41 @@ path = "examples/tui/tui_layout_split.rs"
 [[example]]
 name = "tui_keymap_dispatch"
 path = "examples/tui/tui_keymap_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-161) ---
+
+[[example]]
+name = "contracts_macros_dispatch_fallback"
+path = "examples/contracts-macros/contracts_macros_dispatch_fallback.rs"
+
+[[example]]
+name = "contracts_macros_phase_chain"
+path = "examples/contracts-macros/contracts_macros_phase_chain.rs"
+
+[[example]]
+name = "contracts_macros_obligation_diff"
+path = "examples/contracts-macros/contracts_macros_obligation_diff.rs"
+
+[[example]]
+name = "mc_token_throughput_sim"
+path = "examples/monte-carlo/mc_token_throughput_sim.rs"
+
+[[example]]
+name = "mc_retry_chain_success"
+path = "examples/monte-carlo/mc_retry_chain_success.rs"
+
+[[example]]
+name = "mc_inference_jitter"
+path = "examples/monte-carlo/mc_inference_jitter.rs"
+
+[[example]]
+name = "tui_table_pager"
+path = "examples/tui/tui_table_pager.rs"
+
+[[example]]
+name = "tui_truncate_ellipsis"
+path = "examples/tui/tui_truncate_ellipsis.rs"
+
+[[example]]
+name = "tui_severity_color"
+path = "examples/tui/tui_severity_color.rs"
