@@ -5119,3 +5119,41 @@ path = "examples/tui/tui_help_panel_state.rs"
 [[example]]
 name = "tui_history_navigation"
 path = "examples/tui/tui_history_navigation.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-173) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_resolver"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_resolver.rs"
+
+[[example]]
+name = "contracts_macros_phase_dag_order"
+path = "examples/contracts-macros/contracts_macros_phase_dag_order.rs"
+
+[[example]]
+name = "contracts_macros_lean_axiom_audit"
+path = "examples/contracts-macros/contracts_macros_lean_axiom_audit.rs"
+
+[[example]]
+name = "mc_speculative_decode_acceptance"
+path = "examples/monte-carlo/mc_speculative_decode_acceptance.rs"
+
+[[example]]
+name = "mc_log_aggregation_window"
+path = "examples/monte-carlo/mc_log_aggregation_window.rs"
+
+[[example]]
+name = "mc_kv_cache_hit_under_eviction"
+path = "examples/monte-carlo/mc_kv_cache_hit_under_eviction.rs"
+
+[[example]]
+name = "tui_progress_smooth_eta"
+path = "examples/tui/tui_progress_smooth_eta.rs"
+
+[[example]]
+name = "tui_split_pane_resize"
+path = "examples/tui/tui_split_pane_resize.rs"
+
+[[example]]
+name = "tui_keyboard_repeat_rate"
+path = "examples/tui/tui_keyboard_repeat_rate.rs"
