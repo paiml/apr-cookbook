@@ -4549,3 +4549,41 @@ path = "examples/advanced/adv_request_id_format.rs"
 [[example]]
 name = "adv_response_compression_picker"
 path = "examples/advanced/adv_response_compression_picker.rs"
+
+# --- distillation / monitoring / advanced (PMAT-158) ---
+
+[[example]]
+name = "distill_grad_accum_picker"
+path = "examples/distillation/distill_grad_accum_picker.rs"
+
+[[example]]
+name = "distill_warmup_kd_only"
+path = "examples/distillation/distill_warmup_kd_only.rs"
+
+[[example]]
+name = "distill_token_skipping"
+path = "examples/distillation/distill_token_skipping.rs"
+
+[[example]]
+name = "monitor_token_throughput"
+path = "examples/monitoring/monitor_token_throughput.rs"
+
+[[example]]
+name = "monitor_oom_predict"
+path = "examples/monitoring/monitor_oom_predict.rs"
+
+[[example]]
+name = "monitor_log_volume_anomaly"
+path = "examples/monitoring/monitor_log_volume_anomaly.rs"
+
+[[example]]
+name = "adv_admission_quota_per_tenant"
+path = "examples/advanced/adv_admission_quota_per_tenant.rs"
+
+[[example]]
+name = "adv_payload_size_limit"
+path = "examples/advanced/adv_payload_size_limit.rs"
+
+[[example]]
+name = "adv_idempotency_key"
+path = "examples/advanced/adv_idempotency_key.rs"
