@@ -2367,3 +2367,41 @@ path = "examples/cli/cli_export_batch_csv_planner.rs"
 [[example]]
 name = "cli_export_plan_mode_envelope"
 path = "examples/cli/cli_export_plan_mode_envelope.rs"
+
+# --- canary / hex / flow extension (PMAT-100 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_canary_create_envelope"
+path = "examples/cli/cli_canary_create_envelope.rs"
+
+[[example]]
+name = "cli_canary_check_verdict"
+path = "examples/cli/cli_canary_check_verdict.rs"
+
+[[example]]
+name = "cli_canary_directory_layout"
+path = "examples/cli/cli_canary_directory_layout.rs"
+
+[[example]]
+name = "cli_hex_offset_parser"
+path = "examples/cli/cli_hex_offset_parser.rs"
+
+[[example]]
+name = "cli_hex_slice_range_parser"
+path = "examples/cli/cli_hex_slice_range_parser.rs"
+
+[[example]]
+name = "cli_hex_view_mode_dispatcher"
+path = "examples/cli/cli_hex_view_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_flow_component_filter"
+path = "examples/cli/cli_flow_component_filter.rs"
+
+[[example]]
+name = "cli_flow_dot_renderer"
+path = "examples/cli/cli_flow_dot_renderer.rs"
+
+[[example]]
+name = "cli_flow_layer_aggregation"
+path = "examples/cli/cli_flow_layer_aggregation.rs"
