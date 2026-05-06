@@ -4473,3 +4473,41 @@ path = "examples/advanced/adv_request_dedup_cache.rs"
 [[example]]
 name = "adv_warmup_classifier"
 path = "examples/advanced/adv_warmup_classifier.rs"
+
+# --- distillation / monitoring / advanced (PMAT-156) ---
+
+[[example]]
+name = "distill_grad_clip_picker"
+path = "examples/distillation/distill_grad_clip_picker.rs"
+
+[[example]]
+name = "distill_dropout_match"
+path = "examples/distillation/distill_dropout_match.rs"
+
+[[example]]
+name = "distill_attention_head_align"
+path = "examples/distillation/distill_attention_head_align.rs"
+
+[[example]]
+name = "monitor_gpu_thermal_throttle"
+path = "examples/monitoring/monitor_gpu_thermal_throttle.rs"
+
+[[example]]
+name = "monitor_gradient_norm_alert"
+path = "examples/monitoring/monitor_gradient_norm_alert.rs"
+
+[[example]]
+name = "monitor_cache_hit_rate"
+path = "examples/monitoring/monitor_cache_hit_rate.rs"
+
+[[example]]
+name = "adv_response_schema_match"
+path = "examples/advanced/adv_response_schema_match.rs"
+
+[[example]]
+name = "adv_circuit_breaker"
+path = "examples/advanced/adv_circuit_breaker.rs"
+
+[[example]]
+name = "adv_priority_queue_eviction"
+path = "examples/advanced/adv_priority_queue_eviction.rs"
