@@ -5461,3 +5461,41 @@ path = "examples/tui/tui_status_pulse_dot.rs"
 [[example]]
 name = "tui_minimap_render"
 path = "examples/tui/tui_minimap_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-182) ---
+
+[[example]]
+name = "contracts_macros_obligation_chain_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_chain_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_id_format"
+path = "examples/contracts-macros/contracts_macros_recipe_id_format.rs"
+
+[[example]]
+name = "contracts_macros_proof_status_transition"
+path = "examples/contracts-macros/contracts_macros_proof_status_transition.rs"
+
+[[example]]
+name = "mc_disk_io_queue_depth"
+path = "examples/monte-carlo/mc_disk_io_queue_depth.rs"
+
+[[example]]
+name = "mc_dns_resolver_cache"
+path = "examples/monte-carlo/mc_dns_resolver_cache.rs"
+
+[[example]]
+name = "mc_supply_chain_lead_time_jitter"
+path = "examples/monte-carlo/mc_supply_chain_lead_time_jitter.rs"
+
+[[example]]
+name = "tui_log_level_filter"
+path = "examples/tui/tui_log_level_filter.rs"
+
+[[example]]
+name = "tui_duration_humanize"
+path = "examples/tui/tui_duration_humanize.rs"
+
+[[example]]
+name = "tui_table_zebra_stripe"
+path = "examples/tui/tui_table_zebra_stripe.rs"
