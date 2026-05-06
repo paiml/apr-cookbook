@@ -5081,3 +5081,41 @@ path = "examples/tui/tui_widget_focus_chain.rs"
 [[example]]
 name = "tui_message_box_align"
 path = "examples/tui/tui_message_box_align.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-172) ---
+
+[[example]]
+name = "contracts_macros_arxiv_citation_lint"
+path = "examples/contracts-macros/contracts_macros_arxiv_citation_lint.rs"
+
+[[example]]
+name = "contracts_macros_priority_inversion"
+path = "examples/contracts-macros/contracts_macros_priority_inversion.rs"
+
+[[example]]
+name = "contracts_macros_lemma_reuse_count"
+path = "examples/contracts-macros/contracts_macros_lemma_reuse_count.rs"
+
+[[example]]
+name = "mc_quantized_round_trip"
+path = "examples/monte-carlo/mc_quantized_round_trip.rs"
+
+[[example]]
+name = "mc_disk_seek_pattern"
+path = "examples/monte-carlo/mc_disk_seek_pattern.rs"
+
+[[example]]
+name = "mc_circuit_open_rate"
+path = "examples/monte-carlo/mc_circuit_open_rate.rs"
+
+[[example]]
+name = "tui_modal_slide_transition"
+path = "examples/tui/tui_modal_slide_transition.rs"
+
+[[example]]
+name = "tui_help_panel_state"
+path = "examples/tui/tui_help_panel_state.rs"
+
+[[example]]
+name = "tui_history_navigation"
+path = "examples/tui/tui_history_navigation.rs"
