@@ -1855,6 +1855,22 @@ roadmap:
 - id: PMAT-095
   github_issue: null
   item_type: task
+  title: 'PMAT-118: apr bench + diff + experiment (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T07:56:47Z
+  updated: 2026-05-06T07:56:47Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-096
+  github_issue: null
+  item_type: task
   title: 'PMAT-119: centralize-cookbooks spec v1.1 alimentar amendment'
   status: planned
   priority: medium
