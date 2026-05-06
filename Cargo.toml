@@ -4587,3 +4587,41 @@ path = "examples/advanced/adv_payload_size_limit.rs"
 [[example]]
 name = "adv_idempotency_key"
 path = "examples/advanced/adv_idempotency_key.rs"
+
+# --- distillation / monitoring / advanced (PMAT-159) ---
+
+[[example]]
+name = "distill_softlabel_topk"
+path = "examples/distillation/distill_softlabel_topk.rs"
+
+[[example]]
+name = "distill_layer_skip_connection"
+path = "examples/distillation/distill_layer_skip_connection.rs"
+
+[[example]]
+name = "distill_kl_floor"
+path = "examples/distillation/distill_kl_floor.rs"
+
+[[example]]
+name = "monitor_session_drop"
+path = "examples/monitoring/monitor_session_drop.rs"
+
+[[example]]
+name = "monitor_p50_drift"
+path = "examples/monitoring/monitor_p50_drift.rs"
+
+[[example]]
+name = "monitor_db_pool_exhaustion"
+path = "examples/monitoring/monitor_db_pool_exhaustion.rs"
+
+[[example]]
+name = "adv_request_priority_aging"
+path = "examples/advanced/adv_request_priority_aging.rs"
+
+[[example]]
+name = "adv_response_diff_validator"
+path = "examples/advanced/adv_response_diff_validator.rs"
+
+[[example]]
+name = "adv_correlation_id_propagator"
+path = "examples/advanced/adv_correlation_id_propagator.rs"
