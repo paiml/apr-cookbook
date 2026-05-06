@@ -1772,3 +1772,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-090
+  github_issue: null
+  item_type: task
+  title: 'PMAT-113: apr distill + finetune + prune (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T06:18:55Z
+  updated: 2026-05-06T06:18:55Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
