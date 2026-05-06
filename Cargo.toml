@@ -5803,3 +5803,41 @@ path = "examples/tui/tui_progress_throughput_avg.rs"
 [[example]]
 name = "tui_resize_safe_truncate"
 path = "examples/tui/tui_resize_safe_truncate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-191) ---
+
+[[example]]
+name = "contracts_macros_obligation_owner_filter"
+path = "examples/contracts-macros/contracts_macros_obligation_owner_filter.rs"
+
+[[example]]
+name = "contracts_macros_yaml_quote_style_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_quote_style_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_assignment"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_assignment.rs"
+
+[[example]]
+name = "mc_disk_failure_raid"
+path = "examples/monte-carlo/mc_disk_failure_raid.rs"
+
+[[example]]
+name = "mc_caching_layer_warmup"
+path = "examples/monte-carlo/mc_caching_layer_warmup.rs"
+
+[[example]]
+name = "mc_request_signature_verification_throughput"
+path = "examples/monte-carlo/mc_request_signature_verification_throughput.rs"
+
+[[example]]
+name = "tui_command_palette_score"
+path = "examples/tui/tui_command_palette_score.rs"
+
+[[example]]
+name = "tui_input_validation_state"
+path = "examples/tui/tui_input_validation_state.rs"
+
+[[example]]
+name = "tui_table_column_resize"
+path = "examples/tui/tui_table_column_resize.rs"
