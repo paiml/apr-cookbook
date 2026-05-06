@@ -4153,3 +4153,41 @@ path = "examples/simd/simd_horizontal_max.rs"
 [[example]]
 name = "simd_zigzag_packer"
 path = "examples/simd/simd_zigzag_packer.rs"
+
+# --- bundling / conversion / format round 3 (PMAT-148 expand-cookbooks followup) ---
+
+[[example]]
+name = "bundle_compression_picker"
+path = "examples/bundling/bundle_compression_picker.rs"
+
+[[example]]
+name = "bundle_streaming_unpack"
+path = "examples/bundling/bundle_streaming_unpack.rs"
+
+[[example]]
+name = "bundle_pre_load_warmup"
+path = "examples/bundling/bundle_pre_load_warmup.rs"
+
+[[example]]
+name = "convert_lossy_check"
+path = "examples/conversion/convert_lossy_check.rs"
+
+[[example]]
+name = "convert_metadata_passthrough"
+path = "examples/conversion/convert_metadata_passthrough.rs"
+
+[[example]]
+name = "convert_tensor_view_strider"
+path = "examples/conversion/convert_tensor_view_strider.rs"
+
+[[example]]
+name = "format_zip_eocd"
+path = "examples/format/format_zip_eocd.rs"
+
+[[example]]
+name = "format_arrow_ipc"
+path = "examples/format/format_arrow_ipc.rs"
+
+[[example]]
+name = "format_avro_schema_resolver"
+path = "examples/format/format_avro_schema_resolver.rs"
