@@ -4511,3 +4511,41 @@ path = "examples/advanced/adv_circuit_breaker.rs"
 [[example]]
 name = "adv_priority_queue_eviction"
 path = "examples/advanced/adv_priority_queue_eviction.rs"
+
+# --- distillation / monitoring / advanced (PMAT-157) ---
+
+[[example]]
+name = "distill_loss_mask_padding"
+path = "examples/distillation/distill_loss_mask_padding.rs"
+
+[[example]]
+name = "distill_lr_schedule_match"
+path = "examples/distillation/distill_lr_schedule_match.rs"
+
+[[example]]
+name = "distill_block_skip"
+path = "examples/distillation/distill_block_skip.rs"
+
+[[example]]
+name = "monitor_disk_io_pressure"
+path = "examples/monitoring/monitor_disk_io_pressure.rs"
+
+[[example]]
+name = "monitor_packet_loss_rate"
+path = "examples/monitoring/monitor_packet_loss_rate.rs"
+
+[[example]]
+name = "monitor_concurrent_inflight"
+path = "examples/monitoring/monitor_concurrent_inflight.rs"
+
+[[example]]
+name = "adv_session_affinity_router"
+path = "examples/advanced/adv_session_affinity_router.rs"
+
+[[example]]
+name = "adv_request_id_format"
+path = "examples/advanced/adv_request_id_format.rs"
+
+[[example]]
+name = "adv_response_compression_picker"
+path = "examples/advanced/adv_response_compression_picker.rs"
