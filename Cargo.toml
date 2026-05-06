@@ -3317,3 +3317,41 @@ path = "examples/code/code_indent_normalizer.rs"
 [[example]]
 name = "code_lint_severity_aggregator"
 path = "examples/code/code_lint_severity_aggregator.rs"
+
+# --- shell / acceleration / serverless extension (PMAT-126 expand-cookbooks followup) ---
+
+[[example]]
+name = "shell_pipe_redirection_parser"
+path = "examples/shell/shell_pipe_redirection_parser.rs"
+
+[[example]]
+name = "shell_brace_expander"
+path = "examples/shell/shell_brace_expander.rs"
+
+[[example]]
+name = "shell_quote_state_classifier"
+path = "examples/shell/shell_quote_state_classifier.rs"
+
+[[example]]
+name = "acceleration_kernel_dispatch_planner"
+path = "examples/acceleration/acceleration_kernel_dispatch_planner.rs"
+
+[[example]]
+name = "acceleration_arithmetic_intensity"
+path = "examples/acceleration/acceleration_arithmetic_intensity.rs"
+
+[[example]]
+name = "acceleration_thread_pool_sizer"
+path = "examples/acceleration/acceleration_thread_pool_sizer.rs"
+
+[[example]]
+name = "serverless_cold_start_classifier"
+path = "examples/serverless/serverless_cold_start_classifier.rs"
+
+[[example]]
+name = "serverless_lambda_pricing_matrix"
+path = "examples/serverless/serverless_lambda_pricing_matrix.rs"
+
+[[example]]
+name = "serverless_concurrency_validator"
+path = "examples/serverless/serverless_concurrency_validator.rs"
