@@ -3583,3 +3583,41 @@ path = "examples/data-loading/data_shuffle_seed_validator.rs"
 [[example]]
 name = "data_row_dedup_strategy"
 path = "examples/data-loading/data_row_dedup_strategy.rs"
+
+# --- conversion / format / bundling extension (PMAT-133 expand-cookbooks followup) ---
+
+[[example]]
+name = "convert_layout_transposer"
+path = "examples/conversion/convert_layout_transposer.rs"
+
+[[example]]
+name = "convert_quantization_rescaler"
+path = "examples/conversion/convert_quantization_rescaler.rs"
+
+[[example]]
+name = "convert_safetensors_header"
+path = "examples/conversion/convert_safetensors_header.rs"
+
+[[example]]
+name = "format_stride_encoder"
+path = "examples/format/format_stride_encoder.rs"
+
+[[example]]
+name = "format_alignment_padding"
+path = "examples/format/format_alignment_padding.rs"
+
+[[example]]
+name = "format_gguf_metadata_key"
+path = "examples/format/format_gguf_metadata_key.rs"
+
+[[example]]
+name = "bundle_cache_key_deriver"
+path = "examples/bundling/bundle_cache_key_deriver.rs"
+
+[[example]]
+name = "bundle_table_of_contents"
+path = "examples/bundling/bundle_table_of_contents.rs"
+
+[[example]]
+name = "bundle_integrity_checksum"
+path = "examples/bundling/bundle_integrity_checksum.rs"
