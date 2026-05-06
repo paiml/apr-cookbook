@@ -34,7 +34,7 @@ This is decided despite the slug ambiguity (`apr-` originally referred to the .a
 
 ## What Does NOT Migrate
 
-- `alimentar/src/` — the alimentar crate itself stays published on crates.io
+- `alimentar/src/` — the library crate stays published on crates.io. **As of 2026-05-06**, the canonical source moved into the APR-MONO monorepo at `aprender/crates/aprender-data/` (package `aprender-data`, lib `alimentar`); the standalone `paiml/alimentar` repo is archived. apr-cookbook depends on `aprender-data` via the `alimentar` package alias and MUST keep `examples/data-loading/` current as the user-facing recipe gallery (see parent-spec Amendment 2026-05-06).
 - `presentar/src/` — same; presentar crate stays separate
 - `presentar/crates/` — sub-crates (apr-widgets, ald-widgets, prs-runtime) stay in presentar
 - `sovereign-ai-cookbook/scripts/` — generation/lint scripts that target the source repo's structure; apr-cookbook has its own equivalents
