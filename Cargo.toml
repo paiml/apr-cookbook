@@ -5689,3 +5689,41 @@ path = "examples/tui/tui_clipboard_paste_filter.rs"
 [[example]]
 name = "tui_search_jump_list"
 path = "examples/tui/tui_search_jump_list.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-188) ---
+
+[[example]]
+name = "contracts_macros_obligation_breaking_change_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_breaking_change_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_kebab_case_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_kebab_case_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_runtime_budget"
+path = "examples/contracts-macros/contracts_macros_recipe_runtime_budget.rs"
+
+[[example]]
+name = "mc_password_brute_force_eta"
+path = "examples/monte-carlo/mc_password_brute_force_eta.rs"
+
+[[example]]
+name = "mc_blackjack_house_edge"
+path = "examples/monte-carlo/mc_blackjack_house_edge.rs"
+
+[[example]]
+name = "mc_random_forest_voting"
+path = "examples/monte-carlo/mc_random_forest_voting.rs"
+
+[[example]]
+name = "tui_word_wrap"
+path = "examples/tui/tui_word_wrap.rs"
+
+[[example]]
+name = "tui_alphabetical_index_jump"
+path = "examples/tui/tui_alphabetical_index_jump.rs"
+
+[[example]]
+name = "tui_animation_easing_curve"
+path = "examples/tui/tui_animation_easing_curve.rs"
