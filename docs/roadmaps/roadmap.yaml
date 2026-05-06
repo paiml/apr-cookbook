@@ -2044,3 +2044,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-107
+  github_issue: null
+  item_type: task
+  title: 'PMAT-130: format + gpu + deployment-stacks (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:15:38Z
+  updated: 2026-05-06T10:15:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
