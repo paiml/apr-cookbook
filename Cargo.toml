@@ -2709,3 +2709,41 @@ path = "examples/cli/cli_ollama_chat_lint_role_state_machine.rs"
 [[example]]
 name = "cli_ollama_chat_lint_message_content_validation"
 path = "examples/cli/cli_ollama_chat_lint_message_content_validation.rs"
+
+# --- bench / inspect / trace extension (PMAT-109 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_bench_percentiles_csv_parser"
+path = "examples/cli/cli_bench_percentiles_csv_parser.rs"
+
+[[example]]
+name = "cli_bench_h12_throughput_gate"
+path = "examples/cli/cli_bench_h12_throughput_gate.rs"
+
+[[example]]
+name = "cli_bench_warmup_iterations_envelope"
+path = "examples/cli/cli_bench_warmup_iterations_envelope.rs"
+
+[[example]]
+name = "cli_inspect_view_mode_dispatcher"
+path = "examples/cli/cli_inspect_view_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_inspect_weight_stats_aggregator"
+path = "examples/cli/cli_inspect_weight_stats_aggregator.rs"
+
+[[example]]
+name = "cli_inspect_vocab_token_query"
+path = "examples/cli/cli_inspect_vocab_token_query.rs"
+
+[[example]]
+name = "cli_trace_save_tensor_layer_range"
+path = "examples/cli/cli_trace_save_tensor_layer_range.rs"
+
+[[example]]
+name = "cli_trace_stage_csv_dispatcher"
+path = "examples/cli/cli_trace_stage_csv_dispatcher.rs"
+
+[[example]]
+name = "cli_trace_diff_mode_envelope"
+path = "examples/cli/cli_trace_diff_mode_envelope.rs"
