@@ -5385,3 +5385,41 @@ path = "examples/tui/tui_color_contrast_pass.rs"
 [[example]]
 name = "tui_keybinding_dispatch"
 path = "examples/tui/tui_keybinding_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-180) ---
+
+[[example]]
+name = "contracts_macros_recipe_tag_taxonomy"
+path = "examples/contracts-macros/contracts_macros_recipe_tag_taxonomy.rs"
+
+[[example]]
+name = "contracts_macros_yaml_anchor_cycle"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_cycle.rs"
+
+[[example]]
+name = "contracts_macros_proof_module_index"
+path = "examples/contracts-macros/contracts_macros_proof_module_index.rs"
+
+[[example]]
+name = "mc_inventory_replenishment"
+path = "examples/monte-carlo/mc_inventory_replenishment.rs"
+
+[[example]]
+name = "mc_traffic_light_intersection"
+path = "examples/monte-carlo/mc_traffic_light_intersection.rs"
+
+[[example]]
+name = "mc_db_lock_wait_time"
+path = "examples/monte-carlo/mc_db_lock_wait_time.rs"
+
+[[example]]
+name = "tui_quote_block_render"
+path = "examples/tui/tui_quote_block_render.rs"
+
+[[example]]
+name = "tui_inline_diff_view"
+path = "examples/tui/tui_inline_diff_view.rs"
+
+[[example]]
+name = "tui_password_strength_meter"
+path = "examples/tui/tui_password_strength_meter.rs"
