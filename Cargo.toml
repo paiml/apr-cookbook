@@ -3545,3 +3545,41 @@ path = "examples/analysis/analysis_latency_breakdown.rs"
 [[example]]
 name = "analysis_memory_leak_detector"
 path = "examples/analysis/analysis_memory_leak_detector.rs"
+
+# --- mcp / training / data-loading extension (PMAT-132 expand-cookbooks followup) ---
+
+[[example]]
+name = "mcp_resource_uri_resolver"
+path = "examples/mcp/mcp_resource_uri_resolver.rs"
+
+[[example]]
+name = "mcp_tool_signature_validator"
+path = "examples/mcp/mcp_tool_signature_validator.rs"
+
+[[example]]
+name = "mcp_session_lifecycle"
+path = "examples/mcp/mcp_session_lifecycle.rs"
+
+[[example]]
+name = "training_lr_combo_scheduler"
+path = "examples/training/training_lr_combo_scheduler.rs"
+
+[[example]]
+name = "training_curriculum_filter"
+path = "examples/training/training_curriculum_filter.rs"
+
+[[example]]
+name = "training_grad_clip_norm"
+path = "examples/training/training_grad_clip_norm.rs"
+
+[[example]]
+name = "data_streaming_buffer_size"
+path = "examples/data-loading/data_streaming_buffer_size.rs"
+
+[[example]]
+name = "data_shuffle_seed_validator"
+path = "examples/data-loading/data_shuffle_seed_validator.rs"
+
+[[example]]
+name = "data_row_dedup_strategy"
+path = "examples/data-loading/data_row_dedup_strategy.rs"
