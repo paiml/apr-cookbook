@@ -4929,3 +4929,41 @@ path = "examples/tui/tui_overlay_z_order.rs"
 [[example]]
 name = "tui_resize_constraints"
 path = "examples/tui/tui_resize_constraints.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-168) ---
+
+[[example]]
+name = "contracts_macros_priority_sort"
+path = "examples/contracts-macros/contracts_macros_priority_sort.rs"
+
+[[example]]
+name = "contracts_macros_attribute_round_trip"
+path = "examples/contracts-macros/contracts_macros_attribute_round_trip.rs"
+
+[[example]]
+name = "contracts_macros_lean_filename"
+path = "examples/contracts-macros/contracts_macros_lean_filename.rs"
+
+[[example]]
+name = "mc_replica_lag_distribution"
+path = "examples/monte-carlo/mc_replica_lag_distribution.rs"
+
+[[example]]
+name = "mc_quantization_loss_estimator"
+path = "examples/monte-carlo/mc_quantization_loss_estimator.rs"
+
+[[example]]
+name = "mc_inference_burst_buffer"
+path = "examples/monte-carlo/mc_inference_burst_buffer.rs"
+
+[[example]]
+name = "tui_table_sort_indicator"
+path = "examples/tui/tui_table_sort_indicator.rs"
+
+[[example]]
+name = "tui_progress_eta_format"
+path = "examples/tui/tui_progress_eta_format.rs"
+
+[[example]]
+name = "tui_log_tail_buffer"
+path = "examples/tui/tui_log_tail_buffer.rs"
