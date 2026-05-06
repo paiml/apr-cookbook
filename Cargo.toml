@@ -4739,3 +4739,41 @@ path = "examples/tui/tui_modal_focus_stack.rs"
 [[example]]
 name = "tui_input_buffer"
 path = "examples/tui/tui_input_buffer.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-163) ---
+
+[[example]]
+name = "contracts_macros_invariant_chain"
+path = "examples/contracts-macros/contracts_macros_invariant_chain.rs"
+
+[[example]]
+name = "contracts_macros_dependency_graph"
+path = "examples/contracts-macros/contracts_macros_dependency_graph.rs"
+
+[[example]]
+name = "contracts_macros_yaml_lint"
+path = "examples/contracts-macros/contracts_macros_yaml_lint.rs"
+
+[[example]]
+name = "mc_request_arrival_poisson"
+path = "examples/monte-carlo/mc_request_arrival_poisson.rs"
+
+[[example]]
+name = "mc_priority_queue_wait"
+path = "examples/monte-carlo/mc_priority_queue_wait.rs"
+
+[[example]]
+name = "mc_kv_eviction_compare"
+path = "examples/monte-carlo/mc_kv_eviction_compare.rs"
+
+[[example]]
+name = "tui_status_bar_compose"
+path = "examples/tui/tui_status_bar_compose.rs"
+
+[[example]]
+name = "tui_diff_renderer"
+path = "examples/tui/tui_diff_renderer.rs"
+
+[[example]]
+name = "tui_dropdown_filter"
+path = "examples/tui/tui_dropdown_filter.rs"
