@@ -3507,3 +3507,41 @@ path = "examples/deployment-stacks/deploy_blue_green_cutover.rs"
 [[example]]
 name = "deploy_canary_traffic_ramp"
 path = "examples/deployment-stacks/deploy_canary_traffic_ramp.rs"
+
+# --- optimize / lint / analysis extension (PMAT-131 expand-cookbooks followup) ---
+
+[[example]]
+name = "optimize_warmup_cosine_lr"
+path = "examples/optimize/optimize_warmup_cosine_lr.rs"
+
+[[example]]
+name = "optimize_micro_batch_grad_accum"
+path = "examples/optimize/optimize_micro_batch_grad_accum.rs"
+
+[[example]]
+name = "optimize_adamw_vs_lion_picker"
+path = "examples/optimize/optimize_adamw_vs_lion_picker.rs"
+
+[[example]]
+name = "lint_cors_origin_allowlist"
+path = "examples/lint/lint_cors_origin_allowlist.rs"
+
+[[example]]
+name = "lint_prompt_pii_redactor"
+path = "examples/lint/lint_prompt_pii_redactor.rs"
+
+[[example]]
+name = "lint_schema_drift_detector"
+path = "examples/lint/lint_schema_drift_detector.rs"
+
+[[example]]
+name = "analysis_p99_throughput_gate"
+path = "examples/analysis/analysis_p99_throughput_gate.rs"
+
+[[example]]
+name = "analysis_latency_breakdown"
+path = "examples/analysis/analysis_latency_breakdown.rs"
+
+[[example]]
+name = "analysis_memory_leak_detector"
+path = "examples/analysis/analysis_memory_leak_detector.rs"

@@ -2060,3 +2060,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-108
+  github_issue: null
+  item_type: task
+  title: 'PMAT-131: optimize + lint + analysis (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:26:25Z
+  updated: 2026-05-06T10:26:25Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
