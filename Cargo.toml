@@ -4191,3 +4191,41 @@ path = "examples/format/format_arrow_ipc.rs"
 [[example]]
 name = "format_avro_schema_resolver"
 path = "examples/format/format_avro_schema_resolver.rs"
+
+# --- speech / distillation / advanced (PMAT-149 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_vad_threshold"
+path = "examples/speech/speech_vad_threshold.rs"
+
+[[example]]
+name = "speech_diarization_count"
+path = "examples/speech/speech_diarization_count.rs"
+
+[[example]]
+name = "speech_punctuation_restorer"
+path = "examples/speech/speech_punctuation_restorer.rs"
+
+[[example]]
+name = "distill_curriculum_difficulty"
+path = "examples/distillation/distill_curriculum_difficulty.rs"
+
+[[example]]
+name = "distill_response_pruning"
+path = "examples/distillation/distill_response_pruning.rs"
+
+[[example]]
+name = "distill_self_consistency_filter"
+path = "examples/distillation/distill_self_consistency_filter.rs"
+
+[[example]]
+name = "adv_long_context_retrieval_split"
+path = "examples/advanced/adv_long_context_retrieval_split.rs"
+
+[[example]]
+name = "adv_tool_call_validator"
+path = "examples/advanced/adv_tool_call_validator.rs"
+
+[[example]]
+name = "adv_safety_classifier_threshold"
+path = "examples/advanced/adv_safety_classifier_threshold.rs"
