@@ -1980,3 +1980,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-103
+  github_issue: null
+  item_type: task
+  title: 'PMAT-126: shell + acceleration + serverless (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:29:05Z
+  updated: 2026-05-06T09:29:05Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
