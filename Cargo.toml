@@ -4115,3 +4115,41 @@ path = "examples/gpu/gpu_gqa_group_picker.rs"
 [[example]]
 name = "gpu_kernel_fusion"
 path = "examples/gpu/gpu_kernel_fusion.rs"
+
+# --- registry / monitoring / simd (PMAT-147 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_metadata_search"
+path = "examples/registry/registry_metadata_search.rs"
+
+[[example]]
+name = "registry_provenance_attestation"
+path = "examples/registry/registry_provenance_attestation.rs"
+
+[[example]]
+name = "registry_dependency_resolver"
+path = "examples/registry/registry_dependency_resolver.rs"
+
+[[example]]
+name = "monitor_log_correlation"
+path = "examples/monitoring/monitor_log_correlation.rs"
+
+[[example]]
+name = "monitor_ingest_backpressure"
+path = "examples/monitoring/monitor_ingest_backpressure.rs"
+
+[[example]]
+name = "monitor_seasonal_decompose"
+path = "examples/monitoring/monitor_seasonal_decompose.rs"
+
+[[example]]
+name = "simd_strided_load"
+path = "examples/simd/simd_strided_load.rs"
+
+[[example]]
+name = "simd_horizontal_max"
+path = "examples/simd/simd_horizontal_max.rs"
+
+[[example]]
+name = "simd_zigzag_packer"
+path = "examples/simd/simd_zigzag_packer.rs"
