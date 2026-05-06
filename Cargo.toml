@@ -3621,3 +3621,41 @@ path = "examples/bundling/bundle_table_of_contents.rs"
 [[example]]
 name = "bundle_integrity_checksum"
 path = "examples/bundling/bundle_integrity_checksum.rs"
+
+# --- simd / wasm / serverless extension (PMAT-134 expand-cookbooks followup) ---
+
+[[example]]
+name = "simd_mask_lane_predicate"
+path = "examples/simd/simd_mask_lane_predicate.rs"
+
+[[example]]
+name = "simd_prefetch_distance_picker"
+path = "examples/simd/simd_prefetch_distance_picker.rs"
+
+[[example]]
+name = "simd_fma_fusion_gate"
+path = "examples/simd/simd_fma_fusion_gate.rs"
+
+[[example]]
+name = "wasm_threads_atomics_gate"
+path = "examples/wasm/wasm_threads_atomics_gate.rs"
+
+[[example]]
+name = "wasm_simd128_dispatch"
+path = "examples/wasm/wasm_simd128_dispatch.rs"
+
+[[example]]
+name = "wasm_wasi_capability_grant"
+path = "examples/wasm/wasm_wasi_capability_grant.rs"
+
+[[example]]
+name = "serverless_timeout_budget_picker"
+path = "examples/serverless/serverless_timeout_budget_picker.rs"
+
+[[example]]
+name = "serverless_provisioned_concurrency"
+path = "examples/serverless/serverless_provisioned_concurrency.rs"
+
+[[example]]
+name = "serverless_vpc_cold_start"
+path = "examples/serverless/serverless_vpc_cold_start.rs"
