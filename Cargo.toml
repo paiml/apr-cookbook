@@ -5499,3 +5499,41 @@ path = "examples/tui/tui_duration_humanize.rs"
 [[example]]
 name = "tui_table_zebra_stripe"
 path = "examples/tui/tui_table_zebra_stripe.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-183) ---
+
+[[example]]
+name = "contracts_macros_obligation_dedupe"
+path = "examples/contracts-macros/contracts_macros_obligation_dedupe.rs"
+
+[[example]]
+name = "contracts_macros_yaml_default_field_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_default_field_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_priority_classifier"
+path = "examples/contracts-macros/contracts_macros_recipe_priority_classifier.rs"
+
+[[example]]
+name = "mc_lru_vs_fifo_eviction"
+path = "examples/monte-carlo/mc_lru_vs_fifo_eviction.rs"
+
+[[example]]
+name = "mc_consensus_round_latency"
+path = "examples/monte-carlo/mc_consensus_round_latency.rs"
+
+[[example]]
+name = "mc_a_star_path_cost"
+path = "examples/monte-carlo/mc_a_star_path_cost.rs"
+
+[[example]]
+name = "tui_color_palette_quantize"
+path = "examples/tui/tui_color_palette_quantize.rs"
+
+[[example]]
+name = "tui_text_alignment"
+path = "examples/tui/tui_text_alignment.rs"
+
+[[example]]
+name = "tui_focus_ring_traversal"
+path = "examples/tui/tui_focus_ring_traversal.rs"
