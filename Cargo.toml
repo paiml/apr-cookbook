@@ -2671,3 +2671,41 @@ path = "examples/cli/cli_mcp_jsonrpc_request_validator.rs"
 [[example]]
 name = "cli_mcp_error_response_codes"
 path = "examples/cli/cli_mcp_error_response_codes.rs"
+
+# --- tui / validate / ollama-chat-lint extension (PMAT-108 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_tui_panel_layout_calculator"
+path = "examples/cli/cli_tui_panel_layout_calculator.rs"
+
+[[example]]
+name = "cli_tui_keybinding_matcher"
+path = "examples/cli/cli_tui_keybinding_matcher.rs"
+
+[[example]]
+name = "cli_tui_search_filter_predicate"
+path = "examples/cli/cli_tui_search_filter_predicate.rs"
+
+[[example]]
+name = "cli_validate_quality_score_aggregator"
+path = "examples/cli/cli_validate_quality_score_aggregator.rs"
+
+[[example]]
+name = "cli_validate_strict_warning_promoter"
+path = "examples/cli/cli_validate_strict_warning_promoter.rs"
+
+[[example]]
+name = "cli_validate_min_score_gate"
+path = "examples/cli/cli_validate_min_score_gate.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_eval_count_consistency"
+path = "examples/cli/cli_ollama_chat_lint_eval_count_consistency.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_role_state_machine"
+path = "examples/cli/cli_ollama_chat_lint_role_state_machine.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_message_content_validation"
+path = "examples/cli/cli_ollama_chat_lint_message_content_validation.rs"
