@@ -3127,3 +3127,41 @@ path = "examples/cli/cli_gpu_peer_access_topology.rs"
 [[example]]
 name = "cli_gpu_fp8_capability_checker"
 path = "examples/cli/cli_gpu_fp8_capability_checker.rs"
+
+# --- decrypt / qa / pipeline extension (PMAT-121 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_decrypt_output_collision_detector"
+path = "examples/cli/cli_decrypt_output_collision_detector.rs"
+
+[[example]]
+name = "cli_decrypt_verify_ordering"
+path = "examples/cli/cli_decrypt_verify_ordering.rs"
+
+[[example]]
+name = "cli_decrypt_key_rotation_grace"
+path = "examples/cli/cli_decrypt_key_rotation_grace.rs"
+
+[[example]]
+name = "cli_qa_tier_aggregator"
+path = "examples/cli/cli_qa_tier_aggregator.rs"
+
+[[example]]
+name = "cli_qa_regression_delta_classifier"
+path = "examples/cli/cli_qa_regression_delta_classifier.rs"
+
+[[example]]
+name = "cli_qa_parallel_test_budget"
+path = "examples/cli/cli_qa_parallel_test_budget.rs"
+
+[[example]]
+name = "cli_pipeline_retry_policy_envelope"
+path = "examples/cli/cli_pipeline_retry_policy_envelope.rs"
+
+[[example]]
+name = "cli_pipeline_concurrency_limiter"
+path = "examples/cli/cli_pipeline_concurrency_limiter.rs"
+
+[[example]]
+name = "cli_pipeline_stage_skip_predicate"
+path = "examples/cli/cli_pipeline_stage_skip_predicate.rs"

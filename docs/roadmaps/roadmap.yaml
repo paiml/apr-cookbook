@@ -1900,3 +1900,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-098
+  github_issue: null
+  item_type: task
+  title: 'PMAT-121: apr decrypt + qa + pipeline (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:38:37Z
+  updated: 2026-05-06T08:38:37Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
