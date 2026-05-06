@@ -2443,3 +2443,41 @@ path = "examples/cli/cli_debug_drama_classifier.rs"
 [[example]]
 name = "cli_debug_limit_truncator"
 path = "examples/cli/cli_debug_limit_truncator.rs"
+
+# --- profile / experiment / runs extension (PMAT-102 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_profile_naive_detection_threshold"
+path = "examples/cli/cli_profile_naive_detection_threshold.rs"
+
+[[example]]
+name = "cli_profile_format_dispatcher"
+path = "examples/cli/cli_profile_format_dispatcher.rs"
+
+[[example]]
+name = "cli_profile_perf_grade_thresholds"
+path = "examples/cli/cli_profile_perf_grade_thresholds.rs"
+
+[[example]]
+name = "cli_experiment_view_run_filter"
+path = "examples/cli/cli_experiment_view_run_filter.rs"
+
+[[example]]
+name = "cli_experiment_view_loss_curve_render"
+path = "examples/cli/cli_experiment_view_loss_curve_render.rs"
+
+[[example]]
+name = "cli_experiment_param_diff_renderer"
+path = "examples/cli/cli_experiment_param_diff_renderer.rs"
+
+[[example]]
+name = "cli_runs_ls_sparkline_renderer"
+path = "examples/cli/cli_runs_ls_sparkline_renderer.rs"
+
+[[example]]
+name = "cli_runs_show_metric_summary"
+path = "examples/cli/cli_runs_show_metric_summary.rs"
+
+[[example]]
+name = "cli_runs_diff_two_runs"
+path = "examples/cli/cli_runs_diff_two_runs.rs"
