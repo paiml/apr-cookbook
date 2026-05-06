@@ -2329,3 +2329,41 @@ path = "examples/cli/cli_publish_pipeline_tag_allowlist.rs"
 [[example]]
 name = "cli_publish_dry_run_diff"
 path = "examples/cli/cli_publish_dry_run_diff.rs"
+
+# --- import / explain / export extension (PMAT-099 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_import_strict_mode_envelope"
+path = "examples/cli/cli_import_strict_mode_envelope.rs"
+
+[[example]]
+name = "cli_import_provenance_chain_enforcement"
+path = "examples/cli/cli_import_provenance_chain_enforcement.rs"
+
+[[example]]
+name = "cli_import_no_config_inference_risk"
+path = "examples/cli/cli_import_no_config_inference_risk.rs"
+
+[[example]]
+name = "cli_explain_kernel_dispatch_pipeline"
+path = "examples/cli/cli_explain_kernel_dispatch_pipeline.rs"
+
+[[example]]
+name = "cli_explain_proof_status_aggregator"
+path = "examples/cli/cli_explain_proof_status_aggregator.rs"
+
+[[example]]
+name = "cli_explain_error_code_lookup"
+path = "examples/cli/cli_explain_error_code_lookup.rs"
+
+[[example]]
+name = "cli_export_format_allowlist"
+path = "examples/cli/cli_export_format_allowlist.rs"
+
+[[example]]
+name = "cli_export_batch_csv_planner"
+path = "examples/cli/cli_export_batch_csv_planner.rs"
+
+[[example]]
+name = "cli_export_plan_mode_envelope"
+path = "examples/cli/cli_export_plan_mode_envelope.rs"
