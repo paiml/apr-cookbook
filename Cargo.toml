@@ -3735,3 +3735,41 @@ path = "examples/format/format_version_compat_matrix.rs"
 [[example]]
 name = "format_tensor_name_canonicalizer"
 path = "examples/format/format_tensor_name_canonicalizer.rs"
+
+# --- gpu / monitoring / distillation extension (PMAT-137 expand-cookbooks followup) ---
+
+[[example]]
+name = "gpu_kv_cache_paging"
+path = "examples/gpu/gpu_kv_cache_paging.rs"
+
+[[example]]
+name = "gpu_tensor_parallel_split"
+path = "examples/gpu/gpu_tensor_parallel_split.rs"
+
+[[example]]
+name = "gpu_pcie_bandwidth_tier"
+path = "examples/gpu/gpu_pcie_bandwidth_tier.rs"
+
+[[example]]
+name = "monitor_drift_psi"
+path = "examples/monitoring/monitor_drift_psi.rs"
+
+[[example]]
+name = "monitor_alert_dedup_window"
+path = "examples/monitoring/monitor_alert_dedup_window.rs"
+
+[[example]]
+name = "monitor_slo_burn_rate"
+path = "examples/monitoring/monitor_slo_burn_rate.rs"
+
+[[example]]
+name = "distill_temperature_picker"
+path = "examples/distillation/distill_temperature_picker.rs"
+
+[[example]]
+name = "distill_dataset_filter"
+path = "examples/distillation/distill_dataset_filter.rs"
+
+[[example]]
+name = "distill_layer_alignment_planner"
+path = "examples/distillation/distill_layer_alignment_planner.rs"
