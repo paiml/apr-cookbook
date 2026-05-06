@@ -5423,3 +5423,41 @@ path = "examples/tui/tui_inline_diff_view.rs"
 [[example]]
 name = "tui_password_strength_meter"
 path = "examples/tui/tui_password_strength_meter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-181) ---
+
+[[example]]
+name = "contracts_macros_severity_propagation"
+path = "examples/contracts-macros/contracts_macros_severity_propagation.rs"
+
+[[example]]
+name = "contracts_macros_yaml_indent_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_indent_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_freshness_window"
+path = "examples/contracts-macros/contracts_macros_recipe_freshness_window.rs"
+
+[[example]]
+name = "mc_token_refill_rate_match"
+path = "examples/monte-carlo/mc_token_refill_rate_match.rs"
+
+[[example]]
+name = "mc_battery_discharge_curve"
+path = "examples/monte-carlo/mc_battery_discharge_curve.rs"
+
+[[example]]
+name = "mc_pipeline_stage_bottleneck"
+path = "examples/monte-carlo/mc_pipeline_stage_bottleneck.rs"
+
+[[example]]
+name = "tui_indent_guides_render"
+path = "examples/tui/tui_indent_guides_render.rs"
+
+[[example]]
+name = "tui_status_pulse_dot"
+path = "examples/tui/tui_status_pulse_dot.rs"
+
+[[example]]
+name = "tui_minimap_render"
+path = "examples/tui/tui_minimap_render.rs"
