@@ -3051,3 +3051,41 @@ path = "examples/cli/cli_pretrain_epoch_budget_calc.rs"
 [[example]]
 name = "cli_pretrain_grad_clip_threshold"
 path = "examples/cli/cli_pretrain_grad_clip_threshold.rs"
+
+# --- bench / diff / experiment extension (PMAT-118 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_bench_cv_stability_gate"
+path = "examples/cli/cli_bench_cv_stability_gate.rs"
+
+[[example]]
+name = "cli_bench_batch_sweep_planner"
+path = "examples/cli/cli_bench_batch_sweep_planner.rs"
+
+[[example]]
+name = "cli_bench_unit_normalizer"
+path = "examples/cli/cli_bench_unit_normalizer.rs"
+
+[[example]]
+name = "cli_diff_shape_compatibility"
+path = "examples/cli/cli_diff_shape_compatibility.rs"
+
+[[example]]
+name = "cli_diff_magnitude_classifier"
+path = "examples/cli/cli_diff_magnitude_classifier.rs"
+
+[[example]]
+name = "cli_diff_structural_renderer"
+path = "examples/cli/cli_diff_structural_renderer.rs"
+
+[[example]]
+name = "cli_experiment_run_id_collision"
+path = "examples/cli/cli_experiment_run_id_collision.rs"
+
+[[example]]
+name = "cli_experiment_metric_compare_gate"
+path = "examples/cli/cli_experiment_metric_compare_gate.rs"
+
+[[example]]
+name = "cli_experiment_hypothesis_envelope"
+path = "examples/cli/cli_experiment_hypothesis_envelope.rs"
