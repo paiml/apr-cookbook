@@ -4305,3 +4305,57 @@ path = "examples/training/training_label_smoothing.rs"
 [[example]]
 name = "training_warmup_steps"
 path = "examples/training/training_warmup_steps.rs"
+
+# --- distillation / advanced / gpu (PMAT-152 — catalog crosses 1000 recipes) ---
+
+[[example]]
+name = "distill_progressive_freeze"
+path = "examples/distillation/distill_progressive_freeze.rs"
+
+[[example]]
+name = "distill_skill_cluster_router"
+path = "examples/distillation/distill_skill_cluster_router.rs"
+
+[[example]]
+name = "distill_loss_weight_schedule"
+path = "examples/distillation/distill_loss_weight_schedule.rs"
+
+[[example]]
+name = "distill_cross_layer_match"
+path = "examples/distillation/distill_cross_layer_match.rs"
+
+[[example]]
+name = "adv_token_budget"
+path = "examples/advanced/adv_token_budget.rs"
+
+[[example]]
+name = "adv_chain_of_thought"
+path = "examples/advanced/adv_chain_of_thought.rs"
+
+[[example]]
+name = "adv_multimodal_router"
+path = "examples/advanced/adv_multimodal_router.rs"
+
+[[example]]
+name = "adv_retry_backoff"
+path = "examples/advanced/adv_retry_backoff.rs"
+
+[[example]]
+name = "gpu_kernel_autotune"
+path = "examples/gpu/gpu_kernel_autotune.rs"
+
+[[example]]
+name = "gpu_persistent_kernel"
+path = "examples/gpu/gpu_persistent_kernel.rs"
+
+[[example]]
+name = "gpu_pinned_memory_pipeline"
+path = "examples/gpu/gpu_pinned_memory_pipeline.rs"
+
+[[example]]
+name = "gpu_cuda_graph_capture"
+path = "examples/gpu/gpu_cuda_graph_capture.rs"
+
+[[example]]
+name = "gpu_shared_mem_bank"
+path = "examples/gpu/gpu_shared_mem_bank.rs"
