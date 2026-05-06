@@ -2747,3 +2747,41 @@ path = "examples/cli/cli_trace_stage_csv_dispatcher.rs"
 [[example]]
 name = "cli_trace_diff_mode_envelope"
 path = "examples/cli/cli_trace_diff_mode_envelope.rs"
+
+# --- compile / validate-manifest / tensors extension (PMAT-110 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_compile_target_triple_validator"
+path = "examples/cli/cli_compile_target_triple_validator.rs"
+
+[[example]]
+name = "cli_compile_optimization_flags"
+path = "examples/cli/cli_compile_optimization_flags.rs"
+
+[[example]]
+name = "cli_compile_output_path_resolver"
+path = "examples/cli/cli_compile_output_path_resolver.rs"
+
+[[example]]
+name = "cli_validate_manifest_falsify_envelope"
+path = "examples/cli/cli_validate_manifest_falsify_envelope.rs"
+
+[[example]]
+name = "cli_validate_manifest_sha256_format"
+path = "examples/cli/cli_validate_manifest_sha256_format.rs"
+
+[[example]]
+name = "cli_validate_manifest_offline_safety"
+path = "examples/cli/cli_validate_manifest_offline_safety.rs"
+
+[[example]]
+name = "cli_tensors_filter_pattern"
+path = "examples/cli/cli_tensors_filter_pattern.rs"
+
+[[example]]
+name = "cli_tensors_limit_truncator"
+path = "examples/cli/cli_tensors_limit_truncator.rs"
+
+[[example]]
+name = "cli_tensors_stats_aggregator"
+path = "examples/cli/cli_tensors_stats_aggregator.rs"
