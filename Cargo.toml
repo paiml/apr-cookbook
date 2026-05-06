@@ -4967,3 +4967,41 @@ path = "examples/tui/tui_progress_eta_format.rs"
 [[example]]
 name = "tui_log_tail_buffer"
 path = "examples/tui/tui_log_tail_buffer.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-169) ---
+
+[[example]]
+name = "contracts_macros_proof_dependency"
+path = "examples/contracts-macros/contracts_macros_proof_dependency.rs"
+
+[[example]]
+name = "contracts_macros_alias_resolver"
+path = "examples/contracts-macros/contracts_macros_alias_resolver.rs"
+
+[[example]]
+name = "contracts_macros_obligation_tag_filter"
+path = "examples/contracts-macros/contracts_macros_obligation_tag_filter.rs"
+
+[[example]]
+name = "mc_warmup_sample_efficiency"
+path = "examples/monte-carlo/mc_warmup_sample_efficiency.rs"
+
+[[example]]
+name = "mc_request_lifetime"
+path = "examples/monte-carlo/mc_request_lifetime.rs"
+
+[[example]]
+name = "mc_skewed_load_distribution"
+path = "examples/monte-carlo/mc_skewed_load_distribution.rs"
+
+[[example]]
+name = "tui_grid_focus_navigation"
+path = "examples/tui/tui_grid_focus_navigation.rs"
+
+[[example]]
+name = "tui_alert_dismiss_state"
+path = "examples/tui/tui_alert_dismiss_state.rs"
+
+[[example]]
+name = "tui_action_undo_stack"
+path = "examples/tui/tui_action_undo_stack.rs"
