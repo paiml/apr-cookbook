@@ -2557,3 +2557,41 @@ path = "examples/cli/cli_prune_remove_layers_parser.rs"
 [[example]]
 name = "cli_prune_target_ratio_band"
 path = "examples/cli/cli_prune_target_ratio_band.rs"
+
+# --- serve / quantize / merge extension (PMAT-105 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_serve_plan_capacity_estimator"
+path = "examples/cli/cli_serve_plan_capacity_estimator.rs"
+
+[[example]]
+name = "cli_serve_run_port_validator"
+path = "examples/cli/cli_serve_run_port_validator.rs"
+
+[[example]]
+name = "cli_serve_run_endpoint_router"
+path = "examples/cli/cli_serve_run_endpoint_router.rs"
+
+[[example]]
+name = "cli_quantize_scheme_size_predictor"
+path = "examples/cli/cli_quantize_scheme_size_predictor.rs"
+
+[[example]]
+name = "cli_quantize_format_compatibility"
+path = "examples/cli/cli_quantize_format_compatibility.rs"
+
+[[example]]
+name = "cli_quantize_batch_csv_planner"
+path = "examples/cli/cli_quantize_batch_csv_planner.rs"
+
+[[example]]
+name = "cli_merge_strategy_dispatcher"
+path = "examples/cli/cli_merge_strategy_dispatcher.rs"
+
+[[example]]
+name = "cli_merge_weights_csv_parser"
+path = "examples/cli/cli_merge_weights_csv_parser.rs"
+
+[[example]]
+name = "cli_merge_dare_drop_rate_band"
+path = "examples/cli/cli_merge_dare_drop_rate_band.rs"
