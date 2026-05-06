@@ -3659,3 +3659,41 @@ path = "examples/serverless/serverless_provisioned_concurrency.rs"
 [[example]]
 name = "serverless_vpc_cold_start"
 path = "examples/serverless/serverless_vpc_cold_start.rs"
+
+# --- mcp / training / data-loading round 2 (PMAT-135 expand-cookbooks followup) ---
+
+[[example]]
+name = "mcp_request_id_correlator"
+path = "examples/mcp/mcp_request_id_correlator.rs"
+
+[[example]]
+name = "mcp_capability_handshake_diff"
+path = "examples/mcp/mcp_capability_handshake_diff.rs"
+
+[[example]]
+name = "mcp_error_code_classifier"
+path = "examples/mcp/mcp_error_code_classifier.rs"
+
+[[example]]
+name = "training_lr_warmup_decay"
+path = "examples/training/training_lr_warmup_decay.rs"
+
+[[example]]
+name = "training_loss_spike_detector"
+path = "examples/training/training_loss_spike_detector.rs"
+
+[[example]]
+name = "training_eval_cadence"
+path = "examples/training/training_eval_cadence.rs"
+
+[[example]]
+name = "data_compression_codec"
+path = "examples/data-loading/data_compression_codec.rs"
+
+[[example]]
+name = "data_sample_quota_balancer"
+path = "examples/data-loading/data_sample_quota_balancer.rs"
+
+[[example]]
+name = "data_train_val_test_split"
+path = "examples/data-loading/data_train_val_test_split.rs"
