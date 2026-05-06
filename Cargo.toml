@@ -3773,3 +3773,41 @@ path = "examples/distillation/distill_dataset_filter.rs"
 [[example]]
 name = "distill_layer_alignment_planner"
 path = "examples/distillation/distill_layer_alignment_planner.rs"
+
+# --- registry / api / simd round 2 (PMAT-138 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_signature_chain"
+path = "examples/registry/registry_signature_chain.rs"
+
+[[example]]
+name = "registry_quota_per_user"
+path = "examples/registry/registry_quota_per_user.rs"
+
+[[example]]
+name = "registry_gc_orphans"
+path = "examples/registry/registry_gc_orphans.rs"
+
+[[example]]
+name = "api_circuit_breaker_state"
+path = "examples/api/api_circuit_breaker_state.rs"
+
+[[example]]
+name = "api_request_timeout_classifier"
+path = "examples/api/api_request_timeout_classifier.rs"
+
+[[example]]
+name = "api_admission_control_queue"
+path = "examples/api/api_admission_control_queue.rs"
+
+[[example]]
+name = "simd_loop_carried_dep_detector"
+path = "examples/simd/simd_loop_carried_dep_detector.rs"
+
+[[example]]
+name = "simd_alignment_strategy"
+path = "examples/simd/simd_alignment_strategy.rs"
+
+[[example]]
+name = "simd_aos_to_soa"
+path = "examples/simd/simd_aos_to_soa.rs"
