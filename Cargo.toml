@@ -5043,3 +5043,41 @@ path = "examples/tui/tui_resize_grid_layout.rs"
 [[example]]
 name = "tui_loading_skeleton"
 path = "examples/tui/tui_loading_skeleton.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-171) ---
+
+[[example]]
+name = "contracts_macros_recipe_id_uniqueness"
+path = "examples/contracts-macros/contracts_macros_recipe_id_uniqueness.rs"
+
+[[example]]
+name = "contracts_macros_proof_age_audit"
+path = "examples/contracts-macros/contracts_macros_proof_age_audit.rs"
+
+[[example]]
+name = "contracts_macros_obligation_renaming"
+path = "examples/contracts-macros/contracts_macros_obligation_renaming.rs"
+
+[[example]]
+name = "mc_request_collision_dedup"
+path = "examples/monte-carlo/mc_request_collision_dedup.rs"
+
+[[example]]
+name = "mc_warmup_to_target"
+path = "examples/monte-carlo/mc_warmup_to_target.rs"
+
+[[example]]
+name = "mc_token_streaming_jitter"
+path = "examples/monte-carlo/mc_token_streaming_jitter.rs"
+
+[[example]]
+name = "tui_chart_axis_ticks"
+path = "examples/tui/tui_chart_axis_ticks.rs"
+
+[[example]]
+name = "tui_widget_focus_chain"
+path = "examples/tui/tui_widget_focus_chain.rs"
+
+[[example]]
+name = "tui_message_box_align"
+path = "examples/tui/tui_message_box_align.rs"
