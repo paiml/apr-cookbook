@@ -5005,3 +5005,41 @@ path = "examples/tui/tui_alert_dismiss_state.rs"
 [[example]]
 name = "tui_action_undo_stack"
 path = "examples/tui/tui_action_undo_stack.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-170) ---
+
+[[example]]
+name = "contracts_macros_invariant_drift_alert"
+path = "examples/contracts-macros/contracts_macros_invariant_drift_alert.rs"
+
+[[example]]
+name = "contracts_macros_recipe_decomposition"
+path = "examples/contracts-macros/contracts_macros_recipe_decomposition.rs"
+
+[[example]]
+name = "contracts_macros_obligation_coverage_pct"
+path = "examples/contracts-macros/contracts_macros_obligation_coverage_pct.rs"
+
+[[example]]
+name = "mc_chaos_monkey_failures"
+path = "examples/monte-carlo/mc_chaos_monkey_failures.rs"
+
+[[example]]
+name = "mc_token_billing_estimator"
+path = "examples/monte-carlo/mc_token_billing_estimator.rs"
+
+[[example]]
+name = "mc_replica_failover_time"
+path = "examples/monte-carlo/mc_replica_failover_time.rs"
+
+[[example]]
+name = "tui_select_popup"
+path = "examples/tui/tui_select_popup.rs"
+
+[[example]]
+name = "tui_resize_grid_layout"
+path = "examples/tui/tui_resize_grid_layout.rs"
+
+[[example]]
+name = "tui_loading_skeleton"
+path = "examples/tui/tui_loading_skeleton.rs"
