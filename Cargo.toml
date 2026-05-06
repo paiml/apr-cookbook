@@ -4077,3 +4077,41 @@ path = "examples/distributed/distributed_split_brain_detector.rs"
 [[example]]
 name = "distributed_priority_queue"
 path = "examples/distributed/distributed_priority_queue.rs"
+
+# --- wasm / training / gpu (PMAT-146 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_simd_lane_dispatcher"
+path = "examples/wasm/wasm_simd_lane_dispatcher.rs"
+
+[[example]]
+name = "wasm_globals_section"
+path = "examples/wasm/wasm_globals_section.rs"
+
+[[example]]
+name = "wasm_table_index_resolver"
+path = "examples/wasm/wasm_table_index_resolver.rs"
+
+[[example]]
+name = "training_zero3_partitioning"
+path = "examples/training/training_zero3_partitioning.rs"
+
+[[example]]
+name = "training_pretrain_data_mix"
+path = "examples/training/training_pretrain_data_mix.rs"
+
+[[example]]
+name = "training_long_context_extension"
+path = "examples/training/training_long_context_extension.rs"
+
+[[example]]
+name = "gpu_pcie_p2p_topology"
+path = "examples/gpu/gpu_pcie_p2p_topology.rs"
+
+[[example]]
+name = "gpu_gqa_group_picker"
+path = "examples/gpu/gpu_gqa_group_picker.rs"
+
+[[example]]
+name = "gpu_kernel_fusion"
+path = "examples/gpu/gpu_kernel_fusion.rs"
