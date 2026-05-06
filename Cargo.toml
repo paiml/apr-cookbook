@@ -5309,3 +5309,41 @@ path = "examples/tui/tui_chart_bar_render.rs"
 [[example]]
 name = "tui_dialog_button_focus"
 path = "examples/tui/tui_dialog_button_focus.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-178) ---
+
+[[example]]
+name = "contracts_macros_signature_hash"
+path = "examples/contracts-macros/contracts_macros_signature_hash.rs"
+
+[[example]]
+name = "contracts_macros_obligation_lock_file"
+path = "examples/contracts-macros/contracts_macros_obligation_lock_file.rs"
+
+[[example]]
+name = "contracts_macros_lean_compile_status"
+path = "examples/contracts-macros/contracts_macros_lean_compile_status.rs"
+
+[[example]]
+name = "mc_correlated_burst"
+path = "examples/monte-carlo/mc_correlated_burst.rs"
+
+[[example]]
+name = "mc_streaming_underflow"
+path = "examples/monte-carlo/mc_streaming_underflow.rs"
+
+[[example]]
+name = "mc_kv_zipf_hit_rate"
+path = "examples/monte-carlo/mc_kv_zipf_hit_rate.rs"
+
+[[example]]
+name = "tui_breadcrumb_click_target"
+path = "examples/tui/tui_breadcrumb_click_target.rs"
+
+[[example]]
+name = "tui_marquee_scroll"
+path = "examples/tui/tui_marquee_scroll.rs"
+
+[[example]]
+name = "tui_calendar_grid"
+path = "examples/tui/tui_calendar_grid.rs"
