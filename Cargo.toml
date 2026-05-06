@@ -2975,3 +2975,41 @@ path = "examples/cli/cli_import_dtype_coercion_validator.rs"
 [[example]]
 name = "cli_import_sharding_plan_validator"
 path = "examples/cli/cli_import_sharding_plan_validator.rs"
+
+# --- train / serve / diagnose extension (PMAT-116 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_train_early_stop_patience"
+path = "examples/cli/cli_train_early_stop_patience.rs"
+
+[[example]]
+name = "cli_train_lr_finder_validator"
+path = "examples/cli/cli_train_lr_finder_validator.rs"
+
+[[example]]
+name = "cli_train_checkpoint_planner"
+path = "examples/cli/cli_train_checkpoint_planner.rs"
+
+[[example]]
+name = "cli_serve_max_tokens_cap"
+path = "examples/cli/cli_serve_max_tokens_cap.rs"
+
+[[example]]
+name = "cli_serve_streaming_chunk_size"
+path = "examples/cli/cli_serve_streaming_chunk_size.rs"
+
+[[example]]
+name = "cli_serve_kv_cache_budget"
+path = "examples/cli/cli_serve_kv_cache_budget.rs"
+
+[[example]]
+name = "cli_diagnose_grad_nan_scanner"
+path = "examples/cli/cli_diagnose_grad_nan_scanner.rs"
+
+[[example]]
+name = "cli_diagnose_param_count_sanity"
+path = "examples/cli/cli_diagnose_param_count_sanity.rs"
+
+[[example]]
+name = "cli_diagnose_weight_histogram_classifier"
+path = "examples/cli/cli_diagnose_weight_histogram_classifier.rs"

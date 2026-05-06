@@ -1820,3 +1820,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-093
+  github_issue: null
+  item_type: task
+  title: 'PMAT-116: apr train + serve + diagnose (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T07:17:38Z
+  updated: 2026-05-06T07:17:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
