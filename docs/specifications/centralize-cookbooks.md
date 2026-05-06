@@ -1,11 +1,35 @@
 # Centralize Cookbooks Specification
 
-**Version**: 1.0.0
-**Status**: PROPOSED
+**Version**: 1.1.0
+**Status**: AMENDED (post-migration consolidation 2026-05-06)
 **MSRV**: 1.89 (inherits from apr-cookbook v5.0)
-**Date**: 2026-05-04
+**Date**: 2026-05-04 (v1.0.0); amended 2026-05-06 (v1.1.0)
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
 **Sovereign Stack**: APR-MONO v0.31.2
+
+---
+
+## Amendment 2026-05-06 — Post-Migration Library Consolidation (v1.1.0)
+
+After PMAT-066 archived `paiml/alimentar` and migrated its 18 examples into `apr-cookbook/examples/data-loading/`, **the alimentar library source itself was folded into the APR-MONO monorepo** at `aprender/crates/aprender-data/` (package `aprender-data`, lib name `alimentar`, v0.31.2 published to crates.io). Both the standalone repo and the migrated cookbook now point upstream to a single source of truth.
+
+**Implications:**
+
+1. **paiml/alimentar is ARCHIVED.** The git URL still resolves (read-only) and `REDIRECT.md` points here, but no further commits land there. The `archive-log.txt` entry from 2026-05-05 stands.
+
+2. **Canonical source lives in aprender.** New aprender-data features, bug fixes, and version bumps happen in `aprender/crates/aprender-data/` only. The `repository` field in that crate's Cargo.toml still reads `github.com/paiml/alimentar` (preserved for crates.io continuity); update is not required since the URL redirects.
+
+3. **apr-cookbook MUST show recipes.** `examples/data-loading/` is the canonical recipe gallery for `aprender-data` (lib `alimentar`). It is the ONLY user-facing surface that demonstrates the library. As aprender-data ships new APIs (new dataset formats, new transforms, new REPL commands), `examples/data-loading/` MUST be extended to cover them — same IIUR template, same Verdict-enum + arXiv-citation discipline as PMAT-110+ apr CLI recipe expansions.
+
+4. **Dependency wiring is correct as of v0.31.2.** `Cargo.toml` line 123:
+   ```toml
+   alimentar = { version = "0.31.2", package = "aprender-data", features = ["doctest"] }
+   ```
+   No change needed when aprender-data ships a patch; bump the version pin and re-run the data-loading example suite.
+
+5. **F-invariant for data-loading.** The original 18 migrated recipes satisfy the per-API floor at the time of migration. New aprender-data subcommands (`alimentar repl`, `alimentar registry`, `alimentar ingest`, etc.) added after 2026-05-06 each need ≥3 recipes in `examples/data-loading/` to maintain F-invariant parity with apr CLI surfaces — track via PMAT-200-series tickets when expansion ramps up.
+
+The rest of this spec (and all component documents under `centralize-cookbooks/`) remains accurate for the one-time migration mechanics. Where it says "alimentar crate stays published on crates.io," read that as "aprender-data is published on crates.io with `alimentar` as its lib name and the `paiml/alimentar` URL preserved for SemVer continuity."
 
 ---
 

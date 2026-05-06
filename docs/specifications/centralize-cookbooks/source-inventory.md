@@ -61,9 +61,11 @@ Snapshot date: **2026-05-04**. Counts taken via `find` against `~/src/{sovereign
 
 ## alimentar
 
-**Repository**: github.com/paiml/alimentar
-**Local**: `~/src/alimentar`
-**Character**: Library repo with examples + book. Cookbook absorbs only `examples/` and `book/src/`.
+**Repository (archived)**: github.com/paiml/alimentar — read-only as of 2026-05-05; `REDIRECT.md` points to apr-cookbook.
+**Canonical source (post-2026-05-06)**: `aprender/crates/aprender-data/` (package `aprender-data`, lib `alimentar`, v0.31.2). All future development of the library happens in the APR-MONO monorepo.
+**Local (legacy)**: `~/src/alimentar` (still on disk; matches the archived `pre-archive-2026-05` tag).
+**Local (canonical)**: `~/src/aprender/crates/aprender-data/`.
+**Character**: Library repo with examples + book. Cookbook absorbed only `examples/` and `book/src/`. The library `src/` lives in aprender-data and is consumed via `alimentar = { version = "0.31.2", package = "aprender-data" }` in `apr-cookbook/Cargo.toml`. **`apr-cookbook/examples/data-loading/` is the canonical recipe gallery and MUST be expanded as aprender-data adds APIs** (see Amendment §3 in the parent spec).
 
 ### Examples (18 files, all `examples/*.rs`)
 
