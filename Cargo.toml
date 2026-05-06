@@ -2253,3 +2253,41 @@ path = "examples/cli/cli_rosetta_compare_inference_logit_diff.rs"
 [[example]]
 name = "cli_rosetta_compare_inference_temperature_modes"
 path = "examples/cli/cli_rosetta_compare_inference_temperature_modes.rs"
+
+# --- rosetta diff-tensors / validate-stats / fingerprint extension (PMAT-097 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_rosetta_diff_tensors_layout_check"
+path = "examples/cli/cli_rosetta_diff_tensors_layout_check.rs"
+
+[[example]]
+name = "cli_rosetta_diff_tensors_value_sampler"
+path = "examples/cli/cli_rosetta_diff_tensors_value_sampler.rs"
+
+[[example]]
+name = "cli_rosetta_diff_tensors_pad_token_signal"
+path = "examples/cli/cli_rosetta_diff_tensors_pad_token_signal.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_threshold_gate"
+path = "examples/cli/cli_rosetta_validate_stats_threshold_gate.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_reference_or_fingerprints"
+path = "examples/cli/cli_rosetta_validate_stats_reference_or_fingerprints.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_per_tensor_report"
+path = "examples/cli/cli_rosetta_validate_stats_per_tensor_report.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_filter_pattern"
+path = "examples/cli/cli_rosetta_fingerprint_filter_pattern.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_diff_mode"
+path = "examples/cli/cli_rosetta_fingerprint_diff_mode.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_json_envelope"
+path = "examples/cli/cli_rosetta_fingerprint_json_envelope.rs"
