@@ -4435,3 +4435,41 @@ path = "examples/advanced/adv_provenance_chain.rs"
 [[example]]
 name = "adv_response_redactor"
 path = "examples/advanced/adv_response_redactor.rs"
+
+# --- distillation / monitoring / advanced (PMAT-155) ---
+
+[[example]]
+name = "distill_logit_smoothing"
+path = "examples/distillation/distill_logit_smoothing.rs"
+
+[[example]]
+name = "distill_per_class_temperature"
+path = "examples/distillation/distill_per_class_temperature.rs"
+
+[[example]]
+name = "distill_token_level_kd"
+path = "examples/distillation/distill_token_level_kd.rs"
+
+[[example]]
+name = "monitor_p99_outlier"
+path = "examples/monitoring/monitor_p99_outlier.rs"
+
+[[example]]
+name = "monitor_request_size_histogram"
+path = "examples/monitoring/monitor_request_size_histogram.rs"
+
+[[example]]
+name = "monitor_thread_pool_saturation"
+path = "examples/monitoring/monitor_thread_pool_saturation.rs"
+
+[[example]]
+name = "adv_quota_token_bucket"
+path = "examples/advanced/adv_quota_token_bucket.rs"
+
+[[example]]
+name = "adv_request_dedup_cache"
+path = "examples/advanced/adv_request_dedup_cache.rs"
+
+[[example]]
+name = "adv_warmup_classifier"
+path = "examples/advanced/adv_warmup_classifier.rs"
