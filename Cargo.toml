@@ -3469,3 +3469,41 @@ path = "examples/inference/inference_beam_search_width.rs"
 [[example]]
 name = "inference_top_p_nucleus"
 path = "examples/inference/inference_top_p_nucleus.rs"
+
+# --- format / gpu / deployment-stacks extension (PMAT-130 expand-cookbooks followup) ---
+
+[[example]]
+name = "format_bf16_vs_fp16_mantissa"
+path = "examples/format/format_bf16_vs_fp16_mantissa.rs"
+
+[[example]]
+name = "format_manifest_tensor_count"
+path = "examples/format/format_manifest_tensor_count.rs"
+
+[[example]]
+name = "format_endianness_detector"
+path = "examples/format/format_endianness_detector.rs"
+
+[[example]]
+name = "gpu_warp_divergence_classifier"
+path = "examples/gpu/gpu_warp_divergence_classifier.rs"
+
+[[example]]
+name = "gpu_occupancy_calculator"
+path = "examples/gpu/gpu_occupancy_calculator.rs"
+
+[[example]]
+name = "gpu_memory_bandwidth_roofline"
+path = "examples/gpu/gpu_memory_bandwidth_roofline.rs"
+
+[[example]]
+name = "deploy_pod_replica_scheduler"
+path = "examples/deployment-stacks/deploy_pod_replica_scheduler.rs"
+
+[[example]]
+name = "deploy_blue_green_cutover"
+path = "examples/deployment-stacks/deploy_blue_green_cutover.rs"
+
+[[example]]
+name = "deploy_canary_traffic_ramp"
+path = "examples/deployment-stacks/deploy_canary_traffic_ramp.rs"
