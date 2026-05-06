@@ -6031,3 +6031,41 @@ path = "examples/tui/tui_input_max_length_indicator.rs"
 [[example]]
 name = "tui_overflow_marker_render"
 path = "examples/tui/tui_overflow_marker_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-197) ---
+
+[[example]]
+name = "contracts_macros_obligation_join_status"
+path = "examples/contracts-macros/contracts_macros_obligation_join_status.rs"
+
+[[example]]
+name = "contracts_macros_yaml_required_top_level"
+path = "examples/contracts-macros/contracts_macros_yaml_required_top_level.rs"
+
+[[example]]
+name = "contracts_macros_recipe_priority_decay"
+path = "examples/contracts-macros/contracts_macros_recipe_priority_decay.rs"
+
+[[example]]
+name = "mc_traffic_jam_density"
+path = "examples/monte-carlo/mc_traffic_jam_density.rs"
+
+[[example]]
+name = "mc_neural_dropout_inference"
+path = "examples/monte-carlo/mc_neural_dropout_inference.rs"
+
+[[example]]
+name = "mc_caching_eviction_oldest"
+path = "examples/monte-carlo/mc_caching_eviction_oldest.rs"
+
+[[example]]
+name = "tui_minilist_filter_render"
+path = "examples/tui/tui_minilist_filter_render.rs"
+
+[[example]]
+name = "tui_resize_overflow_compact"
+path = "examples/tui/tui_resize_overflow_compact.rs"
+
+[[example]]
+name = "tui_chart_threshold_overlay"
+path = "examples/tui/tui_chart_threshold_overlay.rs"
