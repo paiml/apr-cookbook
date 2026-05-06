@@ -4039,3 +4039,41 @@ path = "examples/monitoring/monitor_metric_cardinality.rs"
 [[example]]
 name = "monitor_trace_sampling"
 path = "examples/monitoring/monitor_trace_sampling.rs"
+
+# --- distillation / advanced / distributed (PMAT-145 expand-cookbooks followup) ---
+
+[[example]]
+name = "distill_white_box_logit_match"
+path = "examples/distillation/distill_white_box_logit_match.rs"
+
+[[example]]
+name = "distill_data_augmentation"
+path = "examples/distillation/distill_data_augmentation.rs"
+
+[[example]]
+name = "distill_temperature_anneal"
+path = "examples/distillation/distill_temperature_anneal.rs"
+
+[[example]]
+name = "adv_request_coalescing"
+path = "examples/advanced/adv_request_coalescing.rs"
+
+[[example]]
+name = "adv_kv_quantization"
+path = "examples/advanced/adv_kv_quantization.rs"
+
+[[example]]
+name = "adv_speculative_tree_attention"
+path = "examples/advanced/adv_speculative_tree_attention.rs"
+
+[[example]]
+name = "distributed_consistent_hash"
+path = "examples/distributed/distributed_consistent_hash.rs"
+
+[[example]]
+name = "distributed_split_brain_detector"
+path = "examples/distributed/distributed_split_brain_detector.rs"
+
+[[example]]
+name = "distributed_priority_queue"
+path = "examples/distributed/distributed_priority_queue.rs"
