@@ -6373,3 +6373,41 @@ path = "examples/tui/tui_fold_block_collapse.rs"
 [[example]]
 name = "tui_notification_toast_queue"
 path = "examples/tui/tui_notification_toast_queue.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-206) ---
+
+[[example]]
+name = "contracts_macros_recipe_reviewer_assign"
+path = "examples/contracts-macros/contracts_macros_recipe_reviewer_assign.rs"
+
+[[example]]
+name = "contracts_macros_witness_dag_check"
+path = "examples/contracts-macros/contracts_macros_witness_dag_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_seq_padding_norm"
+path = "examples/contracts-macros/contracts_macros_yaml_seq_padding_norm.rs"
+
+[[example]]
+name = "mc_hit_or_miss_integration"
+path = "examples/monte-carlo/mc_hit_or_miss_integration.rs"
+
+[[example]]
+name = "mc_sphere_volume_estimate"
+path = "examples/monte-carlo/mc_sphere_volume_estimate.rs"
+
+[[example]]
+name = "mc_stratified_sampling"
+path = "examples/monte-carlo/mc_stratified_sampling.rs"
+
+[[example]]
+name = "tui_cursor_blink_phase"
+path = "examples/tui/tui_cursor_blink_phase.rs"
+
+[[example]]
+name = "tui_sidebar_toggle_state"
+path = "examples/tui/tui_sidebar_toggle_state.rs"
+
+[[example]]
+name = "tui_tooltip_show_delay"
+path = "examples/tui/tui_tooltip_show_delay.rs"
