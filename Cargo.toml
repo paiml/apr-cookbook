@@ -6145,3 +6145,41 @@ path = "examples/tui/tui_form_layout_grid.rs"
 [[example]]
 name = "tui_emoji_picker_filter"
 path = "examples/tui/tui_emoji_picker_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-200, milestone batch) ---
+
+[[example]]
+name = "contracts_macros_obligation_severity_escalate"
+path = "examples/contracts-macros/contracts_macros_obligation_severity_escalate.rs"
+
+[[example]]
+name = "contracts_macros_yaml_path_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_path_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_release_blocker"
+path = "examples/contracts-macros/contracts_macros_recipe_release_blocker.rs"
+
+[[example]]
+name = "mc_random_walk_drunkard"
+path = "examples/monte-carlo/mc_random_walk_drunkard.rs"
+
+[[example]]
+name = "mc_genetic_drift_population"
+path = "examples/monte-carlo/mc_genetic_drift_population.rs"
+
+[[example]]
+name = "mc_pareto_principle_80_20"
+path = "examples/monte-carlo/mc_pareto_principle_80_20.rs"
+
+[[example]]
+name = "tui_command_history_search_pattern"
+path = "examples/tui/tui_command_history_search_pattern.rs"
+
+[[example]]
+name = "tui_progress_estimate_remaining"
+path = "examples/tui/tui_progress_estimate_remaining.rs"
+
+[[example]]
+name = "tui_help_overlay_dismiss"
+path = "examples/tui/tui_help_overlay_dismiss.rs"
