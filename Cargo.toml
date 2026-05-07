@@ -7019,3 +7019,41 @@ path = "examples/wasm/wasm_name_section_validate.rs"
 [[example]]
 name = "simd_count_trailing_zeros_lane"
 path = "examples/simd/simd_count_trailing_zeros_lane.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-223) ---
+
+[[example]]
+name = "contracts_macros_yaml_root_node_check"
+path = "examples/contracts-macros/contracts_macros_yaml_root_node_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_namespace_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_namespace_audit.rs"
+
+[[example]]
+name = "contracts_macros_invariant_negated_classify"
+path = "examples/contracts-macros/contracts_macros_invariant_negated_classify.rs"
+
+[[example]]
+name = "mc_polya_ballot_problem"
+path = "examples/monte-carlo/mc_polya_ballot_problem.rs"
+
+[[example]]
+name = "mc_ising_model_2d"
+path = "examples/monte-carlo/mc_ising_model_2d.rs"
+
+[[example]]
+name = "mc_boltzmann_distribution"
+path = "examples/monte-carlo/mc_boltzmann_distribution.rs"
+
+[[example]]
+name = "tui_color_swatch_render"
+path = "examples/tui/tui_color_swatch_render.rs"
+
+[[example]]
+name = "tui_search_input_box"
+path = "examples/tui/tui_search_input_box.rs"
+
+[[example]]
+name = "tui_inline_emoji_replace"
+path = "examples/tui/tui_inline_emoji_replace.rs"
