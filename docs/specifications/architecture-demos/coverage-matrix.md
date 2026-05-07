@@ -4,7 +4,7 @@ Auto-regenerated from [manifest.yaml](manifest.yaml) by `scripts/architecture-de
 Hand-edits will be overwritten. Edit the manifest, not this file.
 
 **Last regenerated:** 2026-05-07 (seed; CI will refresh)
-**Totals:** 3 certified · 15 in-progress · 25 blocked · **43 total**
+**Totals:** 4 certified · 14 in-progress · 25 blocked · **43 total**
 
 ## Certified (2)
 
