@@ -1,7 +1,7 @@
 # Architecture Demos Specification
 
-**Version**: 1.0.0
-**Status**: ACTIVE (PMAT-300..307 implemented; CI gate enforced)
+**Version**: 1.1.0
+**Status**: ACTIVE (PMAT-300..313 implemented; CI gate enforced; upstream contribution aprender#1562)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-07
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
@@ -17,7 +17,9 @@ The unit is the architecture, not the model. HF hosts millions of model repos bu
 
 apr-cookbook today implements **Qwen2 only** (in `aprender-core/src/models/qwen2/`), with one-off recipes (`convert_phi_to_apr.rs`, `inference_qwen3_moe_numerical_parity_smoke.rs`) for two more. A user landing on the cookbook learns nothing about whether Llama, Mistral, Gemma, Phi, DeepSeek, Falcon, BLOOM, MAMBA, or any of the 35+ remaining families are supported. This spec proposes ~43 new recipes (one per family) plus the upstream `aprender::rosetta` loader registry that backs them.
 
-**Net additions:** 43 recipe artifacts split between `examples/inference/` (smoke loads) and `examples/conversion/` (HF-format converters where non-trivial), plus a manifest-driven coverage gate that forces the cookbook to track upstream architecture support.
+**Net additions (v1, PMAT-300..308):** 18 family-smoke recipes + 17 provable-contracts + 18 fixtures, plus a manifest-driven coverage gate that forces the cookbook to track upstream architecture support.
+
+**v1.1 expansion (PMAT-309..313):** 5 cross-family meta-recipes — detector (PMAT-309), summary (PMAT-310), compare (PMAT-311), quirk-audit (PMAT-312), alias-resolver (PMAT-313) — plus upstream contribution to `aprender::format::FamilyRegistry` ([aprender#1562](https://github.com/paiml/aprender/pull/1562)) lifting the discriminator-dispatch logic and adding the alias mechanism. Cookbook recipes act as the falsification suite for the upstream API; the cookbook→upstream bridge becomes a first-class pattern documented in [scope.md](architecture-demos/scope.md#upstream-contribution-discipline).
 
 ---
 

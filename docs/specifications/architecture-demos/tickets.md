@@ -1,6 +1,8 @@
 # PMAT Ticket Breakdown
 
-Architecture-demos work splits into **8 PMAT tickets** plus 1 prerequisite. Family batches group ~3 families per ticket so each is independently shippable. Each family ticket authors **both** the smoke recipe AND a per-family provable-contract YAML, then gates manifest-flip on `pv lint` + `pv score` grade C minimum. Ticket numbers are placeholders; actual numbers assigned by `pmat work add` at execution time.
+Architecture-demos work has shipped two waves: **v1 (PMAT-300..308, 9 tickets)** built one smoke recipe per family with a provable-contract; **v1.1 (PMAT-309..314, 6 tickets)** added cross-family meta-recipes plus the upstream-bridge to `aprender::format::FamilyRegistry` ([aprender#1562](https://github.com/paiml/aprender/pull/1562)).
+
+Each ticket authors recipe(s) + provable-contract YAML + (where applicable) fixture + tests, gating manifest-flip on `pv lint` + `pv score` grade C minimum. PMAT numbers are real ticket IDs assigned at landing time.
 
 | Ticket | Scope | Priority | Estimate | Depends on |
 |--------|-------|----------|----------|------------|
@@ -57,7 +59,7 @@ Total: ~20.5 dev-days (vs 14.5 IIUR-only — contract authoring adds ~0.5 day pe
 3. Demonstrate all three formats: safetensors, apr, gguf.
 4. Author `contracts/inference-llama-smoke-v1.yaml` — fill in concrete pre/postconditions for `loader_dispatch`, `tensor_validation`, `forward_determinism`. Reference Lean theorems (`Theorems.Llama.LoaderDispatch`, etc.) at `lean.status: wip` until proofs land.
 5. Flip manifest entry `llama: status: in-progress` → `certified` only after `pv lint` and `pv score --summary` (grade C minimum) both pass.
-6. Open upstream aprender ticket `aprender#TODO-llama-aliases` requesting alias mechanism for codellama/dolphin/hermes/openchat/smollm/smollm2/tinyllama/vicuna/wizardcoder/yi (10 aliases unblock as a batch when this lands).
+6. Open upstream aprender ticket `aprender#1562` (alias mechanism resolved) for codellama/dolphin/hermes/openchat/smollm/smollm2/tinyllama/vicuna/wizardcoder/yi (10 aliases unblock as a batch when this lands).
 7. Update [coverage-matrix.md](coverage-matrix.md) via generator.
 
 ### Definition of Done
@@ -153,7 +155,7 @@ Gemma demonstrates GGUF; GPT-2 demonstrates f32 (smallest models still ship full
 
 - All 3 recipes pass tests.
 - Manifest entries flipped to `certified`.
-- Open `aprender#TODO-codegemma-alias`, `aprender#TODO-distilgpt2-alias`, `aprender#TODO-pythia-alias` (3 aliases unblock).
+- Open `aprender#1562` (alias mechanism unblocks codegemma + distilgpt2 + pythia) (3 aliases unblock).
 
 ---
 
@@ -199,7 +201,7 @@ BERT is the only encoder-only family in v1; the verdict shape may need a fourth 
 
 - All 4 recipes pass tests.
 - Manifest entries flipped to `certified`.
-- Open `aprender#TODO-galactica-alias` (OPT-shared).
+- Open `aprender#1562` (alias mechanism unblocks galactica) (OPT-shared).
 - Recipe-template note added for encoder-only verdict shape.
 
 ---
@@ -229,8 +231,25 @@ BERT is the only encoder-only family in v1; the verdict shape may need a fourth 
 
 ---
 
-## Backlog (post-architecture-demos v1)
+## v1.1 Expansion (PMAT-309..314) — Cross-Family Meta-Recipes + Upstream Bridge
 
-- Resolution of `status: blocked` entries — driven by upstream aprender alias mechanism + new loaders. Each blocked-family unblock is a separate small ticket (PMAT-310..3??), tracked individually.
-- Vision/audio/multimodal expansion (LLaVA, SDXL, ViT) — separate spec, not in this scope.
+After v1 closeout (PMAT-308), the spec was extended with cross-family meta-recipes and an upstream-contribution bridge. The unit of v1.1 is no longer "one recipe per family" but "primitives that operate across the family suite".
+
+| Ticket | Scope | PR |
+|--------|-------|----|
+| PMAT-309 | Cross-family detector — discriminator-dispatch from raw config.json to family name | #413 (combined with PMAT-310) |
+| PMAT-310 | Family summary — discriminator catalog across all 16 families | #413 |
+| PMAT-311 | Cross-family compare — diff two configs, classify FamilyRelation | #414 (combined with PMAT-312) |
+| PMAT-312 | Quirk audit — flag configs matching >1 family discriminator | #414 |
+| PMAT-313 | Upstream bridge — alias-resolver demo + cookbook→aprender contribution ([aprender#1562](https://github.com/paiml/aprender/pull/1562)) | #415 + aprender#1562 |
+| PMAT-314 | Spec retrofit — bump status, document v1.1, refresh upstream-ticket links in manifest | this PR |
+
+Each v1.1 ticket follows the same IIUR + provable-contract discipline as v1. The 5 meta-recipes ship 22+11+12+10+13 = 68 unit tests across the family suite.
+
+## Backlog (post-architecture-demos v1.1)
+
+- **Refactor cookbook detector to consume upstream API** — when aprender ships a release containing #1562, bump the cookbook's aprender pin and replace `inference_arch_detector.rs` body with a thin call to `FamilyRegistry::detect_from_config_str`. The 22 detector tests become integration tests for the upstream API.
+- **Resolution of `status: blocked` entries** — 16 of 25 are alias-eligible (codellama, tinyllama, vicuna, yi, smollm, smollm2, dolphin, hermes, openchat, wizardcoder, codestral, zephyr, distilgpt2, pythia, galactica, codegemma) and unblock via aprender#1562's `register_alias` once it ships. The remaining 9 (bloom, falcon-classic, granite, internlm2_5, nemotron, olmo, stablelm, starcoder2, tiny_starcoder_py) need new upstream loaders, deferred per scope non-goal.
+- **Lift contracts C→A** — contracts currently score 0.65 Grade C (D1/D2 perfect, D3 Kani 0.6, D4 Lean 0.0, D5 Binding 0.0). Lifting to Grade A requires real Kani harness implementations + Lean theorem files. Tracked as a separate substantial-effort initiative.
+- **Vision/audio/multimodal expansion** (LLaVA, SDXL, ViT) — separate v2 spec, not in current scope.
 - ONNX format coverage — none of the 18 in-progress loaders ship ONNX; awaits upstream support.

@@ -289,7 +289,7 @@ families:
     hf_architectures: [GemmaForCausalLM] # shares Gemma loader; alias when gemma loader lands
     hf_pattern: "google/codegemma-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-codegemma-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
     notes: "Aliases the gemma family; awaits hf_pattern alias support in aprender::rosetta."
   - name: codellama
     display_name: "CodeLlama"
@@ -297,7 +297,7 @@ families:
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "codellama/CodeLlama-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-codellama-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
     notes: "Aliases the llama family; same loader, different vocab."
   - name: codestral
     display_name: "Codestral"
@@ -305,13 +305,13 @@ families:
     hf_architectures: [MistralForCausalLM]
     hf_pattern: "mistralai/Codestral-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-codestral-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: dolphin
     display_name: "Dolphin"
     vendor: cognitivecomputations
     hf_architectures: [LlamaForCausalLM, MistralForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-dolphin-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: falcon
     display_name: "Falcon (classic)"
     vendor: TII
@@ -325,7 +325,7 @@ families:
     vendor: "Meta AI"
     hf_architectures: [OPTForCausalLM] # actually uses OPT loader
     status: blocked
-    upstream_ticket: "aprender#TODO-galactica-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: granite
     display_name: "Granite"
     vendor: IBM
@@ -338,7 +338,7 @@ families:
     vendor: NousResearch
     hf_architectures: [LlamaForCausalLM, MistralForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-hermes-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: internlm2_5
     display_name: "InternLM2.5"
     vendor: InternLM
@@ -364,14 +364,14 @@ families:
     vendor: openchat
     hf_architectures: [LlamaForCausalLM, MistralForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-openchat-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: pythia
     display_name: "Pythia"
     vendor: EleutherAI
     hf_architectures: [GPTNeoXForCausalLM]
     hf_pattern: "EleutherAI/pythia-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-pythia-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
     notes: "Aliases gptneox loader."
   - name: smollm
     display_name: "SmolLM"
@@ -379,14 +379,14 @@ families:
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "HuggingFaceTB/SmolLM-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-smollm-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: smollm2
     display_name: "SmolLM2"
     vendor: HuggingFace
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "HuggingFaceTB/SmolLM2-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-smollm2-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: stablelm
     display_name: "StableLM"
     vendor: "Stability AI"
@@ -406,34 +406,34 @@ families:
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "TinyLlama/*"
     status: blocked
-    upstream_ticket: "aprender#TODO-tinyllama-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: vicuna
     display_name: "Vicuna"
     vendor: lmsys
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "lmsys/vicuna-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-vicuna-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: wizardcoder
     display_name: "WizardCoder"
     vendor: WizardLM
     hf_architectures: [LlamaForCausalLM, MistralForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-wizardcoder-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: yi
     display_name: "Yi"
     vendor: 01-ai
     hf_architectures: [LlamaForCausalLM]
     hf_pattern: "01-ai/Yi-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-yi-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: zephyr
     display_name: "Zephyr"
     vendor: HuggingFaceH4
     hf_architectures: [MistralForCausalLM]
     hf_pattern: "HuggingFaceH4/zephyr-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-zephyr-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
   - name: tiny_starcoder_py
     display_name: "Tiny StarCoder Python"
     vendor: bigcode
@@ -447,5 +447,5 @@ families:
     hf_architectures: [GPT2LMHeadModel]
     hf_pattern: "distilbert/distilgpt2"
     status: blocked
-    upstream_ticket: "aprender#TODO-distilgpt2-alias"
+    upstream_ticket: "aprender#1562 (alias mechanism — unblocks once released)"
     notes: "Aliases gpt2 loader; awaits alias support."

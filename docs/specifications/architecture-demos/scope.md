@@ -54,6 +54,23 @@ The architecture-demos initiative does **not** cover:
 - ❌ GPU-required CI gates — CPU smoke is the floor, GPU is `#[cfg_attr(not(feature = "cuda"), ignore)]`
 - ❌ Implementing upstream loaders — `status: blocked` entries are tracked, not resolved here
 
+## Upstream Contribution Discipline
+
+Added in v1.1 (PMAT-313). When a cookbook meta-recipe surfaces a primitive that genuinely belongs upstream — not a one-off demo, but a reusable API surface that other consumers would want — it gets lifted into `aprender-core` and the cookbook recipe becomes the falsification suite for the upstream API.
+
+Concrete instance: PMAT-309's `inference_arch_detector.rs` reverse-engineered a discriminator-dispatch table from the 18 family-smoke recipes. PMAT-313 lifted that dispatch table into `aprender::format::FamilyRegistry::detect_from_config_str` ([aprender#1562](https://github.com/paiml/aprender/pull/1562)) plus added a `register_alias` mechanism that unblocks 16 of the 25 `status: blocked` manifest entries.
+
+Pattern when this applies:
+1. A cookbook recipe demonstrates a primitive that maps cleanly to upstream's domain (architecture inspection, loader dispatch, …)
+2. The recipe's tests serve as a falsification contract on the upstream behavior
+3. Upstream PR adds the public API; cookbook recipe doc-header documents the upstream destination
+4. After the upstream PR ships in a release, cookbook bumps its aprender pin and the recipe refactors to call the upstream API directly (the tests become integration tests for upstream)
+
+Pattern when this does NOT apply:
+- Recipe is genuinely cookbook-specific (depends on `RecipeContext`, IIUR plumbing, etc.)
+- Recipe is a thin wrapper over an existing upstream API (no new primitive)
+- Recipe is exploratory — not yet stabilized enough to bake into upstream
+
 ## Versioning
 
-apr-cookbook spec bumps from v6.1.0 → **v6.2.0** after architecture-demos lands (minor: additive, no breaking re-categorization). The architecture-demos spec itself stays at v1.0.0 — the manifest evolves continuously without spec re-version.
+apr-cookbook spec bumps from v6.1.0 → **v6.2.0** after architecture-demos v1 lands (PMAT-308). v1.1 (PMAT-309..313) is additive within v6.2.x — the architecture-demos spec bumps to **1.1.0** to reflect the cross-family meta-recipe expansion + upstream-contribution discipline.
