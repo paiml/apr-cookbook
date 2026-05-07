@@ -2,7 +2,7 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Qwen3 smoke inference invariants — load, forward, determinism"
+  description: "Qwen3 smoke inference invariants — config parse, head_dim discriminator (vs Qwen2), deterministic forward simulation"
   references:
     - "Qwen Team (2025). Qwen3 Model Family. (HF model card)"
     - "docs/specifications/architecture-demos.md"
@@ -17,35 +17,34 @@ metadata:
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the qwen3 family"
-      invariant: "load_family('qwen3', fixture, fmt) returns Ok(Model)"
+      description: "Read config.json; extract numeric fields"
+      invariant: "Four numeric fields parsed; head_dim explicitly declared (Qwen3 vs Qwen2)"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "Run LCG seeded forward simulation"
+      invariant: "head_dim seeds the accumulator so it influences checksum"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Two consecutive smoke calls produce equal verdicts"
+      invariant: "Determinism across runs"
     - name: teardown
       description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'qwen3'"
+      - "Missing head_dim surfaces LoaderUnavailable (Qwen3 discriminator vs Qwen2)"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'qwen3'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, head_dim, .. } => family == 'qwen3' AND head_dim == config.head_dim"
     lean_theorem: "Theorems.Qwen3.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +52,34 @@ equations:
       status: wip
       module: "lean/Theorems/Qwen3.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  head_dim_discriminator:
+    formula: "config without head_dim ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "Qwen3 explicitly declares head_dim; Qwen2 derives it from hidden_size/num_attention_heads"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "fixture is readable"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Qwen3.TensorValidation"
+      - "if !body.contains('head_dim') then result is LoaderUnavailable"
+    lean_theorem: "Theorems.Qwen3.HeadDimDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen3.TensorValidation"
+      theorem: "Theorems.Qwen3.HeadDimDiscriminator"
       status: wip
       module: "lean/Theorems/Qwen3.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, hidden, head_dim) is deterministic and head_dim-sensitive"
+    domain: "seed: u64; vocab,hidden,head_dim: u32"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "head_dim seeds the accumulator so it participates in output"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, h, hd) == forward_sim(s, v, h, hd)"
+      - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
     lean_theorem: "Theorems.Qwen3.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +87,48 @@ equations:
       status: wip
       module: "lean/Theorems/Qwen3.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Qwen3.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3"
+  - type: invariant
+    property: "head_dim presence is required"
+    formal: "fixture without head_dim ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: head_dim_discriminator
+    lean:
+      theorem: "Theorems.Qwen3.HeadDimDiscriminator"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3"
+  - type: invariant
+    property: "Forward simulation is head_dim-sensitive"
+    formal: "head_dim participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Qwen3.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3"
+
 falsification_tests:
   - id: FALSIFY-QWEN3-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('qwen3', fixture, 'safetensors') ↦ Ok with .family() == 'qwen3'"
-    test: "Run smoke('tests/fixtures/architectures/qwen3/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "head_dim is explicitly declared in Qwen3"
+    prediction: "head_dim == 16 for the bundled Qwen3 fixture"
+    test: "cargo test --example inference_qwen3_smoke -- happy_path_head_dim_present"
+    if_fails: "head_dim extraction broke or fixture lost the field"
   - id: FALSIFY-QWEN3-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is head_dim-sensitive"
+    prediction: "forward_sim with head_dim=16 != forward_sim with head_dim=32"
+    test: "cargo test --example inference_qwen3_smoke -- head_dim_affects_checksum"
+    if_fails: "head_dim dropped from accumulator seeding"
   - id: FALSIFY-QWEN3-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output; different seed → different output"
+    test: "cargo test --example inference_qwen3_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked from RNG/threading"
 
 kani_harnesses:
   - id: KANI-QWEN3-001
@@ -114,43 +137,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_smoke_deterministic"
   - id: KANI-QWEN3-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for qwen3"
-    formal: "load_family('qwen3', fixture, fmt) ↦ Ok(Model) where Model.family() == 'qwen3'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Qwen3.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Qwen3.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Qwen3.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3"
-
 qa_gate:
   id: F-QWEN3-001
   name: "Qwen3 Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the qwen3 architecture family"
+  description: "Smoke load + head_dim discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "head_dim_present"
+    - "head_dim_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"

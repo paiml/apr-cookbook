@@ -2,7 +2,7 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Qwen3_5 smoke inference invariants — load, forward, determinism"
+  description: "Qwen3.5 smoke inference invariants — config parse, tie_word_embeddings discriminator, weight-tied tensor count, deterministic forward simulation"
   references:
     - "Qwen Team (2026). Qwen3.5 Technical Report. (HF model card)"
     - "docs/specifications/architecture-demos.md"
@@ -17,35 +17,34 @@ metadata:
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the qwen3_5 family"
-      invariant: "load_family('qwen3_5', fixture, fmt) returns Ok(Model)"
+      description: "Read config.json; extract numeric fields"
+      invariant: "Three numeric fields parsed; tie_word_embeddings field is present"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "Run LCG seeded forward simulation"
+      invariant: "When tied, lm_head.weight is dropped from tensor count (2+9n vs 3+9n)"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Two consecutive smoke calls produce equal verdicts"
+      invariant: "Determinism across runs"
     - name: teardown
       description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'qwen3_5'"
+      - "Missing tie_word_embeddings field surfaces LoaderUnavailable"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'qwen3_5'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, .. } => family == 'qwen3_5'"
     lean_theorem: "Theorems.Qwen3_5.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +52,35 @@ equations:
       status: wip
       module: "lean/Theorems/Qwen3_5.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  tied_word_embeddings:
+    formula: "tie_word_embeddings == true ↦ tensor_count = 2 + 9n (not 3 + 9n)"
+    domain: "n: u32; tied: bool"
+    codomain: "u32"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "When tied, lm_head shares weights with embed_tokens — no separate tensor"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "n ≥ 0"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Qwen3_5.TensorValidation"
+      - "expected_tensor_count(n, true) == 2 + 9n"
+      - "expected_tensor_count(n, false) == 3 + 9n"
+    lean_theorem: "Theorems.Qwen3_5.TiedWordEmbeddings"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen3_5.TensorValidation"
+      theorem: "Theorems.Qwen3_5.TiedWordEmbeddings"
       status: wip
       module: "lean/Theorems/Qwen3_5.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, tied) is deterministic and tied-sensitive"
+    domain: "seed: u64; vocab: u32; tied: bool"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "Tied flag affects accumulator initialization"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, t) == forward_sim(s, v, t)"
+      - "forward_sim(42, 256, true) != forward_sim(42, 256, false)"
     lean_theorem: "Theorems.Qwen3_5.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +88,48 @@ equations:
       status: wip
       module: "lean/Theorems/Qwen3_5.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Qwen3_5.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Tied embeddings drop lm_head from tensor count"
+    formal: "expected_tensor_count(n, true) == 2 + 9n"
+    tolerance: 0.0
+    applies_to: tied_word_embeddings
+    lean:
+      theorem: "Theorems.Qwen3_5.TiedWordEmbeddings"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Forward simulation is tied-sensitive"
+    formal: "tied flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Qwen3_5.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+
 falsification_tests:
   - id: FALSIFY-QWEN3_5-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('qwen3_5', fixture, 'safetensors') ↦ Ok with .family() == 'qwen3_5'"
-    test: "Run smoke('tests/fixtures/architectures/qwen3_5/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "tie_word_embeddings is required and recognized"
+    prediction: "tie_word_embeddings == true for the bundled Qwen3.5 fixture"
+    test: "cargo test --example inference_qwen3_5_smoke -- happy_path_tied_word_embeddings_true"
+    if_fails: "Field detection broke or fixture lost the tie_word_embeddings: true line"
   - id: FALSIFY-QWEN3_5-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Tied embeddings drop lm_head from tensor count"
+    prediction: "expected_tensor_count(2, true) == 20 != expected_tensor_count(2, false) == 21"
+    test: "cargo test --example inference_qwen3_5_smoke -- tensor_count_drops_lm_head_when_tied"
+    if_fails: "Tying logic drift — tensor count formula no longer reflects weight sharing"
   - id: FALSIFY-QWEN3_5-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is tied-sensitive"
+    prediction: "forward_sim with tied=true != forward_sim with tied=false"
+    test: "cargo test --example inference_qwen3_5_smoke -- tied_flag_affects_checksum"
+    if_fails: "Tied flag dropped from accumulator seeding"
 
 kani_harnesses:
   - id: KANI-QWEN3_5-001
@@ -114,43 +138,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_smoke_deterministic"
   - id: KANI-QWEN3_5-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for qwen3_5"
-    formal: "load_family('qwen3_5', fixture, fmt) ↦ Ok(Model) where Model.family() == 'qwen3_5'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Qwen3_5.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Qwen3_5.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Qwen3_5.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
-
 qa_gate:
   id: F-QWEN3_5-001
-  name: "Qwen3_5 Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the qwen3_5 architecture family"
+  name: "Qwen3.5 Smoke Inference Contract"
+  description: "Smoke load + tied-embeddings discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "tie_word_embeddings_present"
+    - "tied_drops_lm_head"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"

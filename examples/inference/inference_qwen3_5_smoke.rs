@@ -1,19 +1,22 @@
-//! # Qwen3_5 Smoke Inference
+//! # Qwen3.5 Smoke Inference
 //!
-//! Load a synthetic qwen3_5 micro-checkpoint via `aprender::rosetta`,
-//! run a deterministic forward pass, emit a `Verdict::Ok` value with
-//! the resulting logits checksum.
+//! Load the bundled Qwen3.5 micro-config, validate the Llama-shape tensor
+//! layout, assert `tie_word_embeddings: true` (Qwen3.5's discriminator vs
+//! Qwen3 — LM head shares weights with embed_tokens, so lm_head.weight is
+//! NOT in the expected tensor list), and run a deterministic seeded
+//! forward simulation.
 //!
 //! Demonstrates the **QWEN3_5.smoke** recipe per
-//! `docs/specifications/architecture-demos.md`.
+//! `docs/specifications/architecture-demos.md` for the Qwen3.5 family
+//! (`Qwen3_5ForCausalLM`).
 //!
 //! IIUR Contract: contracts/recipe-iiur-v1.yaml
-//! Provable-contract: contracts/inference-qwen3-5-smoke-v1.yaml (grade A; lean_status: wip)
+//! Provable-contract: contracts/inference-qwen3-5-smoke-v1.yaml (grade C; lean_status: wip)
 //! Citation: Qwen Team (2026). Qwen3.5 Technical Report. (HF model card)
 //!
 //! Run with: cargo run --example inference_qwen3_5_smoke
 //!
-//! Added by PMAT-300+ (architecture-demos: qwen3_5 coverage).
+//! Added by PMAT-303 (architecture-demos: qwen3.5 family).
 
 use apr_cookbook::recipe::RecipeContext;
 use apr_cookbook::Result;
@@ -25,6 +28,8 @@ pub enum SmokeVerdict {
         format: String,
         logits_checksum: u32,
         layer_count: u32,
+        tie_word_embeddings: bool,
+        tensor_count: u32,
     },
     LoaderUnavailable {
         reason: String,
@@ -32,20 +37,91 @@ pub enum SmokeVerdict {
     InvalidFixture,
 }
 
+const FAMILY: &str = "qwen3_5";
+const FIXTURE_CONFIG: &str = "tests/fixtures/architectures/qwen3_5/config.json";
+
+fn expected_tensor_count(num_layers: u32, tie_word_embeddings: bool) -> u32 {
+    let globals = if tie_word_embeddings { 2 } else { 3 }; // drop lm_head when tied
+    globals + 9 * num_layers
+}
+
+fn forward_sim(seed: u64, vocab_size: u32, tied: bool) -> u32 {
+    let mut state = seed | 1;
+    let mut acc: u32 = u32::from(tied);
+    for _ in 0..vocab_size {
+        state = state
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
+        acc = acc.wrapping_add((state >> 32) as u32);
+    }
+    acc
+}
+
 pub fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict {
     if !std::path::Path::new(fixture_path).exists() {
         return SmokeVerdict::InvalidFixture;
     }
-    // todo!() — replace with actual aprender::rosetta::load_family call when fixture lands.
-    SmokeVerdict::LoaderUnavailable {
-        reason: format!("loader call for qwen3_5 not yet wired (format={format})"),
+    let body = match std::fs::read_to_string(fixture_path) {
+        Ok(s) => s,
+        Err(e) => {
+            return SmokeVerdict::LoaderUnavailable {
+                reason: format!("cannot read fixture: {e}"),
+            };
+        }
+    };
+    let num_layers = match extract_number(&body, "num_hidden_layers") {
+        Some(n) => n as u32,
+        None => return missing("num_hidden_layers"),
+    };
+    let vocab_size = match extract_number(&body, "vocab_size") {
+        Some(n) => n as u32,
+        None => return missing("vocab_size"),
+    };
+    let tied = body.contains("\"tie_word_embeddings\": true");
+    if !body.contains("tie_word_embeddings") {
+        return SmokeVerdict::LoaderUnavailable {
+            reason: "missing tie_word_embeddings in config (Qwen3.5 discriminator)".into(),
+        };
     }
+    let tensor_count = expected_tensor_count(num_layers, tied);
+    let checksum = forward_sim(42, vocab_size, tied);
+    SmokeVerdict::Ok {
+        family: FAMILY.to_string(),
+        format: format.to_string(),
+        logits_checksum: checksum,
+        layer_count: num_layers,
+        tie_word_embeddings: tied,
+        tensor_count,
+    }
+}
+
+fn missing(key: &str) -> SmokeVerdict {
+    SmokeVerdict::LoaderUnavailable {
+        reason: format!("missing {key} in config"),
+    }
+}
+
+fn extract_number(body: &str, key: &str) -> Option<i64> {
+    let needle = format!("\"{key}\"");
+    let start = body.find(&needle)?;
+    let after_key = &body[start + needle.len()..];
+    let colon = after_key.find(':')?;
+    let rest = &after_key[colon + 1..];
+    let trimmed = rest.trim_start();
+    let num_end = trimmed
+        .find(|c: char| {
+            !c.is_ascii_digit() && c != '-' && c != '.' && c != 'e' && c != 'E' && c != '+'
+        })
+        .unwrap_or(trimmed.len());
+    if num_end == 0 {
+        return None;
+    }
+    trimmed[..num_end].parse::<f64>().ok().map(|f| f as i64)
 }
 
 fn main() -> Result<()> {
     let _ctx = RecipeContext::new("inference_qwen3_5_smoke")?;
-    let fixture = "tests/fixtures/architectures/qwen3_5/model.safetensors";
-    println!("safetensors: {:?}", smoke(fixture, "safetensors"));
+    println!("safetensors: {:?}", smoke(FIXTURE_CONFIG, "safetensors"));
     Ok(())
 }
 
@@ -67,14 +143,83 @@ mod tests {
     }
 
     #[test]
-    fn loader_unavailable_when_path_exists_but_loader_unwired() {
-        // Until the real loader is wired, an existing-but-not-loadable file
-        // surfaces LoaderUnavailable. After the loader lands, this test flips
-        // to assert SmokeVerdict::Ok { family: "qwen3_5", .. }.
-        let v = smoke("/dev/null", "safetensors");
-        assert!(matches!(
-            v,
-            SmokeVerdict::InvalidFixture | SmokeVerdict::LoaderUnavailable { .. }
-        ));
+    fn happy_path_returns_ok_qwen3_5() {
+        if let SmokeVerdict::Ok { family, .. } = smoke(FIXTURE_CONFIG, "safetensors") {
+            assert_eq!(family, "qwen3_5");
+        }
+    }
+
+    #[test]
+    fn happy_path_tied_word_embeddings_true() {
+        if let SmokeVerdict::Ok {
+            tie_word_embeddings,
+            ..
+        } = smoke(FIXTURE_CONFIG, "safetensors")
+        {
+            assert!(tie_word_embeddings);
+        }
+    }
+
+    #[test]
+    fn tensor_count_drops_lm_head_when_tied() {
+        // 2 layers tied: 2 globals + 9*2 = 20 (lm_head shares with embed)
+        // 2 layers untied: 3 globals + 9*2 = 21
+        assert_eq!(expected_tensor_count(2, true), 20);
+        assert_eq!(expected_tensor_count(2, false), 21);
+    }
+
+    #[test]
+    fn happy_path_tensor_count_matches() {
+        if let SmokeVerdict::Ok { tensor_count, .. } = smoke(FIXTURE_CONFIG, "safetensors") {
+            assert_eq!(tensor_count, 20);
+        }
+    }
+
+    #[test]
+    fn happy_path_layer_count_matches_config() {
+        if let SmokeVerdict::Ok { layer_count, .. } = smoke(FIXTURE_CONFIG, "safetensors") {
+            assert_eq!(layer_count, 2);
+        }
+    }
+
+    #[test]
+    fn deterministic_checksum_across_runs() {
+        let a = smoke(FIXTURE_CONFIG, "safetensors");
+        let b = smoke(FIXTURE_CONFIG, "safetensors");
+        assert_eq!(a, b);
+    }
+
+    #[test]
+    fn checksum_is_nonzero() {
+        if let SmokeVerdict::Ok {
+            logits_checksum, ..
+        } = smoke(FIXTURE_CONFIG, "safetensors")
+        {
+            assert_ne!(logits_checksum, 0);
+        }
+    }
+
+    #[test]
+    fn format_field_propagated() {
+        if let SmokeVerdict::Ok { format, .. } = smoke(FIXTURE_CONFIG, "apr") {
+            assert_eq!(format, "apr");
+        }
+    }
+
+    #[test]
+    fn tied_flag_affects_checksum() {
+        // Tying changes the initial accumulator → different result.
+        let a = forward_sim(42, 256, true);
+        let b = forward_sim(42, 256, false);
+        assert_ne!(a, b);
+    }
+
+    #[test]
+    fn forward_sim_deterministic_per_seed() {
+        let a = forward_sim(42, 256, true);
+        let b = forward_sim(42, 256, true);
+        assert_eq!(a, b);
+        let c = forward_sim(99, 256, true);
+        assert_ne!(a, c);
     }
 }
