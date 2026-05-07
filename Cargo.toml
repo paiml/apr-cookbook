@@ -6487,3 +6487,41 @@ path = "examples/tui/tui_popup_dialog_modal.rs"
 [[example]]
 name = "tui_select_box_arrow_nav"
 path = "examples/tui/tui_select_box_arrow_nav.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-209) ---
+
+[[example]]
+name = "contracts_macros_yaml_string_truncate"
+path = "examples/contracts-macros/contracts_macros_yaml_string_truncate.rs"
+
+[[example]]
+name = "contracts_macros_recipe_severity_aggregate"
+path = "examples/contracts-macros/contracts_macros_recipe_severity_aggregate.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_skip_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_skip_audit.rs"
+
+[[example]]
+name = "mc_secretary_problem"
+path = "examples/monte-carlo/mc_secretary_problem.rs"
+
+[[example]]
+name = "mc_chinese_restaurant_process"
+path = "examples/monte-carlo/mc_chinese_restaurant_process.rs"
+
+[[example]]
+name = "mc_hash_collision_birthday"
+path = "examples/monte-carlo/mc_hash_collision_birthday.rs"
+
+[[example]]
+name = "tui_pane_split_compute"
+path = "examples/tui/tui_pane_split_compute.rs"
+
+[[example]]
+name = "tui_keymap_register_chord"
+path = "examples/tui/tui_keymap_register_chord.rs"
+
+[[example]]
+name = "tui_gradient_fill_compute"
+path = "examples/tui/tui_gradient_fill_compute.rs"
