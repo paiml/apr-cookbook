@@ -6867,3 +6867,41 @@ path = "examples/wasm/wasm_atomic_wait_timeout.rs"
 [[example]]
 name = "simd_saturating_arithmetic"
 path = "examples/simd/simd_saturating_arithmetic.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-219) ---
+
+[[example]]
+name = "contracts_macros_yaml_block_scalar_norm"
+path = "examples/contracts-macros/contracts_macros_yaml_block_scalar_norm.rs"
+
+[[example]]
+name = "contracts_macros_recipe_pre_publish_lint"
+path = "examples/contracts-macros/contracts_macros_recipe_pre_publish_lint.rs"
+
+[[example]]
+name = "contracts_macros_invariant_atomicity"
+path = "examples/contracts-macros/contracts_macros_invariant_atomicity.rs"
+
+[[example]]
+name = "mc_card_shuffle_riffle"
+path = "examples/monte-carlo/mc_card_shuffle_riffle.rs"
+
+[[example]]
+name = "mc_brownian_bridge_path"
+path = "examples/monte-carlo/mc_brownian_bridge_path.rs"
+
+[[example]]
+name = "mc_inhomog_poisson_thinning"
+path = "examples/monte-carlo/mc_inhomog_poisson_thinning.rs"
+
+[[example]]
+name = "tui_banner_alert_render"
+path = "examples/tui/tui_banner_alert_render.rs"
+
+[[example]]
+name = "tui_terminal_bell_throttle"
+path = "examples/tui/tui_terminal_bell_throttle.rs"
+
+[[example]]
+name = "tui_pill_badge_render"
+path = "examples/tui/tui_pill_badge_render.rs"
