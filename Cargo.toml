@@ -6601,3 +6601,41 @@ path = "examples/tui/tui_context_menu_show.rs"
 [[example]]
 name = "tui_drawer_slide_compute"
 path = "examples/tui/tui_drawer_slide_compute.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-212) ---
+
+[[example]]
+name = "contracts_macros_yaml_block_indent_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_block_indent_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_metadata_min"
+path = "examples/contracts-macros/contracts_macros_recipe_metadata_min.rs"
+
+[[example]]
+name = "contracts_macros_witness_origin_trace"
+path = "examples/contracts-macros/contracts_macros_witness_origin_trace.rs"
+
+[[example]]
+name = "mc_german_tank_problem"
+path = "examples/monte-carlo/mc_german_tank_problem.rs"
+
+[[example]]
+name = "mc_prisoner_box_strategy"
+path = "examples/monte-carlo/mc_prisoner_box_strategy.rs"
+
+[[example]]
+name = "mc_full_shuffle_quality"
+path = "examples/monte-carlo/mc_full_shuffle_quality.rs"
+
+[[example]]
+name = "tui_syntax_token_classify"
+path = "examples/tui/tui_syntax_token_classify.rs"
+
+[[example]]
+name = "tui_wrap_strategy_compute"
+path = "examples/tui/tui_wrap_strategy_compute.rs"
+
+[[example]]
+name = "tui_column_header_sort_cycle"
+path = "examples/tui/tui_column_header_sort_cycle.rs"
