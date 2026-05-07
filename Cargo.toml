@@ -7171,3 +7171,11 @@ path = "examples/inference/inference_arch_detector.rs"
 [[example]]
 name = "inference_arch_summary"
 path = "examples/inference/inference_arch_summary.rs"
+
+[[example]]
+name = "inference_arch_compare"
+path = "examples/inference/inference_arch_compare.rs"
+
+[[example]]
+name = "inference_arch_quirk_audit"
+path = "examples/inference/inference_arch_quirk_audit.rs"

@@ -1,0 +1,155 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Architecture compare — diff two family configs by discriminator-field intersection; emit FamilyRelation"
+  references:
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/coverage-matrix.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - compare
+    - documentation
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext"
+      invariant: "context.temp_dir empty"
+    - name: load
+      description: "Read both fixture config bodies as strings"
+      invariant: "Both paths readable; otherwise InvalidFixture"
+    - name: diff
+      description: "For each known discriminator field, classify presence as shared/only_a/only_b"
+      invariant: "Every discriminator falls into exactly one of {shared, only_a, only_b, neither}"
+    - name: classify
+      description: "Map (shared, only_a, only_b) to FamilyRelation enum"
+      invariant: "SameFamily iff all-shared-no-only; SiblingFamilies iff shared+(only_a|only_b); DistantFamilies iff no shared"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  compare_total:
+    formula: "compare(a, b) ↦ Ok | InvalidFixture { which: a|b }"
+    domain: "a, b: Path"
+    codomain: "CompareVerdict"
+    invariants:
+      - "Total: every input pair produces some Verdict (no panic)"
+      - "InvalidFixture distinguishes which path failed"
+    preconditions:
+      - "a, b are valid UTF-8 path strings"
+    postconditions:
+      - "match Ok { shared, only_a, only_b } => disjoint sets, each subset of DISCRIMINATOR_FIELDS"
+    lean_theorem: "Theorems.ArchCompare.Total"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchCompare.Total"
+      status: wip
+      module: "lean/Theorems/ArchCompare.lean"
+
+  symmetry:
+    formula: "compare(a, b).only_a == compare(b, a).only_b"
+    domain: "a, b: Path"
+    codomain: "(Vec<String>, Vec<String>)"
+    invariants:
+      - "Order-swap swaps only_a and only_b but preserves shared"
+    preconditions:
+      - "Both paths readable"
+    postconditions:
+      - "compare(a, b).only_a == compare(b, a).only_b"
+      - "compare(a, b).only_b == compare(b, a).only_a"
+      - "compare(a, b).shared == compare(b, a).shared (set equality)"
+    lean_theorem: "Theorems.ArchCompare.Symmetry"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchCompare.Symmetry"
+      status: wip
+      module: "lean/Theorems/ArchCompare.lean"
+
+  relation_classification:
+    formula: "FamilyRelation = f(shared.is_empty(), only_a.is_empty(), only_b.is_empty())"
+    domain: "(bool, bool, bool)"
+    codomain: "FamilyRelation"
+    invariants:
+      - "SameFamily iff !shared.is_empty AND only_a.is_empty AND only_b.is_empty"
+      - "SiblingFamilies iff !shared.is_empty AND (!only_a.is_empty OR !only_b.is_empty)"
+      - "DistantFamilies iff shared.is_empty"
+    preconditions:
+      - "Sets are well-formed Vec<String>"
+    postconditions:
+      - "Relation is exhaustive and exclusive"
+    lean_theorem: "Theorems.ArchCompare.RelationClassification"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchCompare.RelationClassification"
+      status: wip
+      module: "lean/Theorems/ArchCompare.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Compare is total"
+    formal: "for all a, b: Path. compare(a, b) ↦ CompareVerdict"
+    tolerance: 0.0
+    applies_to: compare_total
+    lean:
+      theorem: "Theorems.ArchCompare.Total"
+      module: "ProvableContracts.ArchitectureDemos.ArchCompare"
+  - type: invariant
+    property: "Compare is symmetric in only-fields"
+    formal: "compare(a, b).only_a == compare(b, a).only_b"
+    tolerance: 0.0
+    applies_to: symmetry
+    lean:
+      theorem: "Theorems.ArchCompare.Symmetry"
+      module: "ProvableContracts.ArchitectureDemos.ArchCompare"
+  - type: invariant
+    property: "Family relation classification is exhaustive"
+    formal: "Relation ∈ {SameFamily, SiblingFamilies, DistantFamilies}"
+    tolerance: 0.0
+    applies_to: relation_classification
+    lean:
+      theorem: "Theorems.ArchCompare.RelationClassification"
+      module: "ProvableContracts.ArchitectureDemos.ArchCompare"
+
+falsification_tests:
+  - id: FALSIFY-COMPARE-001
+    rule: "Same fixture compared with itself yields SameFamily"
+    prediction: "compare(llama, llama) ↦ Ok with relation == SameFamily"
+    test: "cargo test --example inference_arch_compare -- same_fixture_yields_same_family"
+    if_fails: "Self-comparison broke; relation classification misclassified"
+  - id: FALSIFY-COMPARE-002
+    rule: "Order swap swaps only-fields"
+    prediction: "compare(a, b).only_a == compare(b, a).only_b"
+    test: "cargo test --example inference_arch_compare -- order_swap_yields_swapped_only_fields"
+    if_fails: "Compare lost symmetry; only-field assignment is order-sensitive"
+  - id: FALSIFY-COMPARE-003
+    rule: "Llama vs BERT have no shared discriminator (DistantFamilies)"
+    prediction: "compare(llama, bert).relation == DistantFamilies"
+    test: "cargo test --example inference_arch_compare -- llama_vs_bert_relation_is_distant"
+    if_fails: "Decoder-only Llama and encoder-only BERT incorrectly classified as related"
+
+kani_harnesses:
+  - id: KANI-COMPARE-001
+    obligation: "Compare is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_compare_total"
+  - id: KANI-COMPARE-002
+    obligation: "Compare is symmetric in only-fields"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_compare_symmetry"
+
+qa_gate:
+  id: F-COMPARE-001
+  name: "Architecture Compare Contract"
+  description: "Diff two family configs by discriminator-field intersection; emit FamilyRelation"
+  checks:
+    - "compare_is_total"
+    - "compare_is_symmetric"
+    - "relation_classification_is_exhaustive"
+  pass_criteria: "All three falsification tests pass"

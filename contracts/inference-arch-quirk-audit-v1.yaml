@@ -1,0 +1,151 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Architecture quirk audit — flag fixture configs that match more than one family discriminator"
+  references:
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/coverage-matrix.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - audit
+    - ci-canary
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext"
+      invariant: "context.temp_dir empty"
+    - name: walk
+      description: "Iterate the 16 in-progress family fixtures"
+      invariant: "Every family in FAMILIES const has a corresponding fixture path"
+    - name: classify
+      description: "For each fixture, count how many discriminator fields are present"
+      invariant: "matched_discriminators is a subset of DISCRIMINATOR_FIELDS"
+    - name: report
+      description: "Partition into clean (≤1 match) and quirky (>1 match) buckets"
+      invariant: "clean_count + quirky_count == 16"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  audit_total:
+    formula: "audit() ↦ Ok | InvalidFixture { missing_family }"
+    domain: "()"
+    codomain: "AuditVerdict"
+    invariants:
+      - "Total: every invocation produces some Verdict (no panic)"
+      - "Ok arm: clean + quirky == 16"
+    preconditions:
+      - "All 16 fixture config.json files exist on disk"
+    postconditions:
+      - "match Ok { clean_count, quirky_count, .. } => clean_count + quirky_count == 16"
+    lean_theorem: "Theorems.ArchQuirkAudit.Total"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.Total"
+      status: wip
+      module: "lean/Theorems/ArchQuirkAudit.lean"
+
+  quirky_minimum:
+    formula: "QuirkEntry => matched_discriminators.len() >= 2"
+    domain: "QuirkEntry"
+    codomain: "bool"
+    invariants:
+      - "Quirky entries by definition match at least two discriminators"
+    preconditions:
+      - "Audit ran successfully"
+    postconditions:
+      - "for all q in quirks: q.matched_discriminators.len() >= 2"
+    lean_theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
+      status: wip
+      module: "lean/Theorems/ArchQuirkAudit.lean"
+
+  determinism:
+    formula: "audit() == audit()"
+    domain: "()"
+    codomain: "AuditVerdict"
+    invariants:
+      - "Audit is a pure function of fixture filesystem state"
+    preconditions:
+      - "Fixtures don't change between calls"
+    postconditions:
+      - "Two consecutive calls produce byte-equal verdicts"
+    lean_theorem: "Theorems.ArchQuirkAudit.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.Determinism"
+      status: wip
+      module: "lean/Theorems/ArchQuirkAudit.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Audit totals 16"
+    formal: "audit().clean + audit().quirky == 16"
+    tolerance: 0.0
+    applies_to: audit_total
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.Total"
+      module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
+  - type: invariant
+    property: "Quirky entries have at least 2 matches"
+    formal: "for all q in quirks: q.matched_discriminators.len() >= 2"
+    tolerance: 0.0
+    applies_to: quirky_minimum
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
+      module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
+  - type: invariant
+    property: "Audit is deterministic"
+    formal: "audit() == audit()"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "Theorems.ArchQuirkAudit.Determinism"
+      module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
+
+falsification_tests:
+  - id: FALSIFY-AUDIT-001
+    rule: "Audit covers all 16 in-progress families"
+    prediction: "clean + quirky == 16"
+    test: "cargo test --example inference_arch_quirk_audit -- total_count_equals_16"
+    if_fails: "FAMILIES const drifted from manifest"
+  - id: FALSIFY-AUDIT-002
+    rule: "Quirky families have at least 2 discriminator matches"
+    prediction: "for all q in quirks: q.matched_discriminators.len() >= 2"
+    test: "cargo test --example inference_arch_quirk_audit -- quirky_entries_have_at_least_two_discriminators"
+    if_fails: "Classification logic drifted; quirky bucket admitted single-match families"
+  - id: FALSIFY-AUDIT-003
+    rule: "Qwen2 is in the quirks list (rope_theta + sliding_window + tie_word_embeddings)"
+    prediction: "audit().quirks contains entry with family == 'qwen2'"
+    test: "cargo test --example inference_arch_quirk_audit -- qwen2_is_quirky_shares_rope_theta_and_more"
+    if_fails: "Qwen2 fixture changed or discriminator detection regressed"
+
+kani_harnesses:
+  - id: KANI-AUDIT-001
+    obligation: "Audit total equals fixture count"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_quirk_audit_total"
+  - id: KANI-AUDIT-002
+    obligation: "Quirky entries minimum-match invariant"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_quirk_audit_quirky_minimum"
+
+qa_gate:
+  id: F-AUDIT-001
+  name: "Architecture Quirk Audit Contract"
+  description: "Flag fixtures that match more than one family discriminator (CI canary for catalog drift)"
+  checks:
+    - "audit_totals_16"
+    - "quirky_minimum_2_matches"
+    - "audit_deterministic"
+  pass_criteria: "All three falsification tests pass"

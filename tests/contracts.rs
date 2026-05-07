@@ -30,7 +30,9 @@ const CONTRACT_FILES: &[&str] = &[
     "docs-schema-v1.yaml",
     "flash-attention-v1.yaml",
     // architecture-demos (PMAT-300+): one per family + cross-family detector (PMAT-309).
+    "inference-arch-compare-v1.yaml",
     "inference-arch-detector-v1.yaml",
+    "inference-arch-quirk-audit-v1.yaml",
     "inference-arch-summary-v1.yaml",
     "inference-bert-smoke-v1.yaml",
     "inference-deepseek-smoke-v1.yaml",
