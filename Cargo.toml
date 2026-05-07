@@ -6297,3 +6297,41 @@ path = "examples/tui/tui_braces_match_highlight.rs"
 [[example]]
 name = "tui_find_replace_count"
 path = "examples/tui/tui_find_replace_count.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-204) ---
+
+[[example]]
+name = "contracts_macros_coverage_band_check"
+path = "examples/contracts-macros/contracts_macros_coverage_band_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_revision_bump"
+path = "examples/contracts-macros/contracts_macros_recipe_revision_bump.rs"
+
+[[example]]
+name = "contracts_macros_spec_drift_audit"
+path = "examples/contracts-macros/contracts_macros_spec_drift_audit.rs"
+
+[[example]]
+name = "mc_reservoir_sample"
+path = "examples/monte-carlo/mc_reservoir_sample.rs"
+
+[[example]]
+name = "mc_metropolis_hastings_target"
+path = "examples/monte-carlo/mc_metropolis_hastings_target.rs"
+
+[[example]]
+name = "mc_geomean_estimate"
+path = "examples/monte-carlo/mc_geomean_estimate.rs"
+
+[[example]]
+name = "tui_line_number_render"
+path = "examples/tui/tui_line_number_render.rs"
+
+[[example]]
+name = "tui_trailing_ws_highlight"
+path = "examples/tui/tui_trailing_ws_highlight.rs"
+
+[[example]]
+name = "tui_theme_switch_apply"
+path = "examples/tui/tui_theme_switch_apply.rs"
