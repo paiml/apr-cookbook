@@ -6829,3 +6829,41 @@ path = "examples/tui/tui_empty_state_render.rs"
 [[example]]
 name = "tui_active_indicator_dot"
 path = "examples/tui/tui_active_indicator_dot.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-218) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_alphabetize"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_alphabetize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_changelog_versi"
+path = "examples/contracts-macros/contracts_macros_recipe_changelog_versi.rs"
+
+[[example]]
+name = "contracts_macros_spec_release_notes"
+path = "examples/contracts-macros/contracts_macros_spec_release_notes.rs"
+
+[[example]]
+name = "mc_zipf_law_word_freq"
+path = "examples/monte-carlo/mc_zipf_law_word_freq.rs"
+
+[[example]]
+name = "mc_gaussian_kde_estimate"
+path = "examples/monte-carlo/mc_gaussian_kde_estimate.rs"
+
+[[example]]
+name = "mc_rng_period_check"
+path = "examples/monte-carlo/mc_rng_period_check.rs"
+
+[[example]]
+name = "wasm_memory_grow_step"
+path = "examples/wasm/wasm_memory_grow_step.rs"
+
+[[example]]
+name = "wasm_atomic_wait_timeout"
+path = "examples/wasm/wasm_atomic_wait_timeout.rs"
+
+[[example]]
+name = "simd_saturating_arithmetic"
+path = "examples/simd/simd_saturating_arithmetic.rs"
