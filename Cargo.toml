@@ -6449,3 +6449,41 @@ path = "examples/tui/tui_word_count_status.rs"
 [[example]]
 name = "tui_live_preview_throttle"
 path = "examples/tui/tui_live_preview_throttle.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-208) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_chain_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_chain_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_handoff"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_handoff.rs"
+
+[[example]]
+name = "contracts_macros_deprecation_window_audit"
+path = "examples/contracts-macros/contracts_macros_deprecation_window_audit.rs"
+
+[[example]]
+name = "mc_rejection_sampling_normal"
+path = "examples/monte-carlo/mc_rejection_sampling_normal.rs"
+
+[[example]]
+name = "mc_inverse_cdf_sample"
+path = "examples/monte-carlo/mc_inverse_cdf_sample.rs"
+
+[[example]]
+name = "mc_coin_flip_max_streak"
+path = "examples/monte-carlo/mc_coin_flip_max_streak.rs"
+
+[[example]]
+name = "tui_sticky_header_pin"
+path = "examples/tui/tui_sticky_header_pin.rs"
+
+[[example]]
+name = "tui_popup_dialog_modal"
+path = "examples/tui/tui_popup_dialog_modal.rs"
+
+[[example]]
+name = "tui_select_box_arrow_nav"
+path = "examples/tui/tui_select_box_arrow_nav.rs"
