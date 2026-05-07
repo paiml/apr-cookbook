@@ -6639,3 +6639,41 @@ path = "examples/tui/tui_wrap_strategy_compute.rs"
 [[example]]
 name = "tui_column_header_sort_cycle"
 path = "examples/tui/tui_column_header_sort_cycle.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-213) ---
+
+[[example]]
+name = "contracts_macros_recipe_attestation_chain"
+path = "examples/contracts-macros/contracts_macros_recipe_attestation_chain.rs"
+
+[[example]]
+name = "contracts_macros_severity_decay_curve"
+path = "examples/contracts-macros/contracts_macros_severity_decay_curve.rs"
+
+[[example]]
+name = "contracts_macros_invariant_drift_window"
+path = "examples/contracts-macros/contracts_macros_invariant_drift_window.rs"
+
+[[example]]
+name = "mc_levy_flight_step"
+path = "examples/monte-carlo/mc_levy_flight_step.rs"
+
+[[example]]
+name = "mc_hawkes_self_exciting_process"
+path = "examples/monte-carlo/mc_hawkes_self_exciting_process.rs"
+
+[[example]]
+name = "mc_grid_walk_2d_diffusion"
+path = "examples/monte-carlo/mc_grid_walk_2d_diffusion.rs"
+
+[[example]]
+name = "tui_smooth_scroll_velocity"
+path = "examples/tui/tui_smooth_scroll_velocity.rs"
+
+[[example]]
+name = "tui_carousel_advance_step"
+path = "examples/tui/tui_carousel_advance_step.rs"
+
+[[example]]
+name = "tui_tag_cloud_size_compute"
+path = "examples/tui/tui_tag_cloud_size_compute.rs"
