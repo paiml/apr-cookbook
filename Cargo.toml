@@ -6259,3 +6259,41 @@ path = "examples/tui/tui_diff_word_level.rs"
 [[example]]
 name = "tui_kbd_shortcuts_render"
 path = "examples/tui/tui_kbd_shortcuts_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-203) ---
+
+[[example]]
+name = "contracts_macros_obligation_age_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_age_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_alias_dup_check"
+path = "examples/contracts-macros/contracts_macros_yaml_alias_dup_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_tag_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_tag_consistency.rs"
+
+[[example]]
+name = "mc_gamblers_ruin"
+path = "examples/monte-carlo/mc_gamblers_ruin.rs"
+
+[[example]]
+name = "mc_knapsack_random"
+path = "examples/monte-carlo/mc_knapsack_random.rs"
+
+[[example]]
+name = "mc_tsp_random_search"
+path = "examples/monte-carlo/mc_tsp_random_search.rs"
+
+[[example]]
+name = "tui_smart_indent_continue"
+path = "examples/tui/tui_smart_indent_continue.rs"
+
+[[example]]
+name = "tui_braces_match_highlight"
+path = "examples/tui/tui_braces_match_highlight.rs"
+
+[[example]]
+name = "tui_find_replace_count"
+path = "examples/tui/tui_find_replace_count.rs"
