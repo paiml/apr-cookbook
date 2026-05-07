@@ -7057,3 +7057,41 @@ path = "examples/tui/tui_search_input_box.rs"
 [[example]]
 name = "tui_inline_emoji_replace"
 path = "examples/tui/tui_inline_emoji_replace.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-224) ---
+
+[[example]]
+name = "contracts_macros_yaml_seq_dedupe"
+path = "examples/contracts-macros/contracts_macros_yaml_seq_dedupe.rs"
+
+[[example]]
+name = "contracts_macros_yaml_collection_size_max"
+path = "examples/contracts-macros/contracts_macros_yaml_collection_size_max.rs"
+
+[[example]]
+name = "contracts_macros_recipe_complete_pct"
+path = "examples/contracts-macros/contracts_macros_recipe_complete_pct.rs"
+
+[[example]]
+name = "mc_elephant_walk_memory"
+path = "examples/monte-carlo/mc_elephant_walk_memory.rs"
+
+[[example]]
+name = "mc_island_model_migration"
+path = "examples/monte-carlo/mc_island_model_migration.rs"
+
+[[example]]
+name = "mc_firefly_optimization"
+path = "examples/monte-carlo/mc_firefly_optimization.rs"
+
+[[example]]
+name = "wasm_magic_bytes_check"
+path = "examples/wasm/wasm_magic_bytes_check.rs"
+
+[[example]]
+name = "wasm_features_compat_check"
+path = "examples/wasm/wasm_features_compat_check.rs"
+
+[[example]]
+name = "simd_sum_lanes_reduce"
+path = "examples/simd/simd_sum_lanes_reduce.rs"
