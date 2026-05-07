@@ -6411,3 +6411,41 @@ path = "examples/tui/tui_sidebar_toggle_state.rs"
 [[example]]
 name = "tui_tooltip_show_delay"
 path = "examples/tui/tui_tooltip_show_delay.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-207) ---
+
+[[example]]
+name = "contracts_macros_yaml_doc_separator_check"
+path = "examples/contracts-macros/contracts_macros_yaml_doc_separator_check.rs"
+
+[[example]]
+name = "contracts_macros_spec_hash_pin"
+path = "examples/contracts-macros/contracts_macros_spec_hash_pin.rs"
+
+[[example]]
+name = "contracts_macros_recipe_quarantine_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_quarantine_audit.rs"
+
+[[example]]
+name = "mc_st_petersburg_paradox"
+path = "examples/monte-carlo/mc_st_petersburg_paradox.rs"
+
+[[example]]
+name = "mc_polya_urn_color_balance"
+path = "examples/monte-carlo/mc_polya_urn_color_balance.rs"
+
+[[example]]
+name = "mc_control_variate_reduction"
+path = "examples/monte-carlo/mc_control_variate_reduction.rs"
+
+[[example]]
+name = "tui_menu_render_aligned"
+path = "examples/tui/tui_menu_render_aligned.rs"
+
+[[example]]
+name = "tui_word_count_status"
+path = "examples/tui/tui_word_count_status.rs"
+
+[[example]]
+name = "tui_live_preview_throttle"
+path = "examples/tui/tui_live_preview_throttle.rs"
