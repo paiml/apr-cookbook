@@ -6905,3 +6905,41 @@ path = "examples/tui/tui_terminal_bell_throttle.rs"
 [[example]]
 name = "tui_pill_badge_render"
 path = "examples/tui/tui_pill_badge_render.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-220) ---
+
+[[example]]
+name = "contracts_macros_yaml_doc_seq_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_doc_seq_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_locale_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_locale_consistency.rs"
+
+[[example]]
+name = "contracts_macros_severity_score_normalize"
+path = "examples/contracts-macros/contracts_macros_severity_score_normalize.rs"
+
+[[example]]
+name = "mc_preferential_attachment_growth"
+path = "examples/monte-carlo/mc_preferential_attachment_growth.rs"
+
+[[example]]
+name = "mc_m_m_1_queue_wait"
+path = "examples/monte-carlo/mc_m_m_1_queue_wait.rs"
+
+[[example]]
+name = "mc_rumor_spread_dk_model"
+path = "examples/monte-carlo/mc_rumor_spread_dk_model.rs"
+
+[[example]]
+name = "wasm_table_max_size_check"
+path = "examples/wasm/wasm_table_max_size_check.rs"
+
+[[example]]
+name = "simd_lane_swizzle_validate"
+path = "examples/simd/simd_lane_swizzle_validate.rs"
+
+[[example]]
+name = "simd_pop_count_lane"
+path = "examples/simd/simd_pop_count_lane.rs"
