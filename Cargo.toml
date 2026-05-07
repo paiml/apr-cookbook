@@ -7162,3 +7162,12 @@ path = "examples/inference/inference_qwen3_5_smoke.rs"
 name = "inference_rwkv7_smoke"
 path = "examples/inference/inference_rwkv7_smoke.rs"
 
+# --- architecture-demos v1.1 (PMAT-309) ---
+
+[[example]]
+name = "inference_arch_detector"
+path = "examples/inference/inference_arch_detector.rs"
+
+[[example]]
+name = "inference_arch_summary"
+path = "examples/inference/inference_arch_summary.rs"

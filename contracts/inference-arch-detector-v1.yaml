@@ -1,0 +1,155 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Architecture detector — discriminator-based dispatch from config.json to family identifier"
+  references:
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/coverage-matrix.md (per-family discriminator catalog)"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - detector
+    - dispatch
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: load
+      description: "Read config.json body as a string"
+      invariant: "Body is valid UTF-8"
+    - name: dispatch
+      description: "Pattern-match discriminator fields in priority order to identify family"
+      invariant: "Most-specific discriminator wins (qwen3_5 before qwen3 before qwen2; mistral before llama catch-all)"
+    - name: verify
+      description: "Two consecutive detect() calls produce equal verdicts"
+      invariant: "Detection is deterministic per-input"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  detector_dispatch:
+    formula: "detect(fixture) ↦ Family(name) | UnknownFamily | InvalidFixture"
+    domain: "fixture: Path"
+    codomain: "DetectorVerdict"
+    invariants:
+      - "Detect is total: every input produces some Verdict (no panic)"
+      - "Family ∈ {16 in-progress + 2 speech} = 18 supported families"
+      - "Order-sensitive dispatch: qwen3_5 before qwen3; mistral before llama; mamba before bert"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+    postconditions:
+      - "match Family { name } => name ∈ {18 known families}"
+      - "match UnknownFamily { config_excerpt } => excerpt.len() ≤ 120"
+    lean_theorem: "Theorems.ArchDetector.Dispatch"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchDetector.Dispatch"
+      status: wip
+      module: "lean/Theorems/ArchDetector.lean"
+
+  discriminator_specificity:
+    formula: "more-specific discriminators dominate less-specific catch-alls"
+    domain: "config: String"
+    codomain: "DetectedFamily"
+    invariants:
+      - "Qwen3.5 fixture (has tie_word_embeddings + head_dim + qwen3_5) is detected as Qwen3_5, not Qwen3"
+      - "Mistral fixture (has sliding_window) is detected as Mistral, not Llama"
+      - "MAMBA fixture (state_size, no num_attention_heads) is detected as Mamba, not Bert"
+    preconditions:
+      - "config is non-empty"
+    postconditions:
+      - "Detection respects the per-family discriminator priority order"
+    lean_theorem: "Theorems.ArchDetector.Specificity"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchDetector.Specificity"
+      status: wip
+      module: "lean/Theorems/ArchDetector.lean"
+
+  determinism:
+    formula: "detect(f) == detect(f) for all f"
+    domain: "f: Path"
+    codomain: "DetectorVerdict"
+    invariants:
+      - "Detection is a pure function of input config bytes"
+    preconditions:
+      - "f is readable"
+    postconditions:
+      - "Two consecutive calls produce byte-equal verdicts"
+    lean_theorem: "Theorems.ArchDetector.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchDetector.Determinism"
+      status: wip
+      module: "lean/Theorems/ArchDetector.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Detector dispatch is total"
+    formal: "for all fixture: Path. detect(fixture) ↦ DetectorVerdict (no panic)"
+    tolerance: 0.0
+    applies_to: detector_dispatch
+    lean:
+      theorem: "Theorems.ArchDetector.Dispatch"
+      module: "ProvableContracts.ArchitectureDemos.ArchDetector"
+  - type: invariant
+    property: "Discriminator priority is correct"
+    formal: "specific-fixture detected as specific-family, not generic catch-all"
+    tolerance: 0.0
+    applies_to: discriminator_specificity
+    lean:
+      theorem: "Theorems.ArchDetector.Specificity"
+      module: "ProvableContracts.ArchitectureDemos.ArchDetector"
+  - type: invariant
+    property: "Detection is deterministic"
+    formal: "detect(f) == detect(f)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "Theorems.ArchDetector.Determinism"
+      module: "ProvableContracts.ArchitectureDemos.ArchDetector"
+
+falsification_tests:
+  - id: FALSIFY-DETECTOR-001
+    rule: "Each of the 16 in-progress family fixtures detects to its own family"
+    prediction: "detect(fixtures/llama/config.json) ↦ Family { Llama, .. }; same for all 15 others"
+    test: "cargo test --example inference_arch_detector -- detects_"
+    if_fails: "Discriminator catalog drifted from one or more family recipes"
+  - id: FALSIFY-DETECTOR-002
+    rule: "Specificity priority — Qwen3.5 NOT classified as Qwen3"
+    prediction: "Qwen3.5 fixture detects as Qwen3_5 (more specific match wins)"
+    test: "cargo test --example inference_arch_detector -- detects_qwen3_5"
+    if_fails: "Dispatch order broke; less-specific match shadowed the specific one"
+  - id: FALSIFY-DETECTOR-003
+    rule: "Detector is total — unknown configs return UnknownFamily, never panic"
+    prediction: "Body without recognizable discriminators returns DetectorVerdict::UnknownFamily"
+    test: "cargo test --example inference_arch_detector -- unknown_config_returns_unknown_family"
+    if_fails: "Catch-all fallback removed; detector now panics or silently misclassifies"
+
+kani_harnesses:
+  - id: KANI-DETECTOR-001
+    obligation: "Detection is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_detector_total"
+  - id: KANI-DETECTOR-002
+    obligation: "Detection is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_detector_deterministic"
+
+qa_gate:
+  id: F-DETECTOR-001
+  name: "Architecture Detector Contract"
+  description: "Cross-family discriminator-based dispatch from config.json to family identifier"
+  checks:
+    - "all_16_fixtures_detected"
+    - "specificity_priority_holds"
+    - "detection_is_total"
+  pass_criteria: "All three falsification tests pass; 16/16 fixtures correctly classified"

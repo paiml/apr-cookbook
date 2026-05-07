@@ -1,0 +1,153 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Architecture summary — discriminator catalog across all 16 families with deterministic output"
+  references:
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/coverage-matrix.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - summary
+    - documentation
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext"
+      invariant: "context.temp_dir empty"
+    - name: load
+      description: "Walk all 16 family fixture configs and read their bodies"
+      invariant: "Every family in FAMILIES list has a corresponding fixture path"
+    - name: extract
+      description: "For each family, extract its discriminator field value"
+      invariant: "Each entry has nonempty family + discriminator_field strings"
+    - name: verify
+      description: "Two consecutive summarize() calls produce equal verdicts"
+      invariant: "Output is deterministic across runs"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  summary_total:
+    formula: "summarize() ↦ Ok { entries.len() == 16 } | InvalidFixture"
+    domain: "()"
+    codomain: "SummaryVerdict"
+    invariants:
+      - "Total: every invocation produces some Verdict (no panic)"
+      - "Ok arm has exactly 16 entries (matches the 16 in-progress families)"
+    preconditions:
+      - "All 16 fixture config.json files exist on disk"
+    postconditions:
+      - "match Ok { entries } => entries.len() == 16"
+      - "All entries have non-empty family + discriminator_field"
+    lean_theorem: "Theorems.ArchSummary.Total"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchSummary.Total"
+      status: wip
+      module: "lean/Theorems/ArchSummary.lean"
+
+  discriminator_uniqueness:
+    formula: "discriminator_field is unique per family except llama+qwen2 share rope_theta"
+    domain: "()"
+    codomain: "Vec<String>"
+    invariants:
+      - "16 families, 15 distinct discriminator fields (llama and qwen2 share rope_theta)"
+    preconditions:
+      - "All 16 family fixtures load successfully"
+    postconditions:
+      - "Distinct discriminator_field values count == 15"
+    lean_theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
+      status: wip
+      module: "lean/Theorems/ArchSummary.lean"
+
+  determinism:
+    formula: "summarize() == summarize()"
+    domain: "()"
+    codomain: "SummaryVerdict"
+    invariants:
+      - "Output order is fixed by the FAMILIES const ordering"
+    preconditions:
+      - "Fixtures don't change between calls"
+    postconditions:
+      - "Two consecutive calls produce byte-equal verdicts"
+      - "First entry is always llama; last is always bert"
+    lean_theorem: "Theorems.ArchSummary.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.ArchSummary.Determinism"
+      status: wip
+      module: "lean/Theorems/ArchSummary.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Summary produces exactly 16 entries"
+    formal: "summarize().entries.len() == 16"
+    tolerance: 0.0
+    applies_to: summary_total
+    lean:
+      theorem: "Theorems.ArchSummary.Total"
+      module: "ProvableContracts.ArchitectureDemos.ArchSummary"
+  - type: invariant
+    property: "15 distinct discriminator fields across 16 families"
+    formal: "unique(discriminator_field).len() == 15"
+    tolerance: 0.0
+    applies_to: discriminator_uniqueness
+    lean:
+      theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
+      module: "ProvableContracts.ArchitectureDemos.ArchSummary"
+  - type: invariant
+    property: "Output is deterministic"
+    formal: "summarize() == summarize()"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "Theorems.ArchSummary.Determinism"
+      module: "ProvableContracts.ArchitectureDemos.ArchSummary"
+
+falsification_tests:
+  - id: FALSIFY-SUMMARY-001
+    rule: "Summary returns 16 entries (one per in-progress family)"
+    prediction: "summarize() ↦ Ok with entries.len() == 16"
+    test: "cargo test --example inference_arch_summary -- all_16_families_returned"
+    if_fails: "FAMILIES const drifted from manifest's 16 in-progress entries"
+  - id: FALSIFY-SUMMARY-002
+    rule: "15 unique discriminators across 16 families (llama+qwen2 share rope_theta)"
+    prediction: "Distinct discriminator_field values count == 15"
+    test: "cargo test --example inference_arch_summary -- discriminators_unique_across_families"
+    if_fails: "Discriminator catalog drifted; either too many shared or all unique"
+  - id: FALSIFY-SUMMARY-003
+    rule: "Output is deterministic across runs"
+    prediction: "Two summarize() invocations produce byte-equal output"
+    test: "cargo test --example inference_arch_summary -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked from filesystem timestamps or RNG"
+
+kani_harnesses:
+  - id: KANI-SUMMARY-001
+    obligation: "Summary always returns 16 entries"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_summary_count"
+  - id: KANI-SUMMARY-002
+    obligation: "Summary is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_summary_deterministic"
+
+qa_gate:
+  id: F-SUMMARY-001
+  name: "Architecture Summary Contract"
+  description: "Discriminator catalog across all 16 in-progress families with deterministic output"
+  checks:
+    - "all_16_families_returned"
+    - "discriminator_uniqueness"
+    - "deterministic_across_runs"
+  pass_criteria: "All three falsification tests pass"
