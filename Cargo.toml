@@ -6753,3 +6753,41 @@ path = "examples/tui/tui_ascii_histogram_render.rs"
 [[example]]
 name = "tui_gauge_meter_render"
 path = "examples/tui/tui_gauge_meter_render.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-216) ---
+
+[[example]]
+name = "contracts_macros_yaml_envelope_quote"
+path = "examples/contracts-macros/contracts_macros_yaml_envelope_quote.rs"
+
+[[example]]
+name = "contracts_macros_recipe_ttl_check"
+path = "examples/contracts-macros/contracts_macros_recipe_ttl_check.rs"
+
+[[example]]
+name = "contracts_macros_invariant_split_check"
+path = "examples/contracts-macros/contracts_macros_invariant_split_check.rs"
+
+[[example]]
+name = "mc_circuit_recovery_time"
+path = "examples/monte-carlo/mc_circuit_recovery_time.rs"
+
+[[example]]
+name = "mc_exponential_backoff_jitter"
+path = "examples/monte-carlo/mc_exponential_backoff_jitter.rs"
+
+[[example]]
+name = "mc_jitter_buffer_underrun"
+path = "examples/monte-carlo/mc_jitter_buffer_underrun.rs"
+
+[[example]]
+name = "wasm_import_count_budget"
+path = "examples/wasm/wasm_import_count_budget.rs"
+
+[[example]]
+name = "simd_dot_product_lane"
+path = "examples/simd/simd_dot_product_lane.rs"
+
+[[example]]
+name = "simd_horizontal_min_lanes"
+path = "examples/simd/simd_horizontal_min_lanes.rs"
