@@ -1,0 +1,13 @@
+{
+  "architectures": ["OPTForCausalLM"],
+  "model_type": "opt",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "num_attention_heads": 4,
+  "ffn_dim": 128,
+  "vocab_size": 256,
+  "max_position_embeddings": 128,
+  "do_layer_norm_before": true,
+  "layer_norm_elementwise_affine": true,
+  "torch_dtype": "float32"
+}

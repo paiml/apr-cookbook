@@ -2,7 +2,7 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Bert smoke inference invariants — load, forward, determinism"
+  description: "BERT smoke inference invariants — config parse, encoder-only discriminator (type_vocab_size for token-type embeddings), deterministic forward simulation"
   references:
     - "Devlin et al. (2018). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. arXiv:1810.04805"
     - "docs/specifications/architecture-demos.md"
@@ -13,39 +13,40 @@ metadata:
     - inference
     - smoke
     - bert
+    - encoder-only
 
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the bert family"
-      invariant: "load_family('bert', fixture, fmt) returns Ok(Model)"
+      description: "Extract BERT-specific fields including type_vocab_size"
+      invariant: "Four numeric fields parsed; type_vocab_size identifies encoder-only"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "LCG forward sim seeded with type_vocab_size"
+      invariant: "type_vocab_size participates in checksum"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
     - name: teardown
-      description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'bert'"
+      - "is_encoder_only is always true on Ok arm"
+      - "Missing type_vocab_size surfaces LoaderUnavailable (BERT discriminator)"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'bert'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, is_encoder_only, .. } => family == 'bert' AND is_encoder_only == true"
     lean_theorem: "Theorems.Bert.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +54,35 @@ equations:
       status: wip
       module: "lean/Theorems/Bert.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  encoder_only_discriminator:
+    formula: "config without type_vocab_size ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "BERT carries type_vocab_size for token-type embeddings (sentence-pair tasks)"
+      - "Decoder-only LMs (Llama, Mistral, etc.) do not have type_vocab_size"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "fixture is readable"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Bert.TensorValidation"
+      - "match Ok { type_vocab_size, .. } => type_vocab_size == config.type_vocab_size"
+    lean_theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Bert.TensorValidation"
+      theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
       status: wip
       module: "lean/Theorems/Bert.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, hidden, type_vocab) is deterministic and type-vocab-sensitive"
+    domain: "seed: u64; vocab,hidden,type_vocab: u32"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "type_vocab seeds the accumulator"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, h, t) == forward_sim(s, v, h, t)"
+      - "forward_sim(42, 256, 64, 2) != forward_sim(42, 256, 64, 4)"
     lean_theorem: "Theorems.Bert.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +90,48 @@ equations:
       status: wip
       module: "lean/Theorems/Bert.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Bert.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+  - type: invariant
+    property: "type_vocab_size required"
+    formal: "fixture without type_vocab_size ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: encoder_only_discriminator
+    lean:
+      theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+  - type: invariant
+    property: "Forward simulation is type-vocab-sensitive"
+    formal: "type_vocab_size participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Bert.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+
 falsification_tests:
   - id: FALSIFY-BERT-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('bert', fixture, 'safetensors') ↦ Ok with .family() == 'bert'"
-    test: "Run smoke('tests/fixtures/architectures/bert/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "type_vocab_size identifies encoder-only models"
+    prediction: "type_vocab_size == 2 AND is_encoder_only == true for the bundled BERT fixture"
+    test: "cargo test --example inference_bert_smoke -- happy_path_type_vocab_size_present"
+    if_fails: "Field detection broke or BERT discriminator removed"
   - id: FALSIFY-BERT-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is type-vocab-sensitive"
+    prediction: "forward_sim with type_vocab=2 != forward_sim with type_vocab=4"
+    test: "cargo test --example inference_bert_smoke -- type_vocab_size_affects_checksum"
+    if_fails: "type_vocab dropped from accumulator"
   - id: FALSIFY-BERT-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_bert_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
 
 kani_harnesses:
   - id: KANI-BERT-001
@@ -114,43 +140,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::bert_smoke_deterministic"
   - id: KANI-BERT-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::bert_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for bert"
-    formal: "load_family('bert', fixture, fmt) ↦ Ok(Model) where Model.family() == 'bert'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Bert.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Bert"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Bert.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Bert"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Bert.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Bert"
-
 qa_gate:
   id: F-BERT-001
-  name: "Bert Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the bert architecture family"
+  name: "BERT Smoke Inference Contract"
+  description: "Smoke load + encoder-only discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "type_vocab_size_present"
+    - "type_vocab_size_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"

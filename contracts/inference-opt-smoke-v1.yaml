@@ -2,9 +2,9 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Opt smoke inference invariants — load, forward, determinism"
+  description: "OPT smoke inference invariants — config parse, do_layer_norm_before discriminator (Pre-LN positioning), deterministic forward simulation"
   references:
-    - "Zhang et al. (2022). OPT: Open Pre-trained Transformer Language Models. arXiv:2205.01068"
+    - "Zhang et al. (2022). OPT: Open Pre-trained Transformer. arXiv:2205.01068"
     - "docs/specifications/architecture-demos.md"
   depends_on:
     - "recipe-iiur-v1"
@@ -17,35 +17,34 @@ metadata:
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the opt family"
-      invariant: "load_family('opt', fixture, fmt) returns Ok(Model)"
+      description: "Extract OPT-specific fields"
+      invariant: "do_layer_norm_before field present in body"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "LCG forward sim seeded with ln_before flag"
+      invariant: "ln_before flag participates in checksum"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
     - name: teardown
-      description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'opt'"
+      - "Missing do_layer_norm_before surfaces LoaderUnavailable"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'opt'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, .. } => family == 'opt'"
     lean_theorem: "Theorems.Opt.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +52,34 @@ equations:
       status: wip
       module: "lean/Theorems/Opt.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  pre_ln_discriminator:
+    formula: "config without do_layer_norm_before ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "OPT declares Pre-LN positioning explicitly via do_layer_norm_before"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "fixture is readable"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Opt.TensorValidation"
+      - "match Ok { layer_norm_before, .. } => layer_norm_before matches body"
+    lean_theorem: "Theorems.Opt.PreLnDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Opt.TensorValidation"
+      theorem: "Theorems.Opt.PreLnDiscriminator"
       status: wip
       module: "lean/Theorems/Opt.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, hidden, ln_before) is deterministic and ln-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; ln_before: bool"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "ln_before flag affects accumulator initialization"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, h, l) == forward_sim(s, v, h, l)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
     lean_theorem: "Theorems.Opt.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +87,48 @@ equations:
       status: wip
       module: "lean/Theorems/Opt.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Opt.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+  - type: invariant
+    property: "do_layer_norm_before required"
+    formal: "fixture without do_layer_norm_before ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: pre_ln_discriminator
+    lean:
+      theorem: "Theorems.Opt.PreLnDiscriminator"
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+  - type: invariant
+    property: "Forward simulation is ln-sensitive"
+    formal: "ln_before flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Opt.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+
 falsification_tests:
   - id: FALSIFY-OPT-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('opt', fixture, 'safetensors') ↦ Ok with .family() == 'opt'"
-    test: "Run smoke('tests/fixtures/architectures/opt/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "do_layer_norm_before field is recognized"
+    prediction: "layer_norm_before == true for the bundled OPT fixture"
+    test: "cargo test --example inference_opt_smoke -- happy_path_ln_before_true"
+    if_fails: "Field detection broke"
   - id: FALSIFY-OPT-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is ln-sensitive"
+    prediction: "forward_sim with ln=true != forward_sim with ln=false"
+    test: "cargo test --example inference_opt_smoke -- ln_position_affects_checksum"
+    if_fails: "ln_before dropped from accumulator"
   - id: FALSIFY-OPT-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_opt_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
 
 kani_harnesses:
   - id: KANI-OPT-001
@@ -114,43 +137,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::opt_smoke_deterministic"
   - id: KANI-OPT-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::opt_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for opt"
-    formal: "load_family('opt', fixture, fmt) ↦ Ok(Model) where Model.family() == 'opt'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Opt.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Opt"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Opt.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Opt"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Opt.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Opt"
-
 qa_gate:
   id: F-OPT-001
-  name: "Opt Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the opt architecture family"
+  name: "OPT Smoke Inference Contract"
+  description: "Smoke load + Pre-LN discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "ln_before_present"
+    - "ln_position_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"

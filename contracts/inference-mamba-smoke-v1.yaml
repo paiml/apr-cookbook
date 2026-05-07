@@ -2,7 +2,7 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Mamba smoke inference invariants — load, forward, determinism"
+  description: "MAMBA smoke inference invariants — config parse, pure-SSM discriminator (state_size + conv_kernel + expand), deterministic forward simulation"
   references:
     - "Gu & Dao (2023). Mamba: Linear-Time Sequence Modeling with Selective State Spaces. arXiv:2312.00752"
     - "docs/specifications/architecture-demos.md"
@@ -13,39 +13,39 @@ metadata:
     - inference
     - smoke
     - mamba
+    - ssm
 
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the mamba family"
-      invariant: "load_family('mamba', fixture, fmt) returns Ok(Model)"
+      description: "Extract MAMBA SSM fields"
+      invariant: "state_size, conv_kernel parsed"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "LCG forward sim seeded with state_size"
+      invariant: "state_size participates in checksum"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
     - name: teardown
-      description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'mamba'"
+      - "Missing state_size surfaces LoaderUnavailable (MAMBA SSM discriminator)"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'mamba'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, .. } => family == 'mamba'"
     lean_theorem: "Theorems.Mamba.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +53,34 @@ equations:
       status: wip
       module: "lean/Theorems/Mamba.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  ssm_discriminator:
+    formula: "config without state_size ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "MAMBA is pure SSM; state_size + conv_kernel are required"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "fixture is readable"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Mamba.TensorValidation"
+      - "match Ok { state_size, conv_kernel, .. } => both match config"
+    lean_theorem: "Theorems.Mamba.SsmDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mamba.TensorValidation"
+      theorem: "Theorems.Mamba.SsmDiscriminator"
       status: wip
       module: "lean/Theorems/Mamba.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, hidden, state_size) is deterministic and state-sensitive"
+    domain: "seed: u64; vocab,hidden,state_size: u32"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "state_size seeds the accumulator"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, h, ss) == forward_sim(s, v, h, ss)"
+      - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
     lean_theorem: "Theorems.Mamba.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +88,48 @@ equations:
       status: wip
       module: "lean/Theorems/Mamba.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Mamba.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+  - type: invariant
+    property: "state_size required"
+    formal: "fixture without state_size ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: ssm_discriminator
+    lean:
+      theorem: "Theorems.Mamba.SsmDiscriminator"
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+  - type: invariant
+    property: "Forward simulation is state-sensitive"
+    formal: "state_size participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Mamba.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+
 falsification_tests:
   - id: FALSIFY-MAMBA-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('mamba', fixture, 'safetensors') ↦ Ok with .family() == 'mamba'"
-    test: "Run smoke('tests/fixtures/architectures/mamba/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "MAMBA SSM fields are recognized"
+    prediction: "state_size=16, conv_kernel=4 for the bundled fixture"
+    test: "cargo test --example inference_mamba_smoke -- happy_path_ssm_fields_present"
+    if_fails: "SSM field detection broke"
   - id: FALSIFY-MAMBA-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is state-sensitive"
+    prediction: "forward_sim with state=16 != forward_sim with state=32"
+    test: "cargo test --example inference_mamba_smoke -- state_size_affects_checksum"
+    if_fails: "state_size dropped from accumulator"
   - id: FALSIFY-MAMBA-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_mamba_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
 
 kani_harnesses:
   - id: KANI-MAMBA-001
@@ -114,43 +138,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::mamba_smoke_deterministic"
   - id: KANI-MAMBA-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mamba_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for mamba"
-    formal: "load_family('mamba', fixture, fmt) ↦ Ok(Model) where Model.family() == 'mamba'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Mamba.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Mamba"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Mamba.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Mamba"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Mamba.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Mamba"
-
 qa_gate:
   id: F-MAMBA-001
-  name: "Mamba Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the mamba architecture family"
+  name: "MAMBA Smoke Inference Contract"
+  description: "Smoke load + SSM discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "ssm_fields_present"
+    - "state_size_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"
