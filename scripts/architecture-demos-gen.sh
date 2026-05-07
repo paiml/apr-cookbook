@@ -39,6 +39,15 @@ if ! command -v yq >/dev/null 2>&1; then
     exit 3
 fi
 
+# Reject path-traversal in any manifest-supplied path.
+guard_path() {
+    local p="$1"
+    if [[ "$p" == /* || "$p" == *..* ]]; then
+        echo "ERROR: refusing to operate on suspicious path: $p" >&2
+        exit 3
+    fi
+}
+
 # ---------- Manifest readers ----------
 families_with_status() {
     local status="$1"
@@ -54,6 +63,7 @@ field_for() {
 emit_recipe_stub() {
     local family="$1"
     local recipe_path="$2"
+    guard_path "$recipe_path"
     local citation
     citation="$(field_for "$family" citation)"
     local target="$ROOT/$recipe_path"
@@ -143,6 +153,7 @@ EOF
 emit_contract_stub() {
     local family="$1"
     local contract_path="$2"
+    guard_path "$contract_path"
     local target="$ROOT/$contract_path"
     if [[ -e "$target" ]]; then
         return 0
@@ -337,7 +348,7 @@ ensure_cargo_block() {
             head -n $((line - 1)) "$CARGO_TOML" > "$CARGO_TOML.tmp"
             # Drop trailing blank lines.
             sed -i -e :a -e '/^[[:space:]]*$/{$d;N;ba' -e '}' "$CARGO_TOML.tmp"
-            mv "$CARGO_TOML.tmp" "$CARGO_TOML"
+            mv -f "$CARGO_TOML.tmp" "$CARGO_TOML"
         fi
         {
             echo ""
