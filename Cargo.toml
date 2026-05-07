@@ -6563,3 +6563,41 @@ path = "examples/tui/tui_date_picker_validate.rs"
 [[example]]
 name = "tui_tabbed_view_switch"
 path = "examples/tui/tui_tabbed_view_switch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-211) ---
+
+[[example]]
+name = "contracts_macros_recipe_freeze_check"
+path = "examples/contracts-macros/contracts_macros_recipe_freeze_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_compat_matrix"
+path = "examples/contracts-macros/contracts_macros_recipe_compat_matrix.rs"
+
+[[example]]
+name = "contracts_macros_witness_replay_audit"
+path = "examples/contracts-macros/contracts_macros_witness_replay_audit.rs"
+
+[[example]]
+name = "mc_markov_text_generator"
+path = "examples/monte-carlo/mc_markov_text_generator.rs"
+
+[[example]]
+name = "mc_coalescent_tree_sample"
+path = "examples/monte-carlo/mc_coalescent_tree_sample.rs"
+
+[[example]]
+name = "mc_secretary_two_choice"
+path = "examples/monte-carlo/mc_secretary_two_choice.rs"
+
+[[example]]
+name = "tui_range_slider_validate"
+path = "examples/tui/tui_range_slider_validate.rs"
+
+[[example]]
+name = "tui_context_menu_show"
+path = "examples/tui/tui_context_menu_show.rs"
+
+[[example]]
+name = "tui_drawer_slide_compute"
+path = "examples/tui/tui_drawer_slide_compute.rs"
