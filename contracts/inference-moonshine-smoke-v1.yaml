@@ -118,6 +118,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::moonshine_smoke_invalid_fixture_total"
+  - id: KANI-MOONSHINE-003
+    obligation: "Forward pass is deterministic on speech-test fixture"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::moonshine_smoke_forward_determinism"
 
 proof_obligations:
   - type: invariant
