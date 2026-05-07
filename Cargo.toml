@@ -6677,3 +6677,41 @@ path = "examples/tui/tui_carousel_advance_step.rs"
 [[example]]
 name = "tui_tag_cloud_size_compute"
 path = "examples/tui/tui_tag_cloud_size_compute.rs"
+
+# --- contracts-macros / monte-carlo / wasm (PMAT-214) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_namespace"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_namespace.rs"
+
+[[example]]
+name = "contracts_macros_recipe_publish_gate"
+path = "examples/contracts-macros/contracts_macros_recipe_publish_gate.rs"
+
+[[example]]
+name = "contracts_macros_witness_aging_decay"
+path = "examples/contracts-macros/contracts_macros_witness_aging_decay.rs"
+
+[[example]]
+name = "mc_galton_board_distribution"
+path = "examples/monte-carlo/mc_galton_board_distribution.rs"
+
+[[example]]
+name = "mc_kelly_criterion_bet_size"
+path = "examples/monte-carlo/mc_kelly_criterion_bet_size.rs"
+
+[[example]]
+name = "mc_jidoka_guard_failure_rate"
+path = "examples/monte-carlo/mc_jidoka_guard_failure_rate.rs"
+
+[[example]]
+name = "wasm_start_section_validate"
+path = "examples/wasm/wasm_start_section_validate.rs"
+
+[[example]]
+name = "wasm_data_segment_overlap"
+path = "examples/wasm/wasm_data_segment_overlap.rs"
+
+[[example]]
+name = "wasm_tail_call_dispatch"
+path = "examples/wasm/wasm_tail_call_dispatch.rs"
