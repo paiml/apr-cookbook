@@ -6715,3 +6715,41 @@ path = "examples/wasm/wasm_data_segment_overlap.rs"
 [[example]]
 name = "wasm_tail_call_dispatch"
 path = "examples/wasm/wasm_tail_call_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-215, simular-themed MC) ---
+
+[[example]]
+name = "contracts_macros_yaml_emit_format_check"
+path = "examples/contracts-macros/contracts_macros_yaml_emit_format_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signoff_required"
+path = "examples/contracts-macros/contracts_macros_recipe_signoff_required.rs"
+
+[[example]]
+name = "contracts_macros_invariant_baseline_diff"
+path = "examples/contracts-macros/contracts_macros_invariant_baseline_diff.rs"
+
+[[example]]
+name = "mc_work_steal_scheduler_balance"
+path = "examples/monte-carlo/mc_work_steal_scheduler_balance.rs"
+
+[[example]]
+name = "mc_sim_clock_drift_detect"
+path = "examples/monte-carlo/mc_sim_clock_drift_detect.rs"
+
+[[example]]
+name = "mc_deterministic_replay_diverge"
+path = "examples/monte-carlo/mc_deterministic_replay_diverge.rs"
+
+[[example]]
+name = "tui_sparkline_render"
+path = "examples/tui/tui_sparkline_render.rs"
+
+[[example]]
+name = "tui_ascii_histogram_render"
+path = "examples/tui/tui_ascii_histogram_render.rs"
+
+[[example]]
+name = "tui_gauge_meter_render"
+path = "examples/tui/tui_gauge_meter_render.rs"
