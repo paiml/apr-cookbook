@@ -6981,3 +6981,41 @@ path = "examples/tui/tui_cursor_shape_phase.rs"
 [[example]]
 name = "tui_task_status_check"
 path = "examples/tui/tui_task_status_check.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-222) ---
+
+[[example]]
+name = "contracts_macros_yaml_explicit_tag_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_explicit_tag_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_dependent_count"
+path = "examples/contracts-macros/contracts_macros_recipe_dependent_count.rs"
+
+[[example]]
+name = "contracts_macros_invariant_proof_lang"
+path = "examples/contracts-macros/contracts_macros_invariant_proof_lang.rs"
+
+[[example]]
+name = "mc_bond_percolation_threshold"
+path = "examples/monte-carlo/mc_bond_percolation_threshold.rs"
+
+[[example]]
+name = "mc_forest_fire_spread"
+path = "examples/monte-carlo/mc_forest_fire_spread.rs"
+
+[[example]]
+name = "mc_elementary_ca_rule30"
+path = "examples/monte-carlo/mc_elementary_ca_rule30.rs"
+
+[[example]]
+name = "wasm_custom_section_emit"
+path = "examples/wasm/wasm_custom_section_emit.rs"
+
+[[example]]
+name = "wasm_name_section_validate"
+path = "examples/wasm/wasm_name_section_validate.rs"
+
+[[example]]
+name = "simd_count_trailing_zeros_lane"
+path = "examples/simd/simd_count_trailing_zeros_lane.rs"
