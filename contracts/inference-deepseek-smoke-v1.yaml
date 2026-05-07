@@ -142,6 +142,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::deepseek_smoke_invalid_fixture_total"
+  - id: KANI-DEEPSEEK-003
+    obligation: "moe_fields_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::deepseek_moe_fields_present"
 
 qa_gate:
   id: F-DEEPSEEK-001

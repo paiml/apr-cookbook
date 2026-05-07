@@ -142,6 +142,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::rwkv7_smoke_invalid_fixture_total"
+  - id: KANI-RWKV7-003
+    obligation: "linear_attention_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::rwkv7_linear_attention_present"
 
 qa_gate:
   id: F-RWKV7-001

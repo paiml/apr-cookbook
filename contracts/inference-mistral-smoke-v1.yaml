@@ -151,6 +151,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mistral_smoke_invalid_fixture_total"
+  - id: KANI-MISTRAL-003
+    obligation: "sliding_window_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mistral_sliding_window_present"
 
 qa_gate:
   id: F-MISTRAL-001

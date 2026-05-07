@@ -151,6 +151,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::llama_smoke_invalid_fixture_total"
+  - id: KANI-LLAMA-003
+    obligation: "tensor_count_layout"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::llama_tensor_count_layout"
 
 qa_gate:
   id: F-LLAMA-001

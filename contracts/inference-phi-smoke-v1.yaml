@@ -144,6 +144,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::phi_smoke_invalid_fixture_total"
+  - id: KANI-PHI-003
+    obligation: "fused_qkv_count"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::phi_fused_qkv_count"
 
 qa_gate:
   id: F-PHI-001

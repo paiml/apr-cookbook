@@ -143,6 +143,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_detector_deterministic"
+  - id: KANI-DETECTOR-003
+    obligation: "Specificity priority holds"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_detector_specificity_priority"
 
 qa_gate:
   id: F-DETECTOR-001

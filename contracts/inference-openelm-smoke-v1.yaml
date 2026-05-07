@@ -141,6 +141,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::openelm_smoke_invalid_fixture_total"
+  - id: KANI-OPENELM-003
+    obligation: "scaling_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::openelm_scaling_present"
 
 qa_gate:
   id: F-OPENELM-001

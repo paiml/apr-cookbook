@@ -142,6 +142,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mamba_smoke_invalid_fixture_total"
+  - id: KANI-MAMBA-003
+    obligation: "ssm_fields_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mamba_ssm_fields_present"
 
 qa_gate:
   id: F-MAMBA-001

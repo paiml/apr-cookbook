@@ -144,6 +144,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen2_smoke_invalid_fixture_total"
+  - id: KANI-QWEN2-003
+    obligation: "qkv_bias_count"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen2_qkv_bias_count"
 
 qa_gate:
   id: F-QWEN2-001

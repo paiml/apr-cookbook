@@ -142,6 +142,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_smoke_invalid_fixture_total"
+  - id: KANI-QWEN3_5-003
+    obligation: "tied_word_embeddings_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_tied_word_embeddings_present"
 
 qa_gate:
   id: F-QWEN3_5-001

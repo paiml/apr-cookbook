@@ -139,6 +139,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_quirk_audit_quirky_minimum"
+  - id: KANI-AUDIT-003
+    obligation: "Audit is deterministic across runs"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_quirk_audit_determinism"
 
 qa_gate:
   id: F-AUDIT-001

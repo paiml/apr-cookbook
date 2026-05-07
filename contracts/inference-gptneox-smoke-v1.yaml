@@ -141,6 +141,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_smoke_invalid_fixture_total"
+  - id: KANI-GPTNEOX-003
+    obligation: "parallel_residual_present"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gptneox_parallel_residual_present"
 
 qa_gate:
   id: F-GPTNEOX-001

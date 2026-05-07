@@ -143,6 +143,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_alias_resolver_deterministic"
+  - id: KANI-ALIAS-003
+    obligation: "Glob semantics correct (* suffix-wildcard)"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_alias_resolver_glob_semantics"
 
 qa_gate:
   id: F-ALIAS-001

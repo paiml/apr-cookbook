@@ -143,6 +143,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_compare_symmetry"
+  - id: KANI-COMPARE-003
+    obligation: "Relation classification is exhaustive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_compare_relation_classification"
 
 qa_gate:
   id: F-COMPARE-001

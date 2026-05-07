@@ -144,6 +144,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::bert_smoke_invalid_fixture_total"
+  - id: KANI-BERT-003
+    obligation: "encoder_only_marker"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::bert_encoder_only_marker"
 
 qa_gate:
   id: F-BERT-001

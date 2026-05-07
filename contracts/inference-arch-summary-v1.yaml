@@ -141,6 +141,11 @@ kani_harnesses:
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_summary_deterministic"
+  - id: KANI-SUMMARY-003
+    obligation: "Discriminator uniqueness invariant"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_summary_discriminator_uniqueness"
 
 qa_gate:
   id: F-SUMMARY-001
