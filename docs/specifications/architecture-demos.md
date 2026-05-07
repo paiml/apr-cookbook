@@ -1,7 +1,7 @@
 # Architecture Demos Specification
 
-**Version**: 1.1.0
-**Status**: ACTIVE (PMAT-300..313 implemented; CI gate enforced; upstream contribution aprender#1562)
+**Version**: 1.1.1
+**Status**: ACTIVE (PMAT-300..318 implemented; CI gate enforced; upstream contribution aprender#1562; **all 23 contracts at Grade A 0.98**)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-07
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
