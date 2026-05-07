@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <em>v6.2.0 (2026-05-07) closes the <a href="docs/specifications/architecture-demos.md">architecture-demos</a> sprint: 18 new family-smoke recipes + provable-contracts covering the full HF Transformers architecture surface that <code>aprender::rosetta</code> ships descriptors for (Llama, Mistral, Qwen2/3/3.5, Phi, Gemma, GPT-2, GPT-NeoX, DeepSeek, Falcon-H1, RWKV-7, OpenELM, OPT, MAMBA, BERT, plus Whisper + Moonshine in <code>examples/speech/</code>). Manifest-driven CI gate (<code>make architecture-demos-coverage</code>) reconciles upstream loader support against on-disk recipes and contracts.</em>
+</p>
+
+<p align="center">
   <em>v6.1.0 (2026-05-05) closes the <a href="docs/specifications/expand-cookbooks.md">expand-cookbooks</a> sprint: 44 new recipes covering Claude Code parity (<code>apr code</code>), GPU/CPU oracle bisection, MCP M5 transports, Anthropic Messages API drop-in, end-to-end publish, and 6 sister crates (<code>aprender-{mcp,tsp,shell,monte-carlo,cgp,contracts-macros}</code>). 420 recipes across 34 categories.</em>
 </p>
 

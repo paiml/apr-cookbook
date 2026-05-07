@@ -1,7 +1,7 @@
 # Architecture Demos Specification
 
 **Version**: 1.0.0
-**Status**: PROPOSED
+**Status**: ACTIVE (PMAT-300..307 implemented; CI gate enforced)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-07
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
