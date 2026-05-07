@@ -46,12 +46,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'mamba'"
-    lean_theorem: "Theorems.Mamba.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mamba.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Mamba.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
 
   ssm_discriminator:
     formula: "config without state_size ↦ LoaderUnavailable"
@@ -63,12 +63,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { state_size, conv_kernel, .. } => both match config"
-    lean_theorem: "Theorems.Mamba.SsmDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mamba.SsmDiscriminator"
-      status: wip
-      module: "lean/Theorems/Mamba.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, state_size) is deterministic and state-sensitive"
@@ -81,12 +81,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, ss) == forward_sim(s, v, h, ss)"
       - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
-    lean_theorem: "Theorems.Mamba.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mamba.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Mamba.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
 
 proof_obligations:
   - type: invariant
@@ -95,7 +95,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Mamba.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mamba"
   - type: invariant
     property: "state_size required"
@@ -103,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: ssm_discriminator
     lean:
-      theorem: "Theorems.Mamba.SsmDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mamba"
   - type: invariant
     property: "Forward simulation is state-sensitive"
@@ -111,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Mamba.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mamba"
 
 falsification_tests:

@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, head_dim, .. } => family == 'qwen3' AND head_dim == config.head_dim"
-    lean_theorem: "Theorems.Qwen3.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen3.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Qwen3.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3.lean"
 
   head_dim_discriminator:
     formula: "config without head_dim ↦ LoaderUnavailable"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "if !body.contains('head_dim') then result is LoaderUnavailable"
-    lean_theorem: "Theorems.Qwen3.HeadDimDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3.HeadDimDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen3.HeadDimDiscriminator"
-      status: wip
-      module: "lean/Theorems/Qwen3.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.HeadDimDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, head_dim) is deterministic and head_dim-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, hd) == forward_sim(s, v, h, hd)"
       - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
-    lean_theorem: "Theorems.Qwen3.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen3.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Qwen3.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Qwen3.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen3"
   - type: invariant
     property: "head_dim presence is required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: head_dim_discriminator
     lean:
-      theorem: "Theorems.Qwen3.HeadDimDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.HeadDimDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen3"
   - type: invariant
     property: "Forward simulation is head_dim-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Qwen3.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen3"
 
 falsification_tests:

@@ -46,12 +46,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'falcon_h1'"
-    lean_theorem: "Theorems.FalconH1.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.FalconH1.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/FalconH1.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
 
   ssm_discriminator:
     formula: "config without mamba_d_state ↦ LoaderUnavailable"
@@ -63,12 +63,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { mamba_d_state, .. } => mamba_d_state == config.mamba_d_state"
-    lean_theorem: "Theorems.FalconH1.SsmDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.FalconH1.SsmDiscriminator"
-      status: wip
-      module: "lean/Theorems/FalconH1.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, mamba_d_state) is deterministic and SSM-sensitive"
@@ -81,12 +81,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, m) == forward_sim(s, v, h, m)"
       - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
-    lean_theorem: "Theorems.FalconH1.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.FalconH1.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/FalconH1.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
 
 proof_obligations:
   - type: invariant
@@ -95,7 +95,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.FalconH1.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.FalconH1"
   - type: invariant
     property: "mamba_d_state required"
@@ -103,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: ssm_discriminator
     lean:
-      theorem: "Theorems.FalconH1.SsmDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.FalconH1"
   - type: invariant
     property: "Forward simulation is SSM-sensitive"
@@ -111,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.FalconH1.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.FalconH1"
 
 falsification_tests:

@@ -45,12 +45,12 @@ equations:
     postconditions:
       - "match Ok { entries } => entries.len() == 16"
       - "All entries have non-empty family + discriminator_field"
-    lean_theorem: "Theorems.ArchSummary.Total"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Total"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchSummary.Total"
-      status: wip
-      module: "lean/Theorems/ArchSummary.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Total"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchSummary.lean"
 
   discriminator_uniqueness:
     formula: "discriminator_field is unique per family except llama+qwen2 share rope_theta"
@@ -62,12 +62,12 @@ equations:
       - "All 16 family fixtures load successfully"
     postconditions:
       - "Distinct discriminator_field values count == 15"
-    lean_theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.DiscriminatorUniqueness"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
-      status: wip
-      module: "lean/Theorems/ArchSummary.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.DiscriminatorUniqueness"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchSummary.lean"
 
   determinism:
     formula: "summarize() == summarize()"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "Two consecutive calls produce byte-equal verdicts"
       - "First entry is always llama; last is always bert"
-    lean_theorem: "Theorems.ArchSummary.Determinism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Determinism"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchSummary.Determinism"
-      status: wip
-      module: "lean/Theorems/ArchSummary.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchSummary.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: summary_total
     lean:
-      theorem: "Theorems.ArchSummary.Total"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Total"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchSummary"
   - type: invariant
     property: "15 distinct discriminator fields across 16 families"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: discriminator_uniqueness
     lean:
-      theorem: "Theorems.ArchSummary.DiscriminatorUniqueness"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.DiscriminatorUniqueness"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchSummary"
   - type: invariant
     property: "Output is deterministic"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: determinism
     lean:
-      theorem: "Theorems.ArchSummary.Determinism"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchSummary.Determinism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchSummary"
 
 falsification_tests:

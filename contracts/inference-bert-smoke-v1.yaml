@@ -47,12 +47,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, is_encoder_only, .. } => family == 'bert' AND is_encoder_only == true"
-    lean_theorem: "Theorems.Bert.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Bert.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Bert.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
 
   encoder_only_discriminator:
     formula: "config without type_vocab_size ↦ LoaderUnavailable"
@@ -65,12 +65,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { type_vocab_size, .. } => type_vocab_size == config.type_vocab_size"
-    lean_theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
-      status: wip
-      module: "lean/Theorems/Bert.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, type_vocab) is deterministic and type-vocab-sensitive"
@@ -83,12 +83,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, t) == forward_sim(s, v, h, t)"
       - "forward_sim(42, 256, 64, 2) != forward_sim(42, 256, 64, 4)"
-    lean_theorem: "Theorems.Bert.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Bert.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Bert.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
 
 proof_obligations:
   - type: invariant
@@ -97,7 +97,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Bert.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Bert"
   - type: invariant
     property: "type_vocab_size required"
@@ -105,7 +106,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: encoder_only_discriminator
     lean:
-      theorem: "Theorems.Bert.EncoderOnlyDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Bert"
   - type: invariant
     property: "Forward simulation is type-vocab-sensitive"
@@ -113,7 +115,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Bert.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Bert"
 
 falsification_tests:

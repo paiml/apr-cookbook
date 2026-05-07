@@ -46,12 +46,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, qkv_proj_fused, .. } => family == 'phi' AND qkv_proj_fused matches body"
-    lean_theorem: "Theorems.Phi.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Phi.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Phi.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
 
   fused_qkv_topology:
     formula: "expected_tensor_count(n, true) == 3 + 7n; expected_tensor_count(n, false) == 3 + 9n"
@@ -64,12 +64,12 @@ equations:
     postconditions:
       - "expected_tensor_count(n, true) == 3 + 7n"
       - "expected_tensor_count(n, false) == 3 + 9n"
-    lean_theorem: "Theorems.Phi.FusedQkvTopology"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
     tolerance: 0
     lean:
-      theorem: "Theorems.Phi.FusedQkvTopology"
-      status: wip
-      module: "lean/Theorems/Phi.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, fused) is deterministic and fused-sensitive"
@@ -83,12 +83,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, f) == forward_sim(s, v, h, f)"
       - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
-    lean_theorem: "Theorems.Phi.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Phi.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Phi.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
 
 proof_obligations:
   - type: invariant
@@ -97,7 +97,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Phi.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Phi"
   - type: invariant
     property: "Fused QKV drops two tensors per layer"
@@ -105,7 +106,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: fused_qkv_topology
     lean:
-      theorem: "Theorems.Phi.FusedQkvTopology"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Phi"
   - type: invariant
     property: "Forward simulation is fused-sensitive"
@@ -113,7 +115,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Phi.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Phi"
 
 falsification_tests:

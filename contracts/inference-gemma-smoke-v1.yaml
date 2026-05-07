@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'gemma'"
-    lean_theorem: "Theorems.Gemma.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gemma.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Gemma.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
 
   query_scalar_discriminator:
     formula: "config without query_pre_attn_scalar ↦ LoaderUnavailable"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { query_scalar_x10, .. } => query_scalar_x10 == 10 * config.query_pre_attn_scalar"
-    lean_theorem: "Theorems.Gemma.QueryScalarDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gemma.QueryScalarDiscriminator"
-      status: wip
-      module: "lean/Theorems/Gemma.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, scalar) is deterministic and scalar-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, sc) == forward_sim(s, v, h, sc)"
       - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
-    lean_theorem: "Theorems.Gemma.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gemma.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Gemma.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Gemma.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gemma"
   - type: invariant
     property: "query_pre_attn_scalar required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: query_scalar_discriminator
     lean:
-      theorem: "Theorems.Gemma.QueryScalarDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gemma"
   - type: invariant
     property: "Forward simulation is scalar-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Gemma.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gemma"
 
 falsification_tests:

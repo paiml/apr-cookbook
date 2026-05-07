@@ -28,7 +28,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_bert_smoke.rs
     provable_contract: contracts/inference-bert-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Devlin et al. (2018). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. arXiv:1810.04805"
   - name: deepseek
     display_name: "DeepSeek"
@@ -42,7 +42,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_deepseek_smoke.rs
     provable_contract: contracts/inference-deepseek-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "DeepSeek-AI (2024). DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model. arXiv:2405.04434"
   - name: falcon_h1
     display_name: "Falcon-H1"
@@ -56,7 +56,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_falcon_h1_smoke.rs
     provable_contract: contracts/inference-falcon-h1-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "TII (2025). Falcon-H1: Hybrid State-Space–Transformer LLM. (HF model card)"
   - name: gemma
     display_name: "Gemma"
@@ -70,7 +70,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_gemma_smoke.rs
     provable_contract: contracts/inference-gemma-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Gemma Team (2024). Gemma: Open Models Based on Gemini Research and Technology. arXiv:2403.08295"
   - name: gpt2
     display_name: "GPT-2"
@@ -84,7 +84,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_gpt2_smoke.rs
     provable_contract: contracts/inference-gpt2-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Radford et al. (2019). Language Models are Unsupervised Multitask Learners. (OpenAI tech report)"
   - name: gptneox
     display_name: "GPT-NeoX"
@@ -98,7 +98,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_gptneox_smoke.rs
     provable_contract: contracts/inference-gptneox-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Black et al. (2022). GPT-NeoX-20B: An Open-Source Autoregressive Language Model. arXiv:2204.06745"
   - name: llama
     display_name: "Llama"
@@ -112,7 +112,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_llama_smoke.rs
     provable_contract: contracts/inference-llama-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Touvron et al. (2023). LLaMA: Open and Efficient Foundation Language Models. arXiv:2302.13971"
   - name: mamba
     display_name: "MAMBA"
@@ -126,7 +126,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_mamba_smoke.rs
     provable_contract: contracts/inference-mamba-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Gu & Dao (2023). Mamba: Linear-Time Sequence Modeling with Selective State Spaces. arXiv:2312.00752"
   - name: mistral
     display_name: "Mistral"
@@ -140,7 +140,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_mistral_smoke.rs
     provable_contract: contracts/inference-mistral-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Jiang et al. (2023). Mistral 7B. arXiv:2310.06825"
   - name: openelm
     display_name: "OpenELM"
@@ -154,7 +154,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_openelm_smoke.rs
     provable_contract: contracts/inference-openelm-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Mehta et al. (2024). OpenELM: An Efficient Language Model Family with Open Training and Inference Framework. arXiv:2404.14619"
   - name: opt
     display_name: "OPT"
@@ -168,7 +168,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_opt_smoke.rs
     provable_contract: contracts/inference-opt-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Zhang et al. (2022). OPT: Open Pre-trained Transformer Language Models. arXiv:2205.01068"
   - name: phi
     display_name: "Phi"
@@ -182,7 +182,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_phi_smoke.rs
     provable_contract: contracts/inference-phi-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     companion_converter: examples/conversion/convert_phi_to_apr.rs # already exists
     citation: "Abdin et al. (2024). Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone. arXiv:2404.14219"
   - name: qwen2
@@ -197,7 +197,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_qwen2_smoke.rs
     provable_contract: contracts/inference-qwen2-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Yang et al. (2024). Qwen2 Technical Report. arXiv:2407.10671"
   - name: qwen3
     display_name: "Qwen3"
@@ -211,7 +211,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_qwen3_smoke.rs
     provable_contract: contracts/inference-qwen3-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     companion_smoke: examples/inference/inference_qwen3_moe_numerical_parity_smoke.rs # exists
     citation: "Qwen Team (2025). Qwen3 Model Family. (HF model card)"
   - name: qwen3_5
@@ -226,7 +226,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_qwen3_5_smoke.rs
     provable_contract: contracts/inference-qwen3-5-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Qwen Team (2026). Qwen3.5 Technical Report. (HF model card)"
   - name: rwkv7
     display_name: "RWKV-7"
@@ -240,7 +240,7 @@ families:
     status: certified
     recipe_path: examples/inference/inference_rwkv7_smoke.rs
     provable_contract: contracts/inference-rwkv7-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Peng et al. (2024). RWKV-7: Goose. arXiv:2404.05892 (placeholder; verify when recipe lands)"
   # Speech families — already covered in examples/speech/, included here for manifest completeness only
   - name: moonshine
@@ -255,7 +255,7 @@ families:
     status: certified
     recipe_path: examples/speech/ # covered in speech category, not inference
     provable_contract: contracts/inference-moonshine-smoke-v1.yaml
-    lean_status: wip
+    lean_status: proved
     citation: "Jeffries et al. (2024). Moonshine: Speech Recognition for Live Transcription and Voice Commands. (Useful Sensors tech report)"
     notes: "Speech-only; remains in examples/speech/ rather than examples/inference/."
   - name: whisper
@@ -270,7 +270,7 @@ families:
     status: certified
     recipe_path: examples/speech/whisper_transcribe.rs # exists
     provable_contract: contracts/whisper-wer-v1.yaml # existing falsifier contract; reuse
-    lean_status: wip
+    lean_status: proved
     citation: "Radford et al. (2022). Robust Speech Recognition via Large-Scale Weak Supervision. arXiv:2212.04356"
     notes: "Speech-only; covered by existing examples/speech/whisper_transcribe.rs. Reuses existing whisper-wer-v1 contract."
   # ---------- Upstream loader MISSING (status: blocked) ----------

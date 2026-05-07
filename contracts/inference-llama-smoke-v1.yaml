@@ -49,12 +49,12 @@ equations:
       - "match Ok { family, .. } => family == 'llama'"
       - "match Ok { layer_count, .. } => layer_count == config.num_hidden_layers"
       - "match LoaderUnavailable { reason } => !reason.is_empty()"
-    lean_theorem: "Theorems.Llama.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Llama.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Llama.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
 
   tensor_validation:
     formula: "expected_tensor_names(n) ↦ vec of length 3 + 9n"
@@ -70,12 +70,12 @@ equations:
       - "result.len() == 3 + 9 * n"
       - "result.iter().all(|s| s.ends_with(.weight))"
       - "for i in 0..n: result.contains(model.layers.<i>.self_attn.q_proj.weight)"
-    lean_theorem: "Theorems.Llama.TensorValidation"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
     tolerance: 0
     lean:
-      theorem: "Theorems.Llama.TensorValidation"
-      status: wip
-      module: "lean/Theorems/Llama.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden) == forward_sim(seed, vocab, hidden)"
@@ -90,12 +90,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h) == forward_sim(s, v, h)  for all s, v, h"
       - "forward_sim(42, 256, 64) != forward_sim(99, 256, 64)"
-    lean_theorem: "Theorems.Llama.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Llama.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Llama.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
 
 proof_obligations:
   - type: invariant
@@ -104,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Llama.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Llama"
   - type: invariant
     property: "Tensor name count matches Llama topology"
@@ -112,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: tensor_validation
     lean:
-      theorem: "Theorems.Llama.TensorValidation"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Llama"
   - type: invariant
     property: "Forward simulation is deterministic"
@@ -120,7 +122,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Llama.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Llama"
 
 falsification_tests:

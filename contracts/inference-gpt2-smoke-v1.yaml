@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, n_layer, n_embd, n_head, .. } => all match config"
-    lean_theorem: "Theorems.Gpt2.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gpt2.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gpt2.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Gpt2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gpt2.lean"
 
   short_name_convention:
     formula: "GPT-2 config uses n_embd, n_layer, n_head (not hidden_size, etc.)"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "if !body.contains('n_embd') then result is LoaderUnavailable"
-    lean_theorem: "Theorems.Gpt2.ShortNameConvention"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ShortNameConvention"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gpt2.ShortNameConvention"
-      status: wip
-      module: "lean/Theorems/Gpt2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ShortNameConvention"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gpt2.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, n_embd) is deterministic and n_embd-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, e) == forward_sim(s, v, e)"
       - "forward_sim(42, 256, 32) != forward_sim(42, 256, 64)"
-    lean_theorem: "Theorems.Gpt2.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gpt2.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Gpt2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gpt2.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Gpt2.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gpt2"
   - type: invariant
     property: "n_embd extraction is required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: short_name_convention
     lean:
-      theorem: "Theorems.Gpt2.ShortNameConvention"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ShortNameConvention"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gpt2"
   - type: invariant
     property: "Forward simulation is n_embd-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Gpt2.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Gpt2.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Gpt2"
 
 falsification_tests:

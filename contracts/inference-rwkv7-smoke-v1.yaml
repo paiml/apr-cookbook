@@ -46,12 +46,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'rwkv7'"
-    lean_theorem: "Theorems.Rwkv7.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Rwkv7.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Rwkv7.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Rwkv7.lean"
 
   linear_attention_discriminator:
     formula: "config without time_mix_extra_dim ↦ LoaderUnavailable"
@@ -63,12 +63,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { time_mix_extra_dim, wkv_dim, .. } => both match config"
-    lean_theorem: "Theorems.Rwkv7.LinearAttentionDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LinearAttentionDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Rwkv7.LinearAttentionDiscriminator"
-      status: wip
-      module: "lean/Theorems/Rwkv7.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LinearAttentionDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Rwkv7.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, time_mix) is deterministic and time-mix-sensitive"
@@ -81,12 +81,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, t) == forward_sim(s, v, h, t)"
       - "forward_sim(42, 256, 64, 32) != forward_sim(42, 256, 64, 64)"
-    lean_theorem: "Theorems.Rwkv7.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Rwkv7.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Rwkv7.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Rwkv7.lean"
 
 proof_obligations:
   - type: invariant
@@ -95,7 +95,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Rwkv7.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Rwkv7"
   - type: invariant
     property: "time_mix_extra_dim required"
@@ -103,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: linear_attention_discriminator
     lean:
-      theorem: "Theorems.Rwkv7.LinearAttentionDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.LinearAttentionDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Rwkv7"
   - type: invariant
     property: "Forward simulation is time-mix-sensitive"
@@ -111,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Rwkv7.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Rwkv7.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Rwkv7"
 
 falsification_tests:

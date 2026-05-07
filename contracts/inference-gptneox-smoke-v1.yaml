@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, parallel_residual, .. } => family == 'gptneox' AND parallel_residual matches body"
-    lean_theorem: "Theorems.GptNeox.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.GptNeox.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/GptNeox.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
 
   parallel_residual_discriminator:
     formula: "config without use_parallel_residual ↦ LoaderUnavailable"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "if !body.contains('use_parallel_residual') then result is LoaderUnavailable"
-    lean_theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
-      status: wip
-      module: "lean/Theorems/GptNeox.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, parallel) is deterministic and parallel-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, p) == forward_sim(s, v, h, p)"
       - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
-    lean_theorem: "Theorems.GptNeox.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.GptNeox.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/GptNeox.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.GptNeox.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.GptNeox"
   - type: invariant
     property: "use_parallel_residual is required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: parallel_residual_discriminator
     lean:
-      theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.GptNeox"
   - type: invariant
     property: "Forward simulation is parallel-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.GptNeox.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.GptNeox"
 
 falsification_tests:

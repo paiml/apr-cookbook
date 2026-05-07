@@ -46,12 +46,12 @@ equations:
     postconditions:
       - "Model.family() == 'moonshine'"
       - "Model.layer_count() == 2"
-    lean_theorem: "Theorems.Moonshine.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Moonshine.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Moonshine.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Moonshine.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Moonshine.lean"
 
   tensor_validation:
     formula: "validate_tensor_names(model, expected) ↦ Ok(())"
@@ -65,12 +65,12 @@ equations:
       - "expected.len() > 0"
     postconditions:
       - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Moonshine.TensorValidation"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Moonshine.TensorValidation"
     tolerance: 0
     lean:
-      theorem: "Theorems.Moonshine.TensorValidation"
-      status: wip
-      module: "lean/Theorems/Moonshine.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.TensorValidation"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Moonshine.lean"
 
   forward_determinism:
     formula: "smoke(f, fmt) == smoke(f, fmt)"
@@ -83,12 +83,12 @@ equations:
       - "rng_seed_for_smoke == 42"
     postconditions:
       - "logits_checksum_run_1 == logits_checksum_run_2"
-    lean_theorem: "Theorems.Moonshine.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Moonshine.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Moonshine.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Moonshine.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Moonshine.lean"
 
 falsification_tests:
   - id: FALSIFY-MOONSHINE-001
@@ -126,7 +126,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Moonshine.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Moonshine"
   - type: invariant
     property: "Tensor names match expected layout"
@@ -134,7 +135,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: tensor_validation
     lean:
-      theorem: "Theorems.Moonshine.TensorValidation"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.TensorValidation"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Moonshine"
   - type: invariant
     property: "Forward pass is deterministic"
@@ -142,7 +144,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Moonshine.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Moonshine.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Moonshine"
 
 qa_gate:

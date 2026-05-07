@@ -45,12 +45,12 @@ equations:
       - "repo is a valid UTF-8 string"
     postconditions:
       - "match Ok { resolved_family, .. } => resolved_family ∈ {18 supported families}"
-    lean_theorem: "Theorems.ArchAliasResolver.Total"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchAliasResolver.Total"
-      status: wip
-      module: "lean/Theorems/ArchAliasResolver.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
 
   glob_semantics:
     formula: "alias_matches(pattern, repo) holds iff pattern matches repo by * suffix wildcard"
@@ -65,12 +65,12 @@ equations:
       - "alias_matches(\"codellama/*\", \"codellama/CodeLlama-7b-hf\") == true"
       - "alias_matches(\"codellama/*\", \"meta-llama/Llama-3-8B\") == false"
       - "alias_matches(\"distilbert/distilgpt2\", \"distilbert/distilgpt2\") == true"
-    lean_theorem: "Theorems.ArchAliasResolver.GlobSemantics"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchAliasResolver.GlobSemantics"
-      status: wip
-      module: "lean/Theorems/ArchAliasResolver.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
 
   determinism:
     formula: "resolve(r) == resolve(r) for all r"
@@ -82,12 +82,12 @@ equations:
       - "r is valid UTF-8"
     postconditions:
       - "Two consecutive calls produce equal verdicts"
-    lean_theorem: "Theorems.ArchAliasResolver.Determinism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchAliasResolver.Determinism"
-      status: wip
-      module: "lean/Theorems/ArchAliasResolver.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
 
 proof_obligations:
   - type: invariant
@@ -96,7 +96,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: alias_total
     lean:
-      theorem: "Theorems.ArchAliasResolver.Total"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
   - type: invariant
     property: "Glob matching is correct"
@@ -104,7 +105,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: glob_semantics
     lean:
-      theorem: "Theorems.ArchAliasResolver.GlobSemantics"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
   - type: invariant
     property: "Resolution is deterministic"
@@ -112,7 +114,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: determinism
     lean:
-      theorem: "Theorems.ArchAliasResolver.Determinism"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
 
 falsification_tests:

@@ -44,12 +44,12 @@ equations:
       - "All 16 fixture config.json files exist on disk"
     postconditions:
       - "match Ok { clean_count, quirky_count, .. } => clean_count + quirky_count == 16"
-    lean_theorem: "Theorems.ArchQuirkAudit.Total"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Total"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchQuirkAudit.Total"
-      status: wip
-      module: "lean/Theorems/ArchQuirkAudit.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Total"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchQuirkAudit.lean"
 
   quirky_minimum:
     formula: "QuirkEntry => matched_discriminators.len() >= 2"
@@ -61,12 +61,12 @@ equations:
       - "Audit ran successfully"
     postconditions:
       - "for all q in quirks: q.matched_discriminators.len() >= 2"
-    lean_theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.QuirkyMinimum"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
-      status: wip
-      module: "lean/Theorems/ArchQuirkAudit.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.QuirkyMinimum"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchQuirkAudit.lean"
 
   determinism:
     formula: "audit() == audit()"
@@ -78,12 +78,12 @@ equations:
       - "Fixtures don't change between calls"
     postconditions:
       - "Two consecutive calls produce byte-equal verdicts"
-    lean_theorem: "Theorems.ArchQuirkAudit.Determinism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Determinism"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchQuirkAudit.Determinism"
-      status: wip
-      module: "lean/Theorems/ArchQuirkAudit.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchQuirkAudit.lean"
 
 proof_obligations:
   - type: invariant
@@ -92,7 +92,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: audit_total
     lean:
-      theorem: "Theorems.ArchQuirkAudit.Total"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Total"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
   - type: invariant
     property: "Quirky entries have at least 2 matches"
@@ -100,7 +101,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: quirky_minimum
     lean:
-      theorem: "Theorems.ArchQuirkAudit.QuirkyMinimum"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.QuirkyMinimum"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
   - type: invariant
     property: "Audit is deterministic"
@@ -108,7 +110,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: determinism
     lean:
-      theorem: "Theorems.ArchQuirkAudit.Determinism"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit.Determinism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchQuirkAudit"
 
 falsification_tests:

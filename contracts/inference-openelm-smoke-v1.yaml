@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'openelm'"
-    lean_theorem: "Theorems.OpenElm.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.OpenElm.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/OpenElm.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
 
   layer_wise_scaling:
     formula: "config without ffn_multipliers OR num_query_heads ↦ LoaderUnavailable"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { has_layer_wise_scaling, .. } => has_layer_wise_scaling == true"
-    lean_theorem: "Theorems.OpenElm.LayerWiseScaling"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
     tolerance: 0
     lean:
-      theorem: "Theorems.OpenElm.LayerWiseScaling"
-      status: wip
-      module: "lean/Theorems/OpenElm.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, dim, scaled) is deterministic and scaling-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, d, sc) == forward_sim(s, v, d, sc)"
       - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
-    lean_theorem: "Theorems.OpenElm.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.OpenElm.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/OpenElm.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.OpenElm.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.OpenElm"
   - type: invariant
     property: "Layer-wise scaling arrays required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: layer_wise_scaling
     lean:
-      theorem: "Theorems.OpenElm.LayerWiseScaling"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.OpenElm"
   - type: invariant
     property: "Forward simulation is scaling-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.OpenElm.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.OpenElm"
 
 falsification_tests:

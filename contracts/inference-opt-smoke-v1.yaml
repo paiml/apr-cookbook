@@ -45,12 +45,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'opt'"
-    lean_theorem: "Theorems.Opt.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Opt.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Opt.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
 
   pre_ln_discriminator:
     formula: "config without do_layer_norm_before ↦ LoaderUnavailable"
@@ -62,12 +62,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { layer_norm_before, .. } => layer_norm_before matches body"
-    lean_theorem: "Theorems.Opt.PreLnDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Opt.PreLnDiscriminator"
-      status: wip
-      module: "lean/Theorems/Opt.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, ln_before) is deterministic and ln-sensitive"
@@ -80,12 +80,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, l) == forward_sim(s, v, h, l)"
       - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
-    lean_theorem: "Theorems.Opt.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Opt.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Opt.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
 
 proof_obligations:
   - type: invariant
@@ -94,7 +94,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Opt.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Opt"
   - type: invariant
     property: "do_layer_norm_before required"
@@ -102,7 +103,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: pre_ln_discriminator
     lean:
-      theorem: "Theorems.Opt.PreLnDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Opt"
   - type: invariant
     property: "Forward simulation is ln-sensitive"
@@ -110,7 +112,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Opt.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Opt"
 
 falsification_tests:

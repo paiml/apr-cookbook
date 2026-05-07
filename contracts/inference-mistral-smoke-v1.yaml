@@ -51,12 +51,12 @@ equations:
       - "match Ok { layer_count, .. } => layer_count == config.num_hidden_layers"
       - "match Ok { sliding_window, .. } => sliding_window == config.sliding_window"
       - "match LoaderUnavailable { reason } => !reason.is_empty()"
-    lean_theorem: "Theorems.Mistral.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mistral.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Mistral.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
 
   sliding_window_discriminator:
     formula: "smoke(llama_fixture_no_sliding_window) ↦ LoaderUnavailable"
@@ -69,12 +69,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "if !body.contains('sliding_window') then result is LoaderUnavailable"
-    lean_theorem: "Theorems.Mistral.SlidingWindowDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mistral.SlidingWindowDiscriminator"
-      status: wip
-      module: "lean/Theorems/Mistral.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, window) == forward_sim(seed, vocab, hidden, window)"
@@ -90,12 +90,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, w) == forward_sim(s, v, h, w)  for all s, v, h, w"
       - "forward_sim(42, 256, 256, 16) != forward_sim(42, 256, 256, 64)"
-    lean_theorem: "Theorems.Mistral.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Mistral.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Mistral.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
 
 proof_obligations:
   - type: invariant
@@ -104,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Mistral.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mistral"
   - type: invariant
     property: "Sliding-window field discriminates Mistral from Llama"
@@ -112,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: sliding_window_discriminator
     lean:
-      theorem: "Theorems.Mistral.SlidingWindowDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mistral"
   - type: invariant
     property: "Forward simulation is deterministic and window-sensitive"
@@ -120,7 +122,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Mistral.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Mistral"
 
 falsification_tests:

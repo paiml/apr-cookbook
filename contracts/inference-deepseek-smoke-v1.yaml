@@ -46,12 +46,12 @@ equations:
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
       - "match Ok { family, .. } => family == 'deepseek'"
-    lean_theorem: "Theorems.Deepseek.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Deepseek.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Deepseek.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Deepseek.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Deepseek.lean"
 
   moe_discriminator:
     formula: "config without n_routed_experts ↦ LoaderUnavailable"
@@ -63,12 +63,12 @@ equations:
       - "fixture is readable"
     postconditions:
       - "match Ok { n_routed_experts, .. } => n_routed_experts == config.n_routed_experts"
-    lean_theorem: "Theorems.Deepseek.MoEDiscriminator"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Deepseek.MoEDiscriminator"
     tolerance: 0
     lean:
-      theorem: "Theorems.Deepseek.MoEDiscriminator"
-      status: wip
-      module: "lean/Theorems/Deepseek.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.MoEDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Deepseek.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, n_experts) is deterministic and n_experts-sensitive"
@@ -81,12 +81,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, n) == forward_sim(s, v, h, n)"
       - "forward_sim(42, 256, 64, 8) != forward_sim(42, 256, 64, 16)"
-    lean_theorem: "Theorems.Deepseek.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Deepseek.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Deepseek.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Deepseek.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Deepseek.lean"
 
 proof_obligations:
   - type: invariant
@@ -95,7 +95,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Deepseek.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Deepseek"
   - type: invariant
     property: "n_routed_experts required"
@@ -103,7 +104,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: moe_discriminator
     lean:
-      theorem: "Theorems.Deepseek.MoEDiscriminator"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.MoEDiscriminator"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Deepseek"
   - type: invariant
     property: "Forward simulation is n_experts-sensitive"
@@ -111,7 +113,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Deepseek.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Deepseek.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Deepseek"
 
 falsification_tests:

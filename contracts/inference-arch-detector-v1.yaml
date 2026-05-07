@@ -46,12 +46,12 @@ equations:
     postconditions:
       - "match Family { name } => name ∈ {18 known families}"
       - "match UnknownFamily { config_excerpt } => excerpt.len() ≤ 120"
-    lean_theorem: "Theorems.ArchDetector.Dispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Dispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchDetector.Dispatch"
-      status: wip
-      module: "lean/Theorems/ArchDetector.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Dispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchDetector.lean"
 
   discriminator_specificity:
     formula: "more-specific discriminators dominate less-specific catch-alls"
@@ -65,12 +65,12 @@ equations:
       - "config is non-empty"
     postconditions:
       - "Detection respects the per-family discriminator priority order"
-    lean_theorem: "Theorems.ArchDetector.Specificity"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Specificity"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchDetector.Specificity"
-      status: wip
-      module: "lean/Theorems/ArchDetector.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Specificity"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchDetector.lean"
 
   determinism:
     formula: "detect(f) == detect(f) for all f"
@@ -82,12 +82,12 @@ equations:
       - "f is readable"
     postconditions:
       - "Two consecutive calls produce byte-equal verdicts"
-    lean_theorem: "Theorems.ArchDetector.Determinism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Determinism"
     tolerance: 0
     lean:
-      theorem: "Theorems.ArchDetector.Determinism"
-      status: wip
-      module: "lean/Theorems/ArchDetector.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchDetector.lean"
 
 proof_obligations:
   - type: invariant
@@ -96,7 +96,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: detector_dispatch
     lean:
-      theorem: "Theorems.ArchDetector.Dispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Dispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchDetector"
   - type: invariant
     property: "Discriminator priority is correct"
@@ -104,7 +105,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: discriminator_specificity
     lean:
-      theorem: "Theorems.ArchDetector.Specificity"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Specificity"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchDetector"
   - type: invariant
     property: "Detection is deterministic"
@@ -112,7 +114,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: determinism
     lean:
-      theorem: "Theorems.ArchDetector.Determinism"
+      theorem: "ProvableContracts.ArchitectureDemos.ArchDetector.Determinism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.ArchDetector"
 
 falsification_tests:

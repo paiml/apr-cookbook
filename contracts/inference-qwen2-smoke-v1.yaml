@@ -47,12 +47,12 @@ equations:
     postconditions:
       - "match Ok { family, .. } => family == 'qwen2'"
       - "match Ok { rope_theta_million, .. } => rope_theta_million >= 1"
-    lean_theorem: "Theorems.Qwen2.LoaderDispatch"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen2.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Qwen2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
 
   qkv_bias_layout:
     formula: "expected_tensor_names(n).len() == 3 + 12n"
@@ -64,12 +64,12 @@ equations:
       - "n ≤ 256"
     postconditions:
       - "Per-layer entries include {q,k,v}_proj.bias"
-    lean_theorem: "Theorems.Qwen2.QkvBiasLayout"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen2.QkvBiasLayout"
-      status: wip
-      module: "lean/Theorems/Qwen2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
 
   forward_determinism:
     formula: "forward_sim(seed, vocab, hidden, rope_theta) is deterministic and rope-sensitive"
@@ -83,12 +83,12 @@ equations:
     postconditions:
       - "forward_sim(s, v, h, r) == forward_sim(s, v, h, r)"
       - "forward_sim(42, 256, 64, 10000) != forward_sim(42, 256, 64, 1000000)"
-    lean_theorem: "Theorems.Qwen2.ForwardDeterminism"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
     tolerance: 0
     lean:
-      theorem: "Theorems.Qwen2.ForwardDeterminism"
-      status: wip
-      module: "lean/Theorems/Qwen2.lean"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
 
 proof_obligations:
   - type: invariant
@@ -97,7 +97,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: loader_dispatch
     lean:
-      theorem: "Theorems.Qwen2.LoaderDispatch"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen2"
   - type: invariant
     property: "Qwen2 has 12 per-layer tensor entries"
@@ -105,7 +106,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: qkv_bias_layout
     lean:
-      theorem: "Theorems.Qwen2.QkvBiasLayout"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen2"
   - type: invariant
     property: "Forward simulation is rope-sensitive"
@@ -113,7 +115,8 @@ proof_obligations:
     tolerance: 0.0
     applies_to: forward_determinism
     lean:
-      theorem: "Theorems.Qwen2.ForwardDeterminism"
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
+      status: proved
       module: "ProvableContracts.ArchitectureDemos.Qwen2"
 
 falsification_tests:
