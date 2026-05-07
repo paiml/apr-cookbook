@@ -6525,3 +6525,41 @@ path = "examples/tui/tui_keymap_register_chord.rs"
 [[example]]
 name = "tui_gradient_fill_compute"
 path = "examples/tui/tui_gradient_fill_compute.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-210) ---
+
+[[example]]
+name = "contracts_macros_yaml_canonical_form"
+path = "examples/contracts-macros/contracts_macros_yaml_canonical_form.rs"
+
+[[example]]
+name = "contracts_macros_recipe_label_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_label_consistency.rs"
+
+[[example]]
+name = "contracts_macros_witness_count_min"
+path = "examples/contracts-macros/contracts_macros_witness_count_min.rs"
+
+[[example]]
+name = "mc_spinning_wheel_payout"
+path = "examples/monte-carlo/mc_spinning_wheel_payout.rs"
+
+[[example]]
+name = "mc_texas_holdem_pocket_pair"
+path = "examples/monte-carlo/mc_texas_holdem_pocket_pair.rs"
+
+[[example]]
+name = "mc_gibbs_sampler_bivariate"
+path = "examples/monte-carlo/mc_gibbs_sampler_bivariate.rs"
+
+[[example]]
+name = "tui_toolbar_btn_overflow"
+path = "examples/tui/tui_toolbar_btn_overflow.rs"
+
+[[example]]
+name = "tui_date_picker_validate"
+path = "examples/tui/tui_date_picker_validate.rs"
+
+[[example]]
+name = "tui_tabbed_view_switch"
+path = "examples/tui/tui_tabbed_view_switch.rs"
