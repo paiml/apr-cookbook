@@ -1,0 +1,46 @@
+name: Architecture Demos
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'docs/specifications/architecture-demos/**'
+      - 'docs/specifications/architecture-demos.md'
+      - 'examples/inference/inference_*_smoke.rs'
+      - 'contracts/inference-*-smoke-v1.yaml'
+      - 'scripts/architecture-demos-gen.sh'
+      - 'Cargo.toml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'docs/specifications/architecture-demos/**'
+      - 'docs/specifications/architecture-demos.md'
+      - 'examples/inference/inference_*_smoke.rs'
+      - 'contracts/inference-*-smoke-v1.yaml'
+      - 'scripts/architecture-demos-gen.sh'
+      - 'Cargo.toml'
+  workflow_dispatch:
+
+jobs:
+  architecture-demos-coverage:
+    name: Verify architecture-demos manifest is in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Install pv (aprender-contracts-cli)
+        run: cargo install --locked aprender-contracts-cli
+
+      - name: Architecture-demos manifest reconciliation
+        run: bash scripts/architecture-demos-gen.sh --check
+
+      - name: Lint all contracts (includes architecture-demos stubs)
+        run: pv lint contracts/

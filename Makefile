@@ -377,6 +377,12 @@ quality-gate: docs-validate contracts-lint cli-parity ## Run quality checks (inc
 # SECURITY
 # =============================================================================
 
+architecture-demos-coverage: ## Verify architecture-demos manifest is in sync with on-disk recipes/contracts
+	@echo "🔧 Checking architecture-demos manifest..."
+	@bash scripts/architecture-demos-gen.sh --check
+	@echo "🔧 Linting all contracts (includes architecture-demos)..."
+	@pv lint contracts/
+
 audit: ## Run security audit
 	@echo "🔒 Running security audit..."
 	@if command -v cargo-audit >/dev/null 2>&1; then \

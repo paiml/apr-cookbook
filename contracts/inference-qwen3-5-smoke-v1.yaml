@@ -1,0 +1,156 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Qwen3_5 smoke inference invariants — load, forward, determinism"
+  references:
+    - "Qwen Team (2026). Qwen3.5 Technical Report. (HF model card)"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - qwen3_5
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; verify fixture path exists"
+      invariant: "context.temp_dir exists; fixture path is readable"
+    - name: load
+      description: "Dispatch aprender::rosetta loader for the qwen3_5 family"
+      invariant: "load_family('qwen3_5', fixture, fmt) returns Ok(Model)"
+    - name: forward
+      description: "Run a seeded forward pass through the loaded model"
+      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+    - name: verify
+      description: "Compare verdicts across two consecutive smoke() calls"
+      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+    - name: teardown
+      description: "Drop RecipeContext; verify temp_dir cleanup"
+      invariant: "!context.temp_dir.exists() after Drop"
+
+equations:
+  loader_dispatch:
+    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
+    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
+    codomain: "Result<Model, LoaderError>"
+    invariants:
+      - "Dispatch is deterministic in (family, fixture, fmt)"
+      - "Returned Model.family() == family"
+    preconditions:
+      - "Path::new(fixture).exists()"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "Model.family() == 'qwen3_5'"
+      - "Model.layer_count() == 2"
+    lean_theorem: "Theorems.Qwen3_5.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.Qwen3_5.LoaderDispatch"
+      status: wip
+      module: "lean/Theorems/Qwen3_5.lean"
+
+  tensor_validation:
+    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
+    domain: "model: Model; expected: Vec<String>"
+    codomain: "Result<(), ContractError>"
+    invariants:
+      - "All expected tensor names are present in the model"
+      - "No unexpected tensor names appear"
+    preconditions:
+      - "model.layer_count() > 0"
+      - "expected.len() > 0"
+    postconditions:
+      - "expected ⊆ model.tensor_names()"
+    lean_theorem: "Theorems.Qwen3_5.TensorValidation"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.Qwen3_5.TensorValidation"
+      status: wip
+      module: "lean/Theorems/Qwen3_5.lean"
+
+  forward_determinism:
+    formula: "smoke(f, fmt) == smoke(f, fmt)"
+    domain: "f: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Two calls with identical inputs produce equal verdicts"
+    preconditions:
+      - "Path::new(f).exists()"
+      - "rng_seed_for_smoke == 42"
+    postconditions:
+      - "logits_checksum_run_1 == logits_checksum_run_2"
+    lean_theorem: "Theorems.Qwen3_5.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.Qwen3_5.ForwardDeterminism"
+      status: wip
+      module: "lean/Theorems/Qwen3_5.lean"
+
+falsification_tests:
+  - id: FALSIFY-QWEN3_5-001
+    rule: "Loader dispatches and returns correct family identifier"
+    prediction: "load_family('qwen3_5', fixture, 'safetensors') ↦ Ok with .family() == 'qwen3_5'"
+    test: "Run smoke('tests/fixtures/architectures/qwen3_5/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
+    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+  - id: FALSIFY-QWEN3_5-002
+    rule: "Forward pass is deterministic across two consecutive calls"
+    prediction: "Identical inputs produce identical SmokeVerdict outputs"
+    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
+    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+  - id: FALSIFY-QWEN3_5-003
+    rule: "Missing fixture path returns InvalidFixture, not panic"
+    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
+    test: "Pass a non-existent path and assert InvalidFixture variant"
+    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+
+kani_harnesses:
+  - id: KANI-QWEN3_5-001
+    obligation: "Deterministic verdict on equal inputs"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_smoke_deterministic"
+  - id: KANI-QWEN3_5-002
+    obligation: "InvalidFixture is total (no panic on bad path)"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_smoke_invalid_fixture_total"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch returns Ok for qwen3_5"
+    formal: "load_family('qwen3_5', fixture, fmt) ↦ Ok(Model) where Model.family() == 'qwen3_5'"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Qwen3_5.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Tensor names match expected layout"
+    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
+    tolerance: 0.0
+    applies_to: tensor_validation
+    lean:
+      theorem: "Theorems.Qwen3_5.TensorValidation"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Forward pass is deterministic"
+    formal: "smoke(f, fmt) == smoke(f, fmt)"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Qwen3_5.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+
+qa_gate:
+  id: F-QWEN3_5-001
+  name: "Qwen3_5 Smoke Inference Contract"
+  description: "Smoke load + deterministic forward pass for the qwen3_5 architecture family"
+  checks:
+    - "loader_dispatch_returns_ok"
+    - "tensor_validation_passes"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"

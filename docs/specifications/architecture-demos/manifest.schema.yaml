@@ -1,0 +1,170 @@
+# Architecture Demos Manifest Schema
+# Version: 1.0.0
+# Forked from apr-model-qa-playbook/playbook.schema.yaml; simplified to drop
+# per-checkpoint matrix concerns (modalities, backends, scenarios, oracles,
+# profile_ci) that don't apply at the family level.
+
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://paiml.com/schemas/architecture-demos-manifest.schema.yaml"
+title: "Architecture Demos Manifest"
+description: "Schema for apr-cookbook architecture-demos manifest entries"
+
+type: object
+required:
+  - version
+  - schema
+  - last_updated
+  - families
+
+properties:
+  version:
+    type: string
+    pattern: "^\\d+\\.\\d+\\.\\d+$"
+    description: "Manifest semver"
+
+  schema:
+    type: string
+    description: "Path to this schema file (self-reference)"
+
+  last_updated:
+    type: string
+    pattern: "^\\d{4}-\\d{2}-\\d{2}$"
+    description: "ISO 8601 date of last manifest edit"
+
+  upstream_source:
+    type: string
+    format: uri
+    description: "URL to the upstream aprender directory whose contents this manifest tracks"
+
+  summary:
+    type: object
+    description: "Auto-regenerated counts; do not hand-edit"
+    properties:
+      certified: { type: integer, minimum: 0 }
+      in_progress: { type: integer, minimum: 0 }
+      blocked: { type: integer, minimum: 0 }
+      total: { type: integer, minimum: 0 }
+
+  families:
+    type: array
+    minItems: 1
+    items: { $ref: "#/$defs/family" }
+
+$defs:
+  family:
+    type: object
+    required:
+      - name
+      - display_name
+      - vendor
+      - hf_architectures
+      - status
+    properties:
+      name:
+        type: string
+        pattern: "^[a-z0-9_]+$"
+        minLength: 1
+        maxLength: 32
+        description: "Snake-case family identifier matching upstream `aprender::rosetta` loader name"
+
+      display_name:
+        type: string
+        maxLength: 64
+        description: "Human-readable family name"
+
+      vendor:
+        type: string
+        maxLength: 64
+        description: "Original organization that published the family (Meta, Google, Mistral AI, …)"
+
+      upstream_descriptor:
+        type: string
+        description: "Path to the upstream YAML file under aprender/contracts/model-families/. Required for status != blocked."
+
+      hf_architectures:
+        type: array
+        minItems: 1
+        items:
+          type: string
+          pattern: "^[A-Z][A-Za-z0-9_]+$"
+        description: "List of HF Transformers `architectures[]` keys this family covers"
+
+      hf_pattern:
+        type: string
+        description: "HF repo glob (e.g., 'meta-llama/Llama-*') for documentation; not used by recipes"
+
+      formats:
+        type: array
+        items:
+          type: string
+          enum: [safetensors, apr, gguf, onnx]
+        description: "Model file formats supported by the upstream loader"
+
+      quantizations:
+        type: array
+        items:
+          type: string
+          enum: [f32, f16, bf16, q8_0, q6_k, q5_k_m, q5_0, q4_k_m, q4_0, q3_k_m, q2_k]
+        description: "Quantization levels demonstrated in the recipe"
+
+      size_category:
+        type: string
+        enum: [tiny, small, medium, large, xlarge, huge]
+        description: "Approximate size class of typical checkpoints in this family"
+
+      status:
+        type: string
+        enum: [certified, in-progress, blocked]
+        description: |
+          certified   — upstream loader exists AND recipe exists AND tests pass
+          in-progress — upstream loader exists, recipe pending
+          blocked     — upstream loader missing (link via upstream_ticket)
+
+      recipe_path:
+        type: string
+        description: "Relative path to the recipe under examples/. Required for status != blocked."
+
+      provable_contract:
+        type: string
+        pattern: "^contracts/inference-[a-z0-9_]+-smoke-v\\d+\\.yaml$"
+        description: "Per-family provable-contract YAML path. Required for status != blocked. Must pass `pv lint`; should report grade A under `pv score --summary`. Authoritative for the recipe's preconditions/postconditions/lean_theorem set per Invariant B."
+
+      lean_status:
+        type: string
+        enum: [wip, proved, sorry, not-applicable]
+        default: wip
+        description: "Lean theorem proof status across the family contract's obligations. `wip` is the honest landing default; `proved` requires real .lean files under lean/; `sorry` means a theorem is admitted; `not-applicable` is for non-mathematical obligations."
+
+      companion_converter:
+        type: string
+        description: "Optional path to a companion examples/conversion/convert_<name>_to_apr.rs"
+
+      companion_smoke:
+        type: string
+        description: "Optional path to an existing recipe that already smoke-tests this family"
+
+      upstream_ticket:
+        type: string
+        description: "Required for status: blocked. Format 'aprender#NNN' or full URL to upstream issue."
+
+      citation:
+        type: string
+        description: "arXiv/DOI/tech-report citation for the original family paper. Required for status != blocked."
+
+      notes:
+        type: string
+        description: "Free-form context (e.g., 'aliases the X loader', 'speech-only')"
+
+    allOf:
+      - if:
+          properties:
+            status: { const: blocked }
+        then:
+          required: [upstream_ticket]
+      - if:
+          properties:
+            status: { enum: [certified, in-progress] }
+        then:
+          required: [upstream_descriptor, recipe_path, provable_contract, citation]
+
+additionalProperties: false

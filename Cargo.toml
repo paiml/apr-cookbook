@@ -7095,3 +7095,70 @@ path = "examples/wasm/wasm_features_compat_check.rs"
 [[example]]
 name = "simd_sum_lanes_reduce"
 path = "examples/simd/simd_sum_lanes_reduce.rs"
+
+# --- architecture-demos (PMAT-300+) ---
+
+[[example]]
+name = "inference_bert_smoke"
+path = "examples/inference/inference_bert_smoke.rs"
+
+[[example]]
+name = "inference_deepseek_smoke"
+path = "examples/inference/inference_deepseek_smoke.rs"
+
+[[example]]
+name = "inference_falcon_h1_smoke"
+path = "examples/inference/inference_falcon_h1_smoke.rs"
+
+[[example]]
+name = "inference_gemma_smoke"
+path = "examples/inference/inference_gemma_smoke.rs"
+
+[[example]]
+name = "inference_gpt2_smoke"
+path = "examples/inference/inference_gpt2_smoke.rs"
+
+[[example]]
+name = "inference_gptneox_smoke"
+path = "examples/inference/inference_gptneox_smoke.rs"
+
+[[example]]
+name = "inference_llama_smoke"
+path = "examples/inference/inference_llama_smoke.rs"
+
+[[example]]
+name = "inference_mamba_smoke"
+path = "examples/inference/inference_mamba_smoke.rs"
+
+[[example]]
+name = "inference_mistral_smoke"
+path = "examples/inference/inference_mistral_smoke.rs"
+
+[[example]]
+name = "inference_openelm_smoke"
+path = "examples/inference/inference_openelm_smoke.rs"
+
+[[example]]
+name = "inference_opt_smoke"
+path = "examples/inference/inference_opt_smoke.rs"
+
+[[example]]
+name = "inference_phi_smoke"
+path = "examples/inference/inference_phi_smoke.rs"
+
+[[example]]
+name = "inference_qwen2_smoke"
+path = "examples/inference/inference_qwen2_smoke.rs"
+
+[[example]]
+name = "inference_qwen3_smoke"
+path = "examples/inference/inference_qwen3_smoke.rs"
+
+[[example]]
+name = "inference_qwen3_5_smoke"
+path = "examples/inference/inference_qwen3_5_smoke.rs"
+
+[[example]]
+name = "inference_rwkv7_smoke"
+path = "examples/inference/inference_rwkv7_smoke.rs"
+
