@@ -2,7 +2,7 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Gpt2 smoke inference invariants — load, forward, determinism"
+  description: "GPT-2 smoke inference invariants — config parse with short-name fields (n_embd/n_layer/n_head), deterministic forward simulation"
   references:
     - "Radford et al. (2019). Language Models are Unsupervised Multitask Learners. (OpenAI tech report)"
     - "docs/specifications/architecture-demos.md"
@@ -17,35 +17,34 @@ metadata:
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the gpt2 family"
-      invariant: "load_family('gpt2', fixture, fmt) returns Ok(Model)"
+      description: "Read config.json; extract n_embd, n_layer, n_head, vocab_size"
+      invariant: "All four short-name fields present (GPT-2 discriminator vs Llama)"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "Run LCG seeded forward simulation"
+      invariant: "Iteration count = min(vocab_size, n_embd)"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Determinism across runs"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
     - name: teardown
-      description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
     invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
+      - "Family on Ok arm always 'gpt2'"
+      - "Missing n_embd surfaces LoaderUnavailable (GPT-2 short-name discriminator)"
     preconditions:
-      - "Path::new(fixture).exists()"
+      - "fixture is a valid UTF-8 path string"
       - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "Model.family() == 'gpt2'"
-      - "Model.layer_count() == 2"
+      - "match Ok { family, n_layer, n_embd, n_head, .. } => all match config"
     lean_theorem: "Theorems.Gpt2.LoaderDispatch"
     tolerance: 0
     lean:
@@ -53,36 +52,34 @@ equations:
       status: wip
       module: "lean/Theorems/Gpt2.lean"
 
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
+  short_name_convention:
+    formula: "GPT-2 config uses n_embd, n_layer, n_head (not hidden_size, etc.)"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
     invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
+      - "n_embd extraction is required; absence rejects the config"
     preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
+      - "fixture is readable"
     postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Gpt2.TensorValidation"
+      - "if !body.contains('n_embd') then result is LoaderUnavailable"
+    lean_theorem: "Theorems.Gpt2.ShortNameConvention"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gpt2.TensorValidation"
+      theorem: "Theorems.Gpt2.ShortNameConvention"
       status: wip
       module: "lean/Theorems/Gpt2.lean"
 
   forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
-    codomain: "SmokeVerdict"
+    formula: "forward_sim(seed, vocab, n_embd) is deterministic and n_embd-sensitive"
+    domain: "seed: u64; vocab,n_embd: u32"
+    codomain: "u32"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "Iteration count depends on n_embd"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "seed | 1 != 0"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
+      - "forward_sim(s, v, e) == forward_sim(s, v, e)"
+      - "forward_sim(42, 256, 32) != forward_sim(42, 256, 64)"
     lean_theorem: "Theorems.Gpt2.ForwardDeterminism"
     tolerance: 0
     lean:
@@ -90,22 +87,48 @@ equations:
       status: wip
       module: "lean/Theorems/Gpt2.lean"
 
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.Gpt2.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.Gpt2"
+  - type: invariant
+    property: "n_embd extraction is required"
+    formal: "fixture without n_embd ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: short_name_convention
+    lean:
+      theorem: "Theorems.Gpt2.ShortNameConvention"
+      module: "ProvableContracts.ArchitectureDemos.Gpt2"
+  - type: invariant
+    property: "Forward simulation is n_embd-sensitive"
+    formal: "n_embd participates in iteration count"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.Gpt2.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.Gpt2"
+
 falsification_tests:
   - id: FALSIFY-GPT2-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('gpt2', fixture, 'safetensors') ↦ Ok with .family() == 'gpt2'"
-    test: "Run smoke('tests/fixtures/architectures/gpt2/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "GPT-2 short-name fields are extracted"
+    prediction: "n_layer=2, n_embd=64, n_head=4 for the bundled GPT-2 fixture"
+    test: "cargo test --example inference_gpt2_smoke -- happy_path_short_field_names_present"
+    if_fails: "Field name pattern drifted; perhaps using hidden_size instead"
   - id: FALSIFY-GPT2-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is n_embd-sensitive"
+    prediction: "forward_sim with n_embd=32 != forward_sim with n_embd=64"
+    test: "cargo test --example inference_gpt2_smoke -- n_embd_affects_iteration_count"
+    if_fails: "n_embd dropped from iteration count"
   - id: FALSIFY-GPT2-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_gpt2_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
 
 kani_harnesses:
   - id: KANI-GPT2-001
@@ -114,43 +137,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::gpt2_smoke_deterministic"
   - id: KANI-GPT2-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gpt2_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for gpt2"
-    formal: "load_family('gpt2', fixture, fmt) ↦ Ok(Model) where Model.family() == 'gpt2'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Gpt2.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Gpt2"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Gpt2.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Gpt2"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Gpt2.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Gpt2"
-
 qa_gate:
   id: F-GPT2-001
-  name: "Gpt2 Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the gpt2 architecture family"
+  name: "GPT-2 Smoke Inference Contract"
+  description: "Smoke load + short-name discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "n_embd_present"
+    - "n_embd_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"

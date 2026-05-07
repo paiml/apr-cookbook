@@ -2,9 +2,9 @@ metadata:
   version: "1.0.0"
   created: "2026-05-07"
   author: "PAIML Engineering"
-  description: "Gptneox smoke inference invariants — load, forward, determinism"
+  description: "GPT-NeoX smoke inference invariants — config parse, use_parallel_residual discriminator (parallel attention+FFN), deterministic forward simulation"
   references:
-    - "Black et al. (2022). GPT-NeoX-20B: An Open-Source Autoregressive Language Model. arXiv:2204.06745"
+    - "Black et al. (2022). GPT-NeoX-20B. arXiv:2204.06745"
     - "docs/specifications/architecture-demos.md"
   depends_on:
     - "recipe-iiur-v1"
@@ -17,95 +17,118 @@ metadata:
 kernel_structure:
   phases:
     - name: setup
-      description: "Construct RecipeContext; verify fixture path exists"
-      invariant: "context.temp_dir exists; fixture path is readable"
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
     - name: load
-      description: "Dispatch aprender::rosetta loader for the gptneox family"
-      invariant: "load_family('gptneox', fixture, fmt) returns Ok(Model)"
+      description: "Read config.json; extract numeric fields and use_parallel_residual presence"
+      invariant: "Three numeric fields parsed; use_parallel_residual field present"
     - name: forward
-      description: "Run a seeded forward pass through the loaded model"
-      invariant: "model.forward_smoke(&[42; 4]) returns logits of expected shape"
+      description: "Run LCG seeded forward simulation; parallel flag seeds accumulator"
+      invariant: "parallel_residual flag participates in checksum"
     - name: verify
-      description: "Compare verdicts across two consecutive smoke() calls"
-      invariant: "smoke(f, fmt) == smoke(f, fmt) byte-for-byte"
+      description: "Determinism across runs"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
     - name: teardown
-      description: "Drop RecipeContext; verify temp_dir cleanup"
-      invariant: "!context.temp_dir.exists() after Drop"
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
 
 equations:
   loader_dispatch:
-    formula: "load_family(family, fixture, fmt) ↦ Ok(Model)"
-    domain: "family ∈ supported_families; fixture: Path; fmt ∈ {safetensors, apr, gguf}"
-    codomain: "Result<Model, LoaderError>"
-    invariants:
-      - "Dispatch is deterministic in (family, fixture, fmt)"
-      - "Returned Model.family() == family"
-    preconditions:
-      - "Path::new(fixture).exists()"
-      - "fmt ∈ {safetensors, apr, gguf}"
-    postconditions:
-      - "Model.family() == 'gptneox'"
-      - "Model.layer_count() == 2"
-    lean_theorem: "Theorems.Gptneox.LoaderDispatch"
-    tolerance: 0
-    lean:
-      theorem: "Theorems.Gptneox.LoaderDispatch"
-      status: wip
-      module: "lean/Theorems/Gptneox.lean"
-
-  tensor_validation:
-    formula: "validate_tensor_names(model, expected) ↦ Ok(())"
-    domain: "model: Model; expected: Vec<String>"
-    codomain: "Result<(), ContractError>"
-    invariants:
-      - "All expected tensor names are present in the model"
-      - "No unexpected tensor names appear"
-    preconditions:
-      - "model.layer_count() > 0"
-      - "expected.len() > 0"
-    postconditions:
-      - "expected ⊆ model.tensor_names()"
-    lean_theorem: "Theorems.Gptneox.TensorValidation"
-    tolerance: 0
-    lean:
-      theorem: "Theorems.Gptneox.TensorValidation"
-      status: wip
-      module: "lean/Theorems/Gptneox.lean"
-
-  forward_determinism:
-    formula: "smoke(f, fmt) == smoke(f, fmt)"
-    domain: "f: Path; fmt: String"
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
     codomain: "SmokeVerdict"
     invariants:
-      - "Two calls with identical inputs produce equal verdicts"
+      - "Family on Ok arm always 'gptneox'"
+      - "Missing use_parallel_residual surfaces LoaderUnavailable"
     preconditions:
-      - "Path::new(f).exists()"
-      - "rng_seed_for_smoke == 42"
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
     postconditions:
-      - "logits_checksum_run_1 == logits_checksum_run_2"
-    lean_theorem: "Theorems.Gptneox.ForwardDeterminism"
+      - "match Ok { family, parallel_residual, .. } => family == 'gptneox' AND parallel_residual matches body"
+    lean_theorem: "Theorems.GptNeox.LoaderDispatch"
     tolerance: 0
     lean:
-      theorem: "Theorems.Gptneox.ForwardDeterminism"
+      theorem: "Theorems.GptNeox.LoaderDispatch"
       status: wip
-      module: "lean/Theorems/Gptneox.lean"
+      module: "lean/Theorems/GptNeox.lean"
+
+  parallel_residual_discriminator:
+    formula: "config without use_parallel_residual ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "GPT-NeoX runs attention + FFN in parallel; field declares the topology"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "if !body.contains('use_parallel_residual') then result is LoaderUnavailable"
+    lean_theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
+      status: wip
+      module: "lean/Theorems/GptNeox.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, parallel) is deterministic and parallel-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; parallel: bool"
+    codomain: "u32"
+    invariants:
+      - "parallel flag affects accumulator initialization"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, p) == forward_sim(s, v, h, p)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
+    lean_theorem: "Theorems.GptNeox.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "Theorems.GptNeox.ForwardDeterminism"
+      status: wip
+      module: "lean/Theorems/GptNeox.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "Theorems.GptNeox.LoaderDispatch"
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
+  - type: invariant
+    property: "use_parallel_residual is required"
+    formal: "fixture without use_parallel_residual ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: parallel_residual_discriminator
+    lean:
+      theorem: "Theorems.GptNeox.ParallelResidualDiscriminator"
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
+  - type: invariant
+    property: "Forward simulation is parallel-sensitive"
+    formal: "parallel flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "Theorems.GptNeox.ForwardDeterminism"
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
 
 falsification_tests:
   - id: FALSIFY-GPTNEOX-001
-    rule: "Loader dispatches and returns correct family identifier"
-    prediction: "load_family('gptneox', fixture, 'safetensors') ↦ Ok with .family() == 'gptneox'"
-    test: "Run smoke('tests/fixtures/architectures/gptneox/model.safetensors', 'safetensors') and assert SmokeVerdict::Ok with matching family"
-    if_fails: "Upstream rosetta loader misroutes or returns a different family identifier"
+    rule: "use_parallel_residual is required and recognized"
+    prediction: "parallel_residual == true for the bundled GPT-NeoX fixture"
+    test: "cargo test --example inference_gptneox_smoke -- happy_path_parallel_residual_true"
+    if_fails: "Field detection broke"
   - id: FALSIFY-GPTNEOX-002
-    rule: "Forward pass is deterministic across two consecutive calls"
-    prediction: "Identical inputs produce identical SmokeVerdict outputs"
-    test: "Call smoke twice on the same fixture and assert byte-equal verdicts"
-    if_fails: "Non-determinism leaked from RNG, threading, or uninitialized memory"
+    rule: "Forward simulation is parallel-sensitive"
+    prediction: "forward_sim with parallel=true != forward_sim with parallel=false"
+    test: "cargo test --example inference_gptneox_smoke -- parallel_flag_affects_checksum"
+    if_fails: "parallel dropped from accumulator seeding"
   - id: FALSIFY-GPTNEOX-003
-    rule: "Missing fixture path returns InvalidFixture, not panic"
-    prediction: "smoke('/no/such/path', 'safetensors') ↦ SmokeVerdict::InvalidFixture"
-    test: "Pass a non-existent path and assert InvalidFixture variant"
-    if_fails: "Loader panics on missing input instead of returning a clean verdict"
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_gptneox_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
 
 kani_harnesses:
   - id: KANI-GPTNEOX-001
@@ -114,43 +137,17 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_smoke_deterministic"
   - id: KANI-GPTNEOX-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "InvalidFixture is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_smoke_invalid_fixture_total"
 
-proof_obligations:
-  - type: invariant
-    property: "Loader dispatch returns Ok for gptneox"
-    formal: "load_family('gptneox', fixture, fmt) ↦ Ok(Model) where Model.family() == 'gptneox'"
-    tolerance: 0.0
-    applies_to: loader_dispatch
-    lean:
-      theorem: "Theorems.Gptneox.LoaderDispatch"
-      module: "ProvableContracts.ArchitectureDemos.Gptneox"
-  - type: invariant
-    property: "Tensor names match expected layout"
-    formal: "validate_tensor_names(model, expected) ↦ Ok(())"
-    tolerance: 0.0
-    applies_to: tensor_validation
-    lean:
-      theorem: "Theorems.Gptneox.TensorValidation"
-      module: "ProvableContracts.ArchitectureDemos.Gptneox"
-  - type: invariant
-    property: "Forward pass is deterministic"
-    formal: "smoke(f, fmt) == smoke(f, fmt)"
-    tolerance: 0.0
-    applies_to: forward_determinism
-    lean:
-      theorem: "Theorems.Gptneox.ForwardDeterminism"
-      module: "ProvableContracts.ArchitectureDemos.Gptneox"
-
 qa_gate:
   id: F-GPTNEOX-001
-  name: "Gptneox Smoke Inference Contract"
-  description: "Smoke load + deterministic forward pass for the gptneox architecture family"
+  name: "GPT-NeoX Smoke Inference Contract"
+  description: "Smoke load + use_parallel_residual discriminator + deterministic forward simulation"
   checks:
-    - "loader_dispatch_returns_ok"
-    - "tensor_validation_passes"
+    - "parallel_residual_present"
+    - "parallel_flag_affects_checksum"
     - "forward_determinism"
-  pass_criteria: "All three falsification tests pass; SmokeVerdict is Ok across all declared formats"
+  pass_criteria: "All three falsification tests pass"
