@@ -6107,3 +6107,41 @@ path = "examples/tui/tui_arrow_key_navigation.rs"
 [[example]]
 name = "tui_pixel_art_palette_render"
 path = "examples/tui/tui_pixel_art_palette_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-199) ---
+
+[[example]]
+name = "contracts_macros_obligation_subset_check"
+path = "examples/contracts-macros/contracts_macros_obligation_subset_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_default_value_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_default_value_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_estimated_complexity"
+path = "examples/contracts-macros/contracts_macros_recipe_estimated_complexity.rs"
+
+[[example]]
+name = "mc_pi_estimation_buffon"
+path = "examples/monte-carlo/mc_pi_estimation_buffon.rs"
+
+[[example]]
+name = "mc_kalman_filter_smoothing"
+path = "examples/monte-carlo/mc_kalman_filter_smoothing.rs"
+
+[[example]]
+name = "mc_coupon_collector"
+path = "examples/monte-carlo/mc_coupon_collector.rs"
+
+[[example]]
+name = "tui_marquee_speed_control"
+path = "examples/tui/tui_marquee_speed_control.rs"
+
+[[example]]
+name = "tui_form_layout_grid"
+path = "examples/tui/tui_form_layout_grid.rs"
+
+[[example]]
+name = "tui_emoji_picker_filter"
+path = "examples/tui/tui_emoji_picker_filter.rs"
