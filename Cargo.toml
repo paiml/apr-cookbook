@@ -7095,3 +7095,41 @@ path = "examples/wasm/wasm_features_compat_check.rs"
 [[example]]
 name = "simd_sum_lanes_reduce"
 path = "examples/simd/simd_sum_lanes_reduce.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-225) ---
+
+[[example]]
+name = "contracts_macros_yaml_key_type_check"
+path = "examples/contracts-macros/contracts_macros_yaml_key_type_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_runtime_min"
+path = "examples/contracts-macros/contracts_macros_recipe_runtime_min.rs"
+
+[[example]]
+name = "contracts_macros_witness_proof_status"
+path = "examples/contracts-macros/contracts_macros_witness_proof_status.rs"
+
+[[example]]
+name = "mc_coupling_chain_mix"
+path = "examples/monte-carlo/mc_coupling_chain_mix.rs"
+
+[[example]]
+name = "mc_leader_election_random"
+path = "examples/monte-carlo/mc_leader_election_random.rs"
+
+[[example]]
+name = "mc_sgd_convergence_rate"
+path = "examples/monte-carlo/mc_sgd_convergence_rate.rs"
+
+[[example]]
+name = "tui_toggle_switch_render"
+path = "examples/tui/tui_toggle_switch_render.rs"
+
+[[example]]
+name = "tui_radio_button_select"
+path = "examples/tui/tui_radio_button_select.rs"
+
+[[example]]
+name = "tui_fuzzy_match_score"
+path = "examples/tui/tui_fuzzy_match_score.rs"

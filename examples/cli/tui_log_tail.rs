@@ -181,7 +181,8 @@ mod tests {
             min_level: Some(Level::Warn),
             substr: None,
         };
-        let out = filter_lines(&demo_log(), &f);
+        let lines = demo_log();
+        let out = filter_lines(&lines, &f);
         assert!(out.iter().all(|l| l.level >= Level::Warn));
     }
 
@@ -191,7 +192,8 @@ mod tests {
             min_level: None,
             substr: Some("timeout".into()),
         };
-        let out = filter_lines(&demo_log(), &f);
+        let lines = demo_log();
+        let out = filter_lines(&lines, &f);
         assert_eq!(out.len(), 1);
     }
 

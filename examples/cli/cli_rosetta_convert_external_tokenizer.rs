@@ -43,18 +43,20 @@ pub fn validate_tokenizer(
     external_provided: bool,
 ) -> TokenizerVerdict {
     match (source, target, external_provided) {
+        // Target doesn't need tokenizer at all → vacuous OK regardless of source/external.
+        (_, TargetNeedsTokenizer::No, _) => TokenizerVerdict::Ok,
         // Source has tokenizer, target wants tokenizer, no external → OK (uses source's).
         (SourceCarriesTokenizer::Yes, TargetNeedsTokenizer::Yes, false) => TokenizerVerdict::Ok,
         // External provided when source already has tokenizer → superfluous (warn).
-        (SourceCarriesTokenizer::Yes, _, true) => TokenizerVerdict::Superfluous,
+        (SourceCarriesTokenizer::Yes, TargetNeedsTokenizer::Yes, true) => {
+            TokenizerVerdict::Superfluous
+        }
         // Source lacks tokenizer, target needs it, no external → REQUIRED.
         (SourceCarriesTokenizer::No, TargetNeedsTokenizer::Yes, false) => {
             TokenizerVerdict::MissingExternal
         }
         // Source lacks tokenizer, target needs it, external provided → OK.
         (SourceCarriesTokenizer::No, TargetNeedsTokenizer::Yes, true) => TokenizerVerdict::Ok,
-        // Target doesn't need tokenizer at all.
-        (_, TargetNeedsTokenizer::No, _) => TokenizerVerdict::Ok,
     }
 }
 

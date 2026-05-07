@@ -98,11 +98,9 @@ pub fn bpe_with_trace(word: &str, merges: &[MergeRule]) -> (Vec<String>, Vec<Mer
 }
 
 fn demo_merges() -> Vec<MergeRule> {
-    vec![
-        ("l".into(), "o".into()),
-        ("lo".into(), "w".into()),
-        ("▁".into(), "l".into()),
-    ]
+    // First token is "▁l" because of the word-sentinel; merge rules must
+    // account for that prefix on the leading character.
+    vec![("▁l".into(), "o".into()), ("▁lo".into(), "w".into())]
 }
 
 fn main() -> Result<()> {

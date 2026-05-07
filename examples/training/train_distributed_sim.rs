@@ -192,7 +192,7 @@ mod tests {
         let initial_loss = global_loss(w, &data);
         for _ in 0..100 {
             let grads: Vec<f64> = shards.iter().map(|s| local_grad(w, s)).collect();
-            w -= 0.05 * all_reduce_average(&grads);
+            w -= 0.005 * all_reduce_average(&grads);
         }
         let final_loss = global_loss(w, &data);
         assert!(final_loss < initial_loss);

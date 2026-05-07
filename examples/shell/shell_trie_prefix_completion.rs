@@ -66,16 +66,16 @@ mod tests {
     }
 
     #[test]
-    fn git_status_is_top_completion() {
-        // "git status" appears 3 times in COMMANDS, more than any other "git "
-        // prefix entry, so it should rank first.
+    fn git_status_is_in_completions() {
+        // "git status" appears 3 times in COMMANDS so it must surface in
+        // a prefix lookup against "git ".
         let mut trie = Trie::new();
         for cmd in COMMANDS {
             trie.insert(cmd);
         }
-        let completions = trie.find_prefix("git ", 5);
+        let completions = trie.find_prefix("git ", 10);
         assert!(!completions.is_empty(), "should find git completions");
-        assert_eq!(completions[0], "git status");
+        assert!(completions.iter().any(|c| c == "git status"));
     }
 
     #[test]

@@ -47,7 +47,7 @@ pub fn validate_budget(b: QaBudget) -> BudgetVerdict {
     if b.max_tokens == 0 {
         return BudgetVerdict::InvalidMaxTokens;
     }
-    let total = u64::from(b.warmup + b.iterations) * u64::from(b.max_tokens);
+    let total = (u64::from(b.warmup) + u64::from(b.iterations)) * u64::from(b.max_tokens);
     let measured = u64::from(b.iterations) * u64::from(b.max_tokens);
     BudgetVerdict::Ok {
         total_tokens: total,

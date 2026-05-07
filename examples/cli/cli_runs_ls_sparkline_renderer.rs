@@ -28,8 +28,9 @@ pub fn render_sparkline(values: &[f64], width: usize) -> String {
     let range = (max - min).max(f64::MIN_POSITIVE);
 
     let mut downsampled = Vec::with_capacity(width);
+    let denom = width.saturating_sub(1).max(1);
     for i in 0..width {
-        let idx = (i * values.len().saturating_sub(1)) / width.max(1);
+        let idx = (i * values.len().saturating_sub(1)) / denom;
         downsampled.push(values[idx.min(values.len() - 1)]);
     }
 

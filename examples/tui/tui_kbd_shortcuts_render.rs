@@ -100,9 +100,13 @@ mod tests {
         let s = [("a", "x"), ("longer", "y")];
         let v = render(&s);
         if let ShortcutVerdict::Ok { lines, .. } = v {
-            // Both lines should have same chord-column width.
-            let ws: Vec<usize> = lines.iter().map(|l| l.find("  ").unwrap_or(0)).collect();
-            assert_eq!(ws[0], ws[1]);
+            // Action column starts at the same position in every line.
+            let action_cols: Vec<usize> = lines
+                .iter()
+                .zip(s.iter())
+                .map(|(l, (_, a))| l.find(a).unwrap_or(0))
+                .collect();
+            assert_eq!(action_cols[0], action_cols[1]);
         }
     }
 
