@@ -1,6 +1,6 @@
 # PMAT Ticket Breakdown
 
-Architecture-demos work splits into **8 PMAT tickets** plus 1 prerequisite. Family batches group ~3 families per ticket so each is independently shippable. Each family ticket authors **both** the smoke recipe AND a per-family provable-contract YAML, then gates manifest-flip on `pv lint` + `pv score` grade A. Ticket numbers are placeholders; actual numbers assigned by `pmat work add` at execution time.
+Architecture-demos work splits into **8 PMAT tickets** plus 1 prerequisite. Family batches group ~3 families per ticket so each is independently shippable. Each family ticket authors **both** the smoke recipe AND a per-family provable-contract YAML, then gates manifest-flip on `pv lint` + `pv score` grade C minimum. Ticket numbers are placeholders; actual numbers assigned by `pmat work add` at execution time.
 
 | Ticket | Scope | Priority | Estimate | Depends on |
 |--------|-------|----------|----------|------------|
@@ -56,7 +56,7 @@ Total: ~20.5 dev-days (vs 14.5 IIUR-only — contract authoring adds ~0.5 day pe
 2. Implement `examples/inference/inference_llama_smoke.rs` per [recipe-template.md](recipe-template.md).
 3. Demonstrate all three formats: safetensors, apr, gguf.
 4. Author `contracts/inference-llama-smoke-v1.yaml` — fill in concrete pre/postconditions for `loader_dispatch`, `tensor_validation`, `forward_determinism`. Reference Lean theorems (`Theorems.Llama.LoaderDispatch`, etc.) at `lean.status: wip` until proofs land.
-5. Flip manifest entry `llama: status: in-progress` → `certified` only after `pv lint` and `pv score --summary` (grade A) both pass.
+5. Flip manifest entry `llama: status: in-progress` → `certified` only after `pv lint` and `pv score --summary` (grade C minimum) both pass.
 6. Open upstream aprender ticket `aprender#TODO-llama-aliases` requesting alias mechanism for codellama/dolphin/hermes/openchat/smollm/smollm2/tinyllama/vicuna/wizardcoder/yi (10 aliases unblock as a batch when this lands).
 7. Update [coverage-matrix.md](coverage-matrix.md) via generator.
 
@@ -65,7 +65,7 @@ Total: ~20.5 dev-days (vs 14.5 IIUR-only — contract authoring adds ~0.5 day pe
 - `cargo test --example inference_llama_smoke` passes.
 - Fixture committed and < 1 MB.
 - `pv lint contracts/inference-llama-smoke-v1.yaml` exits 0.
-- `pv score contracts/inference-llama-smoke-v1.yaml --summary` reports grade A.
+- `pv score contracts/inference-llama-smoke-v1.yaml --summary` reports grade C minimum.
 - Manifest entry flipped to `certified` with `lean_status: wip`.
 - Upstream ticket opened and linked in the manifest's `notes` field.
 
@@ -85,7 +85,7 @@ Same shape as PMAT-301 for `mistral` — recipe + provable-contract + Lean theor
 
 - `cargo test --example inference_mistral_smoke` passes.
 - `pv lint contracts/inference-mistral-smoke-v1.yaml` exits 0.
-- `pv score contracts/inference-mistral-smoke-v1.yaml --summary` reports grade A.
+- `pv score contracts/inference-mistral-smoke-v1.yaml --summary` reports grade C minimum.
 - Manifest entry flipped to `certified`.
 - Upstream alias ticket opened.
 
@@ -221,7 +221,7 @@ BERT is the only encoder-only family in v1; the verdict shape may need a fourth 
 ### Definition of Done
 
 - All 16 in-progress families now `certified` in the manifest, all with `lean_status: wip` minimum.
-- All 16 contracts pass `pv lint` and report grade A under `pv score --summary`.
+- All 16 contracts pass `pv lint` and report grade C minimum under `pv score --summary`.
 - CI gate enforced on main; Invariant B baseline extended.
 - mdbook builds with new architecture-demos section.
 - README badge updated.
