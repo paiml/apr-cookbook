@@ -7179,3 +7179,7 @@ path = "examples/inference/inference_arch_compare.rs"
 [[example]]
 name = "inference_arch_quirk_audit"
 path = "examples/inference/inference_arch_quirk_audit.rs"
+
+[[example]]
+name = "inference_arch_alias_resolver"
+path = "examples/inference/inference_arch_alias_resolver.rs"

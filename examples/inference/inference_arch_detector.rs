@@ -11,10 +11,23 @@
 //! Demonstrates the **ARCH-DETECTOR** recipe per
 //! `docs/specifications/architecture-demos.md` v1.1.
 //!
-//! Mirrors the dispatch logic that upstream `aprender::rosetta::detect_family_from_config`
-//! could adopt: pattern-match the config's distinguishing fields against
-//! the 16 per-family discriminators that the architecture-demos manifest
-//! enumerates.
+//! ## Upstream contribution
+//!
+//! This recipe's dispatch logic was lifted upstream into
+//! `aprender::format::FamilyRegistry::detect_from_config_str` (aprender PR
+//! [#1562](https://github.com/paiml/aprender/pull/1562)). When apr-cookbook
+//! bumps its aprender pin to a release containing #1562, this recipe will
+//! be refactored to call the upstream API directly:
+//!
+//! ```ignore
+//! use aprender::format::FamilyRegistry;
+//! let family = FamilyRegistry::detect_from_config_str(&body); // Option<&'static str>
+//! ```
+//!
+//! Until then, the body of this recipe is the reference implementation
+//! the upstream API mirrors verbatim — same priority order, same
+//! discriminator catalog. The 22 unit tests serve as a falsification
+//! contract on the upstream behavior.
 //!
 //! IIUR Contract: contracts/recipe-iiur-v1.yaml
 //! Provable-contract: contracts/inference-arch-detector-v1.yaml (grade C; lean_status: wip)
