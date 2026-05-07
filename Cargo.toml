@@ -6221,3 +6221,41 @@ path = "examples/tui/tui_clipboard_paste_pending.rs"
 [[example]]
 name = "tui_input_history_navigate"
 path = "examples/tui/tui_input_history_navigate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-202) ---
+
+[[example]]
+name = "contracts_macros_obligation_blame_chain"
+path = "examples/contracts-macros/contracts_macros_obligation_blame_chain.rs"
+
+[[example]]
+name = "contracts_macros_yaml_reserved_word_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_reserved_word_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_generated_marker"
+path = "examples/contracts-macros/contracts_macros_recipe_generated_marker.rs"
+
+[[example]]
+name = "mc_random_partition_set"
+path = "examples/monte-carlo/mc_random_partition_set.rs"
+
+[[example]]
+name = "mc_simulated_pi_dart"
+path = "examples/monte-carlo/mc_simulated_pi_dart.rs"
+
+[[example]]
+name = "mc_revenue_max_pricing"
+path = "examples/monte-carlo/mc_revenue_max_pricing.rs"
+
+[[example]]
+name = "tui_password_input_mask"
+path = "examples/tui/tui_password_input_mask.rs"
+
+[[example]]
+name = "tui_diff_word_level"
+path = "examples/tui/tui_diff_word_level.rs"
+
+[[example]]
+name = "tui_kbd_shortcuts_render"
+path = "examples/tui/tui_kbd_shortcuts_render.rs"
