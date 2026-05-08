@@ -2144,11 +2144,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-321 architecture-demos kaizen — align kani_harnesses obligations with proof_obligations across 5 meta contracts
-  status: inprogress
+  status: completed
   priority: medium
   assigned_to: null
   created: 2026-05-08T20:48:07Z
-  updated: 2026-05-08T20:48:10.040745240+00:00
+  updated: 2026-05-08T20:54:42.231530727+00:00
   spec: null
   acceptance_criteria: []
   phases: []
