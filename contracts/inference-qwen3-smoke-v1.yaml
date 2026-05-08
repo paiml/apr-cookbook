@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-QWEN3-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is head_dim-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_smoke_deterministic"
   - id: KANI-QWEN3-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_smoke_invalid_fixture_total"
   - id: KANI-QWEN3-003
-    obligation: "head_dim_present"
+    obligation: "head_dim presence is required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_head_dim_present"

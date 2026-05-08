@@ -137,17 +137,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-ALIAS-001
-    obligation: "Alias resolver is total"
+    obligation: "Resolver is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_alias_resolver_total"
   - id: KANI-ALIAS-002
-    obligation: "Glob matching is deterministic"
+    obligation: "Resolution is deterministic"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_alias_resolver_deterministic"
   - id: KANI-ALIAS-003
-    obligation: "Glob semantics correct (* suffix-wildcard)"
+    obligation: "Glob matching is correct"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_alias_resolver_glob_semantics"

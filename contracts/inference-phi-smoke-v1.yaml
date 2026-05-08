@@ -138,17 +138,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-PHI-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is fused-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::phi_smoke_deterministic"
   - id: KANI-PHI-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::phi_smoke_invalid_fixture_total"
   - id: KANI-PHI-003
-    obligation: "fused_qkv_count"
+    obligation: "Fused QKV drops two tensors per layer"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::phi_fused_qkv_count"

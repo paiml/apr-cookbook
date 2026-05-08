@@ -137,7 +137,7 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-DETECTOR-001
-    obligation: "Detection is total"
+    obligation: "Detector dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_detector_total"
@@ -147,7 +147,7 @@ kani_harnesses:
     strategy: bounded_int
     harness: "kani_harnesses::arch_detector_deterministic"
   - id: KANI-DETECTOR-003
-    obligation: "Specificity priority holds"
+    obligation: "Discriminator priority is correct"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_detector_specificity_priority"

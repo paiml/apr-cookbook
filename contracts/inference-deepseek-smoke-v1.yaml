@@ -136,17 +136,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-DEEPSEEK-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is n_experts-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::deepseek_smoke_deterministic"
   - id: KANI-DEEPSEEK-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::deepseek_smoke_invalid_fixture_total"
   - id: KANI-DEEPSEEK-003
-    obligation: "moe_fields_present"
+    obligation: "n_routed_experts required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::deepseek_moe_fields_present"

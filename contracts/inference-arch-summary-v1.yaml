@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-SUMMARY-001
-    obligation: "Summary always returns 16 entries"
+    obligation: "Summary produces exactly 16 entries"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_summary_count"
   - id: KANI-SUMMARY-002
-    obligation: "Summary is deterministic"
+    obligation: "Output is deterministic"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_summary_deterministic"
   - id: KANI-SUMMARY-003
-    obligation: "Discriminator uniqueness invariant"
+    obligation: "15 distinct discriminator fields across 16 families"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_summary_discriminator_uniqueness"

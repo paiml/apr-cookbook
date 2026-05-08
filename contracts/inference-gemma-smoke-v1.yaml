@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-GEMMA-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is scalar-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gemma_smoke_deterministic"
   - id: KANI-GEMMA-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gemma_smoke_invalid_fixture_total"
   - id: KANI-GEMMA-003
-    obligation: "query_scalar_present"
+    obligation: "query_pre_attn_scalar required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gemma_query_scalar_present"

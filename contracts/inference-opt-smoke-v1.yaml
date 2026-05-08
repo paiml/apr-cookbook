@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-OPT-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is ln-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::opt_smoke_deterministic"
   - id: KANI-OPT-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::opt_smoke_invalid_fixture_total"
   - id: KANI-OPT-003
-    obligation: "pre_ln_present"
+    obligation: "do_layer_norm_before required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::opt_pre_ln_present"

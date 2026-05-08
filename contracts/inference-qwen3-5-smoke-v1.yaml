@@ -136,17 +136,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-QWEN3_5-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is tied-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_smoke_deterministic"
   - id: KANI-QWEN3_5-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_smoke_invalid_fixture_total"
   - id: KANI-QWEN3_5-003
-    obligation: "tied_word_embeddings_present"
+    obligation: "Tied embeddings drop lm_head from tensor count"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen3_5_tied_word_embeddings_present"

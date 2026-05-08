@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-GPT2-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is n_embd-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gpt2_smoke_deterministic"
   - id: KANI-GPT2-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gpt2_smoke_invalid_fixture_total"
   - id: KANI-GPT2-003
-    obligation: "short_name_present"
+    obligation: "n_embd extraction is required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gpt2_short_name_present"

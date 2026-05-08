@@ -136,17 +136,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-RWKV7-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is time-mix-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::rwkv7_smoke_deterministic"
   - id: KANI-RWKV7-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::rwkv7_smoke_invalid_fixture_total"
   - id: KANI-RWKV7-003
-    obligation: "linear_attention_present"
+    obligation: "time_mix_extra_dim required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::rwkv7_linear_attention_present"

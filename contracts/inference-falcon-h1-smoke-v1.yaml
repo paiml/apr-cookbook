@@ -136,17 +136,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-FALCON_H1-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is SSM-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::falcon_h1_smoke_deterministic"
   - id: KANI-FALCON_H1-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::falcon_h1_smoke_invalid_fixture_total"
   - id: KANI-FALCON_H1-003
-    obligation: "ssm_fields_present"
+    obligation: "mamba_d_state required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::falcon_h1_ssm_fields_present"

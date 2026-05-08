@@ -133,17 +133,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-AUDIT-001
-    obligation: "Audit total equals fixture count"
+    obligation: "Audit totals 16"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_quirk_audit_total"
   - id: KANI-AUDIT-002
-    obligation: "Quirky entries minimum-match invariant"
+    obligation: "Quirky entries have at least 2 matches"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_quirk_audit_quirky_minimum"
   - id: KANI-AUDIT-003
-    obligation: "Audit is deterministic across runs"
+    obligation: "Audit is deterministic"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_quirk_audit_determinism"

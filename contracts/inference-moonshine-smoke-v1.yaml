@@ -109,17 +109,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-MOONSHINE-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward pass is deterministic"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::moonshine_smoke_deterministic"
   - id: KANI-MOONSHINE-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "Loader dispatch returns Ok for moonshine"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::moonshine_smoke_invalid_fixture_total"
   - id: KANI-MOONSHINE-003
-    obligation: "Forward pass is deterministic on speech-test fixture"
+    obligation: "Tensor names match expected layout"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::moonshine_smoke_forward_determinism"

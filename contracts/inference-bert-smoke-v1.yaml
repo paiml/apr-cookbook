@@ -138,17 +138,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-BERT-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is type-vocab-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::bert_smoke_deterministic"
   - id: KANI-BERT-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::bert_smoke_invalid_fixture_total"
   - id: KANI-BERT-003
-    obligation: "encoder_only_marker"
+    obligation: "type_vocab_size required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::bert_encoder_only_marker"

@@ -145,17 +145,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-LLAMA-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is deterministic"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::llama_smoke_deterministic"
   - id: KANI-LLAMA-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::llama_smoke_invalid_fixture_total"
   - id: KANI-LLAMA-003
-    obligation: "tensor_count_layout"
+    obligation: "Tensor name count matches Llama topology"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::llama_tensor_count_layout"

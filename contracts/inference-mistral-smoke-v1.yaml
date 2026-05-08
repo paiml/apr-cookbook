@@ -145,17 +145,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-MISTRAL-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is deterministic and window-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mistral_smoke_deterministic"
   - id: KANI-MISTRAL-002
-    obligation: "InvalidFixture is total (no panic on bad path)"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mistral_smoke_invalid_fixture_total"
   - id: KANI-MISTRAL-003
-    obligation: "sliding_window_present"
+    obligation: "Sliding-window field discriminates Mistral from Llama"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::mistral_sliding_window_present"

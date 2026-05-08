@@ -138,17 +138,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-QWEN2-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is rope-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen2_smoke_deterministic"
   - id: KANI-QWEN2-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen2_smoke_invalid_fixture_total"
   - id: KANI-QWEN2-003
-    obligation: "qkv_bias_count"
+    obligation: "Qwen2 has 12 per-layer tensor entries"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::qwen2_qkv_bias_count"

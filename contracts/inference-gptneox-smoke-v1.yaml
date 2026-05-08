@@ -135,17 +135,17 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-GPTNEOX-001
-    obligation: "Deterministic verdict on equal inputs"
+    obligation: "Forward simulation is parallel-sensitive"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_smoke_deterministic"
   - id: KANI-GPTNEOX-002
-    obligation: "InvalidFixture is total"
+    obligation: "Loader dispatch is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_smoke_invalid_fixture_total"
   - id: KANI-GPTNEOX-003
-    obligation: "parallel_residual_present"
+    obligation: "use_parallel_residual is required"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::gptneox_parallel_residual_present"
