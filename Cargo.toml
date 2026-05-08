@@ -7183,3 +7183,9 @@ path = "examples/inference/inference_arch_quirk_audit.rs"
 [[example]]
 name = "inference_arch_alias_resolver"
 path = "examples/inference/inference_arch_alias_resolver.rs"
+
+# --- architecture-demos v1.2 (PMAT-320) ---
+
+[[example]]
+name = "inference_arch_resolution_pipeline"
+path = "examples/inference/inference_arch_resolution_pipeline.rs"

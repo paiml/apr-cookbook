@@ -402,6 +402,30 @@ bindings:
   status: implemented
   notes: Resolution is a pure function of input string.
 
+# ----- v1.2 forward-bridge resolution pipeline (PMAT-320) -----
+
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: pipeline_compose
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Composes alias_resolver::resolve and detector::detect_from_str. 10 new unit tests (46 total with inherited components). Forward-bridge to upstream aprender#1562 — when `FamilyRegistry::resolve_alias` + `detect_from_config_str` ship, this body becomes a thin wrapper.
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: alias_priority
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Test `alias_repo_with_mismatched_config_still_picks_alias` asserts alias dominance — codellama/* repo with phi config still resolves to llama via alias.
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Composition of two pure functions is itself pure; `deterministic_across_runs` asserts equal verdicts on consecutive calls.
+
 # ----- v1 family-smoke contracts (PMAT-301..307) — 18 families × 3 equations -----
 
 - contract: inference-llama-smoke-v1.yaml

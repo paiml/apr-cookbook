@@ -15,7 +15,7 @@ import ProvableContracts.Int4.Quantization
 import ProvableContracts.Docs.Schema
 import ProvableContracts.AprFormat.Roundtrip
 
--- Architecture demos (PMAT-300..317): 18 family-smoke + 5 cross-family
+-- Architecture demos (PMAT-300..320): 18 family-smoke + 6 cross-family
 -- meta-recipes. All proofs are real (rfl/structural arithmetic) since
 -- the underlying recipes are pure functions of their inputs.
 import ProvableContracts.ArchitectureDemos.Llama
@@ -41,3 +41,4 @@ import ProvableContracts.ArchitectureDemos.ArchSummary
 import ProvableContracts.ArchitectureDemos.ArchCompare
 import ProvableContracts.ArchitectureDemos.ArchQuirkAudit
 import ProvableContracts.ArchitectureDemos.ArchAliasResolver
+import ProvableContracts.ArchitectureDemos.ArchResolutionPipeline

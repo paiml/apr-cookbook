@@ -52,6 +52,8 @@ const CONTRACT_FILES: &[&str] = &[
     "inference-qwen3-5-smoke-v1.yaml",
     "inference-qwen3-smoke-v1.yaml",
     "inference-rwkv7-smoke-v1.yaml",
+    // architecture-demos v1.2 (PMAT-320): forward-bridge resolution pipeline.
+    "inference-arch-resolution-pipeline-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",

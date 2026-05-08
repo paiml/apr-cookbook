@@ -3,76 +3,82 @@
 Auto-regenerated from [manifest.yaml](manifest.yaml) by `scripts/architecture-demos-gen.sh --update`.
 Hand-edits will be overwritten. Edit the manifest, not this file.
 
-**Last regenerated:** 2026-05-07 (seed; CI will refresh)
+**Last regenerated:** 2026-05-08 (post-PMAT-320 forward-bridge)
 **Totals:** 18 certified · 0 in-progress · 25 blocked · **43 total**
 
-## Certified (2)
+## Certified (18 — text decoder/encoder + speech)
 
-Speech-only families covered by `examples/speech/`. Listed for completeness only — they are not part of the `examples/inference/` smoke matrix.
+Every certified family has a recipe at `examples/inference/inference_<family>_smoke.rs` (or `examples/speech/` for whisper/moonshine), a per-family contract at `contracts/inference-<family>-smoke-v1.yaml`, and Lean theorem proofs at `lean/ProvableContracts/ArchitectureDemos/<Family>.lean`. All 18 contracts score **0.98 (Grade A)** under `pv score --summary` after PMAT-315..318.
 
-| Family | Vendor | HF Architectures | Recipe |
-|--------|--------|-----------------|--------|
-| moonshine | useful-sensors | MoonshineForConditionalGeneration | `examples/speech/` |
-| whisper | OpenAI | WhisperForConditionalGeneration | `examples/speech/whisper_transcribe.rs` |
+| Family | Vendor | HF Architectures | Recipe | Contract | Lean status |
+|--------|--------|-----------------|--------|----------|-------------|
+| bert | Google | BertForMaskedLM, BertForSequenceClassification | `examples/inference/inference_bert_smoke.rs` | `contracts/inference-bert-smoke-v1.yaml` | proved |
+| deepseek | DeepSeek-AI | DeepseekForCausalLM, DeepseekV2/V3ForCausalLM | `examples/inference/inference_deepseek_smoke.rs` | `contracts/inference-deepseek-smoke-v1.yaml` | proved |
+| falcon_h1 | TII | FalconH1ForCausalLM | `examples/inference/inference_falcon_h1_smoke.rs` | `contracts/inference-falcon-h1-smoke-v1.yaml` | proved |
+| gemma | Google | GemmaForCausalLM, Gemma2/3ForCausalLM | `examples/inference/inference_gemma_smoke.rs` | `contracts/inference-gemma-smoke-v1.yaml` | proved |
+| gpt2 | OpenAI | GPT2LMHeadModel | `examples/inference/inference_gpt2_smoke.rs` | `contracts/inference-gpt2-smoke-v1.yaml` | proved |
+| gptneox | EleutherAI | GPTNeoXForCausalLM | `examples/inference/inference_gptneox_smoke.rs` | `contracts/inference-gptneox-smoke-v1.yaml` | proved |
+| llama | Meta | LlamaForCausalLM, Llama2/3ForCausalLM | `examples/inference/inference_llama_smoke.rs` | `contracts/inference-llama-smoke-v1.yaml` | proved |
+| mamba | state-spaces | MambaForCausalLM, Mamba2ForCausalLM | `examples/inference/inference_mamba_smoke.rs` | `contracts/inference-mamba-smoke-v1.yaml` | proved |
+| mistral | Mistral AI | MistralForCausalLM, MixtralForCausalLM | `examples/inference/inference_mistral_smoke.rs` | `contracts/inference-mistral-smoke-v1.yaml` | proved |
+| moonshine | useful-sensors | MoonshineForConditionalGeneration | `examples/speech/` | `contracts/inference-moonshine-smoke-v1.yaml` | proved |
+| openelm | Apple | OpenELMForCausalLM | `examples/inference/inference_openelm_smoke.rs` | `contracts/inference-openelm-smoke-v1.yaml` | proved |
+| opt | Meta AI | OPTForCausalLM | `examples/inference/inference_opt_smoke.rs` | `contracts/inference-opt-smoke-v1.yaml` | proved |
+| phi | Microsoft | PhiForCausalLM, Phi3ForCausalLM, Phi3SmallForCausalLM | `examples/inference/inference_phi_smoke.rs` (companion: `convert_phi_to_apr.rs`) | `contracts/inference-phi-smoke-v1.yaml` | proved |
+| qwen2 | Alibaba | Qwen2ForCausalLM, Qwen2_5ForCausalLM | `examples/inference/inference_qwen2_smoke.rs` | `contracts/inference-qwen2-smoke-v1.yaml` | proved |
+| qwen3 | Alibaba | Qwen3ForCausalLM, Qwen3MoeForCausalLM | `examples/inference/inference_qwen3_smoke.rs` (companion: `inference_qwen3_moe_numerical_parity_smoke.rs`) | `contracts/inference-qwen3-smoke-v1.yaml` | proved |
+| qwen3_5 | Alibaba | Qwen3_5ForCausalLM | `examples/inference/inference_qwen3_5_smoke.rs` | `contracts/inference-qwen3-5-smoke-v1.yaml` | proved |
+| rwkv7 | BlinkDL | RWKV7ForCausalLM | `examples/inference/inference_rwkv7_smoke.rs` | `contracts/inference-rwkv7-smoke-v1.yaml` | proved |
+| whisper | OpenAI | WhisperForConditionalGeneration | `examples/speech/whisper_transcribe.rs` | `contracts/whisper-wer-v1.yaml` | proved |
 
-## In-Progress (16 — text decoder/encoder)
+## Cross-family meta-recipes (PMAT-309..313, 320)
 
-Upstream loader exists in `aprender/contracts/model-families/`; recipe + provable-contract pending.
+Higher-level recipes that consume the 18 family fixtures rather than implementing a single family. Each ships its own provable contract.
 
-| Family | Vendor | Recipe (planned) | Provable Contract (planned) | Lean status |
-|--------|--------|------------------|------------------------------|-------------|
-| bert | Google | `examples/inference/inference_bert_smoke.rs` | `contracts/inference-bert-smoke-v1.yaml` | wip |
-| deepseek | DeepSeek-AI | `examples/inference/inference_deepseek_smoke.rs` | `contracts/inference-deepseek-smoke-v1.yaml` | wip |
-| falcon_h1 | TII | `examples/inference/inference_falcon_h1_smoke.rs` | `contracts/inference-falcon-h1-smoke-v1.yaml` | wip |
-| gemma | Google | `examples/inference/inference_gemma_smoke.rs` | `contracts/inference-gemma-smoke-v1.yaml` | wip |
-| gpt2 | OpenAI | `examples/inference/inference_gpt2_smoke.rs` | `contracts/inference-gpt2-smoke-v1.yaml` | wip |
-| gptneox | EleutherAI | `examples/inference/inference_gptneox_smoke.rs` | `contracts/inference-gptneox-smoke-v1.yaml` | wip |
-| llama | Meta | `examples/inference/inference_llama_smoke.rs` | `contracts/inference-llama-smoke-v1.yaml` | wip |
-| mamba | state-spaces | `examples/inference/inference_mamba_smoke.rs` | `contracts/inference-mamba-smoke-v1.yaml` | wip |
-| mistral | Mistral AI | `examples/inference/inference_mistral_smoke.rs` | `contracts/inference-mistral-smoke-v1.yaml` | wip |
-| openelm | Apple | `examples/inference/inference_openelm_smoke.rs` | `contracts/inference-openelm-smoke-v1.yaml` | wip |
-| opt | Meta AI | `examples/inference/inference_opt_smoke.rs` | `contracts/inference-opt-smoke-v1.yaml` | wip |
-| phi | Microsoft | `examples/inference/inference_phi_smoke.rs` (companion: `convert_phi_to_apr.rs` ✓) | `contracts/inference-phi-smoke-v1.yaml` | wip |
-| qwen2 | Alibaba | `examples/inference/inference_qwen2_smoke.rs` | `contracts/inference-qwen2-smoke-v1.yaml` | wip |
-| qwen3 | Alibaba | `examples/inference/inference_qwen3_smoke.rs` (companion: `inference_qwen3_moe_numerical_parity_smoke.rs` ✓) | `contracts/inference-qwen3-smoke-v1.yaml` | wip |
-| qwen3_5 | Alibaba | `examples/inference/inference_qwen3_5_smoke.rs` | `contracts/inference-qwen3-5-smoke-v1.yaml` | wip |
-| rwkv7 | BlinkDL | `examples/inference/inference_rwkv7_smoke.rs` | `contracts/inference-rwkv7-smoke-v1.yaml` | wip |
+| Recipe | Purpose | Contract | Added in |
+|--------|---------|----------|----------|
+| `inference_arch_detector` | Discriminator-based dispatch from raw `config.json` body to a family identifier | `contracts/inference-arch-detector-v1.yaml` | PMAT-309 |
+| `inference_arch_summary` | Catalog the (family, discriminator) pairs across all 16 in-progress families | `contracts/inference-arch-summary-v1.yaml` | PMAT-310 |
+| `inference_arch_compare` | Diff two configs and classify their `FamilyRelation` (same / sibling / distant) | `contracts/inference-arch-compare-v1.yaml` | PMAT-311 |
+| `inference_arch_quirk_audit` | Flag configs matching multiple family discriminators | `contracts/inference-arch-quirk-audit-v1.yaml` | PMAT-312 |
+| `inference_arch_alias_resolver` | Mirror upstream `FamilyRegistry::resolve_alias` semantics for derived models | `contracts/inference-arch-alias-resolver-v1.yaml` | PMAT-313 |
+| `inference_arch_resolution_pipeline` | Compose alias-resolver + detector into a single (hf_repo, body) → family pipeline; forward-bridge to upstream API | `contracts/inference-arch-resolution-pipeline-v1.yaml` | PMAT-320 |
 
 ## Blocked (25)
 
-apr-model-qa-playbook ships per-checkpoint coverage; awaits upstream `aprender::rosetta` loader. Recipe lands when the upstream ticket closes.
+apr-model-qa-playbook ships per-checkpoint coverage; awaits upstream `aprender::rosetta` loader. Recipe lands when the upstream ticket closes. **Status of [aprender#1562](https://github.com/paiml/aprender/pull/1562) (alias mechanism)**: open as of 2026-05-08, not yet merged to main, not yet shipped to crates.io. The 16 alias-eligible entries below unblock as a batch when that PR ships.
 
 | Family | Vendor | HF Architectures | Aliases? | Upstream Ticket |
 |--------|--------|-----------------|----------|-----------------|
 | bloom | BigScience | BloomForCausalLM | — | aprender#TODO-bloom-loader |
-| codegemma | Google | GemmaForCausalLM | gemma | aprender#TODO-codegemma-alias |
-| codellama | Meta | LlamaForCausalLM | llama | aprender#TODO-codellama-alias |
-| codestral | Mistral AI | MistralForCausalLM | mistral | aprender#TODO-codestral-alias |
-| distilgpt2 | HuggingFace | GPT2LMHeadModel | gpt2 | aprender#TODO-distilgpt2-alias |
-| dolphin | cognitivecomputations | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#TODO-dolphin-alias |
+| codegemma | Google | GemmaForCausalLM | gemma | aprender#1562 (alias) |
+| codellama | Meta | LlamaForCausalLM | llama | aprender#1562 (alias) |
+| codestral | Mistral AI | MistralForCausalLM | mistral | aprender#1562 (alias) |
+| distilgpt2 | HuggingFace | GPT2LMHeadModel | gpt2 | aprender#1562 (alias) |
+| dolphin | cognitivecomputations | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
 | falcon | TII | FalconForCausalLM | — (classic, not H1) | aprender#TODO-falcon-classic-loader |
-| galactica | Meta AI | OPTForCausalLM | opt | aprender#TODO-galactica-alias |
+| galactica | Meta AI | OPTForCausalLM | opt | aprender#1562 (alias) |
 | granite | IBM | GraniteForCausalLM | — | aprender#TODO-granite-loader |
-| hermes | NousResearch | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#TODO-hermes-alias |
+| hermes | NousResearch | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
 | internlm2_5 | InternLM | InternLM2ForCausalLM | — | aprender#TODO-internlm2-loader |
 | nemotron | NVIDIA | NemotronForCausalLM | — | aprender#TODO-nemotron-loader |
 | olmo | AllenAI | OlmoForCausalLM, Olmo2ForCausalLM | — | aprender#TODO-olmo-loader |
-| openchat | openchat | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#TODO-openchat-alias |
-| pythia | EleutherAI | GPTNeoXForCausalLM | gptneox | aprender#TODO-pythia-alias |
-| smollm | HuggingFace | LlamaForCausalLM | llama | aprender#TODO-smollm-alias |
-| smollm2 | HuggingFace | LlamaForCausalLM | llama | aprender#TODO-smollm2-alias |
+| openchat | openchat | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
+| pythia | EleutherAI | GPTNeoXForCausalLM | gptneox | aprender#1562 (alias) |
+| smollm | HuggingFace | LlamaForCausalLM | llama | aprender#1562 (alias) |
+| smollm2 | HuggingFace | LlamaForCausalLM | llama | aprender#1562 (alias) |
 | stablelm | Stability AI | StableLmForCausalLM | — | aprender#TODO-stablelm-loader |
 | starcoder2 | BigCode | Starcoder2ForCausalLM | — | aprender#TODO-starcoder2-loader |
-| tinyllama | TinyLlama | LlamaForCausalLM | llama | aprender#TODO-tinyllama-alias |
+| tinyllama | TinyLlama | LlamaForCausalLM | llama | aprender#1562 (alias) |
 | tiny_starcoder_py | bigcode | GPTBigCodeForCausalLM | — | aprender#TODO-gptbigcode-loader |
-| vicuna | lmsys | LlamaForCausalLM | llama | aprender#TODO-vicuna-alias |
-| wizardcoder | WizardLM | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#TODO-wizardcoder-alias |
-| yi | 01-ai | LlamaForCausalLM | llama | aprender#TODO-yi-alias |
-| zephyr | HuggingFaceH4 | MistralForCausalLM | mistral | aprender#TODO-zephyr-alias |
+| vicuna | lmsys | LlamaForCausalLM | llama | aprender#1562 (alias) |
+| wizardcoder | WizardLM | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
+| yi | 01-ai | LlamaForCausalLM | llama | aprender#1562 (alias) |
+| zephyr | HuggingFaceH4 | MistralForCausalLM | mistral | aprender#1562 (alias) |
 
 ## Aliasing Reference
 
-11 of the 25 blocked entries are pure aliases — they share the same upstream loader and only need an `hf_pattern` registration. Once aprender lands a generic alias mechanism, these unblock as a single batch.
+16 of the 25 blocked entries are pure aliases — they share the same upstream loader and only need an `hf_pattern` registration. They unblock as a single batch when [aprender#1562](https://github.com/paiml/aprender/pull/1562) ships. The cookbook-side alias table is mirrored in `examples/inference/inference_arch_alias_resolver.rs::ALIASES` (16 entries) and exercised end-to-end by `examples/inference/inference_arch_resolution_pipeline.rs` (PMAT-320).
 
 | Base loader | Aliases that unblock together |
 |-------------|-------------------------------|

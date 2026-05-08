@@ -250,6 +250,18 @@ After v1 closeout (PMAT-308), the spec was extended with cross-family meta-recip
 
 Each v1.1 ticket follows the same IIUR + provable-contract discipline as v1. The 5 meta-recipes ship 68 unit tests across the family suite. The contract-quality sweep (PMAT-315..318) lifted aggregate from 0.65 Grade C to **0.98 Grade A** across all 23 contracts.
 
+## v1.2 Forward-Bridge (PMAT-320) — Composed Resolution Pipeline
+
+aprender#1562 is open but not yet merged to aprender main as of 2026-05-08. PMAT-320 delivers consumer-side progress that doesn't depend on the upstream merge: a composed `(hf_repo, body) → DetectedFamily` recipe that exercises the future `FamilyRegistry::resolve_alias` + `detect_from_config_str` shape against the cookbook's reverse implementation.
+
+| Ticket | Scope | Status |
+|--------|-------|--------|
+| PMAT-320 | Forward-bridge resolution pipeline — `inference_arch_resolution_pipeline` + provable-contract + Lean module + 3 Kani harnesses | landed (this PR) |
+
+The recipe has 10 new unit tests; one of them (`all_alias_eligible_resolve_to_parent`) is the falsification claim that all 16 alias-eligible blocked manifest entries resolve to a known parent — proving the alias table stays in sync with the manifest. When aprender#1562 ships, the pipeline body becomes a thin wrapper over the upstream API and the 46 inherited tests become integration tests for upstream behavior.
+
+Total architecture-demos contracts after PMAT-320: **24**, all at Grade A 0.98.
+
 ## Score progression (architecture-demos contracts)
 
 | Stage | Spec | Falsify | Kani | Lean | Bind | Aggregate | Grade |
@@ -260,14 +272,15 @@ Each v1.1 ticket follows the same IIUR + provable-contract discipline as v1. The
 | PMAT-317 (Lean) | 1.0 | 1.0 | 0.9 | 1.0 | 1.0 | 0.98 | A (22/23) |
 | **PMAT-318 (moonshine)** | **1.0** | **1.0** | **0.9** | **1.0** | **1.0** | **0.98** | **A (23/23)** |
 
-## Backlog (post-architecture-demos v1.1)
+## Backlog (post-architecture-demos v1.2)
 
-- **Refactor cookbook detector to consume upstream API** — when aprender ships a release containing #1562, bump the cookbook's aprender pin and replace `inference_arch_detector.rs` body with a thin call to `FamilyRegistry::detect_from_config_str`. The 22 detector tests become integration tests for the upstream API. **Status: blocked on external aprender release.**
-- **Resolution of `status: blocked` entries** — 16 of 25 are alias-eligible (codellama, tinyllama, vicuna, yi, smollm, smollm2, dolphin, hermes, openchat, wizardcoder, codestral, zephyr, distilgpt2, pythia, galactica, codegemma) and unblock via aprender#1562's `register_alias` once it ships. The remaining 9 (bloom, falcon-classic, granite, internlm2_5, nemotron, olmo, stablelm, starcoder2, tiny_starcoder_py) need new upstream loaders, deferred per scope non-goal. **Status: blocked on external aprender work.**
-- **D3 Kani 0.9 → 1.0** — would require actual `#[kani::proof]` Rust harness function implementations for the 69 declared harness names (currently declared in YAML but no Rust impl). Substantial separate effort; current 0.9 already exceeds every other flagship contract's Kani score (mmap 0.83, avx512 not measured).
+- **Refactor cookbook detector to consume upstream API** — when aprender ships a release containing #1562, bump the cookbook's aprender pin and replace `inference_arch_detector.rs` body with a thin call to `FamilyRegistry::detect_from_config_str`. The 22 detector tests become integration tests for the upstream API. PMAT-320 already shipped the consumer-side composed pipeline (`inference_arch_resolution_pipeline`) so when upstream merges, the swap is a one-line body change inside that recipe plus the detector. **Status: blocked on external aprender release.** Last verified upstream state (2026-05-08): aprender#1562 is open on a parallel branch, 10 commits behind aprender main; not in published 0.32.0.
+- **Resolution of `status: blocked` entries** — 16 of 25 are alias-eligible (codellama, tinyllama, vicuna, yi, smollm, smollm2, dolphin, hermes, openchat, wizardcoder, codestral, zephyr, distilgpt2, pythia, galactica, codegemma) and unblock via aprender#1562's `register_alias` once it ships. The cookbook-side alias table is already proved in `inference_arch_resolution_pipeline::all_alias_eligible_resolve_to_parent` so flipping the manifest entries from `blocked` → `aliased` is a one-shot manifest edit once upstream merges. The remaining 9 (bloom, falcon-classic, granite, internlm2_5, nemotron, olmo, stablelm, starcoder2, tiny_starcoder_py) need new upstream loaders, deferred per scope non-goal. **Status: blocked on external aprender work.**
+- **D3 Kani 0.9 → 1.0** — would require actual `#[kani::proof]` Rust harness function implementations for the 72 declared harness names (currently declared in YAML but no Rust impl beyond the ones already added in PMAT-320). Substantial separate effort; current 0.9 already exceeds every other flagship contract's Kani score (mmap 0.83, avx512 not measured).
 - **Vision/audio/multimodal expansion** (LLaVA, SDXL, ViT) — separate v2 spec, not in current scope.
 - **ONNX format coverage** — none of the 18 in-progress loaders ship ONNX; awaits upstream support.
 
-## Lifted from backlog (resolved in v1.1)
+## Lifted from backlog (resolved in v1.1 / v1.2)
 
-- ~~**Lift contracts C→A**~~ — **DONE** in PMAT-315..318. All 23 architecture-demos contracts now at 0.98 Grade A (Spec 1.0 / Falsify 1.0 / Kani 0.9 / Lean 1.0 / Bind 1.0). Exceeds every prior cookbook flagship: mmap 0.91, whisper 0.94, avx512 0.73, flash-attention 0.71.
+- ~~**Lift contracts C→A**~~ — **DONE** in PMAT-315..318. All 23 architecture-demos contracts now at 0.98 Grade A (Spec 1.0 / Falsify 1.0 / Kani 0.9 / Lean 1.0 / Bind 1.0). Exceeds every prior cookbook flagship: mmap 0.91, whisper 0.94, avx512 0.73, flash-attention 0.71. PMAT-320 added a 24th contract at the same grade.
+- ~~**Stale coverage-matrix.md**~~ — **DONE** in PMAT-320. Matrix body now reflects 18 certified (was claiming 2 certified / 16 in-progress / 25 blocked) and includes a cross-family meta-recipes section enumerating PMAT-309..313 + PMAT-320 deliverables.

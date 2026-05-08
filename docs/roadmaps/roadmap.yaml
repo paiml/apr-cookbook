@@ -2108,3 +2108,35 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-111
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry::detect_from_config_str + register_alias; refactor cookbook detector to thin wrapper; flip 16 alias-eligible blocked entries to aliased
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:25:18Z
+  updated: 2026-05-08T20:25:32.529004933+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-112
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry API (cross-repo wire-up + cookbook detector refactor + 16 alias entries flip)
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:28:03Z
+  updated: 2026-05-08T20:28:06.736751874+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

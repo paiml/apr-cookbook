@@ -1,9 +1,9 @@
 # Architecture Demos Specification
 
-**Version**: 1.1.1
-**Status**: ACTIVE (PMAT-300..318 implemented; CI gate enforced; upstream contribution aprender#1562; **all 23 contracts at Grade A 0.98**)
+**Version**: 1.2.0
+**Status**: ACTIVE (PMAT-300..320 implemented; CI gate enforced; upstream contribution aprender#1562 OPEN [not yet merged]; **all 24 contracts at Grade A 0.98**)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
-**Date**: 2026-05-07
+**Date**: 2026-05-08
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
 **Sovereign Stack**: APR-MONO v0.31.2
 
@@ -20,6 +20,8 @@ apr-cookbook today implements **Qwen2 only** (in `aprender-core/src/models/qwen2
 **Net additions (v1, PMAT-300..308):** 18 family-smoke recipes + 17 provable-contracts + 18 fixtures, plus a manifest-driven coverage gate that forces the cookbook to track upstream architecture support.
 
 **v1.1 expansion (PMAT-309..313):** 5 cross-family meta-recipes — detector (PMAT-309), summary (PMAT-310), compare (PMAT-311), quirk-audit (PMAT-312), alias-resolver (PMAT-313) — plus upstream contribution to `aprender::format::FamilyRegistry` ([aprender#1562](https://github.com/paiml/aprender/pull/1562)) lifting the discriminator-dispatch logic and adding the alias mechanism. Cookbook recipes act as the falsification suite for the upstream API; the cookbook→upstream bridge becomes a first-class pattern documented in [scope.md](architecture-demos/scope.md#upstream-contribution-discipline).
+
+**v1.2 forward-bridge (PMAT-320):** 1 composed meta-recipe — `inference_arch_resolution_pipeline` — that combines the alias resolver and discriminator detector into a single `(hf_repo, body) → DetectedFamily` pipeline. This delivers the consumer-side shape the cookbook will adopt once aprender#1562 ships (open as of 2026-05-08, not yet merged to aprender main, not yet shipped to crates.io). The recipe acts as a falsification harness for the future upstream `FamilyRegistry::resolve_alias` + `FamilyRegistry::detect_from_config_str` semantics — when the upstream API ships, the recipe body becomes a thin wrapper without changing the 46 unit tests or the contract.
 
 ---
 
