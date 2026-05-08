@@ -161,12 +161,12 @@ falsification_tests:
 
 kani_harnesses:
   - id: KANI-PIPELINE-001
-    obligation: "Resolution is total"
+    obligation: "Pipeline composition is total"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_resolution_pipeline_total"
   - id: KANI-PIPELINE-002
-    obligation: "Alias takes priority"
+    obligation: "Alias takes priority over detector"
     bound: 4
     strategy: bounded_int
     harness: "kani_harnesses::arch_resolution_pipeline_alias_priority"
