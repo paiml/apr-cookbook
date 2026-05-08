@@ -2128,11 +2128,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry API (cross-repo wire-up + cookbook detector refactor + 16 alias entries flip)
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-08T20:28:03Z
-  updated: 2026-05-08T20:28:06.736751874+00:00
+  updated: 2026-05-08T20:45:52.876617864+00:00
   spec: null
   acceptance_criteria: []
   phases: []
