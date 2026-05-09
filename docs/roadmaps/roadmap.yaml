@@ -2172,3 +2172,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-115
+  github_issue: null
+  item_type: task
+  title: PMAT-323 architecture-demos kaizen — 51 family-smoke Kani harness stubs (closes the declared-but-unimplemented gap entirely)
+  status: inprogress
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:09:35Z
+  updated: 2026-05-09T05:09:38.503960264+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
