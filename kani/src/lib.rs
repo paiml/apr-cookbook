@@ -772,6 +772,8 @@ pub fn arch_compare_relation_classification() {
 pub fn arch_quirk_audit_total() {
     let clean: u8 = kani::any();
     let quirky: u8 = kani::any();
+    // Bound each summand individually so the sum cannot overflow u8 (max 255 > 16).
+    kani::assume(clean <= 16 && quirky <= 16);
     kani::assume(clean + quirky == 16);
     kani::assert(
         (clean + quirky) == 16,

@@ -2188,3 +2188,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-116
+  github_issue: null
+  item_type: task
+  title: PMAT-324 architecture-demos D3 Kani 0.9 to 1.0 — wire cargo kani into CI; verifies all 108 declared harnesses on every PR
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-09T05:52:41Z
+  updated: 2026-05-09T05:52:44.973848560+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
