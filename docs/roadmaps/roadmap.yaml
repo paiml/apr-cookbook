@@ -2108,3 +2108,99 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-111
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry::detect_from_config_str + register_alias; refactor cookbook detector to thin wrapper; flip 16 alias-eligible blocked entries to aliased
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:25:18Z
+  updated: 2026-05-08T20:25:32.529004933+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-112
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry API (cross-repo wire-up + cookbook detector refactor + 16 alias entries flip)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:28:03Z
+  updated: 2026-05-08T20:45:52.876617864+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-113
+  github_issue: null
+  item_type: task
+  title: PMAT-321 architecture-demos kaizen — align kani_harnesses obligations with proof_obligations across 5 meta contracts
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-08T20:48:07Z
+  updated: 2026-05-08T20:54:42.231530727+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-114
+  github_issue: null
+  item_type: task
+  title: PMAT-322 architecture-demos kaizen — implement Kani harness stubs for 5 cross-family meta contracts (15 functions; closes declared-but-unimplemented gap for the meta tier)
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:03:18Z
+  updated: 2026-05-09T05:08:58.849703244+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-115
+  github_issue: null
+  item_type: task
+  title: PMAT-323 architecture-demos kaizen — 51 family-smoke Kani harness stubs (closes the declared-but-unimplemented gap entirely)
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:09:35Z
+  updated: 2026-05-09T05:12:49.334114758+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-116
+  github_issue: null
+  item_type: task
+  title: PMAT-324 architecture-demos D3 Kani 0.9 to 1.0 — wire cargo kani into CI; verifies all 108 declared harnesses on every PR
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-09T05:52:41Z
+  updated: 2026-05-09T05:59:39.877969650+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

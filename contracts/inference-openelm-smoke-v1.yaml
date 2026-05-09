@@ -1,0 +1,161 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "OpenELM smoke inference invariants — config parse, layer-wise scaling discriminator (ffn_multipliers + num_query_heads arrays), deterministic forward simulation"
+  references:
+    - "Mehta et al. (2024). OpenELM. arXiv:2404.14619"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - openelm
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Extract OpenELM scaling fields"
+      invariant: "model_dim, num_transformer_layers parsed; ffn_multipliers + num_query_heads arrays present"
+    - name: forward
+      description: "LCG forward sim seeded with scaling flag"
+      invariant: "scaling flag participates in checksum"
+    - name: verify
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'openelm'"
+      - "Missing ffn_multipliers or num_query_heads arrays surfaces LoaderUnavailable"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'openelm'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
+
+  layer_wise_scaling:
+    formula: "config without ffn_multipliers OR num_query_heads ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "OpenELM declares per-layer ffn_multipliers and num_query_heads arrays"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { has_layer_wise_scaling, .. } => has_layer_wise_scaling == true"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, dim, scaled) is deterministic and scaling-sensitive"
+    domain: "seed: u64; vocab,dim: u32; scaled: bool"
+    codomain: "u32"
+    invariants:
+      - "scaled flag affects accumulator initialization"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, d, sc) == forward_sim(s, v, d, sc)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/OpenElm.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.OpenElm"
+  - type: invariant
+    property: "Layer-wise scaling arrays required"
+    formal: "fixture without ffn_multipliers or num_query_heads ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: layer_wise_scaling
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.LayerWiseScaling"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.OpenElm"
+  - type: invariant
+    property: "Forward simulation is scaling-sensitive"
+    formal: "scaled flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.OpenElm.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.OpenElm"
+
+falsification_tests:
+  - id: FALSIFY-OPENELM-001
+    rule: "OpenELM scaling arrays are recognized"
+    prediction: "has_layer_wise_scaling == true for the bundled fixture"
+    test: "cargo test --example inference_openelm_smoke -- happy_path_layer_wise_scaling_present"
+    if_fails: "Array detection broke"
+  - id: FALSIFY-OPENELM-002
+    rule: "Forward simulation is scaling-sensitive"
+    prediction: "forward_sim with scaled=true != forward_sim with scaled=false"
+    test: "cargo test --example inference_openelm_smoke -- scaled_flag_affects_checksum"
+    if_fails: "Scaled flag dropped from accumulator seeding"
+  - id: FALSIFY-OPENELM-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_openelm_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-OPENELM-001
+    obligation: "Forward simulation is scaling-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::openelm_smoke_deterministic"
+  - id: KANI-OPENELM-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::openelm_smoke_invalid_fixture_total"
+  - id: KANI-OPENELM-003
+    obligation: "Layer-wise scaling arrays required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::openelm_scaling_present"
+
+qa_gate:
+  id: F-OPENELM-001
+  name: "OpenELM Smoke Inference Contract"
+  description: "Smoke load + layer-wise scaling discriminator + deterministic forward simulation"
+  checks:
+    - "scaling_arrays_present"
+    - "scaled_flag_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

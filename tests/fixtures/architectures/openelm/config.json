@@ -1,0 +1,14 @@
+{
+  "architectures": ["OpenELMForCausalLM"],
+  "model_type": "openelm",
+  "model_dim": 64,
+  "num_transformer_layers": 2,
+  "vocab_size": 256,
+  "ffn_dim_divisor": 64,
+  "ffn_multipliers": [0.5, 1.0],
+  "num_query_heads": [4, 4],
+  "num_kv_heads": [2, 2],
+  "head_dim": 16,
+  "rms_norm_eps": 1e-6,
+  "torch_dtype": "float32"
+}

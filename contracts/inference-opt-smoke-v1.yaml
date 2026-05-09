@@ -1,0 +1,161 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "OPT smoke inference invariants — config parse, do_layer_norm_before discriminator (Pre-LN positioning), deterministic forward simulation"
+  references:
+    - "Zhang et al. (2022). OPT: Open Pre-trained Transformer. arXiv:2205.01068"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - opt
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Extract OPT-specific fields"
+      invariant: "do_layer_norm_before field present in body"
+    - name: forward
+      description: "LCG forward sim seeded with ln_before flag"
+      invariant: "ln_before flag participates in checksum"
+    - name: verify
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'opt'"
+      - "Missing do_layer_norm_before surfaces LoaderUnavailable"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'opt'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
+
+  pre_ln_discriminator:
+    formula: "config without do_layer_norm_before ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "OPT declares Pre-LN positioning explicitly via do_layer_norm_before"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { layer_norm_before, .. } => layer_norm_before matches body"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, ln_before) is deterministic and ln-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; ln_before: bool"
+    codomain: "u32"
+    invariants:
+      - "ln_before flag affects accumulator initialization"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, l) == forward_sim(s, v, h, l)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Opt.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+  - type: invariant
+    property: "do_layer_norm_before required"
+    formal: "fixture without do_layer_norm_before ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: pre_ln_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.PreLnDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+  - type: invariant
+    property: "Forward simulation is ln-sensitive"
+    formal: "ln_before flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Opt.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Opt"
+
+falsification_tests:
+  - id: FALSIFY-OPT-001
+    rule: "do_layer_norm_before field is recognized"
+    prediction: "layer_norm_before == true for the bundled OPT fixture"
+    test: "cargo test --example inference_opt_smoke -- happy_path_ln_before_true"
+    if_fails: "Field detection broke"
+  - id: FALSIFY-OPT-002
+    rule: "Forward simulation is ln-sensitive"
+    prediction: "forward_sim with ln=true != forward_sim with ln=false"
+    test: "cargo test --example inference_opt_smoke -- ln_position_affects_checksum"
+    if_fails: "ln_before dropped from accumulator"
+  - id: FALSIFY-OPT-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_opt_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-OPT-001
+    obligation: "Forward simulation is ln-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::opt_smoke_deterministic"
+  - id: KANI-OPT-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::opt_smoke_invalid_fixture_total"
+  - id: KANI-OPT-003
+    obligation: "do_layer_norm_before required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::opt_pre_ln_present"
+
+qa_gate:
+  id: F-OPT-001
+  name: "OPT Smoke Inference Contract"
+  description: "Smoke load + Pre-LN discriminator + deterministic forward simulation"
+  checks:
+    - "ln_before_present"
+    - "ln_position_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"
