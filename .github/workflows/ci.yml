@@ -20,6 +20,22 @@ jobs:
       matrix:
         toolchain: [stable]
     steps:
+      # Free ~30GB on the GH runner (Android SDK, .NET, Haskell, large preinstalled
+      # tarballs) before doing anything else. Without this, `cargo test --all-features`
+      # over a 12-crate workspace + 1670 examples runs out of disk during linking
+      # ("ld terminated with signal 7 [Bus error]" / "No space left on device").
+      # Tracked upstream at aprender#1020.
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v4
         with:
           # pull_request_target defaults to checking out the base branch (main),
@@ -110,6 +126,19 @@ jobs:
     name: Kani Gate
     runs-on: ubuntu-latest
     steps:
+      # Same disk-pressure mitigation as the main gate — Kani install adds
+      # ~3GB of binaries and CBMC artifacts on top of cargo target dirs.
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
