@@ -281,7 +281,7 @@ families:
     hf_architectures: [BloomForCausalLM]
     hf_pattern: "bigscience/bloom-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-bloom-loader"
+    upstream_ticket: "aprender#1586"
     notes: "apr-model-qa-playbook ships bloom-560m and bloomz-560m playbooks; awaits aprender::rosetta loader."
   - name: codegemma
     display_name: "CodeGemma"
@@ -318,7 +318,7 @@ families:
     hf_architectures: [FalconForCausalLM]
     hf_pattern: "tiiuae/falcon-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-falcon-classic-loader"
+    upstream_ticket: "aprender#1587"
     notes: "falcon_h1 is supported; classic Falcon (7B/40B/180B) uses a different architecture."
   - name: galactica
     display_name: "Galactica"
@@ -332,7 +332,7 @@ families:
     hf_architectures: [GraniteForCausalLM]
     hf_pattern: "ibm-granite/*"
     status: blocked
-    upstream_ticket: "aprender#TODO-granite-loader"
+    upstream_ticket: "aprender#1588"
   - name: hermes
     display_name: "Hermes"
     vendor: NousResearch
@@ -345,20 +345,20 @@ families:
     hf_architectures: [InternLM2ForCausalLM]
     hf_pattern: "internlm/internlm2_5-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-internlm2-loader"
+    upstream_ticket: "aprender#1589"
   - name: nemotron
     display_name: "Nemotron"
     vendor: NVIDIA
     hf_architectures: [NemotronForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-nemotron-loader"
+    upstream_ticket: "aprender#1590"
   - name: olmo
     display_name: "OLMo"
     vendor: AllenAI
     hf_architectures: [OlmoForCausalLM, Olmo2ForCausalLM]
     hf_pattern: "allenai/OLMo-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-olmo-loader"
+    upstream_ticket: "aprender#1591"
   - name: openchat
     display_name: "OpenChat"
     vendor: openchat
@@ -392,14 +392,14 @@ families:
     vendor: "Stability AI"
     hf_architectures: [StableLmForCausalLM]
     status: blocked
-    upstream_ticket: "aprender#TODO-stablelm-loader"
+    upstream_ticket: "aprender#1592"
   - name: starcoder2
     display_name: "StarCoder2"
     vendor: BigCode
     hf_architectures: [Starcoder2ForCausalLM]
     hf_pattern: "bigcode/starcoder2-*"
     status: blocked
-    upstream_ticket: "aprender#TODO-starcoder2-loader"
+    upstream_ticket: "aprender#1593"
   - name: tinyllama
     display_name: "TinyLlama"
     vendor: TinyLlama
@@ -440,7 +440,7 @@ families:
     hf_architectures: [GPTBigCodeForCausalLM]
     hf_pattern: "bigcode/tiny_starcoder_py"
     status: blocked
-    upstream_ticket: "aprender#TODO-gptbigcode-loader"
+    upstream_ticket: "aprender#1594"
   - name: distilgpt2
     display_name: "DistilGPT-2"
     vendor: HuggingFace

@@ -50,27 +50,27 @@ apr-model-qa-playbook ships per-checkpoint coverage; awaits upstream `aprender::
 
 | Family | Vendor | HF Architectures | Aliases? | Upstream Ticket |
 |--------|--------|-----------------|----------|-----------------|
-| bloom | BigScience | BloomForCausalLM | — | aprender#TODO-bloom-loader |
+| bloom | BigScience | BloomForCausalLM | — | aprender#1586 |
 | codegemma | Google | GemmaForCausalLM | gemma | aprender#1562 (alias) |
 | codellama | Meta | LlamaForCausalLM | llama | aprender#1562 (alias) |
 | codestral | Mistral AI | MistralForCausalLM | mistral | aprender#1562 (alias) |
 | distilgpt2 | HuggingFace | GPT2LMHeadModel | gpt2 | aprender#1562 (alias) |
 | dolphin | cognitivecomputations | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
-| falcon | TII | FalconForCausalLM | — (classic, not H1) | aprender#TODO-falcon-classic-loader |
+| falcon | TII | FalconForCausalLM | — (classic, not H1) | aprender#1587 |
 | galactica | Meta AI | OPTForCausalLM | opt | aprender#1562 (alias) |
-| granite | IBM | GraniteForCausalLM | — | aprender#TODO-granite-loader |
+| granite | IBM | GraniteForCausalLM | — | aprender#1588 |
 | hermes | NousResearch | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
-| internlm2_5 | InternLM | InternLM2ForCausalLM | — | aprender#TODO-internlm2-loader |
-| nemotron | NVIDIA | NemotronForCausalLM | — | aprender#TODO-nemotron-loader |
-| olmo | AllenAI | OlmoForCausalLM, Olmo2ForCausalLM | — | aprender#TODO-olmo-loader |
+| internlm2_5 | InternLM | InternLM2ForCausalLM | — | aprender#1589 |
+| nemotron | NVIDIA | NemotronForCausalLM | — | aprender#1590 |
+| olmo | AllenAI | OlmoForCausalLM, Olmo2ForCausalLM | — | aprender#1591 |
 | openchat | openchat | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
 | pythia | EleutherAI | GPTNeoXForCausalLM | gptneox | aprender#1562 (alias) |
 | smollm | HuggingFace | LlamaForCausalLM | llama | aprender#1562 (alias) |
 | smollm2 | HuggingFace | LlamaForCausalLM | llama | aprender#1562 (alias) |
-| stablelm | Stability AI | StableLmForCausalLM | — | aprender#TODO-stablelm-loader |
-| starcoder2 | BigCode | Starcoder2ForCausalLM | — | aprender#TODO-starcoder2-loader |
+| stablelm | Stability AI | StableLmForCausalLM | — | aprender#1592 |
+| starcoder2 | BigCode | Starcoder2ForCausalLM | — | aprender#1593 |
 | tinyllama | TinyLlama | LlamaForCausalLM | llama | aprender#1562 (alias) |
-| tiny_starcoder_py | bigcode | GPTBigCodeForCausalLM | — | aprender#TODO-gptbigcode-loader |
+| tiny_starcoder_py | bigcode | GPTBigCodeForCausalLM | — | aprender#1594 |
 | vicuna | lmsys | LlamaForCausalLM | llama | aprender#1562 (alias) |
 | wizardcoder | WizardLM | LlamaForCausalLM, MistralForCausalLM | llama/mistral | aprender#1562 (alias) |
 | yi | 01-ai | LlamaForCausalLM | llama | aprender#1562 (alias) |

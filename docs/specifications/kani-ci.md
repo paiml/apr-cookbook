@@ -112,7 +112,7 @@ PMAT-324 ships when:
 
 - **Promote selected `bounded_int` harnesses to `exhaustive`** where the input domain is genuinely tiny (e.g. `arch_resolution_pipeline_total` covers 16 boolean cube cases). Would bump per-contract D3 score from 0.9 to 1.0 for those specific harnesses. Editorial decision; not blocking.
 - **Replace stub-grade harnesses with calls to real cookbook code** where Kani's solver permits it (small bounded String inputs via byte arrays + length bounds). Substantial follow-up; tracked separately.
-- **Add `actually_verified: true` field to YAML** sourced from a `kani-results.json` artifact emitted by CI. Would let `pv score` honestly bump D3 to 1.0 once the green `kani-gate` runs. Requires upstream `aprender-contracts` change (out of cookbook scope).
+- **Add `actually_verified: true` field to YAML** sourced from a `kani-results.json` artifact emitted by CI. Would let `pv score` honestly bump D3 to 1.0 once the green `kani-gate` runs. Requires upstream `aprender-contracts` change (out of cookbook scope) — tracked in [aprender#1595](https://github.com/paiml/aprender/issues/1595).
 
 ---
 
