@@ -2156,3 +2156,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-114
+  github_issue: null
+  item_type: task
+  title: PMAT-322 architecture-demos kaizen — implement Kani harness stubs for 5 cross-family meta contracts (15 functions; closes declared-but-unimplemented gap for the meta tier)
+  status: inprogress
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:03:18Z
+  updated: 2026-05-09T05:03:21.251581958+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

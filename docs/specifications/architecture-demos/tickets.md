@@ -250,17 +250,19 @@ After v1 closeout (PMAT-308), the spec was extended with cross-family meta-recip
 
 Each v1.1 ticket follows the same IIUR + provable-contract discipline as v1. The 5 meta-recipes ship 68 unit tests across the family suite. The contract-quality sweep (PMAT-315..318) lifted aggregate from 0.65 Grade C to **0.98 Grade A** across all 23 contracts.
 
-## v1.2 Forward-Bridge (PMAT-320) — Composed Resolution Pipeline
+## v1.2 Forward-Bridge (PMAT-320..322) — Composed Resolution Pipeline + Kaizen Polish
 
-aprender#1562 is open but not yet merged to aprender main as of 2026-05-08. PMAT-320 delivers consumer-side progress that doesn't depend on the upstream merge: a composed `(hf_repo, body) → DetectedFamily` recipe that exercises the future `FamilyRegistry::resolve_alias` + `detect_from_config_str` shape against the cookbook's reverse implementation.
+aprender#1562 is open but not yet merged to aprender main as of 2026-05-09. PMAT-320 delivers consumer-side progress that doesn't depend on the upstream merge: a composed `(hf_repo, body) → DetectedFamily` recipe that exercises the future `FamilyRegistry::resolve_alias` + `detect_from_config_str` shape against the cookbook's reverse implementation. PMAT-321..322 are kaizen passes refining the contract surface.
 
 | Ticket | Scope | Status |
 |--------|-------|--------|
-| PMAT-320 | Forward-bridge resolution pipeline — `inference_arch_resolution_pipeline` + provable-contract + Lean module + 3 Kani harnesses | landed (this PR) |
+| PMAT-320 | Forward-bridge resolution pipeline — `inference_arch_resolution_pipeline` + provable-contract + Lean module + 3 Kani harnesses | landed |
+| PMAT-321 | Kaizen — align `kani_harnesses[].obligation` strings with `proof_obligations[].property` strings across all 24 architecture-demos contracts (mechanical rename, no semantic change) | landed |
+| PMAT-322 | Kaizen — implement Rust `#[kani::proof]` stub functions for the 15 declared-but-unimplemented meta-contract harnesses (detector/summary/compare/quirk-audit/alias-resolver, 3 each); the 51 family-smoke stubs remain as a follow-up | landed |
 
-The recipe has 10 new unit tests; one of them (`all_alias_eligible_resolve_to_parent`) is the falsification claim that all 16 alias-eligible blocked manifest entries resolve to a known parent — proving the alias table stays in sync with the manifest. When aprender#1562 ships, the pipeline body becomes a thin wrapper over the upstream API and the 46 inherited tests become integration tests for upstream behavior.
+The pipeline recipe has 10 new unit tests; one of them (`all_alias_eligible_resolve_to_parent`) is the falsification claim that all 16 alias-eligible blocked manifest entries resolve to a known parent — proving the alias table stays in sync with the manifest. When aprender#1562 ships, the pipeline body becomes a thin wrapper over the upstream API and the 46 inherited tests become integration tests for upstream behavior.
 
-Total architecture-demos contracts after PMAT-320: **24**, all at Grade A 0.98.
+Total architecture-demos contracts after PMAT-320: **24**, all at Grade A 0.98. Kani harness implementation count after PMAT-322: 18 of 69 declared (all 6 meta contracts complete; 17 family contracts × 3 = 51 family harnesses still declared-only).
 
 ## Score progression (architecture-demos contracts)
 
@@ -276,7 +278,7 @@ Total architecture-demos contracts after PMAT-320: **24**, all at Grade A 0.98.
 
 - **Refactor cookbook detector to consume upstream API** — when aprender ships a release containing #1562, bump the cookbook's aprender pin and replace `inference_arch_detector.rs` body with a thin call to `FamilyRegistry::detect_from_config_str`. The 22 detector tests become integration tests for the upstream API. PMAT-320 already shipped the consumer-side composed pipeline (`inference_arch_resolution_pipeline`) so when upstream merges, the swap is a one-line body change inside that recipe plus the detector. **Status: blocked on external aprender release.** Last verified upstream state (2026-05-08): aprender#1562 is open on a parallel branch, 10 commits behind aprender main; not in published 0.32.0.
 - **Resolution of `status: blocked` entries** — 16 of 25 are alias-eligible (codellama, tinyllama, vicuna, yi, smollm, smollm2, dolphin, hermes, openchat, wizardcoder, codestral, zephyr, distilgpt2, pythia, galactica, codegemma) and unblock via aprender#1562's `register_alias` once it ships. The cookbook-side alias table is already proved in `inference_arch_resolution_pipeline::all_alias_eligible_resolve_to_parent` so flipping the manifest entries from `blocked` → `aliased` is a one-shot manifest edit once upstream merges. The remaining 9 (bloom, falcon-classic, granite, internlm2_5, nemotron, olmo, stablelm, starcoder2, tiny_starcoder_py) need new upstream loaders, deferred per scope non-goal. **Status: blocked on external aprender work.**
-- **D3 Kani 0.9 → 1.0** — would require actual `#[kani::proof]` Rust harness function implementations for the 72 declared harness names (currently declared in YAML but no Rust impl beyond the ones already added in PMAT-320). Substantial separate effort; current 0.9 already exceeds every other flagship contract's Kani score (mmap 0.83, avx512 not measured).
+- **D3 Kani 0.9 → 1.0** — would require actual Kani CI runs (not just stub functions). PMAT-322 backfilled the 15 cross-family meta-contract harnesses (`arch_detector_*`, `arch_summary_*`, `arch_compare_*`, `arch_quirk_audit_*`, `arch_alias_resolver_*`) so all 6 meta contracts now have full `#[kani::proof]` stubs (18 functions total including PMAT-320's 3 pipeline harnesses). The 51 family-smoke harnesses (`<family>_smoke_deterministic`, `_invalid_fixture_total`, `_<discriminator>_present`) remain declared-only — declared in 17 family YAMLs (3 per family) but unimplemented in `kani/src/lib.rs`. Substantial separate effort; current 0.9 already exceeds every other flagship contract's Kani score (mmap 0.83, avx512 not measured). Without an actual Kani CI run the 0.9 ceiling persists regardless of stub count.
 - **Vision/audio/multimodal expansion** (LLaVA, SDXL, ViT) — separate v2 spec, not in current scope.
 - **ONNX format coverage** — none of the 18 in-progress loaders ship ONNX; awaits upstream support.
 
