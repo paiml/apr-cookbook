@@ -1,0 +1,8 @@
+{
+  "recipe_id": "t1_sft_minimal_qwen",
+  "technique": "sft",
+  "n_examples": 100,
+  "true_w1": 2.0,
+  "true_w2": 3.0,
+  "comment": "Linear regression target with deterministic noise; SGD lr=0.01 epochs=1 should produce loss_final < loss_initial"
+}

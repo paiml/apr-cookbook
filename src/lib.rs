@@ -35,6 +35,7 @@ pub mod convert;
 pub mod deployment_stack;
 pub mod error;
 pub mod explainable;
+pub mod finetune;
 pub mod recipe;
 
 pub use error::{CookbookError, Result};

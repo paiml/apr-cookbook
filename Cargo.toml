@@ -88,6 +88,7 @@ thiserror = "1"
 
 # Recipe infrastructure
 rand = { version = "0.8", features = ["std_rng"] }
+regex = "1"
 tempfile = "3"
 
 # Compression (for Lambda packaging)
@@ -7189,3 +7190,675 @@ path = "examples/inference/inference_arch_alias_resolver.rs"
 [[example]]
 name = "inference_arch_resolution_pipeline"
 path = "examples/inference/inference_arch_resolution_pipeline.rs"
+
+# --- fine-tuning-cookbook Tier 1.1 — SFT minimal × 5 (PMAT-331) ---
+
+[[example]]
+name = "t1_sft_minimal_llama"
+path = "examples/finetune/t1_sft_minimal_llama.rs"
+
+[[example]]
+name = "t1_sft_minimal_mistral"
+path = "examples/finetune/t1_sft_minimal_mistral.rs"
+
+[[example]]
+name = "t1_sft_minimal_phi"
+path = "examples/finetune/t1_sft_minimal_phi.rs"
+
+[[example]]
+name = "t1_sft_minimal_qwen"
+path = "examples/finetune/t1_sft_minimal_qwen.rs"
+
+[[example]]
+name = "t1_sft_minimal_gemma"
+path = "examples/finetune/t1_sft_minimal_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 1.2 — Eval primitives × 5 (PMAT-332) ---
+
+[[example]]
+name = "t1_eval_perplexity"
+path = "examples/finetune/t1_eval_perplexity.rs"
+
+[[example]]
+name = "t1_eval_accuracy"
+path = "examples/finetune/t1_eval_accuracy.rs"
+
+[[example]]
+name = "t1_eval_f1"
+path = "examples/finetune/t1_eval_f1.rs"
+
+[[example]]
+name = "t1_eval_rouge_l"
+path = "examples/finetune/t1_eval_rouge_l.rs"
+
+[[example]]
+name = "t1_eval_bleu"
+path = "examples/finetune/t1_eval_bleu.rs"
+
+# --- fine-tuning-cookbook Tier 1.3 — Tabular regression × 5 (PMAT-333) ---
+
+[[example]]
+name = "t1_tabular_regression_housing"
+path = "examples/finetune/t1_tabular_regression_housing.rs"
+
+[[example]]
+name = "t1_tabular_regression_energy"
+path = "examples/finetune/t1_tabular_regression_energy.rs"
+
+[[example]]
+name = "t1_tabular_regression_timeseries"
+path = "examples/finetune/t1_tabular_regression_timeseries.rs"
+
+[[example]]
+name = "t1_tabular_regression_multitarget"
+path = "examples/finetune/t1_tabular_regression_multitarget.rs"
+
+[[example]]
+name = "t1_tabular_regression_missing"
+path = "examples/finetune/t1_tabular_regression_missing.rs"
+
+# --- fine-tuning-cookbook Tier 1.4 — Tabular classification × 5 (PMAT-334) ---
+
+[[example]]
+name = "t1_tabular_binary"
+path = "examples/finetune/t1_tabular_binary.rs"
+
+[[example]]
+name = "t1_tabular_3class"
+path = "examples/finetune/t1_tabular_3class.rs"
+
+[[example]]
+name = "t1_tabular_7class"
+path = "examples/finetune/t1_tabular_7class.rs"
+
+[[example]]
+name = "t1_tabular_100class"
+path = "examples/finetune/t1_tabular_100class.rs"
+
+[[example]]
+name = "t1_tabular_imbalanced"
+path = "examples/finetune/t1_tabular_imbalanced.rs"
+
+# --- fine-tuning-cookbook Tier 1.5 — Smoke + bench × 5 (PMAT-335) ---
+
+[[example]]
+name = "t1_smoke_plan"
+path = "examples/finetune/t1_smoke_plan.rs"
+
+[[example]]
+name = "t1_smoke_resume"
+path = "examples/finetune/t1_smoke_resume.rs"
+
+[[example]]
+name = "t1_smoke_early_stop"
+path = "examples/finetune/t1_smoke_early_stop.rs"
+
+[[example]]
+name = "t1_smoke_dry_run"
+path = "examples/finetune/t1_smoke_dry_run.rs"
+
+[[example]]
+name = "t1_smoke_bench"
+path = "examples/finetune/t1_smoke_bench.rs"
+
+# --- fine-tuning-cookbook Tier 2.1 — LoRA × 10 (rank 8 + rank 32) × 5 families (PMAT-338+339) ---
+
+[[example]]
+name = "t2_lora_rank8_llama"
+path = "examples/finetune/t2_lora_rank8_llama.rs"
+
+[[example]]
+name = "t2_lora_rank32_llama"
+path = "examples/finetune/t2_lora_rank32_llama.rs"
+
+[[example]]
+name = "t2_lora_rank8_mistral"
+path = "examples/finetune/t2_lora_rank8_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank32_mistral"
+path = "examples/finetune/t2_lora_rank32_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank8_phi"
+path = "examples/finetune/t2_lora_rank8_phi.rs"
+
+[[example]]
+name = "t2_lora_rank32_phi"
+path = "examples/finetune/t2_lora_rank32_phi.rs"
+
+[[example]]
+name = "t2_lora_rank8_qwen"
+path = "examples/finetune/t2_lora_rank8_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank32_qwen"
+path = "examples/finetune/t2_lora_rank32_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank8_gemma"
+path = "examples/finetune/t2_lora_rank8_gemma.rs"
+
+[[example]]
+name = "t2_lora_rank32_gemma"
+path = "examples/finetune/t2_lora_rank32_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.2 — QLoRA × 5 (PMAT-340) ---
+
+[[example]]
+name = "t2_qlora_4bit_rank8_llama"
+path = "examples/finetune/t2_qlora_4bit_rank8_llama.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank16_mistral"
+path = "examples/finetune/t2_qlora_4bit_rank16_mistral.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank32_phi"
+path = "examples/finetune/t2_qlora_4bit_rank32_phi.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_qwen"
+path = "examples/finetune/t2_qlora_double_quant_qwen.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_off_gemma"
+path = "examples/finetune/t2_qlora_double_quant_off_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.3 — Continued pretraining × 5 (PMAT-341) ---
+
+[[example]]
+name = "t2_continued_pretrain_legal"
+path = "examples/finetune/t2_continued_pretrain_legal.rs"
+
+[[example]]
+name = "t2_continued_pretrain_code"
+path = "examples/finetune/t2_continued_pretrain_code.rs"
+
+[[example]]
+name = "t2_continued_pretrain_medical"
+path = "examples/finetune/t2_continued_pretrain_medical.rs"
+
+[[example]]
+name = "t2_continued_pretrain_codeswitch"
+path = "examples/finetune/t2_continued_pretrain_codeswitch.rs"
+
+[[example]]
+name = "t2_continued_pretrain_scientific"
+path = "examples/finetune/t2_continued_pretrain_scientific.rs"
+
+# --- fine-tuning-cookbook Tier 2.4 — Adapter merge × 5 (PMAT-342) ---
+
+[[example]]
+name = "t2_adapter_merge_ties"
+path = "examples/finetune/t2_adapter_merge_ties.rs"
+
+[[example]]
+name = "t2_adapter_merge_dare"
+path = "examples/finetune/t2_adapter_merge_dare.rs"
+
+[[example]]
+name = "t2_adapter_merge_slerp"
+path = "examples/finetune/t2_adapter_merge_slerp.rs"
+
+[[example]]
+name = "t2_adapter_merge_average"
+path = "examples/finetune/t2_adapter_merge_average.rs"
+
+[[example]]
+name = "t2_adapter_merge_multilora"
+path = "examples/finetune/t2_adapter_merge_multilora.rs"
+
+# --- fine-tuning-cookbook Tier 2.5 — PEFT variants × 9 (PMAT-343) ---
+
+[[example]]
+name = "t2_peft_corda_init"
+path = "examples/finetune/t2_peft_corda_init.rs"
+
+[[example]]
+name = "t2_peft_eva_init"
+path = "examples/finetune/t2_peft_eva_init.rs"
+
+[[example]]
+name = "t2_peft_pissa_init"
+path = "examples/finetune/t2_peft_pissa_init.rs"
+
+[[example]]
+name = "t2_peft_loftq_init"
+path = "examples/finetune/t2_peft_loftq_init.rs"
+
+[[example]]
+name = "t2_oft"
+path = "examples/finetune/t2_oft.rs"
+
+[[example]]
+name = "t2_ln_tuning"
+path = "examples/finetune/t2_ln_tuning.rs"
+
+[[example]]
+name = "t2_tinylora"
+path = "examples/finetune/t2_tinylora.rs"
+
+[[example]]
+name = "t2_vblora"
+path = "examples/finetune/t2_vblora.rs"
+
+[[example]]
+name = "t2_regex_freeze"
+path = "examples/finetune/t2_regex_freeze.rs"
+
+# --- fine-tuning-cookbook Tier 2.6 — Memory-efficient optimizers × 5 (PMAT-344) ---
+
+[[example]]
+name = "t2_galore"
+path = "examples/finetune/t2_galore.rs"
+
+[[example]]
+name = "t2_badam"
+path = "examples/finetune/t2_badam.rs"
+
+[[example]]
+name = "t2_apollo"
+path = "examples/finetune/t2_apollo.rs"
+
+[[example]]
+name = "t2_dora"
+path = "examples/finetune/t2_dora.rs"
+
+[[example]]
+name = "t2_freeze_tuning"
+path = "examples/finetune/t2_freeze_tuning.rs"
+
+# --- fine-tuning-cookbook Tier 2.7-2.9 closeout × 6 (PMAT-345) ---
+
+[[example]]
+name = "t2_lora_aqlm"
+path = "examples/finetune/t2_lora_aqlm.rs"
+
+[[example]]
+name = "t2_lora_awq"
+path = "examples/finetune/t2_lora_awq.rs"
+
+[[example]]
+name = "t2_lora_gptq"
+path = "examples/finetune/t2_lora_gptq.rs"
+
+[[example]]
+name = "t2_relora"
+path = "examples/finetune/t2_relora.rs"
+
+[[example]]
+name = "t2_lisa"
+path = "examples/finetune/t2_lisa.rs"
+
+[[example]]
+name = "t2_neftune"
+path = "examples/finetune/t2_neftune.rs"
+
+# --- fine-tuning-cookbook Tier 3.1 — Instruction tuning × 5 (PMAT-346) ---
+
+[[example]]
+name = "t3_instruction_alpaca"
+path = "examples/finetune/t3_instruction_alpaca.rs"
+
+[[example]]
+name = "t3_instruction_sharegpt"
+path = "examples/finetune/t3_instruction_sharegpt.rs"
+
+[[example]]
+name = "t3_instruction_openassistant"
+path = "examples/finetune/t3_instruction_openassistant.rs"
+
+[[example]]
+name = "t3_instruction_chat_template"
+path = "examples/finetune/t3_instruction_chat_template.rs"
+
+[[example]]
+name = "t3_instruction_system_prompt"
+path = "examples/finetune/t3_instruction_system_prompt.rs"
+
+# --- fine-tuning-cookbook Tier 3.2 — Hyperparameter optimization × 5 (PMAT-347) ---
+
+[[example]]
+name = "t3_hyperopt_grid"
+path = "examples/finetune/t3_hyperopt_grid.rs"
+
+[[example]]
+name = "t3_hyperopt_random"
+path = "examples/finetune/t3_hyperopt_random.rs"
+
+[[example]]
+name = "t3_hyperopt_tpe"
+path = "examples/finetune/t3_hyperopt_tpe.rs"
+
+[[example]]
+name = "t3_hyperopt_asha"
+path = "examples/finetune/t3_hyperopt_asha.rs"
+
+[[example]]
+name = "t3_hyperopt_hyperband"
+path = "examples/finetune/t3_hyperopt_hyperband.rs"
+
+# --- fine-tuning-cookbook Tier 3.3 — Calibration × 5 (PMAT-348) ---
+
+[[example]]
+name = "t3_calibration_temperature"
+path = "examples/finetune/t3_calibration_temperature.rs"
+
+[[example]]
+name = "t3_calibration_platt"
+path = "examples/finetune/t3_calibration_platt.rs"
+
+[[example]]
+name = "t3_calibration_isotonic"
+path = "examples/finetune/t3_calibration_isotonic.rs"
+
+[[example]]
+name = "t3_calibration_conformal"
+path = "examples/finetune/t3_calibration_conformal.rs"
+
+[[example]]
+name = "t3_calibration_ensemble"
+path = "examples/finetune/t3_calibration_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 3.4 — Class imbalance × 5 (PMAT-349) ---
+
+[[example]]
+name = "t3_imbalance_weighted"
+path = "examples/finetune/t3_imbalance_weighted.rs"
+
+[[example]]
+name = "t3_imbalance_focal"
+path = "examples/finetune/t3_imbalance_focal.rs"
+
+[[example]]
+name = "t3_imbalance_smote"
+path = "examples/finetune/t3_imbalance_smote.rs"
+
+[[example]]
+name = "t3_imbalance_threshold"
+path = "examples/finetune/t3_imbalance_threshold.rs"
+
+[[example]]
+name = "t3_imbalance_costsensitive"
+path = "examples/finetune/t3_imbalance_costsensitive.rs"
+
+# --- fine-tuning-cookbook Tier 3.5 — Multimodal + multitask + k-fold × 5 (PMAT-350) ---
+
+[[example]]
+name = "t3_multimodal_text_image"
+path = "examples/finetune/t3_multimodal_text_image.rs"
+
+[[example]]
+name = "t3_multimodal_text_tabular"
+path = "examples/finetune/t3_multimodal_text_tabular.rs"
+
+[[example]]
+name = "t3_multimodal_multitask"
+path = "examples/finetune/t3_multimodal_multitask.rs"
+
+[[example]]
+name = "t3_multimodal_zero_shot"
+path = "examples/finetune/t3_multimodal_zero_shot.rs"
+
+[[example]]
+name = "t3_kfold_cv"
+path = "examples/finetune/t3_kfold_cv.rs"
+
+# --- fine-tuning-cookbook Tier 3.6+3.7+3.8 — anomaly + open-set + uncertainty × 8 (PMAT-351) ---
+
+[[example]]
+name = "t3_anomaly_deep_sad"
+path = "examples/finetune/t3_anomaly_deep_sad.rs"
+
+[[example]]
+name = "t3_anomaly_deep_svdd"
+path = "examples/finetune/t3_anomaly_deep_svdd.rs"
+
+[[example]]
+name = "t3_anomaly_drocc"
+path = "examples/finetune/t3_anomaly_drocc.rs"
+
+[[example]]
+name = "t3_open_set_baseline"
+path = "examples/finetune/t3_open_set_baseline.rs"
+
+[[example]]
+name = "t3_open_set_entropic"
+path = "examples/finetune/t3_open_set_entropic.rs"
+
+[[example]]
+name = "t3_open_set_objectosphere"
+path = "examples/finetune/t3_open_set_objectosphere.rs"
+
+[[example]]
+name = "t3_uncertainty_mc_dropout"
+path = "examples/finetune/t3_uncertainty_mc_dropout.rs"
+
+[[example]]
+name = "t3_uncertainty_calibrated"
+path = "examples/finetune/t3_uncertainty_calibrated.rs"
+
+# --- fine-tuning-cookbook Tier 3.9+3.10 — image-encoders + optimizers × 5 (PMAT-352) ---
+
+[[example]]
+name = "t3_image_encoder_clip"
+path = "examples/finetune/t3_image_encoder_clip.rs"
+
+[[example]]
+name = "t3_image_encoder_dinov2_lp"
+path = "examples/finetune/t3_image_encoder_dinov2_lp.rs"
+
+[[example]]
+name = "t3_image_encoder_siglip"
+path = "examples/finetune/t3_image_encoder_siglip.rs"
+
+[[example]]
+name = "t3_optimizer_muon"
+path = "examples/finetune/t3_optimizer_muon.rs"
+
+[[example]]
+name = "t3_optimizer_schedule_free"
+path = "examples/finetune/t3_optimizer_schedule_free.rs"
+
+# --- fine-tuning-cookbook Tier 3.11–3.16 single recipes × 6 (PMAT-353) ---
+
+[[example]]
+name = "t3_lbfgs"
+path = "examples/finetune/t3_lbfgs.rs"
+
+[[example]]
+name = "t3_multitask_famo"
+path = "examples/finetune/t3_multitask_famo.rs"
+
+[[example]]
+name = "t3_semantic_segmentation_segformer"
+path = "examples/finetune/t3_semantic_segmentation_segformer.rs"
+
+[[example]]
+name = "t3_structured_output_json"
+path = "examples/finetune/t3_structured_output_json.rs"
+
+[[example]]
+name = "t3_mamba_encoder_text"
+path = "examples/finetune/t3_mamba_encoder_text.rs"
+
+[[example]]
+name = "t3_hypernetwork"
+path = "examples/finetune/t3_hypernetwork.rs"
+
+# --- fine-tuning-cookbook Tier 3.17+3.18 closeout × 4 (PMAT-354) ---
+
+[[example]]
+name = "t3_qat_fp8"
+path = "examples/finetune/t3_qat_fp8.rs"
+
+[[example]]
+name = "t3_qat_mxfp4"
+path = "examples/finetune/t3_qat_mxfp4.rs"
+
+[[example]]
+name = "t3_sample_packing"
+path = "examples/finetune/t3_sample_packing.rs"
+
+[[example]]
+name = "t3_fsdp_lora"
+path = "examples/finetune/t3_fsdp_lora.rs"
+
+# --- fine-tuning-cookbook Tier 4.1+4.2+4.3 — DPO+ORPO+KTO × 11 (PMAT-355) ---
+
+[[example]]
+name = "t4_dpo_llama"
+path = "examples/finetune/t4_dpo_llama.rs"
+
+[[example]]
+name = "t4_dpo_mistral"
+path = "examples/finetune/t4_dpo_mistral.rs"
+
+[[example]]
+name = "t4_dpo_phi"
+path = "examples/finetune/t4_dpo_phi.rs"
+
+[[example]]
+name = "t4_dpo_qwen"
+path = "examples/finetune/t4_dpo_qwen.rs"
+
+[[example]]
+name = "t4_dpo_gemma"
+path = "examples/finetune/t4_dpo_gemma.rs"
+
+[[example]]
+name = "t4_orpo_llama"
+path = "examples/finetune/t4_orpo_llama.rs"
+
+[[example]]
+name = "t4_orpo_mistral"
+path = "examples/finetune/t4_orpo_mistral.rs"
+
+[[example]]
+name = "t4_orpo_qwen"
+path = "examples/finetune/t4_orpo_qwen.rs"
+
+[[example]]
+name = "t4_kto_llama"
+path = "examples/finetune/t4_kto_llama.rs"
+
+[[example]]
+name = "t4_kto_phi"
+path = "examples/finetune/t4_kto_phi.rs"
+
+[[example]]
+name = "t4_kto_gemma"
+path = "examples/finetune/t4_kto_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 4.4+4.5 — GRPO+PPO × 8 (PMAT-356) ---
+
+[[example]]
+name = "t4_grpo_math"
+path = "examples/finetune/t4_grpo_math.rs"
+
+[[example]]
+name = "t4_grpo_code_exec"
+path = "examples/finetune/t4_grpo_code_exec.rs"
+
+[[example]]
+name = "t4_grpo_format_match"
+path = "examples/finetune/t4_grpo_format_match.rs"
+
+[[example]]
+name = "t4_grpo_classification"
+path = "examples/finetune/t4_grpo_classification.rs"
+
+[[example]]
+name = "t4_grpo_length_budget"
+path = "examples/finetune/t4_grpo_length_budget.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_llama"
+path = "examples/finetune/t4_rlhf_ppo_llama.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_mistral"
+path = "examples/finetune/t4_rlhf_ppo_mistral.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_qwen"
+path = "examples/finetune/t4_rlhf_ppo_qwen.rs"
+
+# --- fine-tuning-cookbook Tier 4.6+4.7 — RLAIF+reward × 6 (PMAT-357) ---
+
+[[example]]
+name = "t4_rlaif_judge"
+path = "examples/finetune/t4_rlaif_judge.rs"
+
+[[example]]
+name = "t4_rlaif_constitutional"
+path = "examples/finetune/t4_rlaif_constitutional.rs"
+
+[[example]]
+name = "t4_rlaif_self_critique"
+path = "examples/finetune/t4_rlaif_self_critique.rs"
+
+[[example]]
+name = "t4_reward_pairwise"
+path = "examples/finetune/t4_reward_pairwise.rs"
+
+[[example]]
+name = "t4_reward_scalar"
+path = "examples/finetune/t4_reward_scalar.rs"
+
+[[example]]
+name = "t4_reward_ensemble"
+path = "examples/finetune/t4_reward_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 4.8+4.9 — online+alternative × 7 (PMAT-358) ---
+
+[[example]]
+name = "t4_online_dpo"
+path = "examples/finetune/t4_online_dpo.rs"
+
+[[example]]
+name = "t4_xpo"
+path = "examples/finetune/t4_xpo.rs"
+
+[[example]]
+name = "t4_nash_md"
+path = "examples/finetune/t4_nash_md.rs"
+
+[[example]]
+name = "t4_rloo"
+path = "examples/finetune/t4_rloo.rs"
+
+[[example]]
+name = "t4_bco"
+path = "examples/finetune/t4_bco.rs"
+
+[[example]]
+name = "t4_cpo"
+path = "examples/finetune/t4_cpo.rs"
+
+[[example]]
+name = "t4_simpo"
+path = "examples/finetune/t4_simpo.rs"
+
+# --- fine-tuning-cookbook Tier 4 closeout × 5 (PMAT-359) ---
+
+[[example]]
+name = "t4_async_grpo"
+path = "examples/finetune/t4_async_grpo.rs"
+
+[[example]]
+name = "t4_prm"
+path = "examples/finetune/t4_prm.rs"
+
+[[example]]
+name = "t4_gkd"
+path = "examples/finetune/t4_gkd.rs"
+
+[[example]]
+name = "t4_gspo"
+path = "examples/finetune/t4_gspo.rs"
+
+[[example]]
+name = "t4_mpo"
+path = "examples/finetune/t4_mpo.rs"

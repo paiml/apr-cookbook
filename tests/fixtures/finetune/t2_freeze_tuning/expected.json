@@ -1,0 +1,5 @@
+{
+  "recipe_id": "t2_freeze_tuning",
+  "technique": "freeze_tuning",
+  "comment": "PMAT-330 placeholder; the implementing PMAT-3NN ticket replaces this with the real expected output of main() on data.jsonl"
+}
