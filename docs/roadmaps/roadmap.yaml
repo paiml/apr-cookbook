@@ -2348,3 +2348,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-126
+  github_issue: null
+  item_type: task
+  title: PMAT-340 fine-tuning Tier 2.2 QLoRA × 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:26:21Z
+  updated: 2026-05-10T10:30:05.820132167+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
