@@ -2368,11 +2368,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-341 fine-tuning Tier 2.3 Continued pretraining × 5
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T10:57:42Z
-  updated: 2026-05-10T10:57:42.203642559+00:00
+  updated: 2026-05-10T11:25:39.072203772+00:00
   spec: null
   acceptance_criteria: []
   phases: []
