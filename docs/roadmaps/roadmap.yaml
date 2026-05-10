@@ -2224,11 +2224,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-331 fine-tuning-cookbook Tier 1.1 SFT minimal × 5 families
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T09:32:08Z
-  updated: 2026-05-10T09:32:08.900034039+00:00
+  updated: 2026-05-10T09:50:40.260166404+00:00
   spec: null
   acceptance_criteria: []
   phases: []
