@@ -7189,3 +7189,25 @@ path = "examples/inference/inference_arch_alias_resolver.rs"
 [[example]]
 name = "inference_arch_resolution_pipeline"
 path = "examples/inference/inference_arch_resolution_pipeline.rs"
+
+# --- fine-tuning-cookbook Tier 1.1 — SFT minimal × 5 (PMAT-331) ---
+
+[[example]]
+name = "t1_sft_minimal_llama"
+path = "examples/finetune/t1_sft_minimal_llama.rs"
+
+[[example]]
+name = "t1_sft_minimal_mistral"
+path = "examples/finetune/t1_sft_minimal_mistral.rs"
+
+[[example]]
+name = "t1_sft_minimal_phi"
+path = "examples/finetune/t1_sft_minimal_phi.rs"
+
+[[example]]
+name = "t1_sft_minimal_qwen"
+path = "examples/finetune/t1_sft_minimal_qwen.rs"
+
+[[example]]
+name = "t1_sft_minimal_gemma"
+path = "examples/finetune/t1_sft_minimal_gemma.rs"

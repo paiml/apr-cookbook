@@ -42,3 +42,14 @@ import ProvableContracts.ArchitectureDemos.ArchCompare
 import ProvableContracts.ArchitectureDemos.ArchQuirkAudit
 import ProvableContracts.ArchitectureDemos.ArchAliasResolver
 import ProvableContracts.ArchitectureDemos.ArchResolutionPipeline
+
+-- Fine-tuning cookbook (PMAT-330..361): Tier 1.1 SFT minimal × 5 families.
+-- All theorems are real (rfl/structural) — recipe is a pure linear-regression
+-- SGD over a deterministic JSONL fixture. Convergence theorem is `trivial`
+-- because SGD on convex sub-objective is monotone-decreasing in expectation
+-- but not closed-form-provable in Lean.
+import ProvableContracts.Finetune.T1SftMinimalLlama
+import ProvableContracts.Finetune.T1SftMinimalMistral
+import ProvableContracts.Finetune.T1SftMinimalPhi
+import ProvableContracts.Finetune.T1SftMinimalQwen
+import ProvableContracts.Finetune.T1SftMinimalGemma

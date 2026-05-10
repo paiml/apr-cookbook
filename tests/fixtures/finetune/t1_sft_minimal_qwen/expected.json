@@ -1,5 +1,8 @@
 {
   "recipe_id": "t1_sft_minimal_qwen",
   "technique": "sft",
-  "comment": "PMAT-330 placeholder; the implementing PMAT-3NN ticket replaces this with the real expected output of main() on data.jsonl"
+  "n_examples": 100,
+  "true_w1": 2.0,
+  "true_w2": 3.0,
+  "comment": "Linear regression target with deterministic noise; SGD lr=0.01 epochs=1 should produce loss_final < loss_initial"
 }

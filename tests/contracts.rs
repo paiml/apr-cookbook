@@ -54,6 +54,12 @@ const CONTRACT_FILES: &[&str] = &[
     "inference-rwkv7-smoke-v1.yaml",
     // architecture-demos v1.2 (PMAT-320): forward-bridge resolution pipeline.
     "inference-arch-resolution-pipeline-v1.yaml",
+    // fine-tuning-cookbook Tier 1.1 (PMAT-331): SFT minimal × 5 families.
+    "finetune-t1-sft-minimal-llama-v1.yaml",
+    "finetune-t1-sft-minimal-mistral-v1.yaml",
+    "finetune-t1-sft-minimal-phi-v1.yaml",
+    "finetune-t1-sft-minimal-qwen-v1.yaml",
+    "finetune-t1-sft-minimal-gemma-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -119,6 +125,55 @@ fn every_contract_validates() {
     );
 }
 
+/// Fine-tuning contracts that have been "promoted" to certified — i.e. the
+/// implementing PMAT-3NN ticket has landed the recipe + Lean module + binding
+/// entries. Only these need to appear in CONTRACT_FILES; the other ~150
+/// stubs are auto-generated and exercised by `every_finetune_stub_parses`.
+const FINETUNE_CERTIFIED: &[&str] = &[
+    // Tier 1.1 SFT minimal × 5 (PMAT-331)
+    "finetune-t1-sft-minimal-llama-v1.yaml",
+    "finetune-t1-sft-minimal-mistral-v1.yaml",
+    "finetune-t1-sft-minimal-phi-v1.yaml",
+    "finetune-t1-sft-minimal-qwen-v1.yaml",
+    "finetune-t1-sft-minimal-gemma-v1.yaml",
+];
+
+fn is_finetune_certified(name: &str) -> bool {
+    FINETUNE_CERTIFIED.contains(&name)
+}
+
+/// Every fine-tuning stub on disk parses as valid YAML. PMAT-330 generated
+/// 155 stubs; this test exercises all of them so a generator regression
+/// surfaces immediately.
+#[test]
+fn every_finetune_stub_parses() {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("contracts");
+    let mut count = 0;
+    let mut failures = Vec::new();
+    for entry in std::fs::read_dir(&dir).expect("read contracts/").flatten() {
+        let name = entry.file_name().to_string_lossy().into_owned();
+        if !name.starts_with("finetune-")
+            || Path::new(&name).extension().is_none_or(|e| e != "yaml")
+        {
+            continue;
+        }
+        count += 1;
+        let path = entry.path();
+        if let Err(e) = parse_contract(&path) {
+            failures.push(format!("{name}: {e}"));
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "fine-tuning stub parse failures ({count} stubs):\n  {}",
+        failures.join("\n  ")
+    );
+    assert!(
+        count >= 155,
+        "expected ≥155 fine-tuning stubs on disk, found {count}"
+    );
+}
+
 /// Every contract on disk must appear in `CONTRACT_FILES`. Guards against
 /// silently-added YAMLs that bypass the reviewer's attention.
 #[test]
@@ -137,6 +192,14 @@ fn contract_inventory_matches_disk() {
             // not a contract definition. It lives alongside contracts by `pv` convention
             // but isn't in CONTRACT_FILES.
             n != "binding.yaml"
+        })
+        .filter(|n| {
+            // Fine-tuning-cookbook contract stubs (PMAT-330) are auto-generated
+            // from manifest.yaml by `scripts/finetune-gen.sh --update`. They are
+            // status: planned until the implementing PMAT-3NN ticket lands the
+            // recipe; only certified ones go in CONTRACT_FILES. A separate test
+            // (`every_finetune_stub_parses` below) exercises them all.
+            !n.starts_with("finetune-") || is_finetune_certified(n)
         })
         .collect();
     on_disk.sort();
