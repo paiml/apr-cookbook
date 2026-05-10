@@ -2204,3 +2204,35 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-117
+  github_issue: null
+  item_type: task
+  title: PMAT-330 fine-tuning-cookbook scaffolding — gen script, 155 contract stubs, CI gate
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:25:38Z
+  updated: 2026-05-10T09:50:28.576287249+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-118
+  github_issue: null
+  item_type: task
+  title: PMAT-331 fine-tuning-cookbook Tier 1.1 SFT minimal × 5 families
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:32:08Z
+  updated: 2026-05-10T09:32:08.900034039+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
