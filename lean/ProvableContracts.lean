@@ -156,3 +156,11 @@ import ProvableContracts.Finetune.T3MultimodalTextTabular
 import ProvableContracts.Finetune.T3MultimodalMultitask
 import ProvableContracts.Finetune.T3MultimodalZeroShot
 import ProvableContracts.Finetune.T3KfoldCv
+import ProvableContracts.Finetune.T3AnomalyDeepSad
+import ProvableContracts.Finetune.T3AnomalyDeepSvdd
+import ProvableContracts.Finetune.T3AnomalyDrocc
+import ProvableContracts.Finetune.T3OpenSetBaseline
+import ProvableContracts.Finetune.T3OpenSetEntropic
+import ProvableContracts.Finetune.T3OpenSetObjectosphere
+import ProvableContracts.Finetune.T3UncertaintyMcDropout
+import ProvableContracts.Finetune.T3UncertaintyCalibrated

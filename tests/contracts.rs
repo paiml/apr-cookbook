@@ -166,6 +166,15 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-multimodal-multitask-v1.yaml",
     "finetune-t3-multimodal-zero-shot-v1.yaml",
     "finetune-t3-kfold-cv-v1.yaml",
+    // fine-tuning-cookbook Tier 3.6+3.7+3.8 (PMAT-351): anomaly + open-set + uncertainty × 8.
+    "finetune-t3-anomaly-deep-sad-v1.yaml",
+    "finetune-t3-anomaly-deep-svdd-v1.yaml",
+    "finetune-t3-anomaly-drocc-v1.yaml",
+    "finetune-t3-open-set-baseline-v1.yaml",
+    "finetune-t3-open-set-entropic-v1.yaml",
+    "finetune-t3-open-set-objectosphere-v1.yaml",
+    "finetune-t3-uncertainty-mc-dropout-v1.yaml",
+    "finetune-t3-uncertainty-calibrated-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -348,6 +357,15 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-multimodal-multitask-v1.yaml",
     "finetune-t3-multimodal-zero-shot-v1.yaml",
     "finetune-t3-kfold-cv-v1.yaml",
+    // Tier 3.6+3.7+3.8 (PMAT-351)
+    "finetune-t3-anomaly-deep-sad-v1.yaml",
+    "finetune-t3-anomaly-deep-svdd-v1.yaml",
+    "finetune-t3-anomaly-drocc-v1.yaml",
+    "finetune-t3-open-set-baseline-v1.yaml",
+    "finetune-t3-open-set-entropic-v1.yaml",
+    "finetune-t3-open-set-objectosphere-v1.yaml",
+    "finetune-t3-uncertainty-mc-dropout-v1.yaml",
+    "finetune-t3-uncertainty-calibrated-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

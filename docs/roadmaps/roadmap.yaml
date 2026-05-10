@@ -2524,3 +2524,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-137
+  github_issue: null
+  item_type: task
+  title: PMAT-351 Tier 3.6+3.7+3.8 anomaly+open-set+uncertainty x 8
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:45:58Z
+  updated: 2026-05-10T12:45:59.027375661+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

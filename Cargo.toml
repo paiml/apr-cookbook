@@ -7604,3 +7604,37 @@ path = "examples/finetune/t3_multimodal_zero_shot.rs"
 [[example]]
 name = "t3_kfold_cv"
 path = "examples/finetune/t3_kfold_cv.rs"
+
+# --- fine-tuning-cookbook Tier 3.6+3.7+3.8 — anomaly + open-set + uncertainty × 8 (PMAT-351) ---
+
+[[example]]
+name = "t3_anomaly_deep_sad"
+path = "examples/finetune/t3_anomaly_deep_sad.rs"
+
+[[example]]
+name = "t3_anomaly_deep_svdd"
+path = "examples/finetune/t3_anomaly_deep_svdd.rs"
+
+[[example]]
+name = "t3_anomaly_drocc"
+path = "examples/finetune/t3_anomaly_drocc.rs"
+
+[[example]]
+name = "t3_open_set_baseline"
+path = "examples/finetune/t3_open_set_baseline.rs"
+
+[[example]]
+name = "t3_open_set_entropic"
+path = "examples/finetune/t3_open_set_entropic.rs"
+
+[[example]]
+name = "t3_open_set_objectosphere"
+path = "examples/finetune/t3_open_set_objectosphere.rs"
+
+[[example]]
+name = "t3_uncertainty_mc_dropout"
+path = "examples/finetune/t3_uncertainty_mc_dropout.rs"
+
+[[example]]
+name = "t3_uncertainty_calibrated"
+path = "examples/finetune/t3_uncertainty_calibrated.rs"
