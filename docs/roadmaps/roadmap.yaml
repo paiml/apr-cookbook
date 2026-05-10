@@ -2252,3 +2252,35 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-120
+  github_issue: null
+  item_type: task
+  title: PMAT-333 fine-tuning Tier 1.3 Tabular regression × 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:59:30Z
+  updated: 2026-05-10T09:59:30.412372644+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-121
+  github_issue: null
+  item_type: task
+  title: 'New task: PMAT-121'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-10T10:01:42.844137524+00:00
+  updated: 2026-05-10T10:08:23.846825234+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
