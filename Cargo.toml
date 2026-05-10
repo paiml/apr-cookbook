@@ -7211,3 +7211,25 @@ path = "examples/finetune/t1_sft_minimal_qwen.rs"
 [[example]]
 name = "t1_sft_minimal_gemma"
 path = "examples/finetune/t1_sft_minimal_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 1.2 — Eval primitives × 5 (PMAT-332) ---
+
+[[example]]
+name = "t1_eval_perplexity"
+path = "examples/finetune/t1_eval_perplexity.rs"
+
+[[example]]
+name = "t1_eval_accuracy"
+path = "examples/finetune/t1_eval_accuracy.rs"
+
+[[example]]
+name = "t1_eval_f1"
+path = "examples/finetune/t1_eval_f1.rs"
+
+[[example]]
+name = "t1_eval_rouge_l"
+path = "examples/finetune/t1_eval_rouge_l.rs"
+
+[[example]]
+name = "t1_eval_bleu"
+path = "examples/finetune/t1_eval_bleu.rs"

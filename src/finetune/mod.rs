@@ -7,4 +7,5 @@
 //!
 //! See `docs/specifications/fine-tuning-cookbook.md` and `recipe-template.md`.
 
+pub mod eval_primitives;
 pub mod sft_minimal;

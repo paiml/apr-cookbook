@@ -1,1 +1,10 @@
-{"input": "fixture-placeholder", "output": "ok", "label": 0}
+{"ref": "the cat sat on the mat", "hyp": "the cat sat on the mat"}
+{"ref": "machine learning is fun", "hyp": "machine learning is fun"}
+{"ref": "rouge measures sequence overlap", "hyp": "rouge measures sequence overlap"}
+{"ref": "deterministic seeds produce reproducible results", "hyp": "deterministic seeds produce reproducible results"}
+{"ref": "fine-tuning adapts pretrained models", "hyp": "fine-tuning adapts pretrained models"}
+{"ref": "alpha beta gamma", "hyp": "delta epsilon zeta"}
+{"ref": "one two three", "hyp": "four five six"}
+{"ref": "red blue green", "hyp": "purple orange yellow"}
+{"ref": "dogs bark loud", "hyp": "fish swim quiet"}
+{"ref": "morning sun rises", "hyp": "evening moon sets"}

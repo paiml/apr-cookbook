@@ -53,3 +53,11 @@ import ProvableContracts.Finetune.T1SftMinimalMistral
 import ProvableContracts.Finetune.T1SftMinimalPhi
 import ProvableContracts.Finetune.T1SftMinimalQwen
 import ProvableContracts.Finetune.T1SftMinimalGemma
+
+-- Tier 1.2: 5 eval primitives. Convergence is `trivial` because eval is
+-- a pure closed-form function (no training, no convergence dynamics).
+import ProvableContracts.Finetune.T1EvalPerplexity
+import ProvableContracts.Finetune.T1EvalAccuracy
+import ProvableContracts.Finetune.T1EvalF1
+import ProvableContracts.Finetune.T1EvalRougeL
+import ProvableContracts.Finetune.T1EvalBleu
