@@ -78,6 +78,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t1-tabular-7class-v1.yaml",
     "finetune-t1-tabular-100class-v1.yaml",
     "finetune-t1-tabular-imbalanced-v1.yaml",
+    // fine-tuning-cookbook Tier 1.5 (PMAT-335): Smoke + bench × 5.
+    "finetune-t1-smoke-plan-v1.yaml",
+    "finetune-t1-smoke-resume-v1.yaml",
+    "finetune-t1-smoke-early-stop-v1.yaml",
+    "finetune-t1-smoke-dry-run-v1.yaml",
+    "finetune-t1-smoke-bench-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -172,6 +178,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t1-tabular-7class-v1.yaml",
     "finetune-t1-tabular-100class-v1.yaml",
     "finetune-t1-tabular-imbalanced-v1.yaml",
+    // Tier 1.5 Smoke + bench × 5 (PMAT-335) — closes Tier 1 at 25/25
+    "finetune-t1-smoke-plan-v1.yaml",
+    "finetune-t1-smoke-resume-v1.yaml",
+    "finetune-t1-smoke-early-stop-v1.yaml",
+    "finetune-t1-smoke-dry-run-v1.yaml",
+    "finetune-t1-smoke-bench-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

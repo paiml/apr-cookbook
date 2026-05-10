@@ -75,3 +75,10 @@ import ProvableContracts.Finetune.T1TabularClass3class
 import ProvableContracts.Finetune.T1TabularClass7class
 import ProvableContracts.Finetune.T1TabularClass100class
 import ProvableContracts.Finetune.T1TabularImbalanced
+
+-- Tier 1.5: 5 smoke + bench recipes (PMAT-335). Closes Tier 1 at 25/25.
+import ProvableContracts.Finetune.T1SmokePlan
+import ProvableContracts.Finetune.T1SmokeResume
+import ProvableContracts.Finetune.T1SmokeEarlyStop
+import ProvableContracts.Finetune.T1SmokeDryRun
+import ProvableContracts.Finetune.T1SmokeBench

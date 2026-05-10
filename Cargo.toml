@@ -7277,3 +7277,25 @@ path = "examples/finetune/t1_tabular_100class.rs"
 [[example]]
 name = "t1_tabular_imbalanced"
 path = "examples/finetune/t1_tabular_imbalanced.rs"
+
+# --- fine-tuning-cookbook Tier 1.5 — Smoke + bench × 5 (PMAT-335) ---
+
+[[example]]
+name = "t1_smoke_plan"
+path = "examples/finetune/t1_smoke_plan.rs"
+
+[[example]]
+name = "t1_smoke_resume"
+path = "examples/finetune/t1_smoke_resume.rs"
+
+[[example]]
+name = "t1_smoke_early_stop"
+path = "examples/finetune/t1_smoke_early_stop.rs"
+
+[[example]]
+name = "t1_smoke_dry_run"
+path = "examples/finetune/t1_smoke_dry_run.rs"
+
+[[example]]
+name = "t1_smoke_bench"
+path = "examples/finetune/t1_smoke_bench.rs"

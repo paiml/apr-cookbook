@@ -9,5 +9,6 @@
 
 pub mod eval_primitives;
 pub mod sft_minimal;
+pub mod smoke;
 pub mod tabular_classification;
 pub mod tabular_regression;
