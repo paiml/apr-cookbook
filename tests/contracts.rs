@@ -148,6 +148,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-hyperopt-tpe-v1.yaml",
     "finetune-t3-hyperopt-asha-v1.yaml",
     "finetune-t3-hyperopt-hyperband-v1.yaml",
+    // fine-tuning-cookbook Tier 3.3 (PMAT-348): Calibration × 5.
+    "finetune-t3-calibration-temperature-v1.yaml",
+    "finetune-t3-calibration-platt-v1.yaml",
+    "finetune-t3-calibration-isotonic-v1.yaml",
+    "finetune-t3-calibration-conformal-v1.yaml",
+    "finetune-t3-calibration-ensemble-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -312,6 +318,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-hyperopt-tpe-v1.yaml",
     "finetune-t3-hyperopt-asha-v1.yaml",
     "finetune-t3-hyperopt-hyperband-v1.yaml",
+    // Tier 3.3 Calibration × 5 (PMAT-348)
+    "finetune-t3-calibration-temperature-v1.yaml",
+    "finetune-t3-calibration-platt-v1.yaml",
+    "finetune-t3-calibration-isotonic-v1.yaml",
+    "finetune-t3-calibration-conformal-v1.yaml",
+    "finetune-t3-calibration-ensemble-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

@@ -141,3 +141,8 @@ import ProvableContracts.Finetune.T3HyperoptRandom
 import ProvableContracts.Finetune.T3HyperoptTpe
 import ProvableContracts.Finetune.T3HyperoptAsha
 import ProvableContracts.Finetune.T3HyperoptHyperband
+import ProvableContracts.Finetune.T3CalibrationTemperature
+import ProvableContracts.Finetune.T3CalibrationPlatt
+import ProvableContracts.Finetune.T3CalibrationIsotonic
+import ProvableContracts.Finetune.T3CalibrationConformal
+import ProvableContracts.Finetune.T3CalibrationEnsemble

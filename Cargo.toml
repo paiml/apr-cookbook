@@ -7538,3 +7538,25 @@ path = "examples/finetune/t3_hyperopt_asha.rs"
 [[example]]
 name = "t3_hyperopt_hyperband"
 path = "examples/finetune/t3_hyperopt_hyperband.rs"
+
+# --- fine-tuning-cookbook Tier 3.3 — Calibration × 5 (PMAT-348) ---
+
+[[example]]
+name = "t3_calibration_temperature"
+path = "examples/finetune/t3_calibration_temperature.rs"
+
+[[example]]
+name = "t3_calibration_platt"
+path = "examples/finetune/t3_calibration_platt.rs"
+
+[[example]]
+name = "t3_calibration_isotonic"
+path = "examples/finetune/t3_calibration_isotonic.rs"
+
+[[example]]
+name = "t3_calibration_conformal"
+path = "examples/finetune/t3_calibration_conformal.rs"
+
+[[example]]
+name = "t3_calibration_ensemble"
+path = "examples/finetune/t3_calibration_ensemble.rs"
