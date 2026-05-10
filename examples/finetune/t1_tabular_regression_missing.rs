@@ -22,7 +22,7 @@ fn main() -> Result<()> {
     let original_x2: Vec<f64> = rows.iter().enumerate().map(|(i, r)|
         // Reconstruct the "true" pre-imputation x2 from the index pattern
         if i % 5 == 0 {
-            ((i as f64 - 40.0) / 20.0)  // would-have-been x2
+            (i as f64 - 40.0) / 20.0  // would-have-been x2
         } else {
             r.features[1]
         }

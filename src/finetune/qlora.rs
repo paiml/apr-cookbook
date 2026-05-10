@@ -104,7 +104,7 @@ pub struct QloraMemoryReport {
 
 #[must_use]
 pub fn qlora_memory(base_params: u64, lora_trainable: u64) -> QloraMemoryReport {
-    let base_4bit_bytes = (base_params * 4 + 7) / 8 + base_params / 64 * 4; // 4-bit + per-block scale
+    let base_4bit_bytes = (base_params * 4).div_ceil(8) + base_params / 64 * 4; // 4-bit + per-block scale
     let lora_fp32_bytes = lora_trainable * 4;
     let fp16_bytes = base_params * 2;
     let total = base_4bit_bytes + lora_fp32_bytes;
@@ -149,7 +149,8 @@ mod tests {
 
     #[test]
     fn memory_ratio_around_30_percent_for_4bit() {
-        let (_, _, stats) = quantize_4bit_blockwise(&[1.0; 4096], 64);
+        let big = vec![1.0_f64; 4096];
+        let (_, _, stats) = quantize_4bit_blockwise(&big, 64);
         let ratio = stats.memory_ratio_vs_fp16();
         // 4-bit + f32 scale per 64-block: (4 + 32/64) / 16 = 4.5/16 = 0.28
         assert!(
@@ -160,7 +161,8 @@ mod tests {
 
     #[test]
     fn double_quant_further_reduces_memory() {
-        let (_, _, stats) = quantize_4bit_blockwise(&[1.0; 4096], 64);
+        let big = vec![1.0_f64; 4096];
+        let (_, _, stats) = quantize_4bit_blockwise(&big, 64);
         let double = enable_double_quant(&stats);
         assert!(double.memory_ratio_vs_fp16() < stats.memory_ratio_vs_fp16());
     }

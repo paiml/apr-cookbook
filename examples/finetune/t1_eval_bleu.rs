@@ -19,7 +19,7 @@ fn main() -> Result<()> {
     for (r, h) in &pairs {
         let score = eval_primitives::bleu_4(r, h);
         assert!(
-            score >= 0.0 && score <= 1.0 + 1e-12,
+            (0.0..=1.0 + 1e-12).contains(&score),
             "BLEU score must be in [0,1], got {score}"
         );
         if r.len() >= 6 {

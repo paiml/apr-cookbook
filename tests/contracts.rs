@@ -101,6 +101,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t2-qlora-4bit-rank32-phi-v1.yaml",
     "finetune-t2-qlora-double-quant-qwen-v1.yaml",
     "finetune-t2-qlora-double-quant-off-gemma-v1.yaml",
+    // fine-tuning-cookbook Tier 2.3 (PMAT-341): Continued pretraining × 5.
+    "finetune-t2-continued-pretrain-legal-v1.yaml",
+    "finetune-t2-continued-pretrain-code-v1.yaml",
+    "finetune-t2-continued-pretrain-medical-v1.yaml",
+    "finetune-t2-continued-pretrain-codeswitch-v1.yaml",
+    "finetune-t2-continued-pretrain-scientific-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -218,6 +224,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t2-qlora-4bit-rank32-phi-v1.yaml",
     "finetune-t2-qlora-double-quant-qwen-v1.yaml",
     "finetune-t2-qlora-double-quant-off-gemma-v1.yaml",
+    // Tier 2.3 Continued pretraining × 5 (PMAT-341)
+    "finetune-t2-continued-pretrain-legal-v1.yaml",
+    "finetune-t2-continued-pretrain-code-v1.yaml",
+    "finetune-t2-continued-pretrain-medical-v1.yaml",
+    "finetune-t2-continued-pretrain-codeswitch-v1.yaml",
+    "finetune-t2-continued-pretrain-scientific-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

@@ -27,8 +27,8 @@ fn main() -> Result<()> {
         })
         .collect();
     let targets: Vec<f64> = rows.iter().map(|r| r.target).collect();
-    let target_range = targets.iter().cloned().fold(f64::NEG_INFINITY, f64::max)
-        - targets.iter().cloned().fold(f64::INFINITY, f64::min);
+    let target_range = targets.iter().copied().fold(f64::NEG_INFINITY, f64::max)
+        - targets.iter().copied().fold(f64::INFINITY, f64::min);
     let mae = tab::mae(&predictions, &targets);
     let mae_pct = mae / target_range;
 

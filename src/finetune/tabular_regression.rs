@@ -1,3 +1,4 @@
+#![allow(clippy::needless_range_loop)]
 //! Tier 1.3 tabular regression — shared helper for 5 recipes.
 //!
 //! Each recipe trains a linear regressor on a synthetic JSONL fixture

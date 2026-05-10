@@ -7363,3 +7363,25 @@ path = "examples/finetune/t2_qlora_double_quant_qwen.rs"
 [[example]]
 name = "t2_qlora_double_quant_off_gemma"
 path = "examples/finetune/t2_qlora_double_quant_off_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.3 — Continued pretraining × 5 (PMAT-341) ---
+
+[[example]]
+name = "t2_continued_pretrain_legal"
+path = "examples/finetune/t2_continued_pretrain_legal.rs"
+
+[[example]]
+name = "t2_continued_pretrain_code"
+path = "examples/finetune/t2_continued_pretrain_code.rs"
+
+[[example]]
+name = "t2_continued_pretrain_medical"
+path = "examples/finetune/t2_continued_pretrain_medical.rs"
+
+[[example]]
+name = "t2_continued_pretrain_codeswitch"
+path = "examples/finetune/t2_continued_pretrain_codeswitch.rs"
+
+[[example]]
+name = "t2_continued_pretrain_scientific"
+path = "examples/finetune/t2_continued_pretrain_scientific.rs"

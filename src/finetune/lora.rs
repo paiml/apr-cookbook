@@ -1,3 +1,7 @@
+#![allow(
+    clippy::needless_range_loop,
+    clippy::redundant_closure_for_method_calls
+)]
 //! Tier 2.1 LoRA — shared helper.
 //!
 //! Implements the canonical LoRA decomposition:
@@ -102,7 +106,7 @@ impl LoraLayer {
     #[must_use]
     pub fn unmerge(&self, merged: &[Vec<f64>]) -> Vec<Vec<f64>> {
         let scale = self.alpha / f64::from(self.rank);
-        let mut base = merged.iter().map(|row| row.clone()).collect::<Vec<_>>();
+        let mut base: Vec<Vec<f64>> = merged.to_vec();
         for i in 0..self.d_out {
             for j in 0..self.d_in {
                 let mut dot = 0.0_f64;
