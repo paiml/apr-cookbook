@@ -7255,3 +7255,25 @@ path = "examples/finetune/t1_tabular_regression_multitarget.rs"
 [[example]]
 name = "t1_tabular_regression_missing"
 path = "examples/finetune/t1_tabular_regression_missing.rs"
+
+# --- fine-tuning-cookbook Tier 1.4 — Tabular classification × 5 (PMAT-334) ---
+
+[[example]]
+name = "t1_tabular_binary"
+path = "examples/finetune/t1_tabular_binary.rs"
+
+[[example]]
+name = "t1_tabular_3class"
+path = "examples/finetune/t1_tabular_3class.rs"
+
+[[example]]
+name = "t1_tabular_7class"
+path = "examples/finetune/t1_tabular_7class.rs"
+
+[[example]]
+name = "t1_tabular_100class"
+path = "examples/finetune/t1_tabular_100class.rs"
+
+[[example]]
+name = "t1_tabular_imbalanced"
+path = "examples/finetune/t1_tabular_imbalanced.rs"

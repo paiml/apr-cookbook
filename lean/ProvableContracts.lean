@@ -68,3 +68,10 @@ import ProvableContracts.Finetune.T1TabularRegressionEnergy
 import ProvableContracts.Finetune.T1TabularRegressionTimeseries
 import ProvableContracts.Finetune.T1TabularRegressionMultitarget
 import ProvableContracts.Finetune.T1TabularRegressionMissing
+
+-- Tier 1.4: 5 tabular classification recipes (PMAT-334).
+import ProvableContracts.Finetune.T1TabularBinary
+import ProvableContracts.Finetune.T1TabularClass3class
+import ProvableContracts.Finetune.T1TabularClass7class
+import ProvableContracts.Finetune.T1TabularClass100class
+import ProvableContracts.Finetune.T1TabularImbalanced
