@@ -108,6 +108,33 @@ $defs:
           - rlhf_ppo
           - rlaif
           - reward_modeling
+          # TRL trainers (v1.2.0): preference-learning + reward variants
+          - bco                # Binary Classifier Optimization (TRL bco.py)
+          - cpo                # Contrastive Preference Optimization (TRL cpo.py)
+          - gkd                # Generalized Knowledge Distillation (TRL gkd.py)
+          - gspo               # Generalized Sequence Preference Optimization (TRL gspo.py)
+          - mpo                # Multi-step Preference Optimization (TRL mpo_vlm.py)
+          - nash_md            # Nash-Markov-Decision (TRL nash_md.py)
+          - online_dpo         # Online DPO (TRL online_dpo.py)
+          - prm                # Process Reward Model (TRL prm.py)
+          - rloo               # REINFORCE Leave-One-Out (TRL rloo.py)
+          - simpo              # Simple Preference Optimization (LLaMA-Factory + TRL)
+          - xpo                # Exploratory Preference Optimization (TRL xpo.py)
+          - async_grpo         # Async-rollout GRPO (TRL async_grpo.py)
+          # LLaMA-Factory unique techniques (v1.2.0)
+          - galore             # Gradient Low-Rank Projection
+          - badam              # Block-wise Adam
+          - apollo             # Apollo optimizer
+          - dora               # Weight-Decomposed LoRA
+          - freeze_tuning      # selective layer freeze (LLaMA-Factory style)
+          - neftune            # Noisy Embedding Fine-Tuning
+          - lora_quantized     # AQLM/AWQ/GPTQ-quantized base + LoRA
+          # Axolotl unique techniques (v1.2.0)
+          - relora             # restart LoRA periodically
+          - lisa               # Layer-wise Important Sampling
+          - sample_packing     # sequence/sample packing
+          - qat                # Quantization-Aware Training (fp8/mxfp4/nvfp4)
+          - fsdp_lora          # Fully-Sharded Data Parallel + LoRA
 
       base_family:
         type: string

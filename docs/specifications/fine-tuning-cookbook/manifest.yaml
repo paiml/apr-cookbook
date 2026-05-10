@@ -3,7 +3,7 @@
 # Status: planned (initial state for all entries; flips to certified
 # when recipe + contract + fixture land and pass invariants).
 
-version: "1.1.0"
+version: "1.2.0"
 schema: "./manifest.schema.yaml"
 last_updated: "2026-05-10"
 # v1.1.0: Added 25 net-new Ludwig-grounded recipes after surveying ~/src/ludwig
@@ -12,18 +12,30 @@ last_updated: "2026-05-10"
 # open_set_recognition/, uncertainty/, image_encoders/, optimizers/,
 # multi_task/, semantic_segmentation/, llm_structured_output/, mamba_encoders/,
 # hypernetwork/, lbfgs/. Tier 1 + Tier 4 unchanged.
+#
+# v1.2.0: Added 28 net-new recipes from three big libraries:
+#   - TRL (~/src/trl) 30 examples/scripts/* — adds BCO/CPO/GKD/GSPO/MPO/Nash-MD/
+#     online-DPO/PRM/RLOO/XPO/async-GRPO + SimPO (12 Tier 4)
+#   - LLaMA-Factory (~/src/LLaMA-Factory) — adds GaLore/BAdam/Apollo/DoRA/
+#     NEFTune/freeze-tuning/quantized-LoRA (AQLM/AWQ/GPTQ) (8 Tier 2/3)
+#   - Axolotl (~/src/axolotl, 178 yaml configs) — adds ReLoRA/LISA/QAT
+#     (fp8/mxfp4)/sample-packing/FSDP-LoRA (8 Tier 2/3)
 
 summary:
-  total: 128
+  total: 155
   certified: 0
-  planned: 128
+  planned: 155
   tier_1: 25
-  tier_2: 34
-  tier_3: 44
-  tier_4: 25
-  ludwig_mirrored: 55  # was 21; lifted by direct ludwig/examples/ mappings
+  tier_2: 45
+  tier_3: 48
+  tier_4: 37
+  ludwig_mirrored: 55
+  trl_mirrored: 12          # NEW v1.2.0
+  llamafactory_mirrored: 10 # NEW v1.2.0
+  axolotl_mirrored: 6       # NEW v1.2.0
   unsloth_mirrored: 16
   apr_native: 5
+  techniques_distinct: 63   # was 39 in v1.1.0
 
 recipes:
   # =========================================================================
@@ -507,8 +519,104 @@ recipes:
     ludwig_mirror: examples/regex_freezing/llm_freezing_with_regex_training.py
     falsifier: "Regex-based layer freeze: gradients are zero for frozen-pattern parameters; non-frozen update normally"
 
+  # ---- 2.6 Memory-efficient optimizers (5 recipes — LLaMA-Factory + Axolotl, v1.2.0) ----
+  - id: t2_galore
+    tier: 2
+    technique: galore
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py::GaloreArguments
+    falsifier: "GaLore: optimizer state memory ≤ 0.5× of standard Adam at matched final loss"
+  - id: t2_badam
+    tier: 2
+    technique: badam
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py::BAdamArgument
+    falsifier: "BAdam block-wise update: per-block parameter mass conserved across optimizer step"
+  - id: t2_apollo
+    tier: 2
+    technique: apollo
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py::ApolloArguments
+    falsifier: "Apollo low-memory optimizer matches AdamW final loss with ≤ 0.6× memory"
+  - id: t2_dora
+    tier: 2
+    technique: dora
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py (use_dora flag)
+    falsifier: "DoRA: trained ΔW decomposes as direction × magnitude with magnitude norm preserved"
+  - id: t2_freeze_tuning
+    tier: 2
+    technique: freeze_tuning
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: examples/train_full/qwen3_full_sft.yaml
+    falsifier: "Freeze-tuning N layers: gradient norms zero on frozen, non-zero on trainable"
+
+  # ---- 2.7 Quantized-base LoRA (3 recipes — LLaMA-Factory train_qlora/, v1.2.0) ----
+  - id: t2_lora_aqlm
+    tier: 2
+    technique: lora_quantized
+    base_family: llama
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    llamafactory_mirror: examples/train_qlora/llama3_lora_sft_aqlm.yaml
+    falsifier: "AQLM 2-bit base + LoRA: post-merge perplexity ≤ FP16 baseline + 10%"
+  - id: t2_lora_awq
+    tier: 2
+    technique: lora_quantized
+    base_family: mistral
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    llamafactory_mirror: examples/train_qlora/llama3_lora_sft_awq.yaml
+    falsifier: "AWQ 4-bit activation-aware base + LoRA: salient-channel weights preserved within tolerance"
+  - id: t2_lora_gptq
+    tier: 2
+    technique: lora_quantized
+    base_family: phi
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    llamafactory_mirror: examples/train_qlora/llama3_lora_sft_gptq.yaml
+    falsifier: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+
+  # ---- 2.8 Restart-LoRA + LISA (Axolotl unique, 2 recipes — v1.2.0) ----
+  - id: t2_relora
+    tier: 2
+    technique: relora
+    base_family: llama
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    axolotl_mirror: examples/llama-2/relora.yml
+    falsifier: "ReLoRA periodic merge-and-restart: cumulative effective rank > single-LoRA rank-r over T restarts"
+  - id: t2_lisa
+    tier: 2
+    technique: lisa
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    axolotl_mirror: examples/llama-2/lisa.yml
+    falsifier: "LISA layer-importance sampling: top-k important layers updated per step; bottom layers gradient-zero"
+
+  # ---- 2.9 NEFTune (LLaMA-Factory + paper, 1 recipe — v1.2.0) ----
+  - id: t2_neftune
+    tier: 2
+    technique: neftune
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py (neftune_alpha)
+    falsifier: "NEFTune injected embedding noise α=5: instruction-tuning quality lift ≥ 5pp on AlpacaEval-style synthetic"
+
   # =========================================================================
-  # Tier 3 — Specialization (41 recipes, applied)
+  # Tier 3 — Specialization (48 recipes, applied)
   # =========================================================================
 
   # ---- 3.1 Instruction tuning (5 recipes) ----
@@ -881,8 +989,45 @@ recipes:
     ludwig_mirror: examples/hypernetwork/config_hypernetwork.yaml
     falsifier: "Hypernetwork generates target-network weights conditioned on task-id; per-task accuracy ≥ baseline"
 
+  # ---- 3.17 Quantization-Aware Training (Axolotl QAT, 2 recipes — v1.2.0) ----
+  - id: t3_qat_fp8
+    tier: 3
+    technique: qat
+    base_family: llama
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    axolotl_mirror: examples/{family}/3b-qat-fsdp2.yaml  # see e.g. examples/qwen3.5/3b-qat-fsdp2.yaml
+    falsifier: "QAT FP8 fake-quant matches dequant→quant identity within ε; final post-quant accuracy ≥ FP16 - 1pp"
+  - id: t3_qat_mxfp4
+    tier: 3
+    technique: qat
+    base_family: qwen3
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    axolotl_mirror: examples/qwen3.5/3b-qat-mxfp4.yaml
+    falsifier: "MXFP4 4-bit microscaling: shared-exponent block matches Open Compute MXFP4 spec exactly"
+
+  # ---- 3.18 Sample packing + FSDP-LoRA (Axolotl, 2 recipes — v1.2.0) ----
+  - id: t3_sample_packing
+    tier: 3
+    technique: sample_packing
+    base_family: cross-family
+    apr_subcommand: [finetune]
+    status: planned
+    axolotl_mirror: "examples/llama-2/lora.yml (sample_packing: true)"
+    falsifier: "Sample packing reduces batched-token-padding ratio ≥ 50% vs non-packed baseline"
+  - id: t3_fsdp_lora
+    tier: 3
+    technique: fsdp_lora
+    base_family: llama
+    apr_subcommand: [finetune]
+    status: planned
+    gpu_required: true
+    axolotl_mirror: examples/llama-2/qlora-fsdp.yml
+    falsifier: "FSDP shards model parameters across N GPUs; per-rank memory ≤ (1/N + ε) of single-GPU baseline"
+
   # =========================================================================
-  # Tier 4 — Reinforcement (25 recipes, advanced)
+  # Tier 4 — Reinforcement (37 recipes, advanced)
   # =========================================================================
 
   # ---- 4.1 DPO (5 recipes) ----
@@ -1079,3 +1224,108 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "ensemble of 3 reward models reduces variance vs single model on calibration set"
+
+  # ---- 4.8 Online preference learning (TRL, 4 recipes — v1.2.0) ----
+  - id: t4_online_dpo
+    tier: 4
+    technique: online_dpo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/online_dpo.py
+    falsifier: "Online DPO: per-step generated preferences sampled from current policy, not static dataset"
+  - id: t4_xpo
+    tier: 4
+    technique: xpo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/xpo.py
+    falsifier: "XPO exploratory bonus drives generation-distribution coverage above online-DPO baseline"
+  - id: t4_nash_md
+    tier: 4
+    technique: nash_md
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/nash_md.py
+    falsifier: "Nash-MD: policy converges to Nash equilibrium of preference game (KL drift ≤ ε after T steps)"
+  - id: t4_async_grpo
+    tier: 4
+    technique: async_grpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/async_grpo.py
+    falsifier: "Async GRPO: rollouts on stale policy weighted by importance ratio; gradient bias bounded"
+
+  # ---- 4.9 BCO/CPO/SimPO — alternative preference losses (TRL + LLaMA-Factory, 3 recipes — v1.2.0) ----
+  - id: t4_bco
+    tier: 4
+    technique: bco
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/bco.py
+    falsifier: "BCO Binary Classifier Optimization: thumb-up/down feedback model classifier accuracy ≥ 0.7"
+  - id: t4_cpo
+    tier: 4
+    technique: cpo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/cpo.py
+    falsifier: "CPO contrastive loss: chosen-rejected margin grows monotonically over training"
+  - id: t4_simpo
+    tier: 4
+    technique: simpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: trl/trainer/cpo_trainer.py (simpo_gamma flag)
+    llamafactory_mirror: examples/train_lora/qwen3_lora_dpo.yaml (simpo variant)
+    falsifier: "SimPO reference-free: same chosen-rejected margin objective as DPO without reference-model forward passes"
+
+  # ---- 4.10 Reward modeling extensions (TRL, 3 recipes — v1.2.0) ----
+  - id: t4_prm
+    tier: 4
+    technique: prm
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/prm.py
+    falsifier: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+  - id: t4_rloo
+    tier: 4
+    technique: rloo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/rloo.py
+    falsifier: "RLOO REINFORCE-leave-one-out: variance ≤ vanilla REINFORCE at matched final reward"
+  - id: t4_gkd
+    tier: 4
+    technique: gkd
+    base_family: gemma
+    apr_subcommand: [finetune, eval, distill]
+    status: planned
+    trl_mirror: examples/scripts/gkd.py
+    falsifier: "GKD on-policy distillation: student-teacher KL drops monotonically; student matches teacher style on held-out"
+
+  # ---- 4.11 GSPO + MPO — sequence-level preference (TRL, 2 recipes — v1.2.0) ----
+  - id: t4_gspo
+    tier: 4
+    technique: gspo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/gspo.py
+    falsifier: "GSPO sequence-level Bradley-Terry: per-position log-probs aggregated correctly into sequence preference"
+  - id: t4_mpo
+    tier: 4
+    technique: mpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    trl_mirror: examples/scripts/mpo_vlm.py
+    falsifier: "MPO multi-step preferences: policy improves on multi-turn-completion benchmark vs single-step DPO baseline"

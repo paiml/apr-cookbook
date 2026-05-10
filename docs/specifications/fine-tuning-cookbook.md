@@ -1,8 +1,8 @@
 # Fine-Tuning Cookbook Specification
 
-**Version**: 1.1.0
-**Status**: PROPOSED (PMAT-330..355 planned; spec for review)
-**Manifest count**: 128 recipes (was 100 in v1.0.0; +28 after surveying upstream `~/src/ludwig`)
+**Version**: 1.2.0
+**Status**: PROPOSED (PMAT-330..361 planned; spec for review)
+**Manifest count**: 155 recipes (was 100 in v1.0.0 → 128 in v1.1.0 after Ludwig deep-dive → 155 in v1.2.0 after TRL + LLaMA-Factory + Axolotl surveys)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-10
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
@@ -57,10 +57,14 @@ The cookbook enforces these invariants at PR time. The fine-tuning spec extends 
 
 | Criterion | Target | How measured |
 |-----------|--------|--------------|
-| Recipe count | ≥ 128 | `wc -l` over manifest entries with `status: certified` |
-| Tier coverage | T1=25, T2=34, T3=44, T4=25 | manifest tier histogram (revised in v1.1.0 after Ludwig deep-dive) |
+| Recipe count | ≥ 155 | `wc -l` over manifest entries with `status: certified` |
+| Tier coverage | T1=25, T2=45, T3=48, T4=37 | manifest tier histogram (revised in v1.2.0 after TRL/LLaMA-Factory/Axolotl) |
 | Ludwig mirror coverage | ≥ 55 | manifest entries with `ludwig_mirror:` set (concrete file paths in `~/src/ludwig/examples/`) |
-| Unsloth mirror coverage | ≥ 16 | manifest entries with `unsloth_mirror:` set (Colab notebook refs) |
+| TRL mirror coverage | ≥ 12 | `trl_mirror:` set — Tier 4 RL grounded in `~/src/trl/examples/scripts/` |
+| LLaMA-Factory mirror coverage | ≥ 10 | `llamafactory_mirror:` set — GaLore/BAdam/Apollo/DoRA/NEFTune/quantized-LoRA |
+| Axolotl mirror coverage | ≥ 6 | `axolotl_mirror:` set — ReLoRA/LISA/QAT/sample-packing/FSDP-LoRA |
+| Unsloth mirror coverage | ≥ 16 | `unsloth_mirror:` set (Colab notebook refs) |
+| Distinct techniques | ≥ 63 | manifest `technique:` enum cardinality |
 | Provable-contract grade A | 100% of certified | `pv score contracts/finetune-*.yaml --binding` aggregate ≥ 0.93 |
 | CLI subcommand exercise | every `apr finetune`/`apr eval`/`apr quantize`/`apr serve`/`apr merge` flag | recipe coverage table |
 | CI runtime | < 5 min on PR | `cargo test --lib --tests --features finetune-fixtures` |
