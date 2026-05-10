@@ -2380,3 +2380,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-128
+  github_issue: null
+  item_type: task
+  title: PMAT-342 Tier 2.4 Adapter merge x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T11:30:40Z
+  updated: 2026-05-10T11:30:42.948152445+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

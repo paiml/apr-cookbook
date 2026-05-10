@@ -7385,3 +7385,25 @@ path = "examples/finetune/t2_continued_pretrain_codeswitch.rs"
 [[example]]
 name = "t2_continued_pretrain_scientific"
 path = "examples/finetune/t2_continued_pretrain_scientific.rs"
+
+# --- fine-tuning-cookbook Tier 2.4 — Adapter merge × 5 (PMAT-342) ---
+
+[[example]]
+name = "t2_adapter_merge_ties"
+path = "examples/finetune/t2_adapter_merge_ties.rs"
+
+[[example]]
+name = "t2_adapter_merge_dare"
+path = "examples/finetune/t2_adapter_merge_dare.rs"
+
+[[example]]
+name = "t2_adapter_merge_slerp"
+path = "examples/finetune/t2_adapter_merge_slerp.rs"
+
+[[example]]
+name = "t2_adapter_merge_average"
+path = "examples/finetune/t2_adapter_merge_average.rs"
+
+[[example]]
+name = "t2_adapter_merge_multilora"
+path = "examples/finetune/t2_adapter_merge_multilora.rs"

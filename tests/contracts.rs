@@ -107,6 +107,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t2-continued-pretrain-medical-v1.yaml",
     "finetune-t2-continued-pretrain-codeswitch-v1.yaml",
     "finetune-t2-continued-pretrain-scientific-v1.yaml",
+    // fine-tuning-cookbook Tier 2.4 (PMAT-342): Adapter merge × 5.
+    "finetune-t2-adapter-merge-ties-v1.yaml",
+    "finetune-t2-adapter-merge-dare-v1.yaml",
+    "finetune-t2-adapter-merge-slerp-v1.yaml",
+    "finetune-t2-adapter-merge-average-v1.yaml",
+    "finetune-t2-adapter-merge-multilora-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -230,6 +236,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t2-continued-pretrain-medical-v1.yaml",
     "finetune-t2-continued-pretrain-codeswitch-v1.yaml",
     "finetune-t2-continued-pretrain-scientific-v1.yaml",
+    // Tier 2.4 Adapter merge × 5 (PMAT-342)
+    "finetune-t2-adapter-merge-ties-v1.yaml",
+    "finetune-t2-adapter-merge-dare-v1.yaml",
+    "finetune-t2-adapter-merge-slerp-v1.yaml",
+    "finetune-t2-adapter-merge-average-v1.yaml",
+    "finetune-t2-adapter-merge-multilora-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

@@ -106,3 +106,8 @@ import ProvableContracts.Finetune.T2ContinuedPretrainCode
 import ProvableContracts.Finetune.T2ContinuedPretrainMedical
 import ProvableContracts.Finetune.T2ContinuedPretrainCodeswitch
 import ProvableContracts.Finetune.T2ContinuedPretrainScientific
+import ProvableContracts.Finetune.T2AdapterMergeTies
+import ProvableContracts.Finetune.T2AdapterMergeDare
+import ProvableContracts.Finetune.T2AdapterMergeSlerp
+import ProvableContracts.Finetune.T2AdapterMergeAverage
+import ProvableContracts.Finetune.T2AdapterMergeMultilora

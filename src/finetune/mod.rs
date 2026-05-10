@@ -7,6 +7,7 @@
 //!
 //! See `docs/specifications/fine-tuning-cookbook.md` and `recipe-template.md`.
 
+pub mod adapter_merge;
 pub mod continued_pretrain;
 pub mod eval_primitives;
 pub mod lora;
