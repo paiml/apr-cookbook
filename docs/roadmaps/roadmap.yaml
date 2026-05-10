@@ -2556,3 +2556,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-139
+  github_issue: null
+  item_type: task
+  title: PMAT-353 Tier 3.11-3.16 single recipes x 6
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:58:29Z
+  updated: 2026-05-10T12:58:29.914600905+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

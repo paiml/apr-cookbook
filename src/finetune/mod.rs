@@ -24,5 +24,6 @@ pub mod qlora;
 pub mod quantized_base;
 pub mod sft_minimal;
 pub mod smoke;
+pub mod specialty;
 pub mod tabular_classification;
 pub mod tabular_regression;

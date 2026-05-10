@@ -169,3 +169,9 @@ import ProvableContracts.Finetune.T3ImageEncoderDinov2Lp
 import ProvableContracts.Finetune.T3ImageEncoderSiglip
 import ProvableContracts.Finetune.T3OptimizerMuon
 import ProvableContracts.Finetune.T3OptimizerScheduleFree
+import ProvableContracts.Finetune.T3Lbfgs
+import ProvableContracts.Finetune.T3MultitaskFamo
+import ProvableContracts.Finetune.T3SemanticSegmentationSegformer
+import ProvableContracts.Finetune.T3StructuredOutputJson
+import ProvableContracts.Finetune.T3MambaEncoderText
+import ProvableContracts.Finetune.T3Hypernetwork

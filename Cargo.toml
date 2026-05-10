@@ -7660,3 +7660,29 @@ path = "examples/finetune/t3_optimizer_muon.rs"
 [[example]]
 name = "t3_optimizer_schedule_free"
 path = "examples/finetune/t3_optimizer_schedule_free.rs"
+
+# --- fine-tuning-cookbook Tier 3.11–3.16 single recipes × 6 (PMAT-353) ---
+
+[[example]]
+name = "t3_lbfgs"
+path = "examples/finetune/t3_lbfgs.rs"
+
+[[example]]
+name = "t3_multitask_famo"
+path = "examples/finetune/t3_multitask_famo.rs"
+
+[[example]]
+name = "t3_semantic_segmentation_segformer"
+path = "examples/finetune/t3_semantic_segmentation_segformer.rs"
+
+[[example]]
+name = "t3_structured_output_json"
+path = "examples/finetune/t3_structured_output_json.rs"
+
+[[example]]
+name = "t3_mamba_encoder_text"
+path = "examples/finetune/t3_mamba_encoder_text.rs"
+
+[[example]]
+name = "t3_hypernetwork"
+path = "examples/finetune/t3_hypernetwork.rs"

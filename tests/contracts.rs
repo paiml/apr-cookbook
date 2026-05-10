@@ -181,6 +181,13 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-image-encoder-siglip-v1.yaml",
     "finetune-t3-optimizer-muon-v1.yaml",
     "finetune-t3-optimizer-schedule-free-v1.yaml",
+    // fine-tuning-cookbook Tier 3.11–3.16 (PMAT-353): single recipes × 6.
+    "finetune-t3-lbfgs-v1.yaml",
+    "finetune-t3-multitask-famo-v1.yaml",
+    "finetune-t3-semantic-segmentation-segformer-v1.yaml",
+    "finetune-t3-structured-output-json-v1.yaml",
+    "finetune-t3-mamba-encoder-text-v1.yaml",
+    "finetune-t3-hypernetwork-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -378,6 +385,13 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-image-encoder-siglip-v1.yaml",
     "finetune-t3-optimizer-muon-v1.yaml",
     "finetune-t3-optimizer-schedule-free-v1.yaml",
+    // Tier 3.11–3.16 (PMAT-353)
+    "finetune-t3-lbfgs-v1.yaml",
+    "finetune-t3-multitask-famo-v1.yaml",
+    "finetune-t3-semantic-segmentation-segformer-v1.yaml",
+    "finetune-t3-structured-output-json-v1.yaml",
+    "finetune-t3-mamba-encoder-text-v1.yaml",
+    "finetune-t3-hypernetwork-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {
