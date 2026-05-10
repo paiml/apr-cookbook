@@ -7560,3 +7560,25 @@ path = "examples/finetune/t3_calibration_conformal.rs"
 [[example]]
 name = "t3_calibration_ensemble"
 path = "examples/finetune/t3_calibration_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 3.4 — Class imbalance × 5 (PMAT-349) ---
+
+[[example]]
+name = "t3_imbalance_weighted"
+path = "examples/finetune/t3_imbalance_weighted.rs"
+
+[[example]]
+name = "t3_imbalance_focal"
+path = "examples/finetune/t3_imbalance_focal.rs"
+
+[[example]]
+name = "t3_imbalance_smote"
+path = "examples/finetune/t3_imbalance_smote.rs"
+
+[[example]]
+name = "t3_imbalance_threshold"
+path = "examples/finetune/t3_imbalance_threshold.rs"
+
+[[example]]
+name = "t3_imbalance_costsensitive"
+path = "examples/finetune/t3_imbalance_costsensitive.rs"

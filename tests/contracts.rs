@@ -154,6 +154,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-calibration-isotonic-v1.yaml",
     "finetune-t3-calibration-conformal-v1.yaml",
     "finetune-t3-calibration-ensemble-v1.yaml",
+    // fine-tuning-cookbook Tier 3.4 (PMAT-349): Class imbalance × 5.
+    "finetune-t3-imbalance-weighted-v1.yaml",
+    "finetune-t3-imbalance-focal-v1.yaml",
+    "finetune-t3-imbalance-smote-v1.yaml",
+    "finetune-t3-imbalance-threshold-v1.yaml",
+    "finetune-t3-imbalance-costsensitive-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -324,6 +330,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-calibration-isotonic-v1.yaml",
     "finetune-t3-calibration-conformal-v1.yaml",
     "finetune-t3-calibration-ensemble-v1.yaml",
+    // Tier 3.4 Class imbalance × 5 (PMAT-349)
+    "finetune-t3-imbalance-weighted-v1.yaml",
+    "finetune-t3-imbalance-focal-v1.yaml",
+    "finetune-t3-imbalance-smote-v1.yaml",
+    "finetune-t3-imbalance-threshold-v1.yaml",
+    "finetune-t3-imbalance-costsensitive-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

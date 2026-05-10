@@ -2492,3 +2492,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-135
+  github_issue: null
+  item_type: task
+  title: PMAT-349 Tier 3.4 Class imbalance x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:32:58Z
+  updated: 2026-05-10T12:32:59.356158960+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

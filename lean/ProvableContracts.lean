@@ -146,3 +146,8 @@ import ProvableContracts.Finetune.T3CalibrationPlatt
 import ProvableContracts.Finetune.T3CalibrationIsotonic
 import ProvableContracts.Finetune.T3CalibrationConformal
 import ProvableContracts.Finetune.T3CalibrationEnsemble
+import ProvableContracts.Finetune.T3ImbalanceWeighted
+import ProvableContracts.Finetune.T3ImbalanceFocal
+import ProvableContracts.Finetune.T3ImbalanceSmote
+import ProvableContracts.Finetune.T3ImbalanceThreshold
+import ProvableContracts.Finetune.T3ImbalanceCostsensitive
