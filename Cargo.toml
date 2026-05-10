@@ -7784,3 +7784,29 @@ path = "examples/finetune/t4_rlhf_ppo_mistral.rs"
 [[example]]
 name = "t4_rlhf_ppo_qwen"
 path = "examples/finetune/t4_rlhf_ppo_qwen.rs"
+
+# --- fine-tuning-cookbook Tier 4.6+4.7 — RLAIF+reward × 6 (PMAT-357) ---
+
+[[example]]
+name = "t4_rlaif_judge"
+path = "examples/finetune/t4_rlaif_judge.rs"
+
+[[example]]
+name = "t4_rlaif_constitutional"
+path = "examples/finetune/t4_rlaif_constitutional.rs"
+
+[[example]]
+name = "t4_rlaif_self_critique"
+path = "examples/finetune/t4_rlaif_self_critique.rs"
+
+[[example]]
+name = "t4_reward_pairwise"
+path = "examples/finetune/t4_reward_pairwise.rs"
+
+[[example]]
+name = "t4_reward_scalar"
+path = "examples/finetune/t4_reward_scalar.rs"
+
+[[example]]
+name = "t4_reward_ensemble"
+path = "examples/finetune/t4_reward_ensemble.rs"

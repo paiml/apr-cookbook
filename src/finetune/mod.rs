@@ -24,6 +24,7 @@ pub mod preference;
 pub mod qlora;
 pub mod quantized_base;
 pub mod rl_alignment;
+pub mod rlaif_reward;
 pub mod sft_minimal;
 pub mod smoke;
 pub mod specialty;

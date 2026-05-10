@@ -198,3 +198,9 @@ import ProvableContracts.Finetune.T4GrpoLengthBudget
 import ProvableContracts.Finetune.T4RlhfPpoLlama
 import ProvableContracts.Finetune.T4RlhfPpoMistral
 import ProvableContracts.Finetune.T4RlhfPpoQwen
+import ProvableContracts.Finetune.T4RlaifJudge
+import ProvableContracts.Finetune.T4RlaifConstitutional
+import ProvableContracts.Finetune.T4RlaifSelfCritique
+import ProvableContracts.Finetune.T4RewardPairwise
+import ProvableContracts.Finetune.T4RewardScalar
+import ProvableContracts.Finetune.T4RewardEnsemble

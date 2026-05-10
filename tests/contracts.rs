@@ -214,6 +214,13 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t4-rlhf-ppo-llama-v1.yaml",
     "finetune-t4-rlhf-ppo-mistral-v1.yaml",
     "finetune-t4-rlhf-ppo-qwen-v1.yaml",
+    // fine-tuning-cookbook Tier 4.6+4.7 (PMAT-357): RLAIF+reward × 6.
+    "finetune-t4-rlaif-judge-v1.yaml",
+    "finetune-t4-rlaif-constitutional-v1.yaml",
+    "finetune-t4-rlaif-self-critique-v1.yaml",
+    "finetune-t4-reward-pairwise-v1.yaml",
+    "finetune-t4-reward-scalar-v1.yaml",
+    "finetune-t4-reward-ensemble-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -444,6 +451,13 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t4-rlhf-ppo-llama-v1.yaml",
     "finetune-t4-rlhf-ppo-mistral-v1.yaml",
     "finetune-t4-rlhf-ppo-qwen-v1.yaml",
+    // Tier 4.6+4.7 (PMAT-357)
+    "finetune-t4-rlaif-judge-v1.yaml",
+    "finetune-t4-rlaif-constitutional-v1.yaml",
+    "finetune-t4-rlaif-self-critique-v1.yaml",
+    "finetune-t4-reward-pairwise-v1.yaml",
+    "finetune-t4-reward-scalar-v1.yaml",
+    "finetune-t4-reward-ensemble-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {
