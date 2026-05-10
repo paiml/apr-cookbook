@@ -193,6 +193,18 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-qat-mxfp4-v1.yaml",
     "finetune-t3-sample-packing-v1.yaml",
     "finetune-t3-fsdp-lora-v1.yaml",
+    // fine-tuning-cookbook Tier 4.1+4.2+4.3 (PMAT-355): DPO+ORPO+KTO × 11.
+    "finetune-t4-dpo-llama-v1.yaml",
+    "finetune-t4-dpo-mistral-v1.yaml",
+    "finetune-t4-dpo-phi-v1.yaml",
+    "finetune-t4-dpo-qwen-v1.yaml",
+    "finetune-t4-dpo-gemma-v1.yaml",
+    "finetune-t4-orpo-llama-v1.yaml",
+    "finetune-t4-orpo-mistral-v1.yaml",
+    "finetune-t4-orpo-qwen-v1.yaml",
+    "finetune-t4-kto-llama-v1.yaml",
+    "finetune-t4-kto-phi-v1.yaml",
+    "finetune-t4-kto-gemma-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -402,6 +414,18 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-qat-mxfp4-v1.yaml",
     "finetune-t3-sample-packing-v1.yaml",
     "finetune-t3-fsdp-lora-v1.yaml",
+    // Tier 4.1+4.2+4.3 (PMAT-355)
+    "finetune-t4-dpo-llama-v1.yaml",
+    "finetune-t4-dpo-mistral-v1.yaml",
+    "finetune-t4-dpo-phi-v1.yaml",
+    "finetune-t4-dpo-qwen-v1.yaml",
+    "finetune-t4-dpo-gemma-v1.yaml",
+    "finetune-t4-orpo-llama-v1.yaml",
+    "finetune-t4-orpo-mistral-v1.yaml",
+    "finetune-t4-orpo-qwen-v1.yaml",
+    "finetune-t4-kto-llama-v1.yaml",
+    "finetune-t4-kto-phi-v1.yaml",
+    "finetune-t4-kto-gemma-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

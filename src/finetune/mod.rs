@@ -20,6 +20,7 @@ pub mod lora;
 pub mod memory_optimizers;
 pub mod multimodal;
 pub mod peft_variants;
+pub mod preference;
 pub mod qlora;
 pub mod quantized_base;
 pub mod sft_minimal;

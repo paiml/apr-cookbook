@@ -179,3 +179,14 @@ import ProvableContracts.Finetune.T3QatFp8
 import ProvableContracts.Finetune.T3QatMxfp4
 import ProvableContracts.Finetune.T3SamplePacking
 import ProvableContracts.Finetune.T3FsdpLora
+import ProvableContracts.Finetune.T4DpoLlama
+import ProvableContracts.Finetune.T4DpoMistral
+import ProvableContracts.Finetune.T4DpoPhi
+import ProvableContracts.Finetune.T4DpoQwen
+import ProvableContracts.Finetune.T4DpoGemma
+import ProvableContracts.Finetune.T4OrpoLlama
+import ProvableContracts.Finetune.T4OrpoMistral
+import ProvableContracts.Finetune.T4OrpoQwen
+import ProvableContracts.Finetune.T4KtoLlama
+import ProvableContracts.Finetune.T4KtoPhi
+import ProvableContracts.Finetune.T4KtoGemma

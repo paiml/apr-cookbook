@@ -7704,3 +7704,49 @@ path = "examples/finetune/t3_sample_packing.rs"
 [[example]]
 name = "t3_fsdp_lora"
 path = "examples/finetune/t3_fsdp_lora.rs"
+
+# --- fine-tuning-cookbook Tier 4.1+4.2+4.3 — DPO+ORPO+KTO × 11 (PMAT-355) ---
+
+[[example]]
+name = "t4_dpo_llama"
+path = "examples/finetune/t4_dpo_llama.rs"
+
+[[example]]
+name = "t4_dpo_mistral"
+path = "examples/finetune/t4_dpo_mistral.rs"
+
+[[example]]
+name = "t4_dpo_phi"
+path = "examples/finetune/t4_dpo_phi.rs"
+
+[[example]]
+name = "t4_dpo_qwen"
+path = "examples/finetune/t4_dpo_qwen.rs"
+
+[[example]]
+name = "t4_dpo_gemma"
+path = "examples/finetune/t4_dpo_gemma.rs"
+
+[[example]]
+name = "t4_orpo_llama"
+path = "examples/finetune/t4_orpo_llama.rs"
+
+[[example]]
+name = "t4_orpo_mistral"
+path = "examples/finetune/t4_orpo_mistral.rs"
+
+[[example]]
+name = "t4_orpo_qwen"
+path = "examples/finetune/t4_orpo_qwen.rs"
+
+[[example]]
+name = "t4_kto_llama"
+path = "examples/finetune/t4_kto_llama.rs"
+
+[[example]]
+name = "t4_kto_phi"
+path = "examples/finetune/t4_kto_phi.rs"
+
+[[example]]
+name = "t4_kto_gemma"
+path = "examples/finetune/t4_kto_gemma.rs"

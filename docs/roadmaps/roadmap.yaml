@@ -2588,3 +2588,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-141
+  github_issue: null
+  item_type: task
+  title: PMAT-355 Tier 4.1+4.2+4.3 DPO+ORPO+KTO x 11
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:10:40Z
+  updated: 2026-05-10T13:10:40.675031942+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
