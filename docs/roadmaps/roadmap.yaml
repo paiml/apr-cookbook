@@ -2448,11 +2448,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-346 Tier 3.1 Instruction tuning x 5
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T12:09:28Z
-  updated: 2026-05-10T12:09:31.467558287+00:00
+  updated: 2026-05-10T14:14:26.479832783+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2592,11 +2592,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-355 Tier 4.1+4.2+4.3 DPO+ORPO+KTO x 11
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T13:10:40Z
-  updated: 2026-05-10T13:10:40.675031942+00:00
+  updated: 2026-05-10T14:14:26.446898967+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2656,11 +2656,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-359 Tier 4 closeout async_grpo+PRM+GKD+GSPO+MPO x 5
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T13:46:44Z
-  updated: 2026-05-10T13:46:44.814150484+00:00
+  updated: 2026-05-10T14:18:39.898341389+00:00
   spec: null
   acceptance_criteria: []
   phases: []
