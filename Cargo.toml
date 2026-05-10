@@ -7494,3 +7494,25 @@ path = "examples/finetune/t2_lisa.rs"
 [[example]]
 name = "t2_neftune"
 path = "examples/finetune/t2_neftune.rs"
+
+# --- fine-tuning-cookbook Tier 3.1 — Instruction tuning × 5 (PMAT-346) ---
+
+[[example]]
+name = "t3_instruction_alpaca"
+path = "examples/finetune/t3_instruction_alpaca.rs"
+
+[[example]]
+name = "t3_instruction_sharegpt"
+path = "examples/finetune/t3_instruction_sharegpt.rs"
+
+[[example]]
+name = "t3_instruction_openassistant"
+path = "examples/finetune/t3_instruction_openassistant.rs"
+
+[[example]]
+name = "t3_instruction_chat_template"
+path = "examples/finetune/t3_instruction_chat_template.rs"
+
+[[example]]
+name = "t3_instruction_system_prompt"
+path = "examples/finetune/t3_instruction_system_prompt.rs"

@@ -2444,3 +2444,51 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-132
+  github_issue: null
+  item_type: task
+  title: PMAT-346 Tier 3.1 Instruction tuning x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T12:09:31.467558287+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-133
+  github_issue: null
+  item_type: task
+  title: PMAT-347 Tier 3.2 Hyperparameter optimization x 5
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T12:09:28Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-134
+  github_issue: null
+  item_type: task
+  title: PMAT-348 Tier 3.3 Calibration x 5
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T12:09:28Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

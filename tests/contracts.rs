@@ -136,6 +136,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t2-relora-v1.yaml",
     "finetune-t2-lisa-v1.yaml",
     "finetune-t2-neftune-v1.yaml",
+    // fine-tuning-cookbook Tier 3.1 (PMAT-346): Instruction tuning × 5.
+    "finetune-t3-instruction-alpaca-v1.yaml",
+    "finetune-t3-instruction-sharegpt-v1.yaml",
+    "finetune-t3-instruction-openassistant-v1.yaml",
+    "finetune-t3-instruction-chat-template-v1.yaml",
+    "finetune-t3-instruction-system-prompt-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -288,6 +294,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t2-relora-v1.yaml",
     "finetune-t2-lisa-v1.yaml",
     "finetune-t2-neftune-v1.yaml",
+    // Tier 3.1 Instruction tuning × 5 (PMAT-346)
+    "finetune-t3-instruction-alpaca-v1.yaml",
+    "finetune-t3-instruction-sharegpt-v1.yaml",
+    "finetune-t3-instruction-openassistant-v1.yaml",
+    "finetune-t3-instruction-chat-template-v1.yaml",
+    "finetune-t3-instruction-system-prompt-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

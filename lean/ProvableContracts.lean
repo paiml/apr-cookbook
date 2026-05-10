@@ -131,3 +131,8 @@ import ProvableContracts.Finetune.T2LoraGptq
 import ProvableContracts.Finetune.T2Relora
 import ProvableContracts.Finetune.T2Lisa
 import ProvableContracts.Finetune.T2Neftune
+import ProvableContracts.Finetune.T3InstructionAlpaca
+import ProvableContracts.Finetune.T3InstructionSharegpt
+import ProvableContracts.Finetune.T3InstructionOpenassistant
+import ProvableContracts.Finetune.T3InstructionChatTemplate
+import ProvableContracts.Finetune.T3InstructionSystemPrompt
