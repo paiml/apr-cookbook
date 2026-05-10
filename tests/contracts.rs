@@ -188,6 +188,11 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-structured-output-json-v1.yaml",
     "finetune-t3-mamba-encoder-text-v1.yaml",
     "finetune-t3-hypernetwork-v1.yaml",
+    // fine-tuning-cookbook Tier 3 closeout (PMAT-354): 3.17+3.18 × 4.
+    "finetune-t3-qat-fp8-v1.yaml",
+    "finetune-t3-qat-mxfp4-v1.yaml",
+    "finetune-t3-sample-packing-v1.yaml",
+    "finetune-t3-fsdp-lora-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -392,6 +397,11 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-structured-output-json-v1.yaml",
     "finetune-t3-mamba-encoder-text-v1.yaml",
     "finetune-t3-hypernetwork-v1.yaml",
+    // Tier 3 closeout 3.17+3.18 (PMAT-354)
+    "finetune-t3-qat-fp8-v1.yaml",
+    "finetune-t3-qat-mxfp4-v1.yaml",
+    "finetune-t3-sample-packing-v1.yaml",
+    "finetune-t3-fsdp-lora-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

@@ -2572,3 +2572,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-140
+  github_issue: null
+  item_type: task
+  title: PMAT-354 Tier 3 closeout 3.17+3.18 x 4
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:04:20Z
+  updated: 2026-05-10T13:04:20.744889826+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

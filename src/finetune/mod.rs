@@ -27,3 +27,4 @@ pub mod smoke;
 pub mod specialty;
 pub mod tabular_classification;
 pub mod tabular_regression;
+pub mod tier3_closeout;

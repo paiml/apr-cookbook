@@ -7686,3 +7686,21 @@ path = "examples/finetune/t3_mamba_encoder_text.rs"
 [[example]]
 name = "t3_hypernetwork"
 path = "examples/finetune/t3_hypernetwork.rs"
+
+# --- fine-tuning-cookbook Tier 3.17+3.18 closeout × 4 (PMAT-354) ---
+
+[[example]]
+name = "t3_qat_fp8"
+path = "examples/finetune/t3_qat_fp8.rs"
+
+[[example]]
+name = "t3_qat_mxfp4"
+path = "examples/finetune/t3_qat_mxfp4.rs"
+
+[[example]]
+name = "t3_sample_packing"
+path = "examples/finetune/t3_sample_packing.rs"
+
+[[example]]
+name = "t3_fsdp_lora"
+path = "examples/finetune/t3_fsdp_lora.rs"

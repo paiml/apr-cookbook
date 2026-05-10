@@ -175,3 +175,7 @@ import ProvableContracts.Finetune.T3SemanticSegmentationSegformer
 import ProvableContracts.Finetune.T3StructuredOutputJson
 import ProvableContracts.Finetune.T3MambaEncoderText
 import ProvableContracts.Finetune.T3Hypernetwork
+import ProvableContracts.Finetune.T3QatFp8
+import ProvableContracts.Finetune.T3QatMxfp4
+import ProvableContracts.Finetune.T3SamplePacking
+import ProvableContracts.Finetune.T3FsdpLora
