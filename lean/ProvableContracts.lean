@@ -125,3 +125,9 @@ import ProvableContracts.Finetune.T2Badam
 import ProvableContracts.Finetune.T2Apollo
 import ProvableContracts.Finetune.T2Dora
 import ProvableContracts.Finetune.T2FreezeTuning
+import ProvableContracts.Finetune.T2LoraAqlm
+import ProvableContracts.Finetune.T2LoraAwq
+import ProvableContracts.Finetune.T2LoraGptq
+import ProvableContracts.Finetune.T2Relora
+import ProvableContracts.Finetune.T2Lisa
+import ProvableContracts.Finetune.T2Neftune

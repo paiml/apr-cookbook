@@ -7468,3 +7468,29 @@ path = "examples/finetune/t2_dora.rs"
 [[example]]
 name = "t2_freeze_tuning"
 path = "examples/finetune/t2_freeze_tuning.rs"
+
+# --- fine-tuning-cookbook Tier 2.7-2.9 closeout × 6 (PMAT-345) ---
+
+[[example]]
+name = "t2_lora_aqlm"
+path = "examples/finetune/t2_lora_aqlm.rs"
+
+[[example]]
+name = "t2_lora_awq"
+path = "examples/finetune/t2_lora_awq.rs"
+
+[[example]]
+name = "t2_lora_gptq"
+path = "examples/finetune/t2_lora_gptq.rs"
+
+[[example]]
+name = "t2_relora"
+path = "examples/finetune/t2_relora.rs"
+
+[[example]]
+name = "t2_lisa"
+path = "examples/finetune/t2_lisa.rs"
+
+[[example]]
+name = "t2_neftune"
+path = "examples/finetune/t2_neftune.rs"

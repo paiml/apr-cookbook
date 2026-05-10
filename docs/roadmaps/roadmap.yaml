@@ -2428,3 +2428,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-131
+  github_issue: null
+  item_type: task
+  title: PMAT-345 Tier 2 closeout 2.7+2.8+2.9 (6 recipes)
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:01:06Z
+  updated: 2026-05-10T12:01:11.289128759+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

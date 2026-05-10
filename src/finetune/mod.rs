@@ -14,6 +14,7 @@ pub mod lora;
 pub mod memory_optimizers;
 pub mod peft_variants;
 pub mod qlora;
+pub mod quantized_base;
 pub mod sft_minimal;
 pub mod smoke;
 pub mod tabular_classification;
