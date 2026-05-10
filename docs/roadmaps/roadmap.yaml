@@ -2528,11 +2528,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-351 Tier 3.6+3.7+3.8 anomaly+open-set+uncertainty x 8
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T12:45:58Z
-  updated: 2026-05-10T12:45:59.027375661+00:00
+  updated: 2026-05-10T13:44:10.237700954+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2629,6 +2629,22 @@ roadmap:
   assigned_to: null
   created: 2026-05-10T13:34:11Z
   updated: 2026-05-10T13:34:11.633128223+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-144
+  github_issue: null
+  item_type: task
+  title: PMAT-358 Tier 4.8+4.9 online+BCO/CPO/SimPO x 7
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:40:20Z
+  updated: 2026-05-10T13:40:20.378206891+00:00
   spec: null
   acceptance_criteria: []
   phases: []
