@@ -190,3 +190,11 @@ import ProvableContracts.Finetune.T4OrpoQwen
 import ProvableContracts.Finetune.T4KtoLlama
 import ProvableContracts.Finetune.T4KtoPhi
 import ProvableContracts.Finetune.T4KtoGemma
+import ProvableContracts.Finetune.T4GrpoMath
+import ProvableContracts.Finetune.T4GrpoCodeExec
+import ProvableContracts.Finetune.T4GrpoFormatMatch
+import ProvableContracts.Finetune.T4GrpoClassification
+import ProvableContracts.Finetune.T4GrpoLengthBudget
+import ProvableContracts.Finetune.T4RlhfPpoLlama
+import ProvableContracts.Finetune.T4RlhfPpoMistral
+import ProvableContracts.Finetune.T4RlhfPpoQwen

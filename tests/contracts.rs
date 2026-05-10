@@ -205,6 +205,15 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t4-kto-llama-v1.yaml",
     "finetune-t4-kto-phi-v1.yaml",
     "finetune-t4-kto-gemma-v1.yaml",
+    // fine-tuning-cookbook Tier 4.4+4.5 (PMAT-356): GRPO+PPO × 8.
+    "finetune-t4-grpo-math-v1.yaml",
+    "finetune-t4-grpo-code-exec-v1.yaml",
+    "finetune-t4-grpo-format-match-v1.yaml",
+    "finetune-t4-grpo-classification-v1.yaml",
+    "finetune-t4-grpo-length-budget-v1.yaml",
+    "finetune-t4-rlhf-ppo-llama-v1.yaml",
+    "finetune-t4-rlhf-ppo-mistral-v1.yaml",
+    "finetune-t4-rlhf-ppo-qwen-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -426,6 +435,15 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t4-kto-llama-v1.yaml",
     "finetune-t4-kto-phi-v1.yaml",
     "finetune-t4-kto-gemma-v1.yaml",
+    // Tier 4.4+4.5 (PMAT-356)
+    "finetune-t4-grpo-math-v1.yaml",
+    "finetune-t4-grpo-code-exec-v1.yaml",
+    "finetune-t4-grpo-format-match-v1.yaml",
+    "finetune-t4-grpo-classification-v1.yaml",
+    "finetune-t4-grpo-length-budget-v1.yaml",
+    "finetune-t4-rlhf-ppo-llama-v1.yaml",
+    "finetune-t4-rlhf-ppo-mistral-v1.yaml",
+    "finetune-t4-rlhf-ppo-qwen-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {
