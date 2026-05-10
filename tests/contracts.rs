@@ -175,6 +175,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-open-set-objectosphere-v1.yaml",
     "finetune-t3-uncertainty-mc-dropout-v1.yaml",
     "finetune-t3-uncertainty-calibrated-v1.yaml",
+    // fine-tuning-cookbook Tier 3.9+3.10 (PMAT-352): image-encoders + optimizers × 5.
+    "finetune-t3-image-encoder-clip-v1.yaml",
+    "finetune-t3-image-encoder-dinov2-lp-v1.yaml",
+    "finetune-t3-image-encoder-siglip-v1.yaml",
+    "finetune-t3-optimizer-muon-v1.yaml",
+    "finetune-t3-optimizer-schedule-free-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -366,6 +372,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-open-set-objectosphere-v1.yaml",
     "finetune-t3-uncertainty-mc-dropout-v1.yaml",
     "finetune-t3-uncertainty-calibrated-v1.yaml",
+    // Tier 3.9+3.10 (PMAT-352)
+    "finetune-t3-image-encoder-clip-v1.yaml",
+    "finetune-t3-image-encoder-dinov2-lp-v1.yaml",
+    "finetune-t3-image-encoder-siglip-v1.yaml",
+    "finetune-t3-optimizer-muon-v1.yaml",
+    "finetune-t3-optimizer-schedule-free-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

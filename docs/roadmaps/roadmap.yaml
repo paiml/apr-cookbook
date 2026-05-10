@@ -2540,3 +2540,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-138
+  github_issue: null
+  item_type: task
+  title: PMAT-352 Tier 3.9+3.10 image-encoders+optimizers x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:52:28Z
+  updated: 2026-05-10T12:52:28.385636658+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

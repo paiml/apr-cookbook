@@ -11,6 +11,7 @@ pub mod adapter_merge;
 pub mod anomaly_open_uncertainty;
 pub mod calibration;
 pub mod continued_pretrain;
+pub mod encoders_optimizers;
 pub mod eval_primitives;
 pub mod hyperopt;
 pub mod imbalance;

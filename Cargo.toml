@@ -7638,3 +7638,25 @@ path = "examples/finetune/t3_uncertainty_mc_dropout.rs"
 [[example]]
 name = "t3_uncertainty_calibrated"
 path = "examples/finetune/t3_uncertainty_calibrated.rs"
+
+# --- fine-tuning-cookbook Tier 3.9+3.10 — image-encoders + optimizers × 5 (PMAT-352) ---
+
+[[example]]
+name = "t3_image_encoder_clip"
+path = "examples/finetune/t3_image_encoder_clip.rs"
+
+[[example]]
+name = "t3_image_encoder_dinov2_lp"
+path = "examples/finetune/t3_image_encoder_dinov2_lp.rs"
+
+[[example]]
+name = "t3_image_encoder_siglip"
+path = "examples/finetune/t3_image_encoder_siglip.rs"
+
+[[example]]
+name = "t3_optimizer_muon"
+path = "examples/finetune/t3_optimizer_muon.rs"
+
+[[example]]
+name = "t3_optimizer_schedule_free"
+path = "examples/finetune/t3_optimizer_schedule_free.rs"

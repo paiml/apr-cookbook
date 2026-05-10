@@ -164,3 +164,8 @@ import ProvableContracts.Finetune.T3OpenSetEntropic
 import ProvableContracts.Finetune.T3OpenSetObjectosphere
 import ProvableContracts.Finetune.T3UncertaintyMcDropout
 import ProvableContracts.Finetune.T3UncertaintyCalibrated
+import ProvableContracts.Finetune.T3ImageEncoderClip
+import ProvableContracts.Finetune.T3ImageEncoderDinov2Lp
+import ProvableContracts.Finetune.T3ImageEncoderSiglip
+import ProvableContracts.Finetune.T3OptimizerMuon
+import ProvableContracts.Finetune.T3OptimizerScheduleFree
