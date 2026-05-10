@@ -2464,11 +2464,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-347 Tier 3.2 Hyperparameter optimization x 5
-  status: planned
+  status: inprogress
   priority: high
   assigned_to: null
   created: 2026-05-10T12:09:28Z
-  updated: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T12:17:08.078226265+00:00
   spec: null
   acceptance_criteria: []
   phases: []

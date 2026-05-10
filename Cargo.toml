@@ -7516,3 +7516,25 @@ path = "examples/finetune/t3_instruction_chat_template.rs"
 [[example]]
 name = "t3_instruction_system_prompt"
 path = "examples/finetune/t3_instruction_system_prompt.rs"
+
+# --- fine-tuning-cookbook Tier 3.2 — Hyperparameter optimization × 5 (PMAT-347) ---
+
+[[example]]
+name = "t3_hyperopt_grid"
+path = "examples/finetune/t3_hyperopt_grid.rs"
+
+[[example]]
+name = "t3_hyperopt_random"
+path = "examples/finetune/t3_hyperopt_random.rs"
+
+[[example]]
+name = "t3_hyperopt_tpe"
+path = "examples/finetune/t3_hyperopt_tpe.rs"
+
+[[example]]
+name = "t3_hyperopt_asha"
+path = "examples/finetune/t3_hyperopt_asha.rs"
+
+[[example]]
+name = "t3_hyperopt_hyperband"
+path = "examples/finetune/t3_hyperopt_hyperband.rs"

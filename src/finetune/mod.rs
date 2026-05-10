@@ -10,6 +10,7 @@
 pub mod adapter_merge;
 pub mod continued_pretrain;
 pub mod eval_primitives;
+pub mod hyperopt;
 pub mod instruction_tuning;
 pub mod lora;
 pub mod memory_optimizers;

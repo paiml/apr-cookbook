@@ -136,3 +136,8 @@ import ProvableContracts.Finetune.T3InstructionSharegpt
 import ProvableContracts.Finetune.T3InstructionOpenassistant
 import ProvableContracts.Finetune.T3InstructionChatTemplate
 import ProvableContracts.Finetune.T3InstructionSystemPrompt
+import ProvableContracts.Finetune.T3HyperoptGrid
+import ProvableContracts.Finetune.T3HyperoptRandom
+import ProvableContracts.Finetune.T3HyperoptTpe
+import ProvableContracts.Finetune.T3HyperoptAsha
+import ProvableContracts.Finetune.T3HyperoptHyperband
