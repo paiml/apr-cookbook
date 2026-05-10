@@ -1,0 +1,821 @@
+# Fine-Tuning Cookbook Manifest — Schema: ./manifest.schema.yaml
+# Single source of truth for the 100-recipe fine-tuning curriculum.
+# Status: planned (initial state for all entries; flips to certified
+# when recipe + contract + fixture land and pass invariants).
+
+version: "1.0.0"
+schema: "./manifest.schema.yaml"
+last_updated: "2026-05-10"
+
+summary:
+  total: 100
+  certified: 0
+  planned: 100
+  tier_1: 25
+  tier_2: 25
+  tier_3: 25
+  tier_4: 25
+  ludwig_mirrored: 21
+  unsloth_mirrored: 16
+  apr_native: 5
+
+recipes:
+  # =========================================================================
+  # Tier 1 — Foundations (25 recipes, simple)
+  # =========================================================================
+
+  # ---- 1.1 SFT minimal × 5 families (5 recipes) ----
+  - id: t1_sft_minimal_llama
+    tier: 1
+    technique: sft
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/getting_started
+    unsloth_mirror: nb/Llama3.1_(8B)-Alpaca.ipynb
+    falsifier: "training loss decreases over 1 epoch (100 SFT examples) for Llama-tiny"
+  - id: t1_sft_minimal_mistral
+    tier: 1
+    technique: sft
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/getting_started
+    unsloth_mirror: nb/Mistral_(7B)-Alpaca.ipynb
+    falsifier: "training loss decreases over 1 epoch for Mistral-tiny"
+  - id: t1_sft_minimal_phi
+    tier: 1
+    technique: sft
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Phi_4_(14B).ipynb
+    falsifier: "training loss decreases over 1 epoch for Phi-tiny"
+  - id: t1_sft_minimal_qwen
+    tier: 1
+    technique: sft
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Qwen3_(4B)-Alpaca.ipynb
+    falsifier: "training loss decreases over 1 epoch for Qwen3-tiny"
+  - id: t1_sft_minimal_gemma
+    tier: 1
+    technique: sft
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Gemma3_(4B)-Vision.ipynb
+    falsifier: "training loss decreases over 1 epoch for Gemma-tiny"
+
+  # ---- 1.2 Eval primitives (5 recipes) ----
+  - id: t1_eval_perplexity
+    tier: 1
+    technique: eval
+    base_family: llama
+    apr_subcommand: [eval]
+    status: planned
+    ludwig_mirror: examples/llm_zero_shot_learning
+    falsifier: "perplexity on uniform text equals exp(log(vocab_size))"
+  - id: t1_eval_accuracy
+    tier: 1
+    technique: eval
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    ludwig_mirror: examples/getting_started
+    falsifier: "accuracy on perfectly-predicted holdout = 1.0"
+  - id: t1_eval_f1
+    tier: 1
+    technique: eval
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    ludwig_mirror: examples/class_imbalance
+    falsifier: "F1 on balanced perfect predictions = 1.0; on always-majority predictor < 1.0"
+  - id: t1_eval_rouge_l
+    tier: 1
+    technique: eval
+    base_family: llama
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "ROUGE-L of identical strings = 1.0; ROUGE-L of disjoint strings = 0.0"
+  - id: t1_eval_bleu
+    tier: 1
+    technique: eval
+    base_family: llama
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "BLEU-4 of identical strings = 1.0; BLEU on length-1 reference returns 0 (smoothing)"
+
+  # ---- 1.3 Tabular regression (5 recipes) ----
+  - id: t1_tabular_regression_housing
+    tier: 1
+    technique: tabular_regression
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/titanic
+    falsifier: "MSE on synthetic linear dataset converges to noise floor σ²"
+  - id: t1_tabular_regression_energy
+    tier: 1
+    technique: tabular_regression
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/synthetic
+    falsifier: "MAE on energy-consumption synthetic ≤ 5% of target range"
+  - id: t1_tabular_regression_timeseries
+    tier: 1
+    technique: tabular_regression
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/timeseries
+    falsifier: "1-step-ahead RMSE on AR(1) dataset ≤ 1.1× of theoretical optimum"
+  - id: t1_tabular_regression_multitarget
+    tier: 1
+    technique: tabular_regression
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "multi-target regression: per-target MSE matches independent-fit baseline"
+  - id: t1_tabular_regression_missing
+    tier: 1
+    technique: tabular_regression
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "missing-imputation strategy preserves rank correlation of inputs ≥ 0.9"
+
+  # ---- 1.4 Tabular classification (5 recipes) ----
+  - id: t1_tabular_binary
+    tier: 1
+    technique: tabular_classification
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/titanic
+    falsifier: "binary classifier accuracy on linearly-separable synthetic = 1.0"
+  - id: t1_tabular_3class
+    tier: 1
+    technique: tabular_classification
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/iris
+    falsifier: "3-class accuracy on iris-style synthetic ≥ 0.95"
+  - id: t1_tabular_7class
+    tier: 1
+    technique: tabular_classification
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/wine_quality
+    falsifier: "7-class macro-F1 on wine-quality-style synthetic ≥ 0.7"
+  - id: t1_tabular_100class
+    tier: 1
+    technique: tabular_classification
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "100-class top-5 accuracy ≥ 0.5 on well-separated synthetic"
+  - id: t1_tabular_imbalanced
+    tier: 1
+    technique: tabular_classification
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/class_imbalance
+    falsifier: "minority-class recall ≥ 0.5 on 90/10 imbalanced synthetic with default training"
+
+  # ---- 1.5 Smoke + bench (5 recipes) ----
+  - id: t1_smoke_plan
+    tier: 1
+    technique: smoke
+    base_family: cross-family
+    apr_subcommand: [finetune]
+    status: planned
+    apr_native: true
+    falsifier: "apr finetune --plan emits a plan but writes no checkpoint"
+  - id: t1_smoke_resume
+    tier: 1
+    technique: smoke
+    base_family: llama
+    apr_subcommand: [finetune]
+    status: planned
+    apr_native: true
+    falsifier: "interrupted finetune resumes at the last persisted optimizer step"
+  - id: t1_smoke_early_stop
+    tier: 1
+    technique: smoke
+    base_family: llama
+    apr_subcommand: [finetune]
+    status: planned
+    apr_native: true
+    falsifier: "early-stop on plateau halts within patience+1 epochs"
+  - id: t1_smoke_dry_run
+    tier: 1
+    technique: smoke
+    base_family: cross-family
+    apr_subcommand: [finetune]
+    status: planned
+    apr_native: true
+    falsifier: "apr finetune --dry-run produces zero side effects (no fs write, no GPU alloc)"
+  - id: t1_smoke_bench
+    tier: 1
+    technique: smoke
+    base_family: cross-family
+    apr_subcommand: [bench]
+    status: planned
+    apr_native: true
+    falsifier: "apr bench finetune produces a deterministic per-step latency histogram"
+
+  # =========================================================================
+  # Tier 2 — Adaptive Methods (25 recipes, intermediate)
+  # =========================================================================
+
+  # ---- 2.1 LoRA: 2 ranks × 5 families (10 recipes) ----
+  - id: t2_lora_rank8_llama
+    tier: 2
+    technique: lora
+    base_family: llama
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    ludwig_mirror: examples/lora_adaptation
+    unsloth_mirror: nb/Llama3.1_(8B)-Alpaca.ipynb
+    falsifier: "rank-8 LoRA merge round-trip is bit-identical when α/r = 1.0"
+  - id: t2_lora_rank8_mistral
+    tier: 2
+    technique: lora
+    base_family: mistral
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    unsloth_mirror: nb/Mistral_(7B)-Alpaca.ipynb
+    falsifier: "rank-8 LoRA merge round-trip on Mistral preserves merged-weights bit-identity"
+  - id: t2_lora_rank8_phi
+    tier: 2
+    technique: lora
+    base_family: phi
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    unsloth_mirror: nb/Phi_4_(14B).ipynb
+    falsifier: "rank-8 LoRA on Phi-fused-QKV maintains attention parity with base ± 1e-5"
+  - id: t2_lora_rank8_qwen
+    tier: 2
+    technique: lora
+    base_family: qwen3
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    unsloth_mirror: nb/Qwen3_(4B)-Alpaca.ipynb
+    falsifier: "rank-8 LoRA on Qwen3 head_dim discriminator preserved through merge"
+  - id: t2_lora_rank8_gemma
+    tier: 2
+    technique: lora
+    base_family: gemma
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    unsloth_mirror: nb/Gemma3_(4B)-Vision.ipynb
+    falsifier: "rank-8 LoRA on Gemma query_pre_attn_scalar preserved through merge"
+  - id: t2_lora_rank32_llama
+    tier: 2
+    technique: lora
+    base_family: llama
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "rank-32 LoRA increases trainable parameter count exactly 4× vs rank-8"
+  - id: t2_lora_rank32_mistral
+    tier: 2
+    technique: lora
+    base_family: mistral
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "rank-32 LoRA on Mistral converges in fewer steps than rank-8 on the same data"
+  - id: t2_lora_rank32_phi
+    tier: 2
+    technique: lora
+    base_family: phi
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "rank-32 LoRA on Phi: target_modules q_proj+v_proj only, k+o frozen"
+  - id: t2_lora_rank32_qwen
+    tier: 2
+    technique: lora
+    base_family: qwen3
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "rank-32 LoRA on Qwen3 trainable-param ratio matches expected 0.5%"
+  - id: t2_lora_rank32_gemma
+    tier: 2
+    technique: lora
+    base_family: gemma
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "rank-32 LoRA on Gemma: gate_proj + up_proj trainable, down_proj frozen"
+
+  # ---- 2.2 QLoRA (5 recipes) ----
+  - id: t2_qlora_4bit_rank8_llama
+    tier: 2
+    technique: qlora
+    base_family: llama
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Llama3.1_(8B)-Alpaca.ipynb
+    falsifier: "4-bit base + rank-8 LoRA: VRAM peak ≤ 0.3× of FP16 base + LoRA"
+  - id: t2_qlora_4bit_rank16_mistral
+    tier: 2
+    technique: qlora
+    base_family: mistral
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Mistral_(7B)-Alpaca.ipynb
+    falsifier: "QLoRA rank-16 mistral: post-merge perplexity ≤ FP16 baseline + 5%"
+  - id: t2_qlora_4bit_rank32_phi
+    tier: 2
+    technique: qlora
+    base_family: phi
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    falsifier: "QLoRA rank-32 phi: dequant error bounded by Q4_K_M block-wise tolerance"
+  - id: t2_qlora_double_quant_qwen
+    tier: 2
+    technique: qlora
+    base_family: qwen3
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    falsifier: "double-quant on Qwen3 reduces quantization-state memory by ≥ 0.4 bits/param"
+  - id: t2_qlora_double_quant_off_gemma
+    tier: 2
+    technique: qlora
+    base_family: gemma
+    apr_subcommand: [quantize, finetune, eval]
+    status: planned
+    falsifier: "double-quant=off on Gemma matches single-quant accuracy ± 0.1 perplexity"
+
+  # ---- 2.3 Continued pretraining (5 recipes) ----
+  - id: t2_continued_pretrain_legal
+    tier: 2
+    technique: continued_pretrain
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "domain perplexity on legal-corpus-mini drops ≥ 30% after 100 CP steps"
+  - id: t2_continued_pretrain_code
+    tier: 2
+    technique: continued_pretrain
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "code perplexity drops on code-corpus-mini; non-code perplexity drift ≤ 5%"
+  - id: t2_continued_pretrain_medical
+    tier: 2
+    technique: continued_pretrain
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "medical-corpus CP improves medical-NER F1 ≥ 5pp without catastrophic forgetting"
+  - id: t2_continued_pretrain_codeswitch
+    tier: 2
+    technique: continued_pretrain
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "code-switching corpus reduces L1↔L2 boundary perplexity spike by ≥ 50%"
+  - id: t2_continued_pretrain_scientific
+    tier: 2
+    technique: continued_pretrain
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "scientific-corpus CP improves arxiv-abstract perplexity ≥ 20%"
+
+  # ---- 2.4 Adapter merge (5 recipes) ----
+  - id: t2_adapter_merge_ties
+    tier: 2
+    technique: adapter_merge
+    base_family: llama
+    apr_subcommand: [merge, eval]
+    status: planned
+    falsifier: "TIES merge of two LoRAs preserves shared sign-direction parameters"
+  - id: t2_adapter_merge_dare
+    tier: 2
+    technique: adapter_merge
+    base_family: mistral
+    apr_subcommand: [merge, eval]
+    status: planned
+    falsifier: "DARE merge with drop_p=0.5 reduces parameter count by exactly 50%"
+  - id: t2_adapter_merge_slerp
+    tier: 2
+    technique: adapter_merge
+    base_family: phi
+    apr_subcommand: [merge, eval]
+    status: planned
+    falsifier: "SLERP at t=0.5 produces midpoint with norm ≈ 0.5×(|A|+|B|)"
+  - id: t2_adapter_merge_average
+    tier: 2
+    technique: adapter_merge
+    base_family: qwen3
+    apr_subcommand: [merge, eval]
+    status: planned
+    falsifier: "average merge of identical LoRAs returns the input unchanged"
+  - id: t2_adapter_merge_multilora
+    tier: 2
+    technique: adapter_merge
+    base_family: gemma
+    apr_subcommand: [finetune, merge, eval]
+    status: planned
+    falsifier: "loading 3 LoRAs simultaneously preserves per-LoRA outputs in routing test"
+
+  # =========================================================================
+  # Tier 3 — Specialization (25 recipes, applied)
+  # =========================================================================
+
+  # ---- 3.1 Instruction tuning (5 recipes) ----
+  - id: t3_instruction_alpaca
+    tier: 3
+    technique: instruction_tune
+    base_family: llama
+    apr_subcommand: [finetune, eval, chat]
+    status: planned
+    unsloth_mirror: nb/Llama3.1_(8B)-Alpaca.ipynb
+    falsifier: "Alpaca-format SFT improves instruction-following on held-out test ≥ 10pp"
+  - id: t3_instruction_sharegpt
+    tier: 3
+    technique: instruction_tune
+    base_family: mistral
+    apr_subcommand: [finetune, eval, chat]
+    status: planned
+    falsifier: "ShareGPT multi-turn SFT preserves multi-turn coherence on 5-turn eval"
+  - id: t3_instruction_openassistant
+    tier: 3
+    technique: instruction_tune
+    base_family: phi
+    apr_subcommand: [finetune, eval, chat]
+    status: planned
+    falsifier: "OpenAssistant tree-format SFT respects the assistant-only loss masking"
+  - id: t3_instruction_chat_template
+    tier: 3
+    technique: instruction_tune
+    base_family: qwen3
+    apr_subcommand: [finetune, chat]
+    status: planned
+    falsifier: "ChatML / Llama2 / Mistral / Phi templates produce token-exact roundtrips"
+  - id: t3_instruction_system_prompt
+    tier: 3
+    technique: instruction_tune
+    base_family: gemma
+    apr_subcommand: [finetune, chat]
+    status: planned
+    falsifier: "system-prompt prefix is masked from loss but visible to forward pass"
+
+  # ---- 3.2 Hyperparameter optimization (5 recipes) ----
+  - id: t3_hyperopt_grid
+    tier: 3
+    technique: hyperopt
+    base_family: tabular-only
+    apr_subcommand: [tune]
+    status: planned
+    ludwig_mirror: examples/hyperopt
+    falsifier: "grid search over 4×4 lr×bs grid evaluates exactly 16 trials"
+  - id: t3_hyperopt_random
+    tier: 3
+    technique: hyperopt
+    base_family: tabular-only
+    apr_subcommand: [tune]
+    status: planned
+    ludwig_mirror: examples/hyperopt
+    falsifier: "random search with seed=42 produces deterministic trial sequence"
+  - id: t3_hyperopt_tpe
+    tier: 3
+    technique: hyperopt
+    base_family: tabular-only
+    apr_subcommand: [tune]
+    status: planned
+    ludwig_mirror: examples/hyperopt
+    falsifier: "TPE concentrates trials near best region after 5 prior trials"
+  - id: t3_hyperopt_asha
+    tier: 3
+    technique: hyperopt
+    base_family: tabular-only
+    apr_subcommand: [tune]
+    status: planned
+    falsifier: "ASHA early-prunes ≥ 50% of trials in first rung at η=2 reduction factor"
+  - id: t3_hyperopt_hyperband
+    tier: 3
+    technique: hyperopt
+    base_family: tabular-only
+    apr_subcommand: [tune]
+    status: planned
+    falsifier: "Hyperband with R=81 produces exactly 5 brackets (s_max+1)"
+
+  # ---- 3.3 Calibration (5 recipes) ----
+  - id: t3_calibration_temperature
+    tier: 3
+    technique: calibration
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    ludwig_mirror: examples/calibration
+    falsifier: "temperature scaling preserves argmax classification while reducing ECE ≥ 30%"
+  - id: t3_calibration_platt
+    tier: 3
+    technique: calibration
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "Platt scaling produces sigmoid-shaped calibration curve through (0.5, 0.5)"
+  - id: t3_calibration_isotonic
+    tier: 3
+    technique: calibration
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "isotonic regression calibration is monotonic in input score"
+  - id: t3_calibration_conformal
+    tier: 3
+    technique: calibration
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "conformal prediction at α=0.1 yields empirical coverage ∈ [0.88, 0.92]"
+  - id: t3_calibration_ensemble
+    tier: 3
+    technique: calibration
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "ensemble averaging of 5 models reduces ECE vs any single member"
+
+  # ---- 3.4 Class imbalance (5 recipes) ----
+  - id: t3_imbalance_weighted
+    tier: 3
+    technique: imbalance
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/class_imbalance
+    falsifier: "class weighting (inverse-frequency) raises minority-class recall by ≥ 15pp"
+  - id: t3_imbalance_focal
+    tier: 3
+    technique: imbalance
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "focal loss with γ=2 down-weights easy-positive contribution by ≥ 50%"
+  - id: t3_imbalance_smote
+    tier: 3
+    technique: imbalance
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "SMOTE on 90/10 dataset produces synthetic minority points within k=5 NN"
+  - id: t3_imbalance_threshold
+    tier: 3
+    technique: imbalance
+    base_family: tabular-only
+    apr_subcommand: [eval]
+    status: planned
+    falsifier: "tuning decision threshold on validation set increases F1 vs default 0.5"
+  - id: t3_imbalance_costsensitive
+    tier: 3
+    technique: imbalance
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "asymmetric cost matrix (10:1) shifts predictions toward minority class"
+
+  # ---- 3.5 Multimodal + multitask (5 recipes) ----
+  - id: t3_multimodal_text_image
+    tier: 3
+    technique: multimodal
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/twitter_bots
+    unsloth_mirror: nb/Gemma3_(4B)-Vision.ipynb
+    falsifier: "text+image stub fusion: removing image input drops accuracy ≥ 5pp"
+  - id: t3_multimodal_text_tabular
+    tier: 3
+    technique: multimodal
+    base_family: cross-family
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "text+tabular fusion outperforms either modality alone"
+  - id: t3_multimodal_multitask
+    tier: 3
+    technique: multimodal
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "3-task SFT shared encoder: per-task loss decreases without catastrophic forgetting"
+  - id: t3_multimodal_zero_shot
+    tier: 3
+    technique: multimodal
+    base_family: llama
+    apr_subcommand: [eval]
+    status: planned
+    ludwig_mirror: examples/llm_zero_shot_learning
+    falsifier: "zero-shot prompt-based classifier matches per-class label likelihood ranking"
+  - id: t3_kfold_cv
+    tier: 3
+    technique: kfold_cv
+    base_family: tabular-only
+    apr_subcommand: [finetune, eval]
+    status: planned
+    ludwig_mirror: examples/kfold_cv
+    falsifier: "5-fold CV produces 5 disjoint validation sets covering 100% of training data"
+
+  # =========================================================================
+  # Tier 4 — Reinforcement (25 recipes, advanced)
+  # =========================================================================
+
+  # ---- 4.1 DPO (5 recipes) ----
+  - id: t4_dpo_llama
+    tier: 4
+    technique: dpo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Llama3_(8B)-DPO.ipynb
+    falsifier: "DPO on chosen>rejected preferences raises chosen-completion likelihood vs reference"
+  - id: t4_dpo_mistral
+    tier: 4
+    technique: dpo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "DPO β=0.1 on mistral converges with lower KL-divergence than β=1.0"
+  - id: t4_dpo_phi
+    tier: 4
+    technique: dpo
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "DPO on phi preserves base model on prompts not in preference set (KL ≤ 0.1)"
+  - id: t4_dpo_qwen
+    tier: 4
+    technique: dpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "DPO with implicit reward model: implicit r(chosen) > r(rejected) for all training pairs"
+  - id: t4_dpo_gemma
+    tier: 4
+    technique: dpo
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "DPO loss drops monotonically over 100 steps on synthetic 50-pair preference set"
+
+  # ---- 4.2 ORPO (3 recipes) ----
+  - id: t4_orpo_llama
+    tier: 4
+    technique: orpo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "ORPO without reference model achieves comparable preference accuracy to DPO + ref"
+  - id: t4_orpo_mistral
+    tier: 4
+    technique: orpo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "ORPO odds-ratio loss is concave on rejected likelihood"
+  - id: t4_orpo_qwen
+    tier: 4
+    technique: orpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "ORPO + SFT joint loss: SFT term + λ × OR term, λ-sweep produces convex-in-λ optimum"
+
+  # ---- 4.3 KTO (3 recipes) ----
+  - id: t4_kto_llama
+    tier: 4
+    technique: kto
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "KTO on binary feedback (helpful/unhelpful) raises helpful-conditional likelihood"
+  - id: t4_kto_phi
+    tier: 4
+    technique: kto
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "KTO with desirability=0.5 produces unbiased gradient over balanced feedback"
+  - id: t4_kto_gemma
+    tier: 4
+    technique: kto
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "KTO does not require paired preferences; works on isolated thumb-up/down samples"
+
+  # ---- 4.4 GRPO (5 recipes) ----
+  - id: t4_grpo_math
+    tier: 4
+    technique: grpo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    unsloth_mirror: nb/Qwen3_(4B)-GRPO.ipynb
+    falsifier: "GRPO on math problems with verifiable rewards: pass@1 increases over 50 steps"
+  - id: t4_grpo_code_exec
+    tier: 4
+    technique: grpo
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "GRPO with code-execution reward: % runnable code rises ≥ 20pp"
+  - id: t4_grpo_format_match
+    tier: 4
+    technique: grpo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "GRPO with regex-format reward: % JSON-conforming outputs ≥ 95% after 30 steps"
+  - id: t4_grpo_classification
+    tier: 4
+    technique: grpo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+  - id: t4_grpo_length_budget
+    tier: 4
+    technique: grpo
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "GRPO with length-penalty reward: mean response length converges to budget ± 10%"
+
+  # ---- 4.5 RLHF / PPO (3 recipes) ----
+  - id: t4_rlhf_ppo_llama
+    tier: 4
+    technique: rlhf_ppo
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "PPO with clipping ε=0.2: per-step KL from reference ≤ target_kl"
+  - id: t4_rlhf_ppo_mistral
+    tier: 4
+    technique: rlhf_ppo
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "full RLHF: SFT → reward model → PPO; final policy improves reward without KL blowup"
+  - id: t4_rlhf_ppo_qwen
+    tier: 4
+    technique: rlhf_ppo
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "PPO with adaptive KL coefficient adjusts within target range over training"
+
+  # ---- 4.6 RLAIF / Constitutional (3 recipes) ----
+  - id: t4_rlaif_judge
+    tier: 4
+    technique: rlaif
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "AI-judge rated chosen completions correlate ≥ 0.7 with human-judge ground truth"
+  - id: t4_rlaif_constitutional
+    tier: 4
+    technique: rlaif
+    base_family: phi
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "constitutional principles: harmful-prompt refusal rate rises ≥ 20pp post-RLAIF"
+  - id: t4_rlaif_self_critique
+    tier: 4
+    technique: rlaif
+    base_family: gemma
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "self-critique loop reduces unsafe-output rate without dropping helpfulness ≥ 5pp"
+
+  # ---- 4.7 Reward modeling (3 recipes) ----
+  - id: t4_reward_pairwise
+    tier: 4
+    technique: reward_modeling
+    base_family: llama
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "pairwise reward model: P(chosen > rejected) > 0.5 on held-out preferences"
+  - id: t4_reward_scalar
+    tier: 4
+    technique: reward_modeling
+    base_family: mistral
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "scalar reward head with regression loss converges with R² ≥ 0.5 on synthetic"
+  - id: t4_reward_ensemble
+    tier: 4
+    technique: reward_modeling
+    base_family: qwen3
+    apr_subcommand: [finetune, eval]
+    status: planned
+    falsifier: "ensemble of 3 reward models reduces variance vs single model on calibration set"
