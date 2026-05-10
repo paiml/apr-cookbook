@@ -2400,11 +2400,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-343 Tier 2.5 PEFT variants x 9
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T11:42:15Z
-  updated: 2026-05-10T11:42:17.568465252+00:00
+  updated: 2026-05-10T13:29:18.915149451+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2597,6 +2597,22 @@ roadmap:
   assigned_to: null
   created: 2026-05-10T13:10:40Z
   updated: 2026-05-10T13:10:40.675031942+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-142
+  github_issue: null
+  item_type: task
+  title: PMAT-356 Tier 4.4+4.5 GRPO+PPO x 8
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:22:03Z
+  updated: 2026-05-10T13:22:03.976344809+00:00
   spec: null
   acceptance_criteria: []
   phases: []
