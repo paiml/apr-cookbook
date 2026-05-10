@@ -7840,3 +7840,25 @@ path = "examples/finetune/t4_cpo.rs"
 [[example]]
 name = "t4_simpo"
 path = "examples/finetune/t4_simpo.rs"
+
+# --- fine-tuning-cookbook Tier 4 closeout × 5 (PMAT-359) ---
+
+[[example]]
+name = "t4_async_grpo"
+path = "examples/finetune/t4_async_grpo.rs"
+
+[[example]]
+name = "t4_prm"
+path = "examples/finetune/t4_prm.rs"
+
+[[example]]
+name = "t4_gkd"
+path = "examples/finetune/t4_gkd.rs"
+
+[[example]]
+name = "t4_gspo"
+path = "examples/finetune/t4_gspo.rs"
+
+[[example]]
+name = "t4_mpo"
+path = "examples/finetune/t4_mpo.rs"

@@ -211,3 +211,8 @@ import ProvableContracts.Finetune.T4Rloo
 import ProvableContracts.Finetune.T4Bco
 import ProvableContracts.Finetune.T4Cpo
 import ProvableContracts.Finetune.T4Simpo
+import ProvableContracts.Finetune.T4AsyncGrpo
+import ProvableContracts.Finetune.T4Prm
+import ProvableContracts.Finetune.T4Gkd
+import ProvableContracts.Finetune.T4Gspo
+import ProvableContracts.Finetune.T4Mpo

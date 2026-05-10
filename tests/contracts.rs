@@ -229,6 +229,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t4-bco-v1.yaml",
     "finetune-t4-cpo-v1.yaml",
     "finetune-t4-simpo-v1.yaml",
+    // fine-tuning-cookbook Tier 4 closeout (PMAT-359): 5 recipes.
+    "finetune-t4-async-grpo-v1.yaml",
+    "finetune-t4-prm-v1.yaml",
+    "finetune-t4-gkd-v1.yaml",
+    "finetune-t4-gspo-v1.yaml",
+    "finetune-t4-mpo-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -474,6 +480,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t4-bco-v1.yaml",
     "finetune-t4-cpo-v1.yaml",
     "finetune-t4-simpo-v1.yaml",
+    // Tier 4 closeout (PMAT-359)
+    "finetune-t4-async-grpo-v1.yaml",
+    "finetune-t4-prm-v1.yaml",
+    "finetune-t4-gkd-v1.yaml",
+    "finetune-t4-gspo-v1.yaml",
+    "finetune-t4-mpo-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {
