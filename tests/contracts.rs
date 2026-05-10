@@ -221,6 +221,14 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t4-reward-pairwise-v1.yaml",
     "finetune-t4-reward-scalar-v1.yaml",
     "finetune-t4-reward-ensemble-v1.yaml",
+    // fine-tuning-cookbook Tier 4.8+4.9 (PMAT-358): online+alt × 7.
+    "finetune-t4-online-dpo-v1.yaml",
+    "finetune-t4-xpo-v1.yaml",
+    "finetune-t4-nash-md-v1.yaml",
+    "finetune-t4-rloo-v1.yaml",
+    "finetune-t4-bco-v1.yaml",
+    "finetune-t4-cpo-v1.yaml",
+    "finetune-t4-simpo-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -458,6 +466,14 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t4-reward-pairwise-v1.yaml",
     "finetune-t4-reward-scalar-v1.yaml",
     "finetune-t4-reward-ensemble-v1.yaml",
+    // Tier 4.8+4.9 (PMAT-358)
+    "finetune-t4-online-dpo-v1.yaml",
+    "finetune-t4-xpo-v1.yaml",
+    "finetune-t4-nash-md-v1.yaml",
+    "finetune-t4-rloo-v1.yaml",
+    "finetune-t4-bco-v1.yaml",
+    "finetune-t4-cpo-v1.yaml",
+    "finetune-t4-simpo-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

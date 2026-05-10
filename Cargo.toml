@@ -7810,3 +7810,33 @@ path = "examples/finetune/t4_reward_scalar.rs"
 [[example]]
 name = "t4_reward_ensemble"
 path = "examples/finetune/t4_reward_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 4.8+4.9 — online+alternative × 7 (PMAT-358) ---
+
+[[example]]
+name = "t4_online_dpo"
+path = "examples/finetune/t4_online_dpo.rs"
+
+[[example]]
+name = "t4_xpo"
+path = "examples/finetune/t4_xpo.rs"
+
+[[example]]
+name = "t4_nash_md"
+path = "examples/finetune/t4_nash_md.rs"
+
+[[example]]
+name = "t4_rloo"
+path = "examples/finetune/t4_rloo.rs"
+
+[[example]]
+name = "t4_bco"
+path = "examples/finetune/t4_bco.rs"
+
+[[example]]
+name = "t4_cpo"
+path = "examples/finetune/t4_cpo.rs"
+
+[[example]]
+name = "t4_simpo"
+path = "examples/finetune/t4_simpo.rs"

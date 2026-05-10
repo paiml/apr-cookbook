@@ -204,3 +204,10 @@ import ProvableContracts.Finetune.T4RlaifSelfCritique
 import ProvableContracts.Finetune.T4RewardPairwise
 import ProvableContracts.Finetune.T4RewardScalar
 import ProvableContracts.Finetune.T4RewardEnsemble
+import ProvableContracts.Finetune.T4OnlineDpo
+import ProvableContracts.Finetune.T4Xpo
+import ProvableContracts.Finetune.T4NashMd
+import ProvableContracts.Finetune.T4Rloo
+import ProvableContracts.Finetune.T4Bco
+import ProvableContracts.Finetune.T4Cpo
+import ProvableContracts.Finetune.T4Simpo

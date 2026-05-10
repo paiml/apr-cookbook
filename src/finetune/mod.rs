@@ -19,6 +19,7 @@ pub mod instruction_tuning;
 pub mod lora;
 pub mod memory_optimizers;
 pub mod multimodal;
+pub mod online_alt;
 pub mod peft_variants;
 pub mod preference;
 pub mod qlora;

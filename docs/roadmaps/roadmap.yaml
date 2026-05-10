@@ -2480,11 +2480,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-348 Tier 3.3 Calibration x 5
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T12:09:28Z
-  updated: 2026-05-10T12:23:09.494480229+00:00
+  updated: 2026-05-10T13:44:35.653998510+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2512,11 +2512,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-350 Tier 3.5 Multimodal + multitask + k-fold x 5
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T12:39:32Z
-  updated: 2026-05-10T12:39:32.643284075+00:00
+  updated: 2026-05-10T13:44:35.673282821+00:00
   spec: null
   acceptance_criteria: []
   phases: []
