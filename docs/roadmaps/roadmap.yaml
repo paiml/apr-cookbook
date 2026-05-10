@@ -2608,11 +2608,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-356 Tier 4.4+4.5 GRPO+PPO x 8
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T13:22:03Z
-  updated: 2026-05-10T13:22:03.976344809+00:00
+  updated: 2026-05-10T14:22:38.046801795+00:00
   spec: null
   acceptance_criteria: []
   phases: []
