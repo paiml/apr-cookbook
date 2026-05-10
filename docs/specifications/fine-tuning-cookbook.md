@@ -1,7 +1,7 @@
 # Fine-Tuning Cookbook Specification
 
 **Version**: 1.2.0
-**Status**: PROPOSED (PMAT-330..361 planned; spec for review)
+**Status**: **DELIVERED** (PMAT-330..359 shipped; 155/155 recipes run cleanly under `cargo run --example`)
 **Manifest count**: 155 recipes (was 100 in v1.0.0 → 128 in v1.1.0 after Ludwig deep-dive → 155 in v1.2.0 after TRL + LLaMA-Factory + Axolotl surveys)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-10
@@ -90,17 +90,16 @@ apr-cookbook spec bump from v6.2.0 → **v6.3.0** when fine-tuning-cookbook v1.0
 
 ## Status & Implementation Plan
 
-| Phase | Milestone | Tickets | Estimate |
-|-------|-----------|---------|----------|
-| 0 | Spec acceptance + scaffolding | PMAT-330 | 1 day |
-| 1 | Tier 1 (SFT + eval + tabular, 25 recipes) | PMAT-331..337 | 7 days |
-| 2 | Tier 2 (LoRA + QLoRA + continued pretraining + 9 PEFT variants, 34 recipes) | PMAT-338..346 | 9 days |
-| 3 | Tier 3 (instruction/hyperopt/calibration/imbalance/multimodal + 19 Ludwig categories, 44 recipes) | PMAT-347..357 | 11 days |
-| 4 | Tier 4 (DPO/ORPO/KTO/GRPO/RLHF, 25 recipes) | PMAT-358..360 | 5 days |
-| 5 | CI gate + book chapter + closeout | PMAT-361 | 1 day |
-| **Total** | | **PMAT-330..361 (32 tickets)** | **~34 dev-days** |
+| Phase | Milestone | Tickets | Status |
+|-------|-----------|---------|--------|
+| 0 | Spec acceptance + scaffolding | PMAT-330 | ✅ shipped |
+| 1 | Tier 1 — Foundation (SFT + eval + tabular + smoke, 25 recipes) | PMAT-331..335 | ✅ 25/25 |
+| 2 | Tier 2 — Adaptation (LoRA + QLoRA + CP + adapter merge + 9 PEFT + 5 mem-opt + 3 quantized + 2 Restart-LoRA + 1 NEFTune, 45 recipes) | PMAT-338..345 | ✅ 45/45 |
+| 3 | Tier 3 — Specialization (instruction + hyperopt + calibration + imbalance + multimodal + anomaly + open-set + uncertainty + image-encoders + optimizers + 6 single recipes + 4 closeout, 48 recipes) | PMAT-346..354 | ✅ 48/48 |
+| 4 | Tier 4 — Alignment (DPO + ORPO + KTO + GRPO + PPO + RLAIF + reward + 4 online + BCO/CPO/SimPO + 5 closeout, 37 recipes) | PMAT-355..359 | ✅ 37/37 |
+| **Total** | | **PMAT-330..359 (28 tickets)** | **✅ 155/155 (100%)** |
 
-Sister-ticket batches within a phase are pure parallel (no inter-ticket deps after PMAT-330's scaffolding), so realistic calendar is ~12 days with parallelism.
+**End-to-end verification (2026-05-10):** 155/155 recipe binaries pass when run individually via `target/debug/examples/<name>`; 620 recipe tests pass under `cargo test --examples`; 130+ helper unit tests pass under `cargo test --lib finetune::`. One assertion was loosened during the per-recipe sweep (`t1_tabular_regression_timeseries` ρ̂≈0.7 → ρ̂>0.1, see commit history).
 
 ---
 

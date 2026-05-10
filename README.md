@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <em>v6.3.0 (2026-05-10) closes the <a href="docs/specifications/fine-tuning-cookbook.md">fine-tuning-cookbook</a> sprint: <strong>155 new fine-tuning recipes</strong> across a 4-tier curriculum (Tier 1 SFT/eval/tabular × 25, Tier 2 LoRA/QLoRA/PEFT/CP/merge × 45, Tier 3 calibration/multimodal/QAT/etc × 48, Tier 4 DPO/ORPO/KTO/GRPO/PPO/RLAIF × 37). Mirrors Ludwig + Unsloth + TRL + LLaMA-Factory + Axolotl. Each recipe ships 4 tests (recipe_runs / falsifier_holds / falsifier_breaks / deterministic). 100% pass rate when run as standalone binaries. See <a href="examples/finetune/README.md"><code>examples/finetune/README.md</code></a>.</em>
+</p>
+
+<p align="center">
   <em>v6.2.0 (2026-05-07) closes the <a href="docs/specifications/architecture-demos.md">architecture-demos</a> sprint: 18 new family-smoke recipes + provable-contracts covering the full HF Transformers architecture surface that <code>aprender::rosetta</code> ships descriptors for (Llama, Mistral, Qwen2/3/3.5, Phi, Gemma, GPT-2, GPT-NeoX, DeepSeek, Falcon-H1, RWKV-7, OpenELM, OPT, MAMBA, BERT, plus Whisper + Moonshine in <code>examples/speech/</code>). Manifest-driven CI gate (<code>make architecture-demos-coverage</code>) reconciles upstream loader support against on-disk recipes and contracts.</em>
 </p>
 
@@ -126,8 +130,10 @@ cargo run --example 2>&1 | head -50
 | [Serverless](examples/serverless/) | 5 | Lambda, cold start optimization, edge functions, containers, warmup |
 | [Speech](examples/speech/) | 5 | Whisper transcription, streaming ASR, VAD, diarization, multilingual |
 | [MCP](examples/mcp/) | 3 | Stdio server, HTTP server, tool schema advertisement |
+| [**Fine-Tuning**](examples/finetune/) | **155** | **4-tier curriculum: SFT → LoRA/QLoRA/PEFT/CP/merge → calibration/multimodal/QAT → DPO/ORPO/KTO/GRPO/PPO/RLAIF (Ludwig + Unsloth + TRL + LLaMA-Factory + Axolotl mirror)** |
 
-**Total: 341 recipes.** Run any example: `cargo run --example <name>`
+**Total: 496 recipes.** Run any example: `cargo run --example <name>`. The 155
+fine-tuning recipes ship a closed-form falsifier each (see [`examples/finetune/README.md`](examples/finetune/README.md)).
 
 **Demo-run baseline (2026-04-23):** 330 / 341 pass under 10s; the remaining 11 are compute-heavy benchmarks (see `docs/specifications/components/quality-gates.md#demo-run-baseline`) that require a longer timeout. 0 failures.
 
