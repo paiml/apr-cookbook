@@ -2432,11 +2432,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-345 Tier 2 closeout 2.7+2.8+2.9 (6 recipes)
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T12:01:06Z
-  updated: 2026-05-10T12:01:11.289128759+00:00
+  updated: 2026-05-10T12:40:57.385526996+00:00
   spec: null
   acceptance_criteria: []
   phases: []
@@ -2501,6 +2501,22 @@ roadmap:
   assigned_to: null
   created: 2026-05-10T12:32:58Z
   updated: 2026-05-10T12:32:59.356158960+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-136
+  github_issue: null
+  item_type: task
+  title: PMAT-350 Tier 3.5 Multimodal + multitask + k-fold x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:39:32Z
+  updated: 2026-05-10T12:39:32.643284075+00:00
   spec: null
   acceptance_criteria: []
   phases: []
