@@ -8,6 +8,7 @@
 //! See `docs/specifications/fine-tuning-cookbook.md` and `recipe-template.md`.
 
 pub mod eval_primitives;
+pub mod lora;
 pub mod sft_minimal;
 pub mod smoke;
 pub mod tabular_classification;

@@ -7299,3 +7299,45 @@ path = "examples/finetune/t1_smoke_dry_run.rs"
 [[example]]
 name = "t1_smoke_bench"
 path = "examples/finetune/t1_smoke_bench.rs"
+
+# --- fine-tuning-cookbook Tier 2.1 — LoRA × 10 (rank 8 + rank 32) × 5 families (PMAT-338+339) ---
+
+[[example]]
+name = "t2_lora_rank8_llama"
+path = "examples/finetune/t2_lora_rank8_llama.rs"
+
+[[example]]
+name = "t2_lora_rank32_llama"
+path = "examples/finetune/t2_lora_rank32_llama.rs"
+
+[[example]]
+name = "t2_lora_rank8_mistral"
+path = "examples/finetune/t2_lora_rank8_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank32_mistral"
+path = "examples/finetune/t2_lora_rank32_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank8_phi"
+path = "examples/finetune/t2_lora_rank8_phi.rs"
+
+[[example]]
+name = "t2_lora_rank32_phi"
+path = "examples/finetune/t2_lora_rank32_phi.rs"
+
+[[example]]
+name = "t2_lora_rank8_qwen"
+path = "examples/finetune/t2_lora_rank8_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank32_qwen"
+path = "examples/finetune/t2_lora_rank32_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank8_gemma"
+path = "examples/finetune/t2_lora_rank8_gemma.rs"
+
+[[example]]
+name = "t2_lora_rank32_gemma"
+path = "examples/finetune/t2_lora_rank32_gemma.rs"

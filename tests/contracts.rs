@@ -84,6 +84,17 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t1-smoke-early-stop-v1.yaml",
     "finetune-t1-smoke-dry-run-v1.yaml",
     "finetune-t1-smoke-bench-v1.yaml",
+    // fine-tuning-cookbook Tier 2.1 (PMAT-338+339): LoRA × 10.
+    "finetune-t2-lora-rank8-llama-v1.yaml",
+    "finetune-t2-lora-rank8-mistral-v1.yaml",
+    "finetune-t2-lora-rank8-phi-v1.yaml",
+    "finetune-t2-lora-rank8-qwen-v1.yaml",
+    "finetune-t2-lora-rank8-gemma-v1.yaml",
+    "finetune-t2-lora-rank32-llama-v1.yaml",
+    "finetune-t2-lora-rank32-mistral-v1.yaml",
+    "finetune-t2-lora-rank32-phi-v1.yaml",
+    "finetune-t2-lora-rank32-qwen-v1.yaml",
+    "finetune-t2-lora-rank32-gemma-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -184,6 +195,17 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t1-smoke-early-stop-v1.yaml",
     "finetune-t1-smoke-dry-run-v1.yaml",
     "finetune-t1-smoke-bench-v1.yaml",
+    // Tier 2.1 LoRA × 10 (PMAT-338+339): 5 families × 2 ranks
+    "finetune-t2-lora-rank8-llama-v1.yaml",
+    "finetune-t2-lora-rank8-mistral-v1.yaml",
+    "finetune-t2-lora-rank8-phi-v1.yaml",
+    "finetune-t2-lora-rank8-qwen-v1.yaml",
+    "finetune-t2-lora-rank8-gemma-v1.yaml",
+    "finetune-t2-lora-rank32-llama-v1.yaml",
+    "finetune-t2-lora-rank32-mistral-v1.yaml",
+    "finetune-t2-lora-rank32-phi-v1.yaml",
+    "finetune-t2-lora-rank32-qwen-v1.yaml",
+    "finetune-t2-lora-rank32-gemma-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

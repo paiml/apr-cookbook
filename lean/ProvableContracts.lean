@@ -82,3 +82,15 @@ import ProvableContracts.Finetune.T1SmokeResume
 import ProvableContracts.Finetune.T1SmokeEarlyStop
 import ProvableContracts.Finetune.T1SmokeDryRun
 import ProvableContracts.Finetune.T1SmokeBench
+
+-- Tier 2.1: LoRA × 10 (PMAT-338+339). 5 families × 2 ranks (8, 32).
+import ProvableContracts.Finetune.T2LoraRank8Llama
+import ProvableContracts.Finetune.T2LoraRank8Mistral
+import ProvableContracts.Finetune.T2LoraRank8Phi
+import ProvableContracts.Finetune.T2LoraRank8Qwen
+import ProvableContracts.Finetune.T2LoraRank8Gemma
+import ProvableContracts.Finetune.T2LoraRank32Llama
+import ProvableContracts.Finetune.T2LoraRank32Mistral
+import ProvableContracts.Finetune.T2LoraRank32Phi
+import ProvableContracts.Finetune.T2LoraRank32Qwen
+import ProvableContracts.Finetune.T2LoraRank32Gemma
