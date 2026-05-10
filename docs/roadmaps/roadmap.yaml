@@ -2236,3 +2236,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-119
+  github_issue: null
+  item_type: task
+  title: PMAT-332 fine-tuning Tier 1.2 Eval primitives × 5 (perplexity, accuracy, F1, ROUGE-L, BLEU)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:51:39Z
+  updated: 2026-05-10T09:59:12.536050809+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
