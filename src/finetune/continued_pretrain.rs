@@ -62,7 +62,7 @@ impl UnigramLM {
 }
 
 fn tokenize(s: &str) -> Vec<String> {
-    s.split_whitespace().map(|t| t.to_lowercase()).collect()
+    s.split_whitespace().map(str::to_lowercase).collect()
 }
 
 /// Build a base "general" LM as a starting point. Trains on a fixed
