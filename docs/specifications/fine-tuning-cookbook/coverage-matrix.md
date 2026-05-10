@@ -4,7 +4,7 @@ Auto-regenerated from [manifest.yaml](manifest.yaml) by `scripts/finetune-gen.sh
 Hand-edits will be overwritten. Edit the manifest, not this file.
 
 **Last regenerated:** 2026-05-10 (v1.1.0 — Ludwig deep-dive added 28 recipes)
-**Totals:** 0 certified · 128 planned · **128 total** across 4 tiers
+**Totals:** 0 certified · 155 planned · **155 total** across 4 tiers
 **Tier histogram:** T1=25 · T2=34 · T3=44 · T4=25
 
 ## Tier × Technique × Base Family Matrix

@@ -383,6 +383,15 @@ architecture-demos-coverage: ## Verify architecture-demos manifest is in sync wi
 	@echo "🔧 Linting all contracts (includes architecture-demos)..."
 	@pv lint contracts/
 
+fine-tuning-coverage: ## Verify fine-tuning-cookbook manifest is in sync with on-disk contracts/fixtures
+	@echo "🔧 Checking fine-tuning-cookbook manifest..."
+	@bash scripts/finetune-gen.sh --check
+	@echo "🔧 Linting all fine-tuning contracts..."
+	@for f in contracts/finetune-*.yaml; do \
+		python3 -c "import yaml; yaml.safe_load(open('$$f'))" || exit 1; \
+	done
+	@echo "✓ $$(ls contracts/finetune-*.yaml | wc -l) fine-tuning contracts parse cleanly"
+
 audit: ## Run security audit
 	@echo "🔒 Running security audit..."
 	@if command -v cargo-audit >/dev/null 2>&1; then \

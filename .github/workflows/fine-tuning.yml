@@ -1,0 +1,50 @@
+# fine-tuning-cookbook coverage gate
+# Validates the manifest reconciles against on-disk artifacts (contracts +
+# fixtures + coverage matrix). Modeled on architecture-demos.yml.
+# PMAT-330 (scaffolding): contracts/fixtures auto-generated; this gate
+# ensures they don't drift from the manifest.
+name: Fine-Tuning
+
+on:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'docs/specifications/fine-tuning-cookbook/**'
+      - 'contracts/finetune-*.yaml'
+      - 'tests/fixtures/finetune/**'
+      - 'examples/finetune/**'
+      - 'scripts/finetune-gen.sh'
+      - '.github/workflows/fine-tuning.yml'
+  push:
+    branches: [main, master]
+    paths:
+      - 'docs/specifications/fine-tuning-cookbook/**'
+      - 'contracts/finetune-*.yaml'
+      - 'tests/fixtures/finetune/**'
+      - 'examples/finetune/**'
+      - 'scripts/finetune-gen.sh'
+      - '.github/workflows/fine-tuning.yml'
+  workflow_dispatch:
+
+jobs:
+  check-manifest:
+    name: Verify fine-tuning-cookbook manifest is in sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install yq
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
+
+      - name: Run finetune-gen --check
+        run: bash scripts/finetune-gen.sh --check
+
+      - name: Verify contracts are valid YAML
+        run: |
+          for f in contracts/finetune-*.yaml; do
+            python3 -c "import yaml; yaml.safe_load(open('$f'))" || { echo "Invalid YAML: $f"; exit 1; }
+          done
+          echo "All $(ls contracts/finetune-*.yaml | wc -l) contracts parse cleanly"

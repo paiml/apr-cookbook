@@ -1,0 +1,158 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-10"
+  author: "PAIML Engineering"
+  description: "Fine-tuning recipe t4_grpo_classification: grpo on mistral"
+  references:
+    - "docs/specifications/fine-tuning-cookbook.md"
+    - "docs/specifications/fine-tuning-cookbook/manifest.yaml#t4_grpo_classification"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - finetune
+    - tier_4
+    - grpo
+    - mistral
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; load fixture"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: train
+      description: "Run apr finetune (or technique-specific entry point)"
+      invariant: "Training is deterministic for fixed seed=42"
+    - name: evaluate
+      description: "Run the recipe metric (loss, perplexity, accuracy, etc.)"
+      invariant: "Metric is finite; no NaN/Inf"
+    - name: verify
+      description: "Assert the falsifier"
+      invariant: "Two consecutive runs produce equal verdict"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  totality:
+    formula: "main() returns Result<()> for any well-formed fixture"
+    domain: "fixture: Path"
+    codomain: "Result<()>"
+    invariants:
+      - "main() is total — no panic for any well-formed input"
+    preconditions:
+      - "fixture is valid UTF-8 JSONL or CSV"
+    postconditions:
+      - "Result is Ok or Err; no panic"
+    lean_theorem: "ProvableContracts.Finetune.T4GrpoClassification.Totality"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Totality"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T4GrpoClassification.lean"
+
+  determinism:
+    formula: "main() with seed=42 produces equal output across runs"
+    domain: "seed: u64, fixture: Path"
+    codomain: "verdict: Hash"
+    invariants:
+      - "Two consecutive main() calls with seed=42 produce byte-equal output"
+    preconditions:
+      - "seed is fixed; fixture is identical"
+    postconditions:
+      - "verdict_1 == verdict_2"
+    lean_theorem: "ProvableContracts.Finetune.T4GrpoClassification.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T4GrpoClassification.lean"
+
+  convergence:
+    formula: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    domain: "fixture: Path, training_steps: u32"
+    codomain: "metric: f32"
+    invariants:
+      - "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    preconditions:
+      - "fixture is bounded, deterministic"
+    postconditions:
+      - "the falsifiable claim above holds on the bundled fixture"
+    lean_theorem: "ProvableContracts.Finetune.T4GrpoClassification.Convergence"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Convergence"
+      status: not-applicable
+      module: "lean/ProvableContracts/Finetune/T4GrpoClassification.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "main() is total"
+    formal: "for all fixture: Path. main() ↦ Result<()> (no panic)"
+    tolerance: 0.0
+    applies_to: totality
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Totality"
+      status: proved
+      module: "ProvableContracts.Finetune.T4GrpoClassification"
+  - type: invariant
+    property: "main() is deterministic"
+    formal: "main(seed=42) == main(seed=42)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Determinism"
+      status: proved
+      module: "ProvableContracts.Finetune.T4GrpoClassification"
+  - type: invariant
+    property: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    formal: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    tolerance: 0.0
+    applies_to: convergence
+    lean:
+      theorem: "ProvableContracts.Finetune.T4GrpoClassification.Convergence"
+      status: not-applicable
+      module: "ProvableContracts.Finetune.T4GrpoClassification"
+
+falsification_tests:
+  - id: FALSIFY-FT-T4_GRPO_CLASSIFICATION-001
+    rule: "main() is total on the bundled fixture"
+    prediction: "main() returns Ok(()) on the bundled fixture"
+    test: "cargo test --example t4_grpo_classification -- recipe_runs"
+    if_fails: "Recipe panics or returns Err on the bundled fixture"
+  - id: FALSIFY-FT-T4_GRPO_CLASSIFICATION-002
+    rule: "Two consecutive runs produce equal output (determinism)"
+    prediction: "main() with seed=42 produces equal verdict across two runs"
+    test: "cargo test --example t4_grpo_classification -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked (clock, RNG, threading)"
+  - id: FALSIFY-FT-T4_GRPO_CLASSIFICATION-003
+    rule: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    prediction: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    test: "cargo test --example t4_grpo_classification -- falsifier_holds_on_fixture"
+    if_fails: "grpo regression on bundled fixture"
+
+kani_harnesses:
+  - id: KANI-FT-T4_GRPO_CLASSIFICATION-001
+    obligation: "main() is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_grpo_classification_total"
+  - id: KANI-FT-T4_GRPO_CLASSIFICATION-002
+    obligation: "main() is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_grpo_classification_deterministic"
+  - id: KANI-FT-T4_GRPO_CLASSIFICATION-003
+    obligation: "GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_grpo_classification_convergence"
+
+qa_gate:
+  id: F-FT-T4_GRPO_CLASSIFICATION-001
+  name: "Fine-tuning t4_grpo_classification contract"
+  description: "grpo on mistral: GRPO with accuracy reward on multi-choice: top-1 accuracy increases vs SFT baseline"
+  checks:
+    - main_is_total
+    - deterministic_across_runs
+    - falsifier_holds_on_fixture
+  pass_criteria: "All 3 falsification tests pass on bundled fixture"

@@ -30,13 +30,12 @@ summary:
   tier_3: 48
   tier_4: 37
   ludwig_mirrored: 55
-  trl_mirrored: 12          # NEW v1.2.0
+  trl_mirrored: 12 # NEW v1.2.0
   llamafactory_mirrored: 10 # NEW v1.2.0
-  axolotl_mirrored: 6       # NEW v1.2.0
+  axolotl_mirrored: 6 # NEW v1.2.0
   unsloth_mirrored: 16
   apr_native: 5
-  techniques_distinct: 63   # was 39 in v1.1.0
-
+  techniques_distinct: 63 # was 39 in v1.1.0
 recipes:
   # =========================================================================
   # Tier 1 — Foundations (25 recipes, simple)
@@ -85,7 +84,6 @@ recipes:
     status: planned
     unsloth_mirror: nb/Gemma3_(4B)-Vision.ipynb
     falsifier: "training loss decreases over 1 epoch for Gemma-tiny"
-
   # ---- 1.2 Eval primitives (5 recipes) ----
   - id: t1_eval_perplexity
     tier: 1
@@ -125,7 +123,6 @@ recipes:
     apr_subcommand: [eval]
     status: planned
     falsifier: "BLEU-4 of identical strings = 1.0; BLEU on length-1 reference returns 0 (smoothing)"
-
   # ---- 1.3 Tabular regression (5 recipes) ----
   - id: t1_tabular_regression_housing
     tier: 1
@@ -149,7 +146,7 @@ recipes:
     base_family: tabular-only
     apr_subcommand: [finetune, eval]
     status: planned
-    ludwig_mirror: examples/forecasting/config.yaml  # plus timeseries_forecasting/
+    ludwig_mirror: examples/forecasting/config.yaml # plus timeseries_forecasting/
     falsifier: "1-step-ahead RMSE on AR(1) dataset ≤ 1.1× of theoretical optimum"
   - id: t1_tabular_regression_multitarget
     tier: 1
@@ -165,7 +162,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "missing-imputation strategy preserves rank correlation of inputs ≥ 0.9"
-
   # ---- 1.4 Tabular classification (5 recipes) ----
   - id: t1_tabular_binary
     tier: 1
@@ -181,7 +177,7 @@ recipes:
     base_family: tabular-only
     apr_subcommand: [finetune, eval]
     status: planned
-    ludwig_mirror: examples/mnist/config.yaml  # 10-class but trims to 3
+    ludwig_mirror: examples/mnist/config.yaml # 10-class but trims to 3
     falsifier: "3-class accuracy on iris-style synthetic ≥ 0.95"
   - id: t1_tabular_7class
     tier: 1
@@ -206,7 +202,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/class_imbalance/config.yaml
     falsifier: "minority-class recall ≥ 0.5 on 90/10 imbalanced synthetic with default training"
-
   # ---- 1.5 Smoke + bench (5 recipes) ----
   - id: t1_smoke_plan
     tier: 1
@@ -248,7 +243,6 @@ recipes:
     status: planned
     apr_native: true
     falsifier: "apr bench finetune produces a deterministic per-step latency histogram"
-
   # =========================================================================
   # Tier 2 — Adaptive Methods (25 recipes, intermediate)
   # =========================================================================
@@ -330,7 +324,6 @@ recipes:
     apr_subcommand: [finetune, merge, eval]
     status: planned
     falsifier: "rank-32 LoRA on Gemma: gate_proj + up_proj trainable, down_proj frozen"
-
   # ---- 2.2 QLoRA (5 recipes) ----
   - id: t2_qlora_4bit_rank8_llama
     tier: 2
@@ -370,7 +363,6 @@ recipes:
     apr_subcommand: [quantize, finetune, eval]
     status: planned
     falsifier: "double-quant=off on Gemma matches single-quant accuracy ± 0.1 perplexity"
-
   # ---- 2.3 Continued pretraining (5 recipes) ----
   - id: t2_continued_pretrain_legal
     tier: 2
@@ -407,7 +399,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "scientific-corpus CP improves arxiv-abstract perplexity ≥ 20%"
-
   # ---- 2.4 Adapter merge (5 recipes) ----
   - id: t2_adapter_merge_ties
     tier: 2
@@ -444,7 +435,6 @@ recipes:
     apr_subcommand: [finetune, merge, eval]
     status: planned
     falsifier: "loading 3 LoRAs simultaneously preserves per-LoRA outputs in routing test"
-
   # ---- 2.5 PEFT variants (Ludwig peft_advanced/ + regex_freezing/, 9 recipes — v1.1.0) ----
   - id: t2_peft_corda_init
     tier: 2
@@ -518,7 +508,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/regex_freezing/llm_freezing_with_regex_training.py
     falsifier: "Regex-based layer freeze: gradients are zero for frozen-pattern parameters; non-frozen update normally"
-
   # ---- 2.6 Memory-efficient optimizers (5 recipes — LLaMA-Factory + Axolotl, v1.2.0) ----
   - id: t2_galore
     tier: 2
@@ -560,7 +549,6 @@ recipes:
     status: planned
     llamafactory_mirror: examples/train_full/qwen3_full_sft.yaml
     falsifier: "Freeze-tuning N layers: gradient norms zero on frozen, non-zero on trainable"
-
   # ---- 2.7 Quantized-base LoRA (3 recipes — LLaMA-Factory train_qlora/, v1.2.0) ----
   - id: t2_lora_aqlm
     tier: 2
@@ -586,7 +574,6 @@ recipes:
     status: planned
     llamafactory_mirror: examples/train_qlora/llama3_lora_sft_gptq.yaml
     falsifier: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
-
   # ---- 2.8 Restart-LoRA + LISA (Axolotl unique, 2 recipes — v1.2.0) ----
   - id: t2_relora
     tier: 2
@@ -604,7 +591,6 @@ recipes:
     status: planned
     axolotl_mirror: examples/llama-2/lisa.yml
     falsifier: "LISA layer-importance sampling: top-k important layers updated per step; bottom layers gradient-zero"
-
   # ---- 2.9 NEFTune (LLaMA-Factory + paper, 1 recipe — v1.2.0) ----
   - id: t2_neftune
     tier: 2
@@ -614,7 +600,6 @@ recipes:
     status: planned
     llamafactory_mirror: src/llamafactory/hparams/finetuning_args.py (neftune_alpha)
     falsifier: "NEFTune injected embedding noise α=5: instruction-tuning quality lift ≥ 5pp on AlpacaEval-style synthetic"
-
   # =========================================================================
   # Tier 3 — Specialization (48 recipes, applied)
   # =========================================================================
@@ -626,7 +611,7 @@ recipes:
     base_family: llama
     apr_subcommand: [finetune, eval, chat]
     status: planned
-    ludwig_mirror: examples/llm_instruction_tuning/  # plus llama2_7b_finetuning_4bit/train_alpaca.py
+    ludwig_mirror: examples/llm_instruction_tuning/ # plus llama2_7b_finetuning_4bit/train_alpaca.py
     unsloth_mirror: nb/Llama3.1_(8B)-Alpaca.ipynb
     falsifier: "Alpaca-format SFT improves instruction-following on held-out test ≥ 10pp"
   - id: t3_instruction_sharegpt
@@ -657,7 +642,6 @@ recipes:
     apr_subcommand: [finetune, chat]
     status: planned
     falsifier: "system-prompt prefix is masked from loss but visible to forward pass"
-
   # ---- 3.2 Hyperparameter optimization (5 recipes) ----
   - id: t3_hyperopt_grid
     tier: 3
@@ -697,7 +681,6 @@ recipes:
     apr_subcommand: [tune]
     status: planned
     falsifier: "Hyperband with R=81 produces exactly 5 brackets (s_max+1)"
-
   # ---- 3.3 Calibration (5 recipes) ----
   - id: t3_calibration_temperature
     tier: 3
@@ -705,7 +688,7 @@ recipes:
     base_family: tabular-only
     apr_subcommand: [eval]
     status: planned
-    ludwig_mirror: examples/calibration/  # 2 .py scripts, no yaml
+    ludwig_mirror: examples/calibration/ # 2 .py scripts, no yaml
     falsifier: "temperature scaling preserves argmax classification while reducing ECE ≥ 30%"
   - id: t3_calibration_platt
     tier: 3
@@ -735,7 +718,6 @@ recipes:
     apr_subcommand: [eval]
     status: planned
     falsifier: "ensemble averaging of 5 models reduces ECE vs any single member"
-
   # ---- 3.4 Class imbalance (5 recipes) ----
   - id: t3_imbalance_weighted
     tier: 3
@@ -773,7 +755,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "asymmetric cost matrix (10:1) shifts predictions toward minority class"
-
   # ---- 3.5 Multimodal + multitask (5 recipes) ----
   - id: t3_multimodal_text_image
     tier: 3
@@ -804,7 +785,7 @@ recipes:
     base_family: llama
     apr_subcommand: [eval]
     status: planned
-    ludwig_mirror: examples/llm_zero_shot_learning/  # plus llm_few_shot_learning/
+    ludwig_mirror: examples/llm_zero_shot_learning/ # plus llm_few_shot_learning/
     falsifier: "zero-shot prompt-based classifier matches per-class label likelihood ranking"
   - id: t3_kfold_cv
     tier: 3
@@ -812,9 +793,8 @@ recipes:
     base_family: tabular-only
     apr_subcommand: [finetune, eval]
     status: planned
-    ludwig_mirror: examples/kfold_cv/  # 3 .py scripts; train_imdb_ray.py
+    ludwig_mirror: examples/kfold_cv/ # 3 .py scripts; train_imdb_ray.py
     falsifier: "5-fold CV produces 5 disjoint validation sets covering 100% of training data"
-
   # ---- 3.6 Anomaly detection (3 recipes — Ludwig anomaly_detection/, v1.1.0) ----
   - id: t3_anomaly_deep_sad
     tier: 3
@@ -840,7 +820,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/anomaly_detection/config_drocc.yaml
     falsifier: "DROCC: adversarial-perturbation classifier flags out-of-distribution synthetic anomalies above noise floor"
-
   # ---- 3.7 Open-set recognition (3 recipes — Ludwig open_set_recognition/, v1.1.0) ----
   - id: t3_open_set_baseline
     tier: 3
@@ -866,7 +845,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/open_set_recognition/config_objectosphere.yaml
     falsifier: "Objectosphere loss: feature norm for known classes > unknown classes by ≥ 2× on validation"
-
   # ---- 3.8 Uncertainty (2 recipes — Ludwig uncertainty/, v1.1.0) ----
   - id: t3_uncertainty_mc_dropout
     tier: 3
@@ -884,12 +862,11 @@ recipes:
     status: planned
     ludwig_mirror: examples/uncertainty/config_calibrated.yaml
     falsifier: "Calibrated head: ECE ≤ 0.05 on validation; reliability diagram lies on diagonal within ε"
-
   # ---- 3.9 Image encoder backbones (3 recipes — Ludwig image_encoders/, v1.1.0) ----
   - id: t3_image_encoder_clip
     tier: 3
     technique: image_encoder
-    base_family: tabular-only  # vision encoder feeds tabular task; cross-family
+    base_family: tabular-only # vision encoder feeds tabular task; cross-family
     apr_subcommand: [finetune, eval]
     status: planned
     ludwig_mirror: examples/image_encoders/config_clip.yaml
@@ -910,7 +887,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/image_encoders/config_siglip.yaml
     falsifier: "SigLIP encoder produces L2-normalized embeddings (||e||₂ ≈ 1 ± ε)"
-
   # ---- 3.10 Optimizers (2 recipes — Ludwig optimizers/, v1.1.0) ----
   - id: t3_optimizer_muon
     tier: 3
@@ -928,7 +904,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/optimizers/config_schedule_free_adamw.yaml
     falsifier: "Schedule-free AdamW: no LR scheduler required; final loss within 5% of warmup+cosine schedule"
-
   # ---- 3.11 L-BFGS optimizer (1 recipe — Ludwig lbfgs/, v1.1.0) ----
   - id: t3_lbfgs
     tier: 3
@@ -938,7 +913,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/lbfgs/lbfgs.yaml
     falsifier: "L-BFGS converges in fewer iterations than SGD/Adam on small-batch convex objective"
-
   # ---- 3.12 Multi-task balancing (1 recipe — Ludwig multi_task/, v1.1.0) ----
   - id: t3_multitask_famo
     tier: 3
@@ -948,7 +922,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/multi_task/config_famo
     falsifier: "FAMO multi-task balancing: per-task loss decreases without any task dominating gradient norm"
-
   # ---- 3.13 Semantic segmentation (1 recipe — Ludwig semantic_segmentation/, v1.1.0) ----
   - id: t3_semantic_segmentation_segformer
     tier: 3
@@ -958,7 +931,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/semantic_segmentation/config_segformer
     falsifier: "SegFormer mIoU ≥ 0.5 on stub CamSeq-tiny dataset (32×32 patches, 4 classes)"
-
   # ---- 3.14 LLM structured output (1 recipe — Ludwig llm_structured_output/, v1.1.0) ----
   - id: t3_structured_output_json
     tier: 3
@@ -968,7 +940,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/llm_structured_output/config_json_schema.yaml
     falsifier: "JSON-schema-constrained decode: ≥ 95% of generated outputs parse against the declared schema"
-
   # ---- 3.15 Mamba encoder (1 recipe — Ludwig mamba_encoders/, v1.1.0) ----
   - id: t3_mamba_encoder_text
     tier: 3
@@ -978,7 +949,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/mamba_encoders/mamba2_text_classification.yaml
     falsifier: "Mamba-2 text classifier: linear-time sequence processing — latency scales O(n) within 10% of theoretical"
-
   # ---- 3.16 Hypernetwork (1 recipe — Ludwig hypernetwork/, v1.1.0) ----
   - id: t3_hypernetwork
     tier: 3
@@ -988,7 +958,6 @@ recipes:
     status: planned
     ludwig_mirror: examples/hypernetwork/config_hypernetwork.yaml
     falsifier: "Hypernetwork generates target-network weights conditioned on task-id; per-task accuracy ≥ baseline"
-
   # ---- 3.17 Quantization-Aware Training (Axolotl QAT, 2 recipes — v1.2.0) ----
   - id: t3_qat_fp8
     tier: 3
@@ -996,7 +965,7 @@ recipes:
     base_family: llama
     apr_subcommand: [quantize, finetune, eval]
     status: planned
-    axolotl_mirror: examples/{family}/3b-qat-fsdp2.yaml  # see e.g. examples/qwen3.5/3b-qat-fsdp2.yaml
+    axolotl_mirror: examples/{family}/3b-qat-fsdp2.yaml # see e.g. examples/qwen3.5/3b-qat-fsdp2.yaml
     falsifier: "QAT FP8 fake-quant matches dequant→quant identity within ε; final post-quant accuracy ≥ FP16 - 1pp"
   - id: t3_qat_mxfp4
     tier: 3
@@ -1006,7 +975,6 @@ recipes:
     status: planned
     axolotl_mirror: examples/qwen3.5/3b-qat-mxfp4.yaml
     falsifier: "MXFP4 4-bit microscaling: shared-exponent block matches Open Compute MXFP4 spec exactly"
-
   # ---- 3.18 Sample packing + FSDP-LoRA (Axolotl, 2 recipes — v1.2.0) ----
   - id: t3_sample_packing
     tier: 3
@@ -1025,7 +993,6 @@ recipes:
     gpu_required: true
     axolotl_mirror: examples/llama-2/qlora-fsdp.yml
     falsifier: "FSDP shards model parameters across N GPUs; per-rank memory ≤ (1/N + ε) of single-GPU baseline"
-
   # =========================================================================
   # Tier 4 — Reinforcement (37 recipes, advanced)
   # =========================================================================
@@ -1068,7 +1035,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "DPO loss drops monotonically over 100 steps on synthetic 50-pair preference set"
-
   # ---- 4.2 ORPO (3 recipes) ----
   - id: t4_orpo_llama
     tier: 4
@@ -1092,7 +1058,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "ORPO + SFT joint loss: SFT term + λ × OR term, λ-sweep produces convex-in-λ optimum"
-
   # ---- 4.3 KTO (3 recipes) ----
   - id: t4_kto_llama
     tier: 4
@@ -1116,7 +1081,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "KTO does not require paired preferences; works on isolated thumb-up/down samples"
-
   # ---- 4.4 GRPO (5 recipes) ----
   - id: t4_grpo_math
     tier: 4
@@ -1124,7 +1088,7 @@ recipes:
     base_family: qwen3
     apr_subcommand: [finetune, eval]
     status: planned
-    ludwig_mirror: examples/alignment/config_grpo.yaml  # train_grpo.py has reward-fn machinery
+    ludwig_mirror: examples/alignment/config_grpo.yaml # train_grpo.py has reward-fn machinery
     unsloth_mirror: nb/Qwen3_(4B)-GRPO.ipynb
     falsifier: "GRPO on math problems with verifiable rewards: pass@1 increases over 50 steps"
   - id: t4_grpo_code_exec
@@ -1155,7 +1119,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "GRPO with length-penalty reward: mean response length converges to budget ± 10%"
-
   # ---- 4.5 RLHF / PPO (3 recipes) ----
   - id: t4_rlhf_ppo_llama
     tier: 4
@@ -1178,7 +1141,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "PPO with adaptive KL coefficient adjusts within target range over training"
-
   # ---- 4.6 RLAIF / Constitutional (3 recipes) ----
   - id: t4_rlaif_judge
     tier: 4
@@ -1201,7 +1163,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "self-critique loop reduces unsafe-output rate without dropping helpfulness ≥ 5pp"
-
   # ---- 4.7 Reward modeling (3 recipes) ----
   - id: t4_reward_pairwise
     tier: 4
@@ -1224,7 +1185,6 @@ recipes:
     apr_subcommand: [finetune, eval]
     status: planned
     falsifier: "ensemble of 3 reward models reduces variance vs single model on calibration set"
-
   # ---- 4.8 Online preference learning (TRL, 4 recipes — v1.2.0) ----
   - id: t4_online_dpo
     tier: 4
@@ -1258,7 +1218,6 @@ recipes:
     status: planned
     trl_mirror: examples/scripts/async_grpo.py
     falsifier: "Async GRPO: rollouts on stale policy weighted by importance ratio; gradient bias bounded"
-
   # ---- 4.9 BCO/CPO/SimPO — alternative preference losses (TRL + LLaMA-Factory, 3 recipes — v1.2.0) ----
   - id: t4_bco
     tier: 4
@@ -1285,7 +1244,6 @@ recipes:
     trl_mirror: trl/trainer/cpo_trainer.py (simpo_gamma flag)
     llamafactory_mirror: examples/train_lora/qwen3_lora_dpo.yaml (simpo variant)
     falsifier: "SimPO reference-free: same chosen-rejected margin objective as DPO without reference-model forward passes"
-
   # ---- 4.10 Reward modeling extensions (TRL, 3 recipes — v1.2.0) ----
   - id: t4_prm
     tier: 4
@@ -1311,7 +1269,6 @@ recipes:
     status: planned
     trl_mirror: examples/scripts/gkd.py
     falsifier: "GKD on-policy distillation: student-teacher KL drops monotonically; student matches teacher style on held-out"
-
   # ---- 4.11 GSPO + MPO — sequence-level preference (TRL, 2 recipes — v1.2.0) ----
   - id: t4_gspo
     tier: 4

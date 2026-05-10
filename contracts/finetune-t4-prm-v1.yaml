@@ -1,0 +1,158 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-10"
+  author: "PAIML Engineering"
+  description: "Fine-tuning recipe t4_prm: prm on phi"
+  references:
+    - "docs/specifications/fine-tuning-cookbook.md"
+    - "docs/specifications/fine-tuning-cookbook/manifest.yaml#t4_prm"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - finetune
+    - tier_4
+    - prm
+    - phi
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; load fixture"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: train
+      description: "Run apr finetune (or technique-specific entry point)"
+      invariant: "Training is deterministic for fixed seed=42"
+    - name: evaluate
+      description: "Run the recipe metric (loss, perplexity, accuracy, etc.)"
+      invariant: "Metric is finite; no NaN/Inf"
+    - name: verify
+      description: "Assert the falsifier"
+      invariant: "Two consecutive runs produce equal verdict"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  totality:
+    formula: "main() returns Result<()> for any well-formed fixture"
+    domain: "fixture: Path"
+    codomain: "Result<()>"
+    invariants:
+      - "main() is total — no panic for any well-formed input"
+    preconditions:
+      - "fixture is valid UTF-8 JSONL or CSV"
+    postconditions:
+      - "Result is Ok or Err; no panic"
+    lean_theorem: "ProvableContracts.Finetune.T4Prm.Totality"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Totality"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T4Prm.lean"
+
+  determinism:
+    formula: "main() with seed=42 produces equal output across runs"
+    domain: "seed: u64, fixture: Path"
+    codomain: "verdict: Hash"
+    invariants:
+      - "Two consecutive main() calls with seed=42 produce byte-equal output"
+    preconditions:
+      - "seed is fixed; fixture is identical"
+    postconditions:
+      - "verdict_1 == verdict_2"
+    lean_theorem: "ProvableContracts.Finetune.T4Prm.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T4Prm.lean"
+
+  convergence:
+    formula: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    domain: "fixture: Path, training_steps: u32"
+    codomain: "metric: f32"
+    invariants:
+      - "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    preconditions:
+      - "fixture is bounded, deterministic"
+    postconditions:
+      - "the falsifiable claim above holds on the bundled fixture"
+    lean_theorem: "ProvableContracts.Finetune.T4Prm.Convergence"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Convergence"
+      status: not-applicable
+      module: "lean/ProvableContracts/Finetune/T4Prm.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "main() is total"
+    formal: "for all fixture: Path. main() ↦ Result<()> (no panic)"
+    tolerance: 0.0
+    applies_to: totality
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Totality"
+      status: proved
+      module: "ProvableContracts.Finetune.T4Prm"
+  - type: invariant
+    property: "main() is deterministic"
+    formal: "main(seed=42) == main(seed=42)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Determinism"
+      status: proved
+      module: "ProvableContracts.Finetune.T4Prm"
+  - type: invariant
+    property: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    formal: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    tolerance: 0.0
+    applies_to: convergence
+    lean:
+      theorem: "ProvableContracts.Finetune.T4Prm.Convergence"
+      status: not-applicable
+      module: "ProvableContracts.Finetune.T4Prm"
+
+falsification_tests:
+  - id: FALSIFY-FT-T4_PRM-001
+    rule: "main() is total on the bundled fixture"
+    prediction: "main() returns Ok(()) on the bundled fixture"
+    test: "cargo test --example t4_prm -- recipe_runs"
+    if_fails: "Recipe panics or returns Err on the bundled fixture"
+  - id: FALSIFY-FT-T4_PRM-002
+    rule: "Two consecutive runs produce equal output (determinism)"
+    prediction: "main() with seed=42 produces equal verdict across two runs"
+    test: "cargo test --example t4_prm -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked (clock, RNG, threading)"
+  - id: FALSIFY-FT-T4_PRM-003
+    rule: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    prediction: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    test: "cargo test --example t4_prm -- falsifier_holds_on_fixture"
+    if_fails: "prm regression on bundled fixture"
+
+kani_harnesses:
+  - id: KANI-FT-T4_PRM-001
+    obligation: "main() is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_prm_total"
+  - id: KANI-FT-T4_PRM-002
+    obligation: "main() is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_prm_deterministic"
+  - id: KANI-FT-T4_PRM-003
+    obligation: "PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t4_prm_convergence"
+
+qa_gate:
+  id: F-FT-T4_PRM-001
+  name: "Fine-tuning t4_prm contract"
+  description: "prm on phi: PRM Process Reward Model: per-step reward correlates ≥ 0.7 with stepwise human annotations on math chain"
+  checks:
+    - main_is_total
+    - deterministic_across_runs
+    - falsifier_holds_on_fixture
+  pass_criteria: "All 3 falsification tests pass on bundled fixture"
