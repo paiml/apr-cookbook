@@ -2640,11 +2640,11 @@ roadmap:
   github_issue: null
   item_type: task
   title: PMAT-358 Tier 4.8+4.9 online+BCO/CPO/SimPO x 7
-  status: inprogress
+  status: completed
   priority: high
   assigned_to: null
   created: 2026-05-10T13:40:20Z
-  updated: 2026-05-10T13:40:20.378206891+00:00
+  updated: 2026-05-10T14:22:02.561194847+00:00
   spec: null
   acceptance_criteria: []
   phases: []
