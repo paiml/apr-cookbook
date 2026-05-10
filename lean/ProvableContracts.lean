@@ -94,3 +94,10 @@ import ProvableContracts.Finetune.T2LoraRank32Mistral
 import ProvableContracts.Finetune.T2LoraRank32Phi
 import ProvableContracts.Finetune.T2LoraRank32Qwen
 import ProvableContracts.Finetune.T2LoraRank32Gemma
+
+-- Tier 2.2: QLoRA × 5 (PMAT-340).
+import ProvableContracts.Finetune.T2QloraLlama4bitR8
+import ProvableContracts.Finetune.T2QloraMistral4bitR16
+import ProvableContracts.Finetune.T2QloraPhi4bitR32
+import ProvableContracts.Finetune.T2QloraQwenDoubleQuant
+import ProvableContracts.Finetune.T2QloraGemmaDoubleQuantOff

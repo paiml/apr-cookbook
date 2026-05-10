@@ -9,6 +9,7 @@
 
 pub mod eval_primitives;
 pub mod lora;
+pub mod qlora;
 pub mod sft_minimal;
 pub mod smoke;
 pub mod tabular_classification;

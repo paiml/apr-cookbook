@@ -7341,3 +7341,25 @@ path = "examples/finetune/t2_lora_rank8_gemma.rs"
 [[example]]
 name = "t2_lora_rank32_gemma"
 path = "examples/finetune/t2_lora_rank32_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.2 — QLoRA × 5 (PMAT-340) ---
+
+[[example]]
+name = "t2_qlora_4bit_rank8_llama"
+path = "examples/finetune/t2_qlora_4bit_rank8_llama.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank16_mistral"
+path = "examples/finetune/t2_qlora_4bit_rank16_mistral.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank32_phi"
+path = "examples/finetune/t2_qlora_4bit_rank32_phi.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_qwen"
+path = "examples/finetune/t2_qlora_double_quant_qwen.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_off_gemma"
+path = "examples/finetune/t2_qlora_double_quant_off_gemma.rs"

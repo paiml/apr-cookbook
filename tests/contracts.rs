@@ -95,6 +95,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t2-lora-rank32-phi-v1.yaml",
     "finetune-t2-lora-rank32-qwen-v1.yaml",
     "finetune-t2-lora-rank32-gemma-v1.yaml",
+    // fine-tuning-cookbook Tier 2.2 (PMAT-340): QLoRA × 5.
+    "finetune-t2-qlora-4bit-rank8-llama-v1.yaml",
+    "finetune-t2-qlora-4bit-rank16-mistral-v1.yaml",
+    "finetune-t2-qlora-4bit-rank32-phi-v1.yaml",
+    "finetune-t2-qlora-double-quant-qwen-v1.yaml",
+    "finetune-t2-qlora-double-quant-off-gemma-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -206,6 +212,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t2-lora-rank32-phi-v1.yaml",
     "finetune-t2-lora-rank32-qwen-v1.yaml",
     "finetune-t2-lora-rank32-gemma-v1.yaml",
+    // Tier 2.2 QLoRA × 5 (PMAT-340)
+    "finetune-t2-qlora-4bit-rank8-llama-v1.yaml",
+    "finetune-t2-qlora-4bit-rank16-mistral-v1.yaml",
+    "finetune-t2-qlora-4bit-rank32-phi-v1.yaml",
+    "finetune-t2-qlora-double-quant-qwen-v1.yaml",
+    "finetune-t2-qlora-double-quant-off-gemma-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {
