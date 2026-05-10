@@ -160,6 +160,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t3-imbalance-smote-v1.yaml",
     "finetune-t3-imbalance-threshold-v1.yaml",
     "finetune-t3-imbalance-costsensitive-v1.yaml",
+    // fine-tuning-cookbook Tier 3.5 (PMAT-350): Multimodal + multitask + k-fold × 5.
+    "finetune-t3-multimodal-text-image-v1.yaml",
+    "finetune-t3-multimodal-text-tabular-v1.yaml",
+    "finetune-t3-multimodal-multitask-v1.yaml",
+    "finetune-t3-multimodal-zero-shot-v1.yaml",
+    "finetune-t3-kfold-cv-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -336,6 +342,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t3-imbalance-smote-v1.yaml",
     "finetune-t3-imbalance-threshold-v1.yaml",
     "finetune-t3-imbalance-costsensitive-v1.yaml",
+    // Tier 3.5 Multimodal + multitask + k-fold × 5 (PMAT-350)
+    "finetune-t3-multimodal-text-image-v1.yaml",
+    "finetune-t3-multimodal-text-tabular-v1.yaml",
+    "finetune-t3-multimodal-multitask-v1.yaml",
+    "finetune-t3-multimodal-zero-shot-v1.yaml",
+    "finetune-t3-kfold-cv-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

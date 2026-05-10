@@ -7582,3 +7582,25 @@ path = "examples/finetune/t3_imbalance_threshold.rs"
 [[example]]
 name = "t3_imbalance_costsensitive"
 path = "examples/finetune/t3_imbalance_costsensitive.rs"
+
+# --- fine-tuning-cookbook Tier 3.5 — Multimodal + multitask + k-fold × 5 (PMAT-350) ---
+
+[[example]]
+name = "t3_multimodal_text_image"
+path = "examples/finetune/t3_multimodal_text_image.rs"
+
+[[example]]
+name = "t3_multimodal_text_tabular"
+path = "examples/finetune/t3_multimodal_text_tabular.rs"
+
+[[example]]
+name = "t3_multimodal_multitask"
+path = "examples/finetune/t3_multimodal_multitask.rs"
+
+[[example]]
+name = "t3_multimodal_zero_shot"
+path = "examples/finetune/t3_multimodal_zero_shot.rs"
+
+[[example]]
+name = "t3_kfold_cv"
+path = "examples/finetune/t3_kfold_cv.rs"

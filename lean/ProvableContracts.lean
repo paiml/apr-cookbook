@@ -151,3 +151,8 @@ import ProvableContracts.Finetune.T3ImbalanceFocal
 import ProvableContracts.Finetune.T3ImbalanceSmote
 import ProvableContracts.Finetune.T3ImbalanceThreshold
 import ProvableContracts.Finetune.T3ImbalanceCostsensitive
+import ProvableContracts.Finetune.T3MultimodalTextImage
+import ProvableContracts.Finetune.T3MultimodalTextTabular
+import ProvableContracts.Finetune.T3MultimodalMultitask
+import ProvableContracts.Finetune.T3MultimodalZeroShot
+import ProvableContracts.Finetune.T3KfoldCv

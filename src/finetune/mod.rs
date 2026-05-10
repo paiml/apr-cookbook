@@ -16,6 +16,7 @@ pub mod imbalance;
 pub mod instruction_tuning;
 pub mod lora;
 pub mod memory_optimizers;
+pub mod multimodal;
 pub mod peft_variants;
 pub mod qlora;
 pub mod quantized_base;
