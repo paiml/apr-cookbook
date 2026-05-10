@@ -56,23 +56,29 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Lint (clippy)
-        run: cargo clippy --all-targets -- -D warnings
+      - name: Lint (clippy on lib + tests, NOT examples)
+        # `--all-targets` would compile all 1670 examples in debug mode
+        # (~264MB each = >400GB needed). Scoped to lib + tests keeps
+        # disk pressure within the GH-hosted runner's 14GB. Examples
+        # are checked separately by the weekly examples-build workflow.
+        run: cargo clippy --lib --tests --all-features -- -D warnings
 
-      - name: Test
-        run: cargo test --all-features
-
-      - name: Coverage (codecov)
-        run: |
-          cargo install cargo-llvm-cov --locked || true
-          cargo llvm-cov --all-features --lcov --output-path lcov.info
-        continue-on-error: true
+      - name: Test (lib + tests, NOT examples)
+        # Same disk-pressure mitigation as clippy. `cargo test` without
+        # `--lib --tests` would compile all 1670 examples — too large.
+        # The dep-duplication tracked at aprender#1599 makes this even
+        # worse (aprender-core 0.29.3 + 0.31.2, trueno 0.19.1 + 0.31.2).
+        run: cargo test --lib --tests --all-features
 
       - name: Security scan (cargo audit)
         run: |
           cargo install cargo-audit --locked || true
           cargo audit
         continue-on-error: true
+
+      # Coverage moved to .github/workflows/coverage.yml (cron schedule)
+      # because cargo llvm-cov re-instruments + recompiles, doubling target/
+      # size. Off the PR critical path keeps this gate fast.
 
   # Note: the self-hosted `unified` gate lives in its own workflow file
   # (`unified-gate-advisory.yml`) so its conclusion doesn't taint this
