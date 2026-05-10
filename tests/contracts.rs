@@ -113,6 +113,16 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t2-adapter-merge-slerp-v1.yaml",
     "finetune-t2-adapter-merge-average-v1.yaml",
     "finetune-t2-adapter-merge-multilora-v1.yaml",
+    // fine-tuning-cookbook Tier 2.5 (PMAT-343): PEFT variants × 9.
+    "finetune-t2-peft-corda-init-v1.yaml",
+    "finetune-t2-peft-eva-init-v1.yaml",
+    "finetune-t2-peft-pissa-init-v1.yaml",
+    "finetune-t2-peft-loftq-init-v1.yaml",
+    "finetune-t2-oft-v1.yaml",
+    "finetune-t2-ln-tuning-v1.yaml",
+    "finetune-t2-tinylora-v1.yaml",
+    "finetune-t2-vblora-v1.yaml",
+    "finetune-t2-regex-freeze-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -242,6 +252,16 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t2-adapter-merge-slerp-v1.yaml",
     "finetune-t2-adapter-merge-average-v1.yaml",
     "finetune-t2-adapter-merge-multilora-v1.yaml",
+    // Tier 2.5 PEFT variants × 9 (PMAT-343)
+    "finetune-t2-peft-corda-init-v1.yaml",
+    "finetune-t2-peft-eva-init-v1.yaml",
+    "finetune-t2-peft-pissa-init-v1.yaml",
+    "finetune-t2-peft-loftq-init-v1.yaml",
+    "finetune-t2-oft-v1.yaml",
+    "finetune-t2-ln-tuning-v1.yaml",
+    "finetune-t2-tinylora-v1.yaml",
+    "finetune-t2-vblora-v1.yaml",
+    "finetune-t2-regex-freeze-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

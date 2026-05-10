@@ -88,6 +88,7 @@ thiserror = "1"
 
 # Recipe infrastructure
 rand = { version = "0.8", features = ["std_rng"] }
+regex = "1"
 tempfile = "3"
 
 # Compression (for Lambda packaging)
@@ -7407,3 +7408,41 @@ path = "examples/finetune/t2_adapter_merge_average.rs"
 [[example]]
 name = "t2_adapter_merge_multilora"
 path = "examples/finetune/t2_adapter_merge_multilora.rs"
+
+# --- fine-tuning-cookbook Tier 2.5 — PEFT variants × 9 (PMAT-343) ---
+
+[[example]]
+name = "t2_peft_corda_init"
+path = "examples/finetune/t2_peft_corda_init.rs"
+
+[[example]]
+name = "t2_peft_eva_init"
+path = "examples/finetune/t2_peft_eva_init.rs"
+
+[[example]]
+name = "t2_peft_pissa_init"
+path = "examples/finetune/t2_peft_pissa_init.rs"
+
+[[example]]
+name = "t2_peft_loftq_init"
+path = "examples/finetune/t2_peft_loftq_init.rs"
+
+[[example]]
+name = "t2_oft"
+path = "examples/finetune/t2_oft.rs"
+
+[[example]]
+name = "t2_ln_tuning"
+path = "examples/finetune/t2_ln_tuning.rs"
+
+[[example]]
+name = "t2_tinylora"
+path = "examples/finetune/t2_tinylora.rs"
+
+[[example]]
+name = "t2_vblora"
+path = "examples/finetune/t2_vblora.rs"
+
+[[example]]
+name = "t2_regex_freeze"
+path = "examples/finetune/t2_regex_freeze.rs"

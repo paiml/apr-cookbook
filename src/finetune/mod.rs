@@ -11,6 +11,7 @@ pub mod adapter_merge;
 pub mod continued_pretrain;
 pub mod eval_primitives;
 pub mod lora;
+pub mod peft_variants;
 pub mod qlora;
 pub mod sft_minimal;
 pub mod smoke;

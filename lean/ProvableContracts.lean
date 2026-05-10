@@ -111,3 +111,12 @@ import ProvableContracts.Finetune.T2AdapterMergeDare
 import ProvableContracts.Finetune.T2AdapterMergeSlerp
 import ProvableContracts.Finetune.T2AdapterMergeAverage
 import ProvableContracts.Finetune.T2AdapterMergeMultilora
+import ProvableContracts.Finetune.T2PeftCordaInit
+import ProvableContracts.Finetune.T2PeftEvaInit
+import ProvableContracts.Finetune.T2PeftPissaInit
+import ProvableContracts.Finetune.T2PeftLoftqInit
+import ProvableContracts.Finetune.T2Oft
+import ProvableContracts.Finetune.T2LnTuning
+import ProvableContracts.Finetune.T2Tinylora
+import ProvableContracts.Finetune.T2Vblora
+import ProvableContracts.Finetune.T2RegexFreeze
