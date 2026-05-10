@@ -66,6 +66,12 @@ const CONTRACT_FILES: &[&str] = &[
     "finetune-t1-eval-f1-v1.yaml",
     "finetune-t1-eval-rouge-l-v1.yaml",
     "finetune-t1-eval-bleu-v1.yaml",
+    // fine-tuning-cookbook Tier 1.3 (PMAT-333): Tabular regression × 5.
+    "finetune-t1-tabular-regression-housing-v1.yaml",
+    "finetune-t1-tabular-regression-energy-v1.yaml",
+    "finetune-t1-tabular-regression-timeseries-v1.yaml",
+    "finetune-t1-tabular-regression-multitarget-v1.yaml",
+    "finetune-t1-tabular-regression-missing-v1.yaml",
     "int4-quantization-v1.yaml",
     "lz4-decompression-v1.yaml",
     "mmap-inference-v1.yaml",
@@ -148,6 +154,12 @@ const FINETUNE_CERTIFIED: &[&str] = &[
     "finetune-t1-eval-f1-v1.yaml",
     "finetune-t1-eval-rouge-l-v1.yaml",
     "finetune-t1-eval-bleu-v1.yaml",
+    // Tier 1.3 Tabular regression × 5 (PMAT-333)
+    "finetune-t1-tabular-regression-housing-v1.yaml",
+    "finetune-t1-tabular-regression-energy-v1.yaml",
+    "finetune-t1-tabular-regression-timeseries-v1.yaml",
+    "finetune-t1-tabular-regression-multitarget-v1.yaml",
+    "finetune-t1-tabular-regression-missing-v1.yaml",
 ];
 
 fn is_finetune_certified(name: &str) -> bool {

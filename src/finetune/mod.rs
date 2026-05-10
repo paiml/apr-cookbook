@@ -9,3 +9,4 @@
 
 pub mod eval_primitives;
 pub mod sft_minimal;
+pub mod tabular_regression;

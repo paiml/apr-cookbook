@@ -61,3 +61,10 @@ import ProvableContracts.Finetune.T1EvalAccuracy
 import ProvableContracts.Finetune.T1EvalF1
 import ProvableContracts.Finetune.T1EvalRougeL
 import ProvableContracts.Finetune.T1EvalBleu
+
+-- Tier 1.3: 5 tabular regression recipes.
+import ProvableContracts.Finetune.T1TabularRegressionHousing
+import ProvableContracts.Finetune.T1TabularRegressionEnergy
+import ProvableContracts.Finetune.T1TabularRegressionTimeseries
+import ProvableContracts.Finetune.T1TabularRegressionMultitarget
+import ProvableContracts.Finetune.T1TabularRegressionMissing
