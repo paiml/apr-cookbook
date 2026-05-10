@@ -1,7 +1,7 @@
 # Kani CI Specification
 
-**Version**: 1.0.0
-**Status**: ACTIVE (PMAT-324 implemented; runs on every PR)
+**Version**: 1.0.1
+**Status**: ACTIVE (PMAT-324 merged on main 2026-05-09 via PR #421; kani-gate + free-disk-space landed; runs on every PR)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-09
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
