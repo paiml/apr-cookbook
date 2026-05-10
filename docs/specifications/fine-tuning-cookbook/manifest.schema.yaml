@@ -76,12 +76,31 @@ $defs:
           - qlora
           - continued_pretrain
           - adapter_merge     # TIES, DARE, SLERP, average
+          # PEFT variants (Ludwig peft_advanced/)
+          - peft_init_variant # CorDA / EVA / PiSSA / LoftQ LoRA inits
+          - oft               # Orthogonal Fine-Tuning
+          - ln_tuning         # LayerNorm-only tuning
+          - tinylora          # very small LoRA
+          - vblora            # Vector Bank LoRA
+          - regex_freeze      # selective layer freezing by regex
           - instruction_tune
           - hyperopt
           - calibration
           - imbalance
           - multimodal
           - kfold_cv
+          # New tier-3 categories surfaced from Ludwig examples
+          - anomaly_detection
+          - open_set_recognition
+          - uncertainty
+          - image_encoder
+          - optimizer_compare
+          - multitask_balance
+          - semantic_segmentation
+          - structured_output
+          - mamba_encoder
+          - hypernetwork
+          - lbfgs
           - dpo
           - orpo
           - kto

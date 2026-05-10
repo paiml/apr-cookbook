@@ -1,7 +1,8 @@
 # Fine-Tuning Cookbook Specification
 
-**Version**: 1.0.0
+**Version**: 1.1.0
 **Status**: PROPOSED (PMAT-330..355 planned; spec for review)
+**Manifest count**: 128 recipes (was 100 in v1.0.0; +28 after surveying upstream `~/src/ludwig`)
 **MSRV**: 1.89 (inherits from apr-cookbook v6.0)
 **Date**: 2026-05-10
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
@@ -56,10 +57,10 @@ The cookbook enforces these invariants at PR time. The fine-tuning spec extends 
 
 | Criterion | Target | How measured |
 |-----------|--------|--------------|
-| Recipe count | ≥ 100 | `wc -l` over manifest entries with `status: certified` |
-| Tier coverage | T1=25, T2=25, T3=25, T4=25 | manifest tier histogram |
-| Ludwig mirror coverage | ≥ 21 | manifest entries with `ludwig_mirror:` set (lifts to ~30 once Tier 3 calibration/imbalance map fully) |
-| Unsloth mirror coverage | ≥ 16 | manifest entries with `unsloth_mirror:` set (lifts to ~25 once Tier 4 GRPO/DPO map to TRL+Unsloth blog refs) |
+| Recipe count | ≥ 128 | `wc -l` over manifest entries with `status: certified` |
+| Tier coverage | T1=25, T2=34, T3=44, T4=25 | manifest tier histogram (revised in v1.1.0 after Ludwig deep-dive) |
+| Ludwig mirror coverage | ≥ 55 | manifest entries with `ludwig_mirror:` set (concrete file paths in `~/src/ludwig/examples/`) |
+| Unsloth mirror coverage | ≥ 16 | manifest entries with `unsloth_mirror:` set (Colab notebook refs) |
 | Provable-contract grade A | 100% of certified | `pv score contracts/finetune-*.yaml --binding` aggregate ≥ 0.93 |
 | CLI subcommand exercise | every `apr finetune`/`apr eval`/`apr quantize`/`apr serve`/`apr merge` flag | recipe coverage table |
 | CI runtime | < 5 min on PR | `cargo test --lib --tests --features finetune-fixtures` |
@@ -89,11 +90,11 @@ apr-cookbook spec bump from v6.2.0 → **v6.3.0** when fine-tuning-cookbook v1.0
 |-------|-----------|---------|----------|
 | 0 | Spec acceptance + scaffolding | PMAT-330 | 1 day |
 | 1 | Tier 1 (SFT + eval + tabular, 25 recipes) | PMAT-331..337 | 7 days |
-| 2 | Tier 2 (LoRA + QLoRA + continued pretraining, 25 recipes) | PMAT-338..344 | 7 days |
-| 3 | Tier 3 (instruction/hyperopt/calibration/imbalance/multimodal, 25 recipes) | PMAT-345..351 | 7 days |
-| 4 | Tier 4 (DPO/ORPO/KTO/GRPO/RLHF, 25 recipes) | PMAT-352..354 | 5 days |
-| 5 | CI gate + book chapter + closeout | PMAT-355 | 1 day |
-| **Total** | | **PMAT-330..355 (26 tickets)** | **~28 dev-days** |
+| 2 | Tier 2 (LoRA + QLoRA + continued pretraining + 9 PEFT variants, 34 recipes) | PMAT-338..346 | 9 days |
+| 3 | Tier 3 (instruction/hyperopt/calibration/imbalance/multimodal + 19 Ludwig categories, 44 recipes) | PMAT-347..357 | 11 days |
+| 4 | Tier 4 (DPO/ORPO/KTO/GRPO/RLHF, 25 recipes) | PMAT-358..360 | 5 days |
+| 5 | CI gate + book chapter + closeout | PMAT-361 | 1 day |
+| **Total** | | **PMAT-330..361 (32 tickets)** | **~34 dev-days** |
 
 Sister-ticket batches within a phase are pure parallel (no inter-ticket deps after PMAT-330's scaffolding), so realistic calendar is ~12 days with parallelism.
 
