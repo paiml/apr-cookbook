@@ -7446,3 +7446,25 @@ path = "examples/finetune/t2_vblora.rs"
 [[example]]
 name = "t2_regex_freeze"
 path = "examples/finetune/t2_regex_freeze.rs"
+
+# --- fine-tuning-cookbook Tier 2.6 — Memory-efficient optimizers × 5 (PMAT-344) ---
+
+[[example]]
+name = "t2_galore"
+path = "examples/finetune/t2_galore.rs"
+
+[[example]]
+name = "t2_badam"
+path = "examples/finetune/t2_badam.rs"
+
+[[example]]
+name = "t2_apollo"
+path = "examples/finetune/t2_apollo.rs"
+
+[[example]]
+name = "t2_dora"
+path = "examples/finetune/t2_dora.rs"
+
+[[example]]
+name = "t2_freeze_tuning"
+path = "examples/finetune/t2_freeze_tuning.rs"

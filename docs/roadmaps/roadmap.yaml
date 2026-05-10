@@ -2412,3 +2412,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-130
+  github_issue: null
+  item_type: task
+  title: PMAT-344 Tier 2.6 Memory-efficient optimizers x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T11:53:23Z
+  updated: 2026-05-10T11:53:26.357020696+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

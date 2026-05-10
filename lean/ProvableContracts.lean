@@ -120,3 +120,8 @@ import ProvableContracts.Finetune.T2LnTuning
 import ProvableContracts.Finetune.T2Tinylora
 import ProvableContracts.Finetune.T2Vblora
 import ProvableContracts.Finetune.T2RegexFreeze
+import ProvableContracts.Finetune.T2Galore
+import ProvableContracts.Finetune.T2Badam
+import ProvableContracts.Finetune.T2Apollo
+import ProvableContracts.Finetune.T2Dora
+import ProvableContracts.Finetune.T2FreezeTuning
