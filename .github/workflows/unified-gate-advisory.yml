@@ -19,14 +19,19 @@
 #
 # When the `paiml/infra` `_provision` target is fixed, this workflow goes
 # green automatically — no change needed here.
+#
+# 2026-05-11: Auto-triggers (push / pull_request_target) removed because
+# the `unified-gate.yml` reusable workflow has been failing on every push
+# for weeks: the self-hosted runners (`intel-clean-room-*`) lack `sccache`
+# and `pmat`, so both `cpu-gates` (`cargo install --locked forjar` with
+# `RUSTC_WRAPPER=sccache`) and `lint-gate` (L4 `pmat quality-gate`) exit
+# with errors 2 and 127 respectively. Workflow is preserved for manual
+# dispatch — re-enable the `push` / `pull_request_target` triggers in
+# this file once the org infra is provisioned (see `paiml/.github`).
 
 name: Unified Gate (advisory)
 
 on:
-  pull_request_target:
-    branches: [main, master]
-  push:
-    branches: [main, master]
   workflow_dispatch:
 
 concurrency:
