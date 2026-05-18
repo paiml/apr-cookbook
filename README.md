@@ -9,6 +9,10 @@
 </p>
 
 <p align="center">
+  <em>v6.4.0 (2026-05-18) — <strong>canonical model-publish workflow now lives in aprender</strong>. <a href="https://github.com/paiml/aprender/blob/main/docs/specifications/aprender-train/model-hf-publish-pipeline-spec.md">SPEC-HF-PUBLISH-001</a> (in the aprender repo) codifies the 12-file minimum, YAML schema, NDJSON-commit rule, LFS-batch flow, 13-tier crates.io cascade, and three-path verification (Rust + HF Transformers + llama.cpp) for any model published to HuggingFace Hub via <code>apr publish</code>. First applied 2026-05-18 to ship <a href="https://huggingface.co/paiml/albor-370m-v1"><code>paiml/albor-370m-v1</code></a> end-to-end. The cookbook's <code>cli_publish_*</code> + <code>hub_publishing</code> recipes (recipes 388-392, 759) operate within this spec for the full workflow context.</em>
+</p>
+
+<p align="center">
   <em>v6.3.0 (2026-05-10) closes the <a href="docs/specifications/fine-tuning-cookbook.md">fine-tuning-cookbook</a> sprint: <strong>155 new fine-tuning recipes</strong> across a 4-tier curriculum (Tier 1 SFT/eval/tabular × 25, Tier 2 LoRA/QLoRA/PEFT/CP/merge × 45, Tier 3 calibration/multimodal/QAT/etc × 48, Tier 4 DPO/ORPO/KTO/GRPO/PPO/RLAIF × 37). Mirrors Ludwig + Unsloth + TRL + LLaMA-Factory + Axolotl. Each recipe ships 4 tests (recipe_runs / falsifier_holds / falsifier_breaks / deterministic). 100% pass rate when run as standalone binaries. See <a href="examples/finetune/README.md"><code>examples/finetune/README.md</code></a>.</em>
 </p>
 
