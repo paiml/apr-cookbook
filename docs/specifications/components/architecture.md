@@ -5,29 +5,22 @@
 | Feature | APR v1 | APR v2 |
 |---------|--------|--------|
 | Tensor Index | JSON | Binary (O(1) lookup) |
-| Compression | None/Gzip | LZ4/ZSTD (3-13 GB/s) |
-| Zero-Copy Loading | Partial | Full (mmap) |
+| Compression | None/Gzip | LZ4/ZSTD (throughput unmeasured in this repo; see apr-leaderboard) |
+| Zero-Copy Loading | Partial | Full (mmap, < 0.1 ms p95 release — F2) |
 | Quantization | Int8 | Int4/Int8/FP16 |
 | Streaming | No | Yes |
 | Signature | Optional | Ed25519 default |
 
 ### Falsifiable Claims
 
-**F1**: APR v2 with LZ4 compression achieves >= 3 GB/s decompression on x86_64 with AVX2.
-- **Test**: `cargo bench --bench compression -- --baseline`
-- **Refutation**: If measured throughput < 2.5 GB/s on reference hardware (AMD EPYC 7763), claim is falsified.
+Only claims with reproducible measurements are listed. See [Quality Gates](quality-gates.md#falsifiable-claims-registry--v50) for the full in-process (F2) + cited (N1–N4) registry and for the list of deleted claims (F1/F3/F4/F5/F6/F7) that lack evidence.
 
-**F2**: Zero-copy loading via mmap adds < 1ms latency for models <= 100MB.
-- **Test**: `cargo bench --bench loading -- --size 100mb`
-- **Refutation**: If p95 latency > 2ms, claim is falsified.
+**F2** (in-process): Zero-copy mmap-backed load completes in p95 < 0.1 ms (release) for the cookbook's `BundledModel` path.
+- **Test**: `cargo test --test falsification -- f2_zero_copy_loading_latency`
+- **Refutation**: p95 > 0.2 ms (release) or p95 > 10 ms (debug).
+- **Evidence basis**: `aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:88-93` measured 0.028 ms.
 
-**F3**: Int4 quantization (Q4_K) achieves < 2% accuracy loss on standard benchmarks.
-- **Test**: `cargo test --test quantization_accuracy`
-- **Refutation**: If accuracy loss > 2.5% on GLUE benchmark subset, claim is falsified.
-
-**F4**: AES-256-GCM decryption adds < 5ms latency for 100MB models.
-- **Test**: `cargo bench --bench encryption -- --size 100mb`
-- **Refutation**: If p95 latency > 10ms, claim is falsified.
+**N1–N4** (cited): Decode throughput, batch scaling, load-time parity, and Candle comparison — see [Quality Gates §Cited](quality-gates.md).
 
 ---
 
@@ -35,27 +28,26 @@
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                   APR Cookbook v3.0                          │
+│                   APR Cookbook v5.0                          │
 ├─────────────────────────────────────────────────────────────┤
-│  Examples Layer                                             │
+│  Examples Layer (341 recipes across 24 categories)          │
 │  ├── Model Bundling (include_bytes!, APR v2 compression)    │
 │  ├── Format Conversion (SafeTensors -> APR v2 -> GGUF)     │
-│  ├── Speech Recognition (whisper.apr integration)           │
+│  ├── Speech Recognition (simulated whisper pipelines)       │
 │  ├── Browser Apps (WASM + WebGPU acceleration)              │
 │  ├── CLI Tools (inference, conversion, benchmarking)        │
 │  └── Optimization (finetune, prune, distill, merge, quant) │
 ├─────────────────────────────────────────────────────────────┤
-│  Framework Layer (Sovereign AI Stack)                       │
-│  ├── aprender 0.25 (APR v2 format, LZ4/ZSTD, Int4/Int8)   │
-│  ├── trueno 0.14 (SIMD/GPU, LZ4 tensors)                   │
-│  ├── entrenar 0.5 (Training, autograd, LoRA, monitoring)    │
-│  ├── realizar 0.4 (GPU kernels, FlashAttention, Q4K/Q5K)   │
-│  ├── whisper-apr 0.1 (WASM-first ASR, streaming)           │
-│  └── repartir 1.1 (distributed compute, work-stealing)     │
+│  Framework Layer — APR-MONO v0.31.2 (../aprender monorepo) │
+│  ├── aprender-core  (pkg) / aprender (lib) — APR v2, LZ4, Int4│
+│  ├── aprender-compute (pkg) / trueno (lib) — SIMD/GPU tensors │
+│  ├── aprender-train  (pkg) / entrenar (lib) — Train, autograd │
+│  ├── aprender-contracts (dev) — In-process YAML validation    │
+│  └── ndarray 0.16 — Tensor gradients (third-party, unchanged) │
 ├─────────────────────────────────────────────────────────────┤
 │  Compression Layer                                          │
-│  ├── trueno-zram (SIMD LZ4/ZSTD, 3-13 GB/s)               │
-│  └── trueno-ublk (GPU block device, 10-50 GB/s)            │
+│  ├── lz4_flex 0.11 (LZ4, throughput unmeasured in this repo)│
+│  └── zstd 0.13 (ZSTD, throughput unmeasured in this repo)   │
 ├─────────────────────────────────────────────────────────────┤
 │  Runtime Layer                                              │
 │  ├── Native: x86_64 (AVX2/AVX-512), aarch64 (NEON)        │
@@ -79,15 +71,23 @@
 
 ## Key Dependencies
 
-| Crate | Version | Role | Features |
-|-------|---------|------|----------|
-| aprender | 0.25 | Core ML library, .apr format | `format-compression`, `format-signing` |
-| trueno | 0.14 | SIMD tensor backend | `gpu` (optional) |
-| entrenar | 0.5 | Training and inference monitoring | autograd, LoRA, collectors |
-| realizar | 0.4 | GPU kernels | FlashAttention, Q4K/Q5K |
-| repartir | 1.1 | Distributed compute | `cpu`, work-stealing |
-| whisper-apr | 0.1 | Speech recognition | WASM-first ASR |
-| clap | 4 | CLI argument parsing | `derive` |
+All sovereign-stack deps are path deps to the APR-MONO monorepo at `../aprender` (v0.31.2). Package names (Cargo.toml keys) differ from lib names (Rust `use` paths) because the monorepo preserved historical lib names for source-compat.
+
+| Cargo package | Rust lib ident | Version | Role | Features |
+|---------------|----------------|---------|------|----------|
+| aprender-core | `aprender` | 0.31.2 | Core ML library, .apr format | `format-compression`, `format-encryption` (via `encryption` feature) |
+| aprender-compute | `trueno` | 0.31.2 | SIMD tensor backend (was standalone `trueno` crate) | — |
+| aprender-train | `entrenar` | 0.31.2 | Training, autograd, LoRA, monitoring (was standalone `entrenar`) | autograd, LoRA, collectors |
+| aprender-contracts (dev-dep) | `provable_contracts` | 0.31.2 | In-process YAML contract validation | — |
+| ndarray | `ndarray` | 0.16 | Tensor gradients | — |
+| clap | `clap` | 4 | CLI argument parsing | `derive` |
+| serde | `serde` | 1 | Serialization | `derive` |
+| ed25519-dalek | `ed25519_dalek` | 2.1 | Model signing | — |
+| lz4_flex | `lz4_flex` | 0.11 | LZ4 compression | — |
+| zstd | `zstd` | 0.13 | ZSTD compression | — |
+| memmap2 (dev-dep) | `memmap2` | 0.9 | F2 zero-copy falsification | — |
+
+GPU (aprender-gpu / aprender-cuda-edge), distributed (aprender-distribute), and speech (aprender-core/audio) are part of the broader APR-MONO workspace but are **simulated** in cookbook examples — not actual Cargo.toml dependencies of this repo. Real-hardware numbers live in sibling repos (candle-vs-apr, apr-leaderboard) and are cited as claims N1–N4 in the root spec, not re-run here.
 
 ---
 
@@ -95,7 +95,7 @@
 
 ### Muda (Waste Elimination)
 
-The Python interpreter, heavy containers, and gigabyte-sized runtime environments are *Muda*. APR v2 binaries are single-file and zero-dependency, eliminating "transport waste" of massive Docker images.
+The Python interpreter, heavy containers, and gigabyte-sized runtime environments are *Muda*. APR v2 binaries are single-file with zero Python/CUDA runtime dependency (CPU path), eliminating "transport waste" of massive Docker images. GPU inference still requires CUDA libraries at runtime — that's a driver dependency, not a Python one.
 
 ### Jidoka (Built-in Quality)
 
@@ -132,8 +132,8 @@ examples/
 ├── distillation/   Knowledge transfer, pruning
 ├── cli/            apr-info, apr-bench, apr-convert, apr-compile, apr-serve
 ├── monitoring/     Inference explainability, hash chain audit
-├── speech/         whisper.apr transcription
-├── distributed/    repartir multi-node inference
+├── speech/         Speech recognition pipelines (simulated)
+├── distributed/    Multi-node inference (simulated)
 ├── advanced/       End-to-end demo applications
 ├── optimize/       Finetune, prune, distill, merge, quantize (CLI demos)
 ├── chat/           Chat template formatting (CLI demos)

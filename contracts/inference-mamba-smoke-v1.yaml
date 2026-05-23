@@ -1,0 +1,162 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "MAMBA smoke inference invariants — config parse, pure-SSM discriminator (state_size + conv_kernel + expand), deterministic forward simulation"
+  references:
+    - "Gu & Dao (2023). Mamba: Linear-Time Sequence Modeling with Selective State Spaces. arXiv:2312.00752"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - mamba
+    - ssm
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Extract MAMBA SSM fields"
+      invariant: "state_size, conv_kernel parsed"
+    - name: forward
+      description: "LCG forward sim seeded with state_size"
+      invariant: "state_size participates in checksum"
+    - name: verify
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'mamba'"
+      - "Missing state_size surfaces LoaderUnavailable (MAMBA SSM discriminator)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'mamba'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
+
+  ssm_discriminator:
+    formula: "config without state_size ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "MAMBA is pure SSM; state_size + conv_kernel are required"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { state_size, conv_kernel, .. } => both match config"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, state_size) is deterministic and state-sensitive"
+    domain: "seed: u64; vocab,hidden,state_size: u32"
+    codomain: "u32"
+    invariants:
+      - "state_size seeds the accumulator"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, ss) == forward_sim(s, v, h, ss)"
+      - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mamba.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+  - type: invariant
+    property: "state_size required"
+    formal: "fixture without state_size ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: ssm_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.SsmDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+  - type: invariant
+    property: "Forward simulation is state-sensitive"
+    formal: "state_size participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mamba.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mamba"
+
+falsification_tests:
+  - id: FALSIFY-MAMBA-001
+    rule: "MAMBA SSM fields are recognized"
+    prediction: "state_size=16, conv_kernel=4 for the bundled fixture"
+    test: "cargo test --example inference_mamba_smoke -- happy_path_ssm_fields_present"
+    if_fails: "SSM field detection broke"
+  - id: FALSIFY-MAMBA-002
+    rule: "Forward simulation is state-sensitive"
+    prediction: "forward_sim with state=16 != forward_sim with state=32"
+    test: "cargo test --example inference_mamba_smoke -- state_size_affects_checksum"
+    if_fails: "state_size dropped from accumulator"
+  - id: FALSIFY-MAMBA-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_mamba_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-MAMBA-001
+    obligation: "Forward simulation is state-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mamba_smoke_deterministic"
+  - id: KANI-MAMBA-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mamba_smoke_invalid_fixture_total"
+  - id: KANI-MAMBA-003
+    obligation: "state_size required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mamba_ssm_fields_present"
+
+qa_gate:
+  id: F-MAMBA-001
+  name: "MAMBA Smoke Inference Contract"
+  description: "Smoke load + SSM discriminator + deterministic forward simulation"
+  checks:
+    - "ssm_fields_present"
+    - "state_size_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

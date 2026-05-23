@@ -1,6 +1,7 @@
 //! # Batch Export to Multiple Formats
 //!
 //! **CLI equivalent:** `apr export model.apr --batch gguf,safetensors,onnx`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates batch exporting an APR model to multiple formats
 //! simultaneously. A single source model is converted to GGUF,
@@ -12,6 +13,9 @@
 //! 2. Parallel export to 3+ formats — convert to each target
 //! 3. Size comparison table — compare output sizes
 //! 4. Format feature matrix — capabilities of each format
+//!
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

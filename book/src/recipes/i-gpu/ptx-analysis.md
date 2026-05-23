@@ -18,4 +18,4 @@ cargo run --example gpu_ptx_analysis
 ```
 
 ## Source
-[`examples/gpu/gpu_ptx_analysis.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/gpu/gpu_ptx_analysis.rs)
+[`examples/gpu/gpu_ptx_analysis/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/gpu/gpu_ptx_analysis/main.rs)

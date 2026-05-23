@@ -1,10 +1,21 @@
 //! # APR Model Profiling (Roofline Analysis)
 //!
 //! CLI equivalent: `apr profile model.apr --granular`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Performs roofline model analysis to classify each layer as compute-bound
 //! or memory-bound. Produces per-layer profiling, an ASCII roofline chart,
 //! bottleneck identification, and optimization recommendations.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr profile model.apr          # APR native format
+//! apr profile model.gguf         # GGUF (llama.cpp compatible)
+//! apr profile model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 

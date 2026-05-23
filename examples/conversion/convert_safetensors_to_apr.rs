@@ -1,5 +1,6 @@
 //! SafeTensors to APR format conversion.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! This example demonstrates converting HuggingFace SafeTensors
 //! models to the native APR format.
 //!
@@ -16,6 +17,16 @@
 //! - Encryption (AES-256-GCM)
 //! - Digital signatures (Ed25519)
 //! - Quantization (Q4_0, Q8_0)
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::convert::{
     AprConverter, ConversionFormat, ConversionMetadata, DataType, TensorData,

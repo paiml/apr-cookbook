@@ -1,5 +1,6 @@
 //! # Recipe: Quantized SIMD Operations
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/avx512-matmul-v1.yaml
 //! **Category**: SIMD Acceleration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example simd_quantized_operations
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hennessy, J. & Patterson, D. (2017). *Computer Architecture: A Quantitative Approach*. DOI: 10.1016/C2012-0-01712-X
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

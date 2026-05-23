@@ -1,0 +1,252 @@
+version: "1.0"
+name: sovereign-qwen-coder
+description: |
+  Qwen2.5-Coder-1.5B-Instruct deployment via APR.
+  Four-mode stack: serve (API daemon), run (one-shot), chat (interactive),
+  compile (model → standalone binary).
+
+params:
+  model_repo: "Qwen/Qwen2.5-Coder-1.5B-Instruct"
+  model_path: "/opt/apr/models/qwen-coder-1.5b.safetensors"
+  compiled_binary: "/opt/apr/bin/qwen-coder"
+  serve_port: 8090
+
+machines:
+  coder-box:
+    hostname: coder-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [inference, coding]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-qwen-coder
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  # ── Layer 0: Setup ──
+  service-user:
+    type: user
+    machine: coder-box
+    name: apr
+    shell: /usr/sbin/nologin
+    home: /opt/apr
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    machine: coder-box
+    state: directory
+    path: /opt/apr
+    owner: apr
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  models-dir:
+    type: file
+    machine: coder-box
+    state: directory
+    path: /opt/apr/models
+    owner: apr
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  bin-dir:
+    type: file
+    machine: coder-box
+    state: directory
+    path: /opt/apr/bin
+    owner: apr
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  cache-dir:
+    type: file
+    machine: coder-box
+    state: directory
+    path: /opt/apr/cache
+    owner: apr
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  logs-dir:
+    type: file
+    machine: coder-box
+    state: directory
+    path: /opt/apr/logs
+    owner: apr
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  # ── Layer 1: Package ──
+  apr-pkg:
+    type: package
+    machine: coder-box
+    provider: cargo
+    packages: [apr-cli]
+    depends_on: []
+    tags: [packages]
+
+  # ── Layer 2: Model pull ──
+  model-pull:
+    type: model
+    machine: coder-box
+    name: "qwen-coder-1.5b"
+    source: "hf://{{params.model_repo}}"
+    format: safetensors
+    path: "{{params.model_path}}"
+    cache_dir: /opt/apr/cache
+    owner: apr
+    depends_on: [apr-pkg, models-dir]
+    tags: [setup, models]
+
+  # ── Layer 3: Compile (model → standalone binary) ──
+  compile-unit:
+    type: file
+    machine: coder-box
+    path: /etc/systemd/system/apr-compile.service
+    content: |
+      [Unit]
+      Description=APR Compile — Qwen Coder 1.5B to standalone binary
+      After=network.target
+
+      [Service]
+      Type=oneshot
+      User=apr
+      ExecStart=/usr/local/bin/apr compile {{params.model_path}} \
+        --output {{params.compiled_binary}} \
+        --quantize int8 \
+        --release \
+        --strip \
+        --lto
+      RemainAfterExit=yes
+      TimeoutStartSec=infinity
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [model-pull, bin-dir]
+    tags: [config, systemd]
+
+  compile-service:
+    type: service
+    machine: coder-box
+    name: apr-compile
+    state: running
+    enabled: true
+    restart_on: [compile-unit, model-pull]
+    depends_on: [compile-unit]
+    tags: [services]
+
+  # ── Layer 4: Serve (persistent API daemon) ──
+  serve-unit:
+    type: file
+    machine: coder-box
+    path: /etc/systemd/system/apr-serve.service
+    content: |
+      [Unit]
+      Description=APR Serve — Qwen Coder 1.5B inference API
+      After=network.target apr-compile.service
+
+      [Service]
+      Type=simple
+      User=apr
+      ExecStart=/usr/local/bin/apr serve {{params.model_path}} \
+        --host 0.0.0.0 \
+        --port {{params.serve_port}} \
+        --offline
+      Restart=on-failure
+      RestartSec=10
+      Environment=APR_CACHE_DIR=/opt/apr/cache
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [model-pull]
+    tags: [config, systemd]
+
+  serve-service:
+    type: service
+    machine: coder-box
+    name: apr-serve
+    state: running
+    enabled: true
+    restart_on: [serve-unit, model-pull]
+    depends_on: [serve-unit]
+    tags: [services]
+
+  firewall:
+    type: network
+    machine: coder-box
+    port: "{{params.serve_port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [serve-service]
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    machine: coder-box
+    name: "apr-serve-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{params.serve_port}}/health || systemctl restart apr-serve"
+    owner: root
+    depends_on: [serve-service]
+    tags: [monitoring]
+
+  # ── Layer 5: Run + Chat convenience wrappers ──
+  run-wrapper:
+    type: file
+    machine: coder-box
+    path: /usr/local/bin/qwen-run
+    content: |
+      #!/bin/bash
+      # One-shot code generation with Qwen Coder 1.5B
+      # Usage: qwen-run "Write a Rust function that sorts a vector"
+      exec /usr/local/bin/apr run {{params.model_path}} \
+        --max-tokens 512 \
+        --stream \
+        --offline \
+        "$@"
+    owner: root
+    mode: "0755"
+    depends_on: [model-pull]
+    tags: [config, scripts]
+
+  chat-wrapper:
+    type: file
+    machine: coder-box
+    path: /usr/local/bin/qwen-chat
+    content: |
+      #!/bin/bash
+      # Interactive coding chat with Qwen Coder 1.5B
+      # Usage: qwen-chat
+      exec /usr/local/bin/apr chat {{params.model_path}} \
+        --temperature 0.3 \
+        --max-tokens 1024 \
+        --system "You are a coding assistant. Write clean, idiomatic code." \
+        --offline \
+        "$@"
+    owner: root
+    mode: "0755"
+    depends_on: [model-pull]
+    tags: [config, scripts]
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

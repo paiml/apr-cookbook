@@ -1,6 +1,7 @@
 //! # Recipe: Adapter Merge and Unmerge Lifecycle
 //!
 //! **CLI Equivalent**: `apr finetune --merge --adapter`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! LoRA adapter lifecycle: create, train, merge for inference, unmerge for
 //! continued training, save adapter-only and merged models to APR v2.
@@ -8,6 +9,16 @@
 //! ```bash
 //! cargo run --example finetune_merge_adapter
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

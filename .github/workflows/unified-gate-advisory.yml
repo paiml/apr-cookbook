@@ -1,0 +1,47 @@
+# Unified Gate (advisory) — self-hosted clean-room gate.
+#
+# This workflow calls `paiml/.github@<sha>/unified-gate.yml` which runs on
+# self-hosted `intel-clean-room-*` runners and invokes a Makefile target
+# in the private `paiml/infra` repo. When that infra is healthy it layers
+# fmt/clippy/deny/sccache on top of the local `Quality Gate` job in
+# `ci.yml`.
+#
+# Why a separate workflow file:
+# - GitHub Actions doesn't allow `continue-on-error: true` on a reusable-
+#   workflow `uses:` job at the caller level (only workflow-level inputs
+#   listed in the docs are supported).
+# - If this job lived in `ci.yml`, its failure would make the `CI`
+#   workflow badge red even when `Quality Gate` + `Lean Gate` + `CI Status`
+#   are all green. The self-hosted infra is outside this repo's control
+#   and its brokenness shouldn't drag down the cookbook's own CI signal.
+# - Branch protection requires the `CI Status` check from `ci.yml`, not
+#   anything here. So this workflow is purely informational.
+#
+# When the `paiml/infra` `_provision` target is fixed, this workflow goes
+# green automatically — no change needed here.
+#
+# 2026-05-11: Auto-triggers (push / pull_request_target) removed because
+# the `unified-gate.yml` reusable workflow has been failing on every push
+# for weeks: the self-hosted runners (`intel-clean-room-*`) lack `sccache`
+# and `pmat`, so both `cpu-gates` (`cargo install --locked forjar` with
+# `RUSTC_WRAPPER=sccache`) and `lint-gate` (L4 `pmat quality-gate`) exit
+# with errors 2 and 127 respectively. Workflow is preserved for manual
+# dispatch — re-enable the `push` / `pull_request_target` triggers in
+# this file once the org infra is provisioned (see `paiml/.github`).
+
+name: Unified Gate (advisory)
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: unified-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unified:
+    uses: paiml/.github/.github/workflows/unified-gate.yml@b6c24635217fe302ca1a67352b7de540fb3e02e7
+    with:
+      repo: ${{ github.event.repository.name }}
+      pr_sha: ${{ github.event.pull_request.head.sha || github.sha }}
+    secrets: inherit

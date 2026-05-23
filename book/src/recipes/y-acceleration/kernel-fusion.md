@@ -18,4 +18,4 @@ cargo run --example acceleration_kernel_fusion
 ```
 
 ## Source
-[`examples/acceleration/acceleration_kernel_fusion.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_kernel_fusion.rs)
+[`examples/acceleration/acceleration_kernel_fusion/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_kernel_fusion/main.rs)

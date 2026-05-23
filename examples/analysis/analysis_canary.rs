@@ -1,4 +1,6 @@
 //! # Canary Tokens for Regression Testing
+//! **CLI Equivalent**: `apr canary`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Embeds test vectors in a model and verifies outputs match expected values,
 //! detecting model drift and weight corruption.
@@ -13,6 +15,16 @@
 //! - Deterministic canary generation from model weights
 //! - Tolerance-based drift detection
 //! - JSON serialization of canary test vectors
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

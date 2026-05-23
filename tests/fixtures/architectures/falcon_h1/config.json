@@ -1,0 +1,15 @@
+{
+  "architectures": ["FalconH1ForCausalLM"],
+  "model_type": "falcon_h1",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "num_attention_heads": 4,
+  "num_key_value_heads": 2,
+  "intermediate_size": 128,
+  "vocab_size": 256,
+  "mamba_d_state": 16,
+  "mamba_d_conv": 4,
+  "mamba_expand": 2,
+  "rms_norm_eps": 1e-5,
+  "torch_dtype": "float32"
+}

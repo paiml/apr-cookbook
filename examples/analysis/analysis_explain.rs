@@ -1,4 +1,6 @@
 //! # APR Error Code Explanation System
+//! **CLI Equivalent**: `apr explain`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Provides detailed explanations, causes, and solutions for APR error codes,
 //! similar to `rustc --explain`.
@@ -12,6 +14,16 @@
 //! - Error catalog design pattern
 //! - Structured error documentation
 //! - Lookup-based CLI diagnostics
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr explain model.apr          # APR native format
+//! apr explain model.gguf         # GGUF (llama.cpp compatible)
+//! apr explain model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

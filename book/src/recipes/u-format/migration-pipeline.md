@@ -4,7 +4,7 @@ Complete model migration pipeline composing four stages: import, lint, convert, 
 
 ## CLI Equivalent
 ```bash
-apr migrate model.safetensors --to apr2 --lint --verify
+apr convert model.safetensors --to apr2 --lint --verify
 ```
 
 ## Key Concepts
@@ -18,4 +18,4 @@ cargo run --example format_migration_pipeline
 ```
 
 ## Source
-[`examples/format/format_migration_pipeline.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_migration_pipeline.rs)
+[`examples/format/format_migration_pipeline/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_migration_pipeline/main.rs)

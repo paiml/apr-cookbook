@@ -1,6 +1,8 @@
 //! # Recipe: Inference Explainability
 //!
 //! **Category**: Inference Monitoring
+//! **CLI Equivalent**: `apr monitor`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: inference-monitoring feature (aprender)
@@ -28,6 +30,16 @@
 //! ```bash
 //! cargo run --example inference_explainability
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Sculley, D. et al. (2015). *Hidden Technical Debt in Machine Learning Systems*. NeurIPS. arXiv:1503.05991
 
 use apr_cookbook::explainable::IntoExplainable;
 use apr_cookbook::prelude::*;

@@ -1,6 +1,7 @@
 //! 4-Bit Quantization
 //!
 //! CLI equivalent: `apr quantize --scheme int4`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //!
 //! Post-training quantization maps floating-point weights to lower bit-width
 //! integers using affine quantization: each block of weights shares a scale
@@ -24,6 +25,16 @@
 //! - Deploying models on edge devices with limited memory
 //! - Reducing model size for mobile / WASM inference
 //! - Trading small accuracy loss for 4-8x memory savings
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr quantize model.apr          # APR native format
+//! apr quantize model.gguf         # GGUF (llama.cpp compatible)
+//! apr quantize model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dettmers, T. et al. (2022). *LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale*. NeurIPS. arXiv:2208.07339
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

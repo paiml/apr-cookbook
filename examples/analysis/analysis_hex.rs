@@ -1,4 +1,6 @@
 //! # Format-Aware Binary Forensics
+//! **CLI Equivalent**: `apr hex`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Hex dump with APR format annotations, parsing magic bytes, version,
 //! metadata offsets, and tensor data regions.
@@ -13,6 +15,16 @@
 //! - Annotated hex dump with region labels
 //! - Magic byte identification and format validation
 //! - Offset calculation for format regions
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr hex model.apr          # APR native format
+//! apr hex model.gguf         # GGUF (llama.cpp compatible)
+//! apr hex model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;

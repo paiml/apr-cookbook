@@ -1,6 +1,7 @@
 //! # Export APR Model to SafeTensors Format
 //!
 //! **CLI equivalent:** `apr export model.apr --format safetensors`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates exporting an APR v2 model to the SafeTensors format.
 //! SafeTensors uses a JSON header followed by raw tensor data, with
@@ -11,6 +12,16 @@
 //! 2. Header generation — produce SafeTensors JSON header with tensor metadata
 //! 3. Tensor data layout — compute contiguous offsets for each tensor
 //! 4. Format comparison — compare APR vs SafeTensors sizes and features
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr export model.apr          # APR native format
+//! apr export model.gguf         # GGUF (llama.cpp compatible)
+//! apr export model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;

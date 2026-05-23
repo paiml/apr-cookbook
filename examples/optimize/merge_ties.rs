@@ -1,6 +1,7 @@
 //! TIES Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy ties --density 0.2`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! TIES (TrIm, Elect Sign & merge) is a task-arithmetic merge strategy that
 //! resolves interference between fine-tuned models by:
@@ -19,6 +20,16 @@
 //! - Merging 3+ models fine-tuned on different tasks
 //! - When simple averaging degrades individual task performance
 //! - When models have conflicting gradient directions
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr merge model.apr          # APR native format
+//! apr merge model.gguf         # GGUF (llama.cpp compatible)
+//! apr merge model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

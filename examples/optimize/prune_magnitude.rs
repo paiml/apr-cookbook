@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr prune --method magnitude --target 0.5`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates magnitude-based unstructured pruning: zeroing out the
 //! smallest-magnitude weights to achieve a target sparsity. This is the
@@ -14,6 +15,16 @@
 //! 4. [x] No temp files leaked
 //! 5. [x] Clippy clean
 //! 6. [x] No `unwrap()` in logic
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr prune model.apr          # APR native format
+//! apr prune model.gguf         # GGUF (llama.cpp compatible)
+//! apr prune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Frantar, E. & Alistarh, D. (2023). *SparseGPT: Massive Language Models Can Be Accurately Pruned in One-Shot*. ICML. arXiv:2301.00774
 
 use apr_cookbook::prelude::*;
 use std::collections::hash_map::DefaultHasher;
@@ -120,11 +131,7 @@ fn weight_histogram(weights: &[f32], bins: usize, label: &str) {
     for (i, &count) in counts.iter().enumerate() {
         let lo = i as f64 * bin_width;
         let hi = (i + 1) as f64 * bin_width;
-        let bar_len = if max_count > 0 {
-            count * bar_max / max_count
-        } else {
-            0
-        };
+        let bar_len = (count * bar_max).checked_div(max_count).unwrap_or(0);
         let bar: String = "#".repeat(bar_len);
         println!("    [{lo:>5.2}, {hi:>5.2}) | {bar:<40} ({count})");
     }

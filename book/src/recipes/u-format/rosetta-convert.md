@@ -21,4 +21,4 @@ cargo run --example format_rosetta_convert
 
 ## Source
 
-[`examples/format/format_rosetta_convert.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_rosetta_convert.rs)
+[`examples/format/format_rosetta_convert/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_rosetta_convert/main.rs)

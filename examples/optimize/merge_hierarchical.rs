@@ -1,6 +1,7 @@
 //! Hierarchical Model Merge
 //!
 //! CLI equivalent: composed multi-model merge pipeline
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Hierarchical merging applies different strategies at different stages of
 //! a merge pipeline. Instead of merging all models at once, you group related
@@ -20,6 +21,16 @@
 //! - Merging 4+ models with natural groupings (e.g., STEM + humanities)
 //! - When flat merge of all models causes too much interference
 //! - When you want fine-grained control over how capabilities combine
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

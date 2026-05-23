@@ -1,5 +1,6 @@
 //! Checkpoint Resume Training Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates saving and restoring training state: model weights,
 //! optimizer state, epoch counter, and loss history. Enables resuming
 //! interrupted training from the last checkpoint.
@@ -20,6 +21,16 @@
 //! ```bash
 //! cargo run --example checkpoint_resume
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

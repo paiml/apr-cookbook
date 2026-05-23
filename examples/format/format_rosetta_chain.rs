@@ -1,6 +1,7 @@
 //! # Multi-Step Conversion Chain
 //!
 //! **CLI equivalent:** `apr rosetta chain model.safetensors --through apr,gguf`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates chaining multiple format conversions in sequence.
 //! Given a source file and a list of target formats, the chain converter
@@ -11,6 +12,16 @@
 //! 2. Step-by-step conversion — execute each link in the chain
 //! 3. Intermediate sizes — track size changes at each stage
 //! 4. Final verification — confirm all outputs are valid
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::fmt;

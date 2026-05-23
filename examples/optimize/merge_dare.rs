@@ -1,6 +1,7 @@
 //! DARE Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy dare --drop-prob 0.5`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! DARE (Drop And REscale) randomly drops delta weights (differences from the
 //! base model) and rescales the surviving weights to compensate. This reduces
@@ -23,6 +24,16 @@
 //! - Merging models with high task interference
 //! - When TIES is too aggressive in pruning
 //! - Exploring stochastic merge strategies with different seeds
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr merge model.apr          # APR native format
+//! apr merge model.gguf         # GGUF (llama.cpp compatible)
+//! apr merge model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

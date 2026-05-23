@@ -18,4 +18,4 @@ cargo run --example ab_experiment
 ```
 
 ## Source
-[`examples/advanced/ab_experiment.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/ab_experiment.rs)
+[`examples/advanced/ab_experiment/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/ab_experiment/main.rs)

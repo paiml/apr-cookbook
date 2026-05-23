@@ -1,0 +1,156 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "AES-256-GCM model decryption latency — F4 falsifiable claim"
+  references:
+    - "NIST SP 800-38D: Recommendation for GCM Mode"
+    - "McGrew & Viega (2004) The Galois/Counter Mode of Operation"
+    - "APR Cookbook Spec v3.0.0, Claim F4"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "apr-format-roundtrip-v1"
+  tags:
+    - encryption
+    - security
+    - performance
+
+kernel_structure:
+  phases:
+    - name: "key_derivation"
+      description: "Derive 256-bit AES key from key material; reject if key.len() != 32"
+      invariant: "key.len() == 32 && nonce.len() == 12"
+    - name: "ghash_init"
+      description: "Initialize GHASH state with authentication key H = AES_k(0^128)"
+      invariant: "H ∈ GF(2^128); H is constant for fixed key"
+    - name: "ctr_decrypt"
+      description: "AES-CTR mode decryption with 96-bit nonce; AES-NI accelerated when available"
+      invariant: "|plaintext| == |ciphertext|; nonce never reused for same key"
+    - name: "auth_verify"
+      description: "Compute GHASH over (AAD || ciphertext) and compare to provided tag in constant time"
+      invariant: "tag mismatch → authentication failure; timing side-channel resistant"
+
+equations:
+  decrypt_latency:
+    formula: "L = t_decrypt_complete - t_decrypt_start"
+    domain: "ciphertext ∈ bytes, key ∈ {0,1}^256, nonce ∈ {0,1}^96"
+    codomain: "L ∈ [0, ∞) seconds"
+    invariants:
+      - "L < 5ms for model header decryption (F4 threshold)"
+      - "L scales linearly with ciphertext size for full-model decrypt"
+    preconditions:
+      - "!ciphertext.is_empty()"
+      - "key.len() == 32"
+      - "nonce.len() == 12"
+    postconditions:
+      - "result_seconds >= 0.0"
+      - "result_seconds < 0.005"
+      - "result_seconds.is_finite()"
+    lean_theorem: "Theorems.DecryptLatency"
+
+  authenticity:
+    formula: "V = GHASH(ciphertext, AAD) == tag"
+    domain: "ciphertext, AAD, tag, key"
+    codomain: "V ∈ {true, false}"
+    invariants:
+      - "V = false for any bit flip in ciphertext (authentication)"
+      - "V = false for any bit flip in tag (forgery detection)"
+      - "Pr[forge] <= 2^{-128} (GCM security bound)"
+    preconditions:
+      - "!ciphertext.is_empty()"
+      - "tag.len() == 16"
+      - "key.len() == 32"
+    postconditions:
+      - "result == true || result == false"
+      - "!result || ghash_matches(ciphertext, aad, tag, key)"
+      - "forge_probability <= 2f64.powi(-128)"
+    lean_theorem: "Theorems.Authenticity"
+
+  roundtrip:
+    formula: "decrypt(encrypt(plaintext, key), key) = plaintext"
+    domain: "plaintext ∈ bytes, key ∈ {0,1}^256"
+    codomain: "bytes"
+    invariants:
+      - "Lossless: output = input for all valid key/plaintext pairs"
+      - "decrypt with wrong key → authentication failure, not garbage"
+    preconditions:
+      - "!plaintext.is_empty()"
+      - "key.len() == 32"
+    postconditions:
+      - "result.as_slice() == plaintext.as_slice()"
+      - "result.len() == plaintext.len()"
+      - "wrong_key_yields_auth_error(plaintext, key)"
+    lean_theorem: "Theorems.Roundtrip"
+
+proof_obligations:
+  - type: bound
+    property: "Decrypt latency under 5ms"
+    formal: "L < 0.005s for header decryption"
+    tolerance: 5.0e-4
+    applies_to: decrypt_latency
+    lean:
+      theorem: "Theorems.DecryptLatencyUnder5Ms"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
+  - type: roundtrip
+    property: "Encrypt/decrypt lossless"
+    formal: "decrypt(encrypt(P, K), K) = P for all P, K"
+    tolerance: 0.0
+    applies_to: roundtrip
+    lean:
+      theorem: "Theorems.EncryptDecryptLossless"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
+  - type: invariant
+    property: "Tamper detection"
+    formal: "flip_bit(ciphertext) → authentication failure"
+    tolerance: 0.0
+    applies_to: authenticity
+    lean:
+      theorem: "Theorems.TamperDetection"
+      module: "ProvableContracts.Aes256.GcmDecrypt"
+      status: wip
+
+falsification_tests:
+  - id: FALSIFY-AES-001
+    rule: "F4 latency threshold"
+    prediction: "AES-256-GCM header decrypt < 5ms"
+    test: "Encrypt/decrypt 4KB header, 1000 iterations, check p99 < 5ms"
+    if_fails: "AES-NI not available or key derivation dominates"
+  - id: FALSIFY-AES-002
+    rule: "Lossless roundtrip"
+    prediction: "decrypt(encrypt(data)) == data"
+    test: "proptest with random byte vectors 1..1MB and random keys"
+    if_fails: "Nonce reuse or padding error"
+  - id: FALSIFY-AES-003
+    rule: "Tamper detection"
+    prediction: "Single bit flip in ciphertext causes auth failure"
+    test: "Encrypt data, flip each byte position, verify decrypt fails"
+    if_fails: "Tag verification skipped or MAC truncated"
+
+kani_harnesses:
+  - id: KANI-AES-001
+    obligation: "Encrypt/decrypt lossless"
+    bound: 32
+    strategy: bounded_int
+    harness: "kani_harnesses::aes_encrypt_decrypt_roundtrip"
+  - id: KANI-AES-002
+    obligation: "Tamper detection"
+    bound: 16
+    strategy: exhaustive
+    harness: "kani_harnesses::aes_tamper_detection"
+  - id: KANI-AES-003
+    obligation: "Decrypt latency under 5ms"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::aes_decrypt_latency_bound"
+
+qa_gate:
+  id: F-AES-001
+  name: "AES-256-GCM Decrypt Contract"
+  description: "Encryption correctness and latency quality gate"
+  checks:
+    - "latency_f4"
+    - "lossless_roundtrip"
+    - "tamper_detection"
+  pass_criteria: "p99 decrypt < 5ms + tamper detected on all bit positions"

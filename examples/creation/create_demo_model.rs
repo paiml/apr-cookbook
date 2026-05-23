@@ -1,10 +1,21 @@
 //! Utility to generate `assets/demo_model.apr` — a small, deterministic APR v1
 //! model file suitable for use in tests, documentation, and bundled-model examples.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! ## Run Command
 //! ```bash
 //! cargo run --example create_demo_model
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::bundle::ModelBundle;
 use std::path::Path;

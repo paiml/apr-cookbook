@@ -18,4 +18,4 @@ cargo run --example analysis_qualify
 ```
 
 ## Source
-[`examples/analysis/analysis_qualify.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qualify.rs)
+[`examples/analysis/analysis_qualify/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_qualify/main.rs)

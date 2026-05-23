@@ -20,7 +20,29 @@ jobs:
       matrix:
         toolchain: [stable]
     steps:
+      # Free ~30GB on the GH runner (Android SDK, .NET, Haskell, large preinstalled
+      # tarballs) before doing anything else. Without this, `cargo test --all-features`
+      # over a 12-crate workspace + 1670 examples runs out of disk during linking
+      # ("ld terminated with signal 7 [Bus error]" / "No space left on device").
+      # Tracked upstream at aprender#1020.
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
       - uses: actions/checkout@v4
+        with:
+          # pull_request_target defaults to checking out the base branch (main),
+          # which means CI would lint/test the pre-PR code and pass/fail on bugs
+          # that have nothing to do with the PR. Pin to the PR head SHA so the
+          # gate actually evaluates the PR's changes.
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: dtolnay/rust-toolchain@stable
         with:
@@ -34,17 +56,19 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Lint (clippy)
-        run: cargo clippy --all-targets -- -D warnings
+      - name: Lint (clippy on lib + tests, NOT examples)
+        # `--all-targets` would compile all 1670 examples in debug mode
+        # (~264MB each = >400GB needed). Scoped to lib + tests keeps
+        # disk pressure within the GH-hosted runner's 14GB. Examples
+        # are checked separately by the weekly examples-build workflow.
+        run: cargo clippy --lib --tests --all-features -- -D warnings
 
-      - name: Test
-        run: cargo test --all-features
-
-      - name: Coverage (codecov)
-        run: |
-          cargo install cargo-llvm-cov --locked || true
-          cargo llvm-cov --all-features --lcov --output-path lcov.info
-        continue-on-error: true
+      - name: Test (lib + tests, NOT examples)
+        # Same disk-pressure mitigation as clippy. `cargo test` without
+        # `--lib --tests` would compile all 1670 examples — too large.
+        # The dep-duplication tracked at aprender#1599 makes this even
+        # worse (aprender-core 0.29.3 + 0.31.2, trueno 0.19.1 + 0.31.2).
+        run: cargo test --lib --tests --all-features
 
       - name: Security scan (cargo audit)
         run: |
@@ -52,9 +76,124 @@ jobs:
           cargo audit
         continue-on-error: true
 
-  unified:
-    uses: paiml/.github/.github/workflows/unified-gate.yml@b6c24635217fe302ca1a67352b7de540fb3e02e7
-    with:
-      repo: ${{ github.event.repository.name }}
-      pr_sha: ${{ github.event.pull_request.head.sha || github.sha }}
-    secrets: inherit
+      # Coverage moved to .github/workflows/coverage.yml (cron schedule)
+      # because cargo llvm-cov re-instruments + recompiles, doubling target/
+      # size. Off the PR critical path keeps this gate fast.
+
+  # Note: the self-hosted `unified` gate lives in its own workflow file
+  # (`unified-gate-advisory.yml`) so its conclusion doesn't taint this
+  # workflow's badge. It is advisory — the required branch-protection
+  # check is `CI Status` (below).
+
+  # Lean gate — builds the ProvableContracts Lake project under `lean/`.
+  # Catches regressions in the PMAT-047 theorem scaffold (e.g. a theorem
+  # body stops compiling, or the lakefile/module graph drifts). Uses elan
+  # to install the toolchain pinned in `lean/lean-toolchain`.
+  #
+  # Note: `lake build` emits `declaration uses 'sorry'` warnings for the
+  # 16 unproven theorems — that's expected and honest. We don't fail on
+  # warnings here; the real regression signal is the build exit code.
+  lean-gate:
+    name: Lean Gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - name: Install elan (Lean toolchain manager)
+        run: |
+          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | \
+            sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+
+      - name: Lean toolchain check
+        working-directory: lean
+        run: lean --version
+
+      - uses: actions/cache@v4
+        with:
+          path: lean/.lake
+          key: lean-${{ runner.os }}-${{ hashFiles('lean/lean-toolchain', 'lean/lakefile.toml') }}
+
+      - name: Build Lean theorem scaffold
+        working-directory: lean
+        run: lake build
+
+  # Kani gate — runs `cargo kani` against the standalone `kani/` crate which
+  # contains 108 #[kani::proof] harnesses (39 base + 69 architecture-demos).
+  # All 108 harnesses verify in ~14s locally on a stable laptop; first-run
+  # cold install of Kani adds ~3-5min to CI. Cached on toolchain version.
+  #
+  # This is the runtime witness for D3 Kani 1.0 — every contract obligation
+  # that ships a kani_harness pointer now has an actually-verified Rust
+  # symbol behind it. PMAT-324.
+  kani-gate:
+    name: Kani Gate
+    runs-on: ubuntu-latest
+    steps:
+      # Same disk-pressure mitigation as the main gate — Kani install adds
+      # ~3GB of binaries and CBMC artifacts on top of cargo target dirs.
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: false
+          docker-images: true
+          swap-storage: true
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/kani-verifier
+            ~/.cargo/bin/cargo-kani
+            ~/.kani
+          key: kani-${{ runner.os }}-0.67.0
+
+      - name: Install Kani
+        run: |
+          if ! command -v cargo-kani >/dev/null 2>&1; then
+            cargo install --locked kani-verifier --version 0.67.0
+            cargo kani setup
+          fi
+          cargo kani --version
+
+      - name: Run Kani harnesses
+        working-directory: kani
+        run: cargo kani
+
+  # Summary job that reports GREEN if the local Quality Gate + Lean Gate +
+  # Kani Gate passed, regardless of the self-hosted unified gate's health.
+  # Branch protection should require this job — not `unified`.
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [gate, lean-gate, kani-gate]
+    if: always()
+    steps:
+      - name: Report local quality + lean + kani gate outcomes
+        run: |
+          failed=0
+          for result_name in gate lean-gate kani-gate; do
+            case "$result_name" in
+              gate)      r="${{ needs.gate.result }}" ;;
+              lean-gate) r="${{ needs.lean-gate.result }}" ;;
+              kani-gate) r="${{ needs.kani-gate.result }}" ;;
+            esac
+            if [ "$r" = "success" ]; then
+              echo "✅ $result_name: success"
+            else
+              echo "❌ $result_name: $r"
+              failed=1
+            fi
+          done
+          exit $failed

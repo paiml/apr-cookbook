@@ -18,4 +18,4 @@ cargo run --example analysis_lint
 ```
 
 ## Source
-[`examples/analysis/analysis_lint.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_lint.rs)
+[`examples/analysis/analysis_lint/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_lint/main.rs)

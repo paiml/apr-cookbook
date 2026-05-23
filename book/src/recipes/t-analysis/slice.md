@@ -4,7 +4,7 @@ Extracts and decodes a range of elements from tensor data. Demonstrates index-ra
 
 ## CLI Equivalent
 ```bash
-apr slice model.apr --tensor weights --range 10..20
+apr tensors model.apr --slice weights --range 10..20
 ```
 
 ## Key Concepts
@@ -18,4 +18,4 @@ cargo run --example analysis_slice
 ```
 
 ## Source
-[`examples/analysis/analysis_slice.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_slice.rs)
+[`examples/analysis/analysis_slice/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_slice/main.rs)

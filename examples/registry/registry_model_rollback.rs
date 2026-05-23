@@ -1,5 +1,6 @@
 //! # Recipe: Model Rollback
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Registry
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example registry_model_rollback
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -196,8 +207,7 @@ impl DeploymentHistory {
 fn get_timestamp() -> u64 {
     std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
-        .map(|d| d.as_secs())
-        .unwrap_or(0)
+        .map_or(0, |d| d.as_secs())
 }
 
 #[cfg(test)]

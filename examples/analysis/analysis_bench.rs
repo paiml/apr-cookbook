@@ -1,10 +1,21 @@
 //! # APR Model Benchmarking
 //!
 //! CLI equivalent: `apr bench model.apr --batch-sizes 1,4,16,64`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Throughput benchmarking for APR model inference across multiple batch sizes.
 //! Measures latency, throughput, and memory scaling to identify optimal
 //! deployment configurations.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr bench model.apr          # APR native format
+//! apr bench model.gguf         # GGUF (llama.cpp compatible)
+//! apr bench model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use std::time::Instant;
@@ -78,8 +89,7 @@ fn bench_inference(model_bytes: &[u8], batch_size: usize, iterations: usize) -> 
     // Infer matrix dimensions (assume square-ish)
     let dim = (num_weights as f64).sqrt() as usize;
     let rows = dim.max(1);
-    let cols = if rows > 0 { num_weights / rows } else { 1 };
-    let cols = cols.max(1);
+    let cols = num_weights.checked_div(rows).unwrap_or(1).max(1);
 
     // Generate deterministic input
     let seed = hash_name_to_seed("bench-input");

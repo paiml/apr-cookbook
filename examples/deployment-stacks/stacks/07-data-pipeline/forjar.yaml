@@ -1,0 +1,74 @@
+version: "1.0"
+name: sovereign-data-pipeline
+description: |
+  End-to-end data pipeline: alimentar ingest → entrenar train → realizar serve.
+  Ingests raw data, trains a model, and deploys it for serving.
+
+params:
+  source_dir: "/opt/raw-data"
+  dataset_path: "/opt/alimentar/output"
+  model_output: "/opt/entrenar/output"
+
+machines:
+  pipeline-box:
+    hostname: pipeline-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, pipeline]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-pipeline
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  # Stage 1: Data ingestion
+  ingest:
+    type: recipe
+    machine: pipeline-box
+    recipe: alimentar-ingest
+    inputs:
+      source_dir: "{{params.source_dir}}"
+      output_dir: "{{params.dataset_path}}"
+      format: jsonl
+      parallelism: 4
+      user: alimentar
+
+  # Stage 2: Training (depends on ingested data)
+  train:
+    type: recipe
+    machine: pipeline-box
+    recipe: entrenar-train
+    inputs:
+      dataset_path: "{{params.dataset_path}}"
+      output_dir: "{{params.model_output}}"
+      learning_rate: "2e-5"
+      epochs: 3
+      batch_size: 8
+      lora_rank: 16
+      gpu_device: 0
+      user: entrenar
+
+
+  # Stage 3: Serve trained model
+  serve:
+    type: recipe
+    machine: pipeline-box
+    recipe: realizar-serve
+    inputs:
+      model_path: "{{params.model_output}}"
+      model_format: safetensors
+      quantization: q4_k_m
+      port: 8080
+      workers: 1
+      gpu_device: 0
+      user: realizar
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

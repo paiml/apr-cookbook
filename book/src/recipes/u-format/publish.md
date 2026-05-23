@@ -21,4 +21,4 @@ cargo run --example format_publish
 
 ## Source
 
-[`examples/format/format_publish.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_publish.rs)
+[`examples/format/format_publish/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/format/format_publish/main.rs)

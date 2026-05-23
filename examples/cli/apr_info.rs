@@ -1,5 +1,6 @@
 //! Display APR model information.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! This CLI tool inspects `.apr` model files and displays their
 //! metadata, format version, and capabilities.
 //!
@@ -9,6 +10,16 @@
 //! cargo run --example apr_info -- --help
 //! cargo run --example apr_info -- model.apr
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;

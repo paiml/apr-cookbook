@@ -1,5 +1,6 @@
 //! Speculative Decoding Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates speculative decoding: a small "draft" model proposes K candidate
 //! tokens, then a larger "target" model verifies them in a single forward pass.
 //! Accepted tokens are emitted instantly; rejected tokens trigger resampling.
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example speculative_decode
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

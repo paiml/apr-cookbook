@@ -1,0 +1,20 @@
+[package]
+name = "apr-cookbook-kani"
+version = "0.1.0"
+edition = "2021"
+publish = false
+description = "Kani bounded-model-check harnesses for apr-cookbook contract obligations (PMAT-046)."
+
+# Standalone crate: intentionally NOT a workspace member of apr-cookbook.
+# Exists solely so `cargo kani` has something to verify. Running
+# `cargo build` from the repo root does not touch this crate.
+
+[lib]
+path = "src/lib.rs"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = ['cfg(kani)'] }
+
+[dependencies]
+
+[dev-dependencies]

@@ -18,4 +18,4 @@ cargo run --example model_showcase
 ```
 
 ## Source
-[`examples/advanced/model_showcase.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/model_showcase.rs)
+[`examples/advanced/model_showcase/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/model_showcase/main.rs)

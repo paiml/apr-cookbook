@@ -1,5 +1,6 @@
 //! # Recipe: WASM Streaming Compilation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: WASM/Browser
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example wasm_streaming_compilation
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Haas, A. et al. (2017). *Bringing the Web up to Speed with WebAssembly*. PLDI. DOI: 10.1145/3062341.3062363
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

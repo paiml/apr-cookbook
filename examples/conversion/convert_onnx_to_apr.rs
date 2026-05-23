@@ -1,5 +1,6 @@
 //! # Recipe: Convert ONNX to APR
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //! **Category**: Format Conversion
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example convert_onnx_to_apr
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 

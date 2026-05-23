@@ -1,5 +1,6 @@
 //! # Recipe: Create APR Decision Tree Model
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Model Creation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example create_apr_decision_tree
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

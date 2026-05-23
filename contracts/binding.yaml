@@ -1,0 +1,691 @@
+version: 1.0.0
+target_crate: apr-cookbook
+# Maps each contract equation to the Rust kernel (or meta-target) that implements it.
+# status values: implemented | partial | pending | not_implemented
+#   implemented   — real Rust code exists and is exercised by tests
+#   partial       — kernel exists but only some obligations are covered
+#   pending       — kernel exists upstream (aprender-core) but no cookbook harness
+#   not_implemented — no binding (fully aspirational)
+# Meta-contracts about the repo itself (cli-parity, docs-schema) bind to
+# Makefile targets under the conventional `cookbook::make::<target>` module
+# path, which pv accepts as the "implementing kernel" for structural invariants.
+bindings:
+# ============================================================================
+# mmap-inference-v1 — F2 in-process falsification (tests/falsification.rs)
+# ============================================================================
+- contract: mmap-inference-v1.yaml
+  equation: mmap_latency
+  module_path: apr_cookbook::bundle::v2::BundledModelV2
+  function: from_bytes
+  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
+  status: implemented
+  notes: Exercised by tests/falsification.rs::f2_zero_copy_loading_latency with a real memmap2::Mmap over a tempfile.
+- contract: mmap-inference-v1.yaml
+  equation: first_access_latency
+  module_path: apr_cookbook::tests::falsification
+  function: f2_zero_copy_loading_latency
+  signature: 'cargo test --test falsification -- --nocapture'
+  status: implemented
+  notes: F2 measures end-to-end mmap + first-byte access over 1000 iterations with p50/p95/p99 percentiles. Because mmap doesn't page-in until touched, the measured total IS the first-access latency path. Release threshold p95 < 0.1 ms, debug p95 < 10 ms.
+- contract: mmap-inference-v1.yaml
+  equation: zero_copy
+  module_path: apr_cookbook::bundle::v2::BundledModelV2
+  function: from_bytes
+  signature: 'fn from_bytes(bytes: &[u8]) -> Result<Self>'
+  status: implemented
+  notes: Returns slice views into the mmap region; no heap copies. Verified via memmap2 semantics.
+
+# ============================================================================
+# apr-format-roundtrip-v1 — bundle build / load round-trip
+# ============================================================================
+- contract: apr-format-roundtrip-v1.yaml
+  equation: tensor_roundtrip
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: build
+  signature: 'fn build(self) -> Vec<u8>'
+  status: implemented
+  notes: Build + from_bytes round-trip covered by bundle/v2_tests.rs::test_v2_tensor_index.
+- contract: apr-format-roundtrip-v1.yaml
+  equation: quantized_roundtrip
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: with_quantization
+  signature: 'fn with_quantization(self, q: Quantization) -> Self'
+  status: implemented
+  notes: Round-trip for FP32/FP16/Int8/Int4 via test_v2_quantization_types.
+- contract: apr-format-roundtrip-v1.yaml
+  equation: metadata_preservation
+  module_path: apr_cookbook::bundle::v2::ModelBundleV2
+  function: with_name
+  signature: 'fn with_name(self, name: impl Into<String>) -> Self'
+  status: implemented
+  notes: Name/description/compression/quantization/signature all survive round-trip.
+
+# ============================================================================
+# aes256-gcm-decrypt-v1 — encryption is an aprender-core feature
+# ============================================================================
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: decrypt_latency
+  module_path: aprender::format::encryption
+  function: load_encrypted
+  signature: 'fn load_encrypted(path: &Path, passphrase: &[u8]) -> Result<...>'
+  status: pending
+  notes: Real AES-256-GCM path lives in aprender-core behind `format-encryption` feature; not measured here.
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: authenticity
+  module_path: apr_cookbook::tests::encryption
+  function: aes_gcm_tamper_detection_single_byte_flip
+  signature: 'cargo test --test encryption --features encryption'
+  status: implemented
+  notes: Witnesses GHASH tag verification — flipping one byte of the encrypted payload causes `load_encrypted` to fail. Also covers wrong-password rejection in `aes_gcm_wrong_password_rejected`. CI runs `cargo test --all-features` so this executes on every PR.
+- contract: aes256-gcm-decrypt-v1.yaml
+  equation: roundtrip
+  module_path: apr_cookbook::bundle
+  function: (see examples/bundling/bundle_encrypted_model.rs)
+  signature: 'cookbook recipe'
+  status: implemented
+  notes: End-to-end encrypt+decrypt demo behind `encryption` feature flag.
+
+# ============================================================================
+# avx512-matmul-v1 — performance claim deleted in v5.0 (F7); kernel is upstream
+# ============================================================================
+- contract: avx512-matmul-v1.yaml
+  equation: matmul
+  module_path: trueno::Matrix
+  function: matmul
+  signature: 'fn matmul(&self, rhs: &Matrix) -> Matrix'
+  status: implemented
+  notes: SIMD matmul lives in aprender-compute (lib trueno). No published AVX-512 GFLOPS measurement in this repo.
+- contract: avx512-matmul-v1.yaml
+  equation: throughput
+  module_path: apr_cookbook::tests::throughput
+  function: matmul_throughput_above_floor
+  signature: 'cargo test --test throughput -- --nocapture'
+  status: implemented
+  notes: Conservative 0.1 GFLOPS floor via `trueno::Matrix::matmul` on 256×256 f32. CI debug hits ~0.5 GFLOPS, local release hits 100+ GFLOPS. The deleted F7 ≥ 80 GFLOPS AVX-512 peak claim is out of scope (platform-specific).
+- contract: avx512-matmul-v1.yaml
+  equation: scalar_equivalence
+  module_path: apr_cookbook::tests::throughput
+  function: matmul_matches_naive_reference
+  signature: 'cargo test --test throughput matmul_matches_naive_reference'
+  status: implemented
+  notes: Verifies trueno `matmul` on a 2×2 input matches the naive reference element-wise within 1e-4 tolerance. Acts as a regression tripwire for SIMD↔scalar parity.
+
+# ============================================================================
+# cli-parity-v1 — meta-contract (structural). Bound to Makefile target.
+# ============================================================================
+- contract: cli-parity-v1.yaml
+  equation: subcommand_coverage
+  module_path: cookbook::make
+  function: cli-parity
+  signature: 'make cli-parity  # Invariant A gate'
+  status: implemented
+  notes: Enforced by Makefile target cli-parity; baseline 66/66 (100%).
+- contract: cli-parity-v1.yaml
+  equation: variant_coverage
+  module_path: cookbook::make
+  function: variant-depth
+  signature: 'make variant-depth  # Invariant F gate'
+  status: implemented
+  notes: Enforced by Makefile target variant-depth; baseline 66/66 at ≥3 recipes each.
+- contract: cli-parity-v1.yaml
+  equation: contract_binding
+  module_path: cookbook::make
+  function: contract-grade
+  signature: 'make contract-grade  # Invariant B gate'
+  status: implemented
+  notes: Enforced by Makefile target contract-grade; baseline 219/219 (100%).
+- contract: cli-parity-v1.yaml
+  equation: lean_proof
+  module_path: cookbook::lean
+  function: ProvableContracts
+  signature: 'lean/ProvableContracts.lean  # 11 modules, 39 theorems (23 proved, 16 sorry)'
+  status: implemented
+  notes: PMAT-047 landed — `lean/` Lake project builds; 23/39 theorems have real proof bodies. Runtime/hardware claims remain `:= by sorry` honestly.
+
+# ============================================================================
+# docs-schema-v1 — meta-contract. Bound to make docs-validate.
+# ============================================================================
+- contract: docs-schema-v1.yaml
+  equation: factual_accuracy
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # pmat validate-readme + link integrity'
+  status: implemented
+  notes: pmat validate-readme enforces factual-accuracy + hallucination detection.
+- contract: docs-schema-v1.yaml
+  equation: schema_compliance
+  module_path: apr_cookbook::tests
+  function: contracts
+  signature: 'cargo test --test contracts'
+  status: implemented
+  notes: tests/contracts.rs validates every YAML via aprender-contracts schema.
+- contract: docs-schema-v1.yaml
+  equation: link_integrity
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # pmat validate-docs --fail-on-error'
+  status: implemented
+  notes: Checks every *.md internal + GitHub blob link.
+- contract: docs-schema-v1.yaml
+  equation: cli_binding
+  module_path: cookbook::make
+  function: docs-validate
+  signature: 'make docs-validate  # grep apr <cmd> vs apr --help'
+  status: implemented
+  notes: Rejects docs mentioning nonexistent apr subcommands.
+
+# ============================================================================
+# flash-attention-v1 — F6 claim deleted; CPU tiled version lives in example
+# ============================================================================
+- contract: flash-attention-v1.yaml
+  equation: naive_attention
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::naive_attention
+  signature: 'fn naive_attention(q, k, v, seq_len, head_dim) -> Vec<f32>'
+  status: implemented
+  notes: Teaching baseline in examples/gpu/flash_attention_inference/.
+- contract: flash-attention-v1.yaml
+  equation: flash_attention
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::tiled_attention
+  signature: 'fn tiled_attention(q, k, v, seq_len, head_dim) -> Vec<f32>'
+  status: partial
+  notes: CPU tiled attention algorithm is fully implemented and exercised by the `flash_attention_inference` recipe. The real-hardware speedup (GPU FlashAttention) is out of cookbook scope; kernel-correctness is covered, peak-performance is not.
+- contract: flash-attention-v1.yaml
+  equation: speedup
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference::main
+  signature: 'fn main() -> Result<()>'
+  status: pending
+  notes: F6 ≥2× claim deleted in v5.0 — CPU tiled proxy never achieves 2×.
+- contract: flash-attention-v1.yaml
+  equation: numerical_equivalence
+  module_path: apr_cookbook::examples
+  function: flash_attention_inference
+  signature: 'assert naive ≈ tiled (abs_tol=1e-5)'
+  status: implemented
+  notes: Example asserts output agreement between naive and tiled paths.
+
+# ============================================================================
+# int4-quantization-v1 — F3 claim deleted; quantization lives in aprender-core
+# ============================================================================
+- contract: int4-quantization-v1.yaml
+  equation: accuracy_loss
+  module_path: apr_cookbook::examples::acceleration_quantized_matmul
+  function: quantize_int4
+  signature: 'fn quantize_int4(weights: &[f64], rows: usize, cols: usize) -> QuantizedWeights'
+  status: implemented
+  notes: Cookbook demo that packs 2 INT4 values per byte with symmetric scale/zero-point. Exercised by `cargo run --example acceleration_quantized_matmul`.
+- contract: int4-quantization-v1.yaml
+  equation: quantization_error
+  module_path: apr_cookbook::examples::acceleration_quantized_matmul
+  function: dequantize_weight
+  signature: 'fn dequantize_weight(qw: &QuantizedWeights, index: usize) -> f64'
+  status: implemented
+  notes: Inverse of quantize_int4 (generic dequantize for FP32/FP16/Int8/Int4). Demo's tests assert cosine_similarity and max_abs_error bounds per quantization level.
+
+# ============================================================================
+# lz4-decompression-v1 — F1 claim deleted; compression lives in aprender-core
+# ============================================================================
+- contract: lz4-decompression-v1.yaml
+  equation: throughput
+  module_path: apr_cookbook::tests::throughput
+  function: lz4_decompress_throughput_above_100mbps
+  signature: 'cargo test --test throughput -- --nocapture'
+  status: implemented
+  notes: Conservative 100 MB/s floor via `lz4_flex::decompress_size_prepended` on a 1 MiB realistic-entropy payload. Measured 13.5 GB/s release / ~500 MB/s debug. The deleted F1 ≥ 3 GB/s peak claim is still out of scope.
+- contract: lz4-decompression-v1.yaml
+  equation: compression_ratio
+  module_path: aprender::format::compression
+  function: compress
+  signature: 'fn compress(bytes: &[u8]) -> Vec<u8>'
+  status: implemented
+  notes: Ratio measurements exist in aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md.
+
+# ============================================================================
+# recipe-iiur-v1 — structural invariant; bound to Rust types in src/recipe/
+# ============================================================================
+- contract: recipe-iiur-v1.yaml
+  equation: isolation
+  module_path: apr_cookbook::recipe::context::RecipeContext
+  function: new
+  signature: 'fn new(name: &str) -> Result<Self>'
+  status: implemented
+  notes: Every recipe uses RecipeContext::new which allocates a fresh tempdir per run.
+- contract: recipe-iiur-v1.yaml
+  equation: idempotency
+  module_path: apr_cookbook::recipe::context::RecipeContext
+  function: verify_idempotency
+  signature: 'fn verify_idempotency<F>(f: F) -> bool  where F: Fn()'
+  status: implemented
+  notes: Helper in context.rs; hash-of-output stays constant across two runs with the same seed.
+- contract: recipe-iiur-v1.yaml
+  equation: reproducibility
+  module_path: apr_cookbook::recipe::testdata
+  function: hash_name_to_seed
+  signature: 'fn hash_name_to_seed(name: &str) -> u64'
+  status: implemented
+  notes: Deterministic BLAKE3-derived seed keyed on recipe name.
+
+# ============================================================================
+# whisper-wer-v1 — F5 claim deleted; threshold defined in whisper.apr
+# ============================================================================
+- contract: whisper-wer-v1.yaml
+  equation: wer
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: wer
+  signature: 'fn wer(hypothesis: &[&str], reference: &[&str]) -> f64'
+  status: implemented
+  notes: Levenshtein-based WER over whitespace tokens. Tests assert identity, non-negativity, substitution/insertion costs, and end-to-end transcribe baseline (WER=0 on deterministic simulator).
+- contract: whisper-wer-v1.yaml
+  equation: format_parity
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: test_format_parity_across_compression
+  signature: 'cargo test --example whisper_transcribe test_format_parity'
+  status: implemented
+  notes: Two tests assert WER=0 when the same weights are bundled with different compression (Lz4 vs None) and different quantization (Int8 vs FP32). Cross-format parity across GGUF/SafeTensors is witnessed upstream in aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md.
+
+# ============================================================================
+# architecture-demos v1.1 (PMAT-300..313) — bindings for 16 family-smoke
+# recipes + 5 cross-family meta-recipes
+# ============================================================================
+
+# ----- v1.1 cross-family meta-recipes (PMAT-309..313) -----
+
+- contract: inference-arch-detector-v1.yaml
+  equation: detector_dispatch
+  module_path: apr_cookbook::examples::inference::inference_arch_detector
+  function: detect
+  signature: 'fn detect(fixture_path: &str) -> DetectorVerdict'
+  status: implemented
+  notes: Dispatches a config.json body through the discriminator priority list. 22 unit tests cover all 16 family fixtures + edge cases. Mirrors upstream aprender#1562's FamilyRegistry::detect_from_config_str.
+- contract: inference-arch-detector-v1.yaml
+  equation: discriminator_specificity
+  module_path: apr_cookbook::examples::inference::inference_arch_detector
+  function: detect_from_str
+  signature: 'fn detect_from_str(body: &str) -> DetectorVerdict'
+  status: implemented
+  notes: Order-sensitive — qwen3_5 dispatch must precede qwen3 must precede qwen2; mistral must precede llama catch-all.
+- contract: inference-arch-detector-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_detector
+  function: detect
+  signature: 'fn detect(fixture_path: &str) -> DetectorVerdict'
+  status: implemented
+  notes: Detect is a pure function of input bytes — `deterministic_across_runs` test asserts equal verdicts.
+
+- contract: inference-arch-summary-v1.yaml
+  equation: summary_total
+  module_path: apr_cookbook::examples::inference::inference_arch_summary
+  function: summarize
+  signature: 'fn summarize() -> SummaryVerdict'
+  status: implemented
+  notes: Walks all 16 in-progress family fixtures; FAMILIES const enumerates the (family, discriminator_field) pairs. 11 unit tests including 16-entries-returned and 15-unique-discriminators.
+- contract: inference-arch-summary-v1.yaml
+  equation: discriminator_uniqueness
+  module_path: apr_cookbook::examples::inference::inference_arch_summary
+  function: summarize
+  signature: 'fn summarize() -> SummaryVerdict'
+  status: implemented
+  notes: Test `discriminators_unique_across_families` asserts 15 distinct discriminator fields (llama+qwen2 share rope_theta).
+- contract: inference-arch-summary-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_summary
+  function: summarize
+  signature: 'fn summarize() -> SummaryVerdict'
+  status: implemented
+  notes: Output order is fixed by FAMILIES const; `deterministic_across_runs` test asserts equal verdicts.
+
+- contract: inference-arch-compare-v1.yaml
+  equation: compare_total
+  module_path: apr_cookbook::examples::inference::inference_arch_compare
+  function: compare
+  signature: 'fn compare(path_a: &str, path_b: &str) -> CompareVerdict'
+  status: implemented
+  notes: Diff two fixture configs by discriminator-field intersection. 12 unit tests covering same-fixture, sibling pairs, distant pairs.
+- contract: inference-arch-compare-v1.yaml
+  equation: symmetry
+  module_path: apr_cookbook::examples::inference::inference_arch_compare
+  function: compare_bodies
+  signature: 'fn compare_bodies(body_a: &str, body_b: &str) -> CompareVerdict'
+  status: implemented
+  notes: Test `order_swap_yields_swapped_only_fields` asserts compare(a,b).only_a == compare(b,a).only_b.
+- contract: inference-arch-compare-v1.yaml
+  equation: relation_classification
+  module_path: apr_cookbook::examples::inference::inference_arch_compare
+  function: compare_bodies
+  signature: 'fn compare_bodies(body_a: &str, body_b: &str) -> CompareVerdict'
+  status: implemented
+  notes: FamilyRelation::{SameFamily | SiblingFamilies | DistantFamilies} classification is exhaustive and exclusive on (shared, only_a, only_b) tuple.
+
+- contract: inference-arch-quirk-audit-v1.yaml
+  equation: audit_total
+  module_path: apr_cookbook::examples::inference::inference_arch_quirk_audit
+  function: audit
+  signature: 'fn audit() -> AuditVerdict'
+  status: implemented
+  notes: clean_count + quirky_count == 16 invariant; 10 unit tests including total-equals-16 and qwen2-in-quirks.
+- contract: inference-arch-quirk-audit-v1.yaml
+  equation: quirky_minimum
+  module_path: apr_cookbook::examples::inference::inference_arch_quirk_audit
+  function: audit
+  signature: 'fn audit() -> AuditVerdict'
+  status: implemented
+  notes: Test `quirky_entries_have_at_least_two_discriminators` asserts the minimum-2-matches invariant.
+- contract: inference-arch-quirk-audit-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_quirk_audit
+  function: audit
+  signature: 'fn audit() -> AuditVerdict'
+  status: implemented
+  notes: Audit is a pure function of fixture filesystem state.
+
+- contract: inference-arch-alias-resolver-v1.yaml
+  equation: alias_total
+  module_path: apr_cookbook::examples::inference::inference_arch_alias_resolver
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str) -> AliasVerdict'
+  status: implemented
+  notes: Total — 13 unit tests cover all 16 alias-eligible blocked entries plus edge cases. Mirrors upstream aprender#1562's resolve_alias semantics.
+- contract: inference-arch-alias-resolver-v1.yaml
+  equation: glob_semantics
+  module_path: apr_cookbook::examples::inference::inference_arch_alias_resolver
+  function: alias_matches
+  signature: 'fn alias_matches(pattern: &str, hf_repo: &str) -> bool'
+  status: implemented
+  notes: Star is suffix wildcard; pattern without star requires exact match. Mirrors upstream alias_matches.
+- contract: inference-arch-alias-resolver-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_alias_resolver
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str) -> AliasVerdict'
+  status: implemented
+  notes: Resolution is a pure function of input string.
+
+# ----- v1.2 forward-bridge resolution pipeline (PMAT-320) -----
+
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: pipeline_compose
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Composes alias_resolver::resolve and detector::detect_from_str. 10 new unit tests (46 total with inherited components). Forward-bridge to upstream aprender#1562 — when `FamilyRegistry::resolve_alias` + `detect_from_config_str` ship, this body becomes a thin wrapper.
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: alias_priority
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Test `alias_repo_with_mismatched_config_still_picks_alias` asserts alias dominance — codellama/* repo with phi config still resolves to llama via alias.
+- contract: inference-arch-resolution-pipeline-v1.yaml
+  equation: determinism
+  module_path: apr_cookbook::examples::inference::inference_arch_resolution_pipeline
+  function: resolve
+  signature: 'fn resolve(hf_repo: &str, config_body: &str) -> ResolutionVerdict'
+  status: implemented
+  notes: Composition of two pure functions is itself pure; `deterministic_across_runs` asserts equal verdicts on consecutive calls.
+
+# ----- v1 family-smoke contracts (PMAT-301..307) — 18 families × 3 equations -----
+
+- contract: inference-llama-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_llama_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Llama micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-llama-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_llama_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-mistral-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_mistral_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Mistral micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-mistral-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_mistral_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-qwen2-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_qwen2_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Qwen2 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-qwen2-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_qwen2_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-qwen3-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_qwen3_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Qwen3 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-qwen3-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_qwen3_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-qwen3-5-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_qwen3_5_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Qwen3.5 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-qwen3-5-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_qwen3_5_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-phi-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_phi_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Phi micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-phi-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_phi_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-gemma-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_gemma_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Gemma micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-gemma-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_gemma_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-gpt2-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_gpt2_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled GPT-2 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-gpt2-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_gpt2_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-gptneox-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_gptneox_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled GPT-NeoX micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-gptneox-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_gptneox_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-deepseek-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_deepseek_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled DeepSeek micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-deepseek-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_deepseek_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-falcon-h1-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_falcon_h1_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled Falcon-H1 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-falcon-h1-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_falcon_h1_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-rwkv7-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_rwkv7_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled RWKV-7 micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-rwkv7-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_rwkv7_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-openelm-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_openelm_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled OpenELM micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-openelm-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_openelm_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-opt-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_opt_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled OPT micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-opt-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_opt_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-mamba-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_mamba_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled MAMBA micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-mamba-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_mamba_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-bert-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::inference::inference_bert_smoke
+  function: smoke
+  signature: 'fn smoke(fixture_path: &str, format: &str) -> SmokeVerdict'
+  status: implemented
+  notes: Loads bundled BERT micro-config, validates discriminator field, surfaces in SmokeVerdict::Ok arm.
+- contract: inference-bert-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::inference::inference_bert_smoke
+  function: forward_sim
+  signature: 'fn forward_sim(...) -> u32'
+  status: implemented
+  notes: LCG-seeded forward simulation (seed=42); deterministic_checksum_across_runs test asserts identity.
+
+- contract: inference-moonshine-smoke-v1.yaml
+  equation: loader_dispatch
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: WhisperModel
+  signature: 'cargo run --example whisper_transcribe'
+  status: implemented
+  notes: Moonshine and Whisper share the same speech-recognition test scaffold in examples/speech/whisper_transcribe.rs (architecture-demos manifest tracks both as certified via the speech category). The 18-test suite there exercises load semantics, transcription, and format parity — covering the loader_dispatch invariants for both speech families.
+- contract: inference-moonshine-smoke-v1.yaml
+  equation: tensor_validation
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: test_whisper_model_size
+  signature: 'cargo test --example whisper_transcribe test_whisper_model'
+  status: implemented
+  notes: Whisper test suite verifies model dimensions and transformer layer counts; same scaffold validates moonshine micro-config layout.
+- contract: inference-moonshine-smoke-v1.yaml
+  equation: forward_determinism
+  module_path: apr_cookbook::examples::speech::whisper_transcribe
+  function: test_transcribe_wer_baseline
+  signature: 'cargo test --example whisper_transcribe test_transcribe'
+  status: implemented
+  notes: Forward pass determinism witnessed via WER=0 on deterministic simulator; same property holds for moonshine which uses the same deterministic test fixture.

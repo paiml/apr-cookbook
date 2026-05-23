@@ -845,3 +845,1826 @@ roadmap:
   labels:
   - quality
   notes: null
+- id: PMAT-037
+  github_issue: null
+  item_type: task
+  title: 'Invariant D: add arXiv citations to all 219 recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:33Z
+  updated: 2026-04-06T13:46:21Z
+  spec: null
+  acceptance_criteria:
+  - 'Every recipe .rs needs >=1 arXiv/DOI citation. Baseline: 0/219 (0%). Gate: make citation-check. Ref: F-ARXIV-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-038
+  github_issue: null
+  item_type: task
+  title: 'Invariant C: add GGUF/SafeTensors format variants to recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:34Z
+  updated: 2026-04-06T13:46:18Z
+  spec: null
+  acceptance_criteria:
+  - 'Recipes accepting model files must demo .apr + .gguf + .safetensors. Baseline: 3/219 (1.4%). Gate: make format-coverage. Ref: F-FORMAT-COV-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-039
+  github_issue: null
+  item_type: task
+  title: 'Invariant B: bind recipes to provable-contracts'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:24:35Z
+  updated: 2026-04-06T13:49:17Z
+  spec: null
+  acceptance_criteria:
+  - 'Every recipe needs Contract: header referencing YAML contract. Baseline: 0/219 (0%). Gate: make contract-grade. Ref: F-CONTRACT-GRADE-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-040
+  github_issue: null
+  item_type: task
+  title: 'Invariant E: bind book/ docs to provable-contracts'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-06T13:24:36Z
+  updated: 2026-04-06T14:10:34Z
+  spec: null
+  acceptance_criteria:
+  - '252 book/src/*.md files need contract binding. Baseline: 13/268 (4.9%). Gate: make docs-validate. Ref: F-DOCS-CONTRACT-001, #208'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-041
+  github_issue: null
+  item_type: task
+  title: 'Fix 98 recipe files exceeding 500-line limit (Toyota Way: Muda)'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-06T13:31:39Z
+  updated: 2026-04-06T16:04:34Z
+  spec: null
+  acceptance_criteria:
+  - 'pmat checkpoint found 98/219 recipe .rs files over 500 lines. Worst: 977 lines. Root cause: monolithic examples with inline domain types that should be in lib.rs or split into focused sub-examples. Priority: reduce top 20 offenders (>800 lines) first.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-042
+  github_issue: null
+  item_type: task
+  title: 'APR-MONO v0.31.2 integration: retarget cookbook at aprender monorepo, falsification discipline v5.0'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-22T09:17:20Z
+  updated: 2026-04-22T10:03:14.569942946+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-043
+  github_issue: null
+  item_type: task
+  title: 'DEBT: src/bundle.rs (986) and src/recipe.rs (540) exceed 500-line cap — extract-module refactor'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T09:55:38Z
+  updated: 2026-04-22T10:19:13.741794971+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-044
+  github_issue: null
+  item_type: task
+  title: 'DEBT: push refactor/aprender-monorepo-v31 branch — blocked on user consent since ''main'' is protected'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T09:55:39Z
+  updated: 2026-04-22T10:30:13.015643081+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-045
+  github_issue: null
+  item_type: task
+  title: 'DEBT: paiml/apr-cookbook is archived on GitHub (isArchived: true) — cannot push refactor/aprender-monorepo-v31 or open PR; requires un-archive by repo admin'
+  status: completed
+  priority: critical
+  assigned_to: null
+  created: 2026-04-22T10:27:43Z
+  updated: 2026-04-22T10:55:20.305463572+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-046
+  github_issue: null
+  item_type: task
+  title: 'Grade A sprint part 1: Kani — write #[kani::proof] harnesses for 32 uncovered proof_obligations across 11 contracts (lifts D3 0.33 → 1.00)'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-22T12:59:04Z
+  updated: 2026-04-22T12:59:04Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-047
+  github_issue: null
+  item_type: task
+  title: 'Grade A sprint part 2: Lean — scaffold Lean 4 project + 33 theorem stubs; flip lean.status wip→proved as each proof lands (lifts D4 0.00 → 1.00)'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-22T12:59:04Z
+  updated: 2026-04-22T12:59:04Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-048
+  github_issue: null
+  item_type: task
+  title: 'Grade A sprint part 3: Binding — create --binding registry YAML mapping each contract to its implementing Rust kernel (lifts D5 0.00 → 1.00)'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-22T12:59:04Z
+  updated: 2026-04-22T12:59:04Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-049
+  github_issue: null
+  item_type: task
+  title: 'Invariant F part 1: 30 new recipes for 10 zero-coverage subcommands (awq-lint, dry-sampling-lint, gbnf-lint, mcp, ollama-chat-lint, oom-lint, pretrain, registry, tool-use-lint, validate-manifest). Each needs 3 example recipes with IIUR headers, contracts, and arXiv citations.'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-22T13:16:03Z
+  updated: 2026-04-23T01:42:19.394790566+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-050
+  github_issue: null
+  item_type: task
+  title: 'Invariant F part 2: ~80 new recipes for ~40 single-coverage subcommands (each at 1 recipe, needs 2 more). Covers bench, check, debug, diff, inspect, eval, oracle, run, serve, train, tune, etc.'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T13:16:03Z
+  updated: 2026-04-23T01:41:45.843572337+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-051
+  github_issue: null
+  item_type: task
+  title: 'Invariant F part 3: ~10 new recipes for subcommands at 2 recipes needing 1 more (compare-hf, qa, tensors, run). Final push to 66/66 grade A.'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-22T13:16:03Z
+  updated: 2026-04-23T01:41:48.249601518+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-052
+  github_issue: null
+  item_type: task
+  title: 'PMAT-050 Sprint A: 22 recipes for 11 subs (bench, canary, cbtop, check, compile, data, debug, decrypt, diagnose, diff, encrypt) — 2 new variants each, Invariant F'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T15:31:56Z
+  updated: 2026-04-23T01:41:50.271110232+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-053
+  github_issue: null
+  item_type: task
+  title: 'PMAT-050 Sprint B: 22 recipes for 11 subs (eval, experiment, explain, flow, gpu, hex, import, inspect, lint, list, monitor) — Invariant F'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T16:03:00Z
+  updated: 2026-04-23T01:41:52.584795312+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-054
+  github_issue: null
+  item_type: task
+  title: 'PMAT-050 Sprint C: 22 recipes for 11 subs (oracle, parity, pipeline, probar, profile, ptx, ptx-map, publish, pull, qualify, quantize) — Invariant F'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T16:20:33Z
+  updated: 2026-04-23T01:41:54.517973160+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-055
+  github_issue: null
+  item_type: task
+  title: 'PMAT-050 Sprint D (final): 20 recipes for 10 subs (rm, runs, serve, showcase, tokenize, trace, train, tree, tui, tune, validate) — brings Invariant F to 66/66 ENFORCED'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-04-22T16:46:19Z
+  updated: 2026-04-23T01:41:56.469635458+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-056
+  github_issue: null
+  item_type: task
+  title: 'Lift whisper-wer-v1 from Grade C: add real wer() edit-distance function + format-parity test to examples/speech/whisper_transcribe.rs; flip 2 pending bindings to implemented'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T07:17:02Z
+  updated: 2026-04-23T07:17:05.839231372+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-057
+  github_issue: null
+  item_type: task
+  title: Refresh all docs to 341 recipes + 341/341 demo-run baseline; pmat comply migrate 3.7.0 → 3.15.0
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:19:13Z
+  updated: 2026-04-23T08:19:21.422421156+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-058
+  github_issue: null
+  item_type: task
+  title: Add runtime throughput tests (lz4 + matmul) to lift lz4/avx512 bindings pending → implemented
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:22:29Z
+  updated: 2026-04-23T08:22:29.431394677+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-059
+  github_issue: null
+  item_type: task
+  title: Add AES-256-GCM tamper-detection + roundtrip test; flip aes256 authenticity binding to implemented
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T08:28:54Z
+  updated: 2026-04-23T08:28:57.939027455+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-060
+  github_issue: null
+  item_type: task
+  title: 'P0: fix matmul threshold flake on CI + unblock unified-gate infra failure'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-23T08:43:21Z
+  updated: 2026-04-23T08:43:25.733574387+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-061
+  github_issue: null
+  item_type: task
+  title: Add lean-build to CI so Lean 4 theorem scaffold regressions are caught in PR
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T10:00:53Z
+  updated: 2026-04-23T10:00:57.062428779+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-062
+  github_issue: null
+  item_type: task
+  title: 'Gitignore hygiene: exclude .pmat-metrics/commit-*.json + .pmat/context.db* transient SQLite files; mark PMAT-061 complete'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T10:16:05Z
+  updated: 2026-04-23T10:16:09.302956964+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-063
+  github_issue: null
+  item_type: task
+  title: Mark unified gate continue-on-error so workflow-level CI badge reflects required-check state, not infra state
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-04-23T12:45:15Z
+  updated: 2026-04-23T12:45:19.508197042+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-064
+  github_issue: null
+  item_type: task
+  title: 'Fix GitHub Pages book deploy: migrate book.yml from peaceiris/actions-gh-pages to actions/deploy-pages to match workflow-based Pages config'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-04-23T13:19:51Z
+  updated: 2026-04-23T13:19:55.490125658+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-065
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Migrate sovereign-ai-cookbook (recipes + stacks + jetson)'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-04T20:32:12Z
+  updated: 2026-05-04T20:53:45.096690028+00:00
+  spec: null
+  acceptance_criteria:
+  - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-100 (renumbered). Copy 14 sovereign YAMLs to examples/deployment-stacks/recipes/, 10 stacks to examples/deployment-stacks/stacks/ (with 09-qwen-coder→10-qwen-coder rename), jetson machine config to examples/machines/jetson/. Generate 14 Rust loader wrappers per iiur-conformance.md Strategy A. Add contracts/recipe-iiur-config-v1.yaml. Author Deployment Stacks book chapters.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - migration
+  notes: null
+- id: PMAT-066
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Migrate alimentar examples + book'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-04T20:32:17Z
+  updated: 2026-05-05T12:01:14.695195619+00:00
+  spec: null
+  acceptance_criteria:
+  - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-101 (renumbered). Copy 18 alimentar examples to examples/data-loading/ with IIUR header retrofit (RecipeContext, Contract+Citation header, tests module, remove unwrap-allow blocks). Copy ~95 book chapters to book/src/data-loading/ (drop development/ + ecosystem/). Wire examples into Cargo.toml.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - migration
+  notes: null
+- id: PMAT-067
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Migrate presentar examples + book'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-04T20:32:24Z
+  updated: 2026-05-05T12:01:17.036494316+00:00
+  spec: null
+  acceptance_criteria:
+  - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-102 (renumbered). Copy 28 .yaml/.prs configs to examples/visualization/{ald,apr,charts,dashboards,edge_cases,prs}/ preserving subdir layout. Author single load_visualization.rs validator per iiur-conformance.md Strategy B. Copy ~110 book chapters to book/src/visualization/ (drop development/ + ecosystem/).
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - migration
+  notes: null
+- id: PMAT-068
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Update Six Coverage Invariants for new categories'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-04T20:32:30Z
+  updated: 2026-05-05T12:01:19.373862632+00:00
+  spec: null
+  acceptance_criteria:
+  - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-103 (renumbered). Update scripts/coverage-invariants.sh to extend B/C/D/E/F across deployment-stacks/data-loading/visualization/machines categories per iiur-conformance.md. Update MEMORY.md project-stats line. Update components/recipe-catalog.md with 4 new category tables.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - coverage
+  notes: null
+- id: PMAT-069
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Bump cookbook spec to v6.0.0 (umbrella scope)'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-04T20:32:35Z
+  updated: 2026-05-05T12:01:21.692620711+00:00
+  spec: null
+  acceptance_criteria:
+  - Per docs/specifications/centralize-cookbooks/tickets.md PMAT-104 (renumbered). Bump apr-cookbook.md 5.0.0 → 6.0.0. Rewrite executive summary per scope.md. Update tech stack diagram with 4 new categories. Update README hero text and category list. Restructure book/src/SUMMARY.md per book-consolidation.md ordering policy. Tag v6.0.0.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - spec
+  notes: null
+- id: PMAT-070
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE: Archive sovereign-ai-cookbook/alimentar/presentar repos'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-05-04T20:32:41Z
+  updated: 2026-05-05T11:59:51.334634920+00:00
+  spec: null
+  acceptance_criteria:
+  - 'Per docs/specifications/centralize-cookbooks/archive-checklist.md (PMAT-105 renumbered). GATED on PMAT-065..069 merged + 7-day quiet period + scripts/centralize-verify.sh --strict green. Per repo: tag pre-archive-2026-05, REDIRECT.md PR, gh api archive=true. 24h pause between repos. Order: sovereign → presentar → alimentar.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - centralize-cookbooks
+  - archive
+  - deferred
+  notes: null
+- id: PMAT-071
+  github_issue: null
+  item_type: task
+  title: 'PMAT-CENTRALIZE-DEBT: Pre-existing tui_log_tail E0716 + book chapter file refs'
+  status: planned
+  priority: low
+  assigned_to: null
+  created: 2026-05-04T20:52:59Z
+  updated: 2026-05-04T20:52:59Z
+  spec: null
+  acceptance_criteria:
+  - Discovered during PMAT-065. tui_log_tail.rs:194 has E0716 lifetime error (let binding scope). c-training and k-distillation book chapters reference example .rs files that are actually directories. mdbook html template missing 'github' font. Out of scope for centralize-cookbooks; track separately.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - debt
+  - pre-existing
+  notes: null
+- id: PMAT-072
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Author expand-cookbooks spec (master + 5 component files)'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T13:26:37Z
+  updated: 2026-05-05T17:03:24.062303164+00:00
+  spec: null
+  acceptance_criteria:
+  - 'Spec for closing aprender-0.31.x coverage gap: 44 new recipes across 6 new categories + 8 extended categories. PMAT-073..086 to be created from this spec. See docs/specifications/expand-cookbooks.md.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - spec
+  notes: null
+- id: PMAT-073
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Cargo.toml + 6 new category scaffolding'
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T14:12:47.147989707+00:00
+  spec: null
+  acceptance_criteria:
+  - Add 6 sister-crate dev-deps + 6 new examples/ subdirs + SUMMARY/recipe-catalog stubs. Per docs/specifications/expand-cookbooks/tickets.md PMAT-072 (renumbered to next available).
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - scaffold
+  notes: null
+- id: PMAT-074
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr code (Claude Code parity) recipes'
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T16:01:08.963339751+00:00
+  spec: null
+  acceptance_criteria:
+  - '7 recipes for apr-code-parity-v1.yaml: mcp-client-register, slash-command, hook-session-start, subagent-spawn, custom-agent-discovery, skill-discovery, worktree+permission. Per recipe-catalog.md code/ section.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-075
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: GPU/CPU oracle bisection recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:28.414934974+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: cli_trace_save_tensor_layer0, cli_diff_values_aprt_stage, analysis_cpu_vs_gpu_parity_gate. Per gap-inventory.md Tier 1 1.1.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-076
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr publish end-to-end recipes'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:30.254246762+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes for publish-manifest-v1: publish_manifest_full, validate_manifest_live_safetensors_dtype, parent_chain. Per gap-inventory.md Tier 1 1.3.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-077
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: apr serve anthropic + serve plan hf://'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:32.142284822+00:00
+  spec: null
+  acceptance_criteria:
+  - '2 recipes: serve_anthropic_messages_api_drop_in (claude-proxy), serve_plan_hf_dryrun_no_weights.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-078
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: MCP M5 transports + notifications'
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:33.989765857+00:00
+  spec: null
+  acceptance_criteria:
+  - '4 recipes: mcp_sse_server, mcp_websocket_server, mcp_notification_progress, mcp_byte_parity_pmcp.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - recipes
+  notes: null
+- id: PMAT-079
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-mcp embedded recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:35.814743580+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes per subcrate-coverage.md: embedded_server_minimal, embedded_register_custom_tool, embedded_byte_parity_pmcp.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-080
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-tsp recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:37.621664524+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: tsp_personalized_route_apr, tsp_local_2opt_optimization, tsp_train_personalized_apr_model.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-081
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-shell recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:39.468019221+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: shell_history_to_apr_corpus, shell_completion_train_local, shell_completion_serve_inline.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-082
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-monte-carlo recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:41.295619251+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: mc_stock_price_simulation_gbm, mc_business_revenue_forecast, mc_value_at_risk_historical_vs_parametric.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-083
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-cgp recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:43.145580978+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: cgp_unified_kernel_profile, cgp_perf_regression_gate_ci, cgp_cross_backend_comparison_report.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-084
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: aprender-contracts-macros recipes'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:44.949383206+00:00
+  spec: null
+  acceptance_criteria:
+  - '3 recipes: contracts_macros_attribute_basic, compile_time_precondition, yaml_codegen_roundtrip.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - subcrate
+  notes: null
+- id: PMAT-085
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Tier 3 perf bench recipes'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:46.769535208+00:00
+  spec: null
+  acceptance_criteria:
+  - '5 recipes: moe_rayon_dispatch_bench, mmap_per_tensor_diff_bench, bundle_streaming_q4k_large, conversion_gguf_legacy_quant_fallback, inference_qwen3_moe_numerical_parity.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - perf
+  notes: null
+- id: PMAT-086
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Tier 4 authoring patterns + distill against contract'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:48.609066790+00:00
+  spec: null
+  acceptance_criteria:
+  - '4 recipes: contract_algorithm_binding_pattern, pv_check_parity_authoring, json_schema_draft7_meta_validation, distill_against_contract_v1.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - authoring
+  notes: null
+- id: PMAT-087
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND: Bump cookbook spec to v6.1.0 + tag'
+  status: completed
+  priority: low
+  assigned_to: null
+  created: 2026-05-05T14:11:26Z
+  updated: 2026-05-05T17:03:50.433081718+00:00
+  spec: null
+  acceptance_criteria:
+  - Bump apr-cookbook.md 6.0.0->6.1.0; update tech stack diagram with 6 new categories + sister crates; README umbrella scope refresh; tag v6.1.0. Closes expand-cookbooks initiative.
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - spec
+  notes: null
+- id: PMAT-088
+  github_issue: null
+  item_type: task
+  title: 'PMAT-EXPAND-FOLLOWUP: apr stamp + compare-hf + check recipes (9 recipes)'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-05T21:06:39Z
+  updated: 2026-05-05T21:06:39Z
+  spec: null
+  acceptance_criteria:
+  - 'Follow-up to expand-cookbooks initiative. Found 2 apr subcommands with 0 recipes (stamp, compare-hf) and 1 with thin coverage (check). Author 3 recipes per surface = 9 total. Targets: apr stamp (provenance: license/data_source/data_license fields), apr compare-hf (APR vs HuggingFace source comparison), apr check (10-stage pipeline integrity per APR-TRACE-001).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels:
+  - expand-cookbooks
+  - followup
+  - recipes
+  notes: null
+- id: PMAT-089
+  github_issue: null
+  item_type: task
+  title: 'PMAT-112: apr eval + merge + quantize (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T05:58:24Z
+  updated: 2026-05-06T05:58:24Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-090
+  github_issue: null
+  item_type: task
+  title: 'PMAT-113: apr distill + finetune + prune (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T06:18:55Z
+  updated: 2026-05-06T06:18:55Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-091
+  github_issue: null
+  item_type: task
+  title: 'PMAT-114: apr registry + explain + monitor (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T06:38:51Z
+  updated: 2026-05-06T06:38:51Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-092
+  github_issue: null
+  item_type: task
+  title: 'PMAT-115: apr encrypt + profile + import (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T06:57:38Z
+  updated: 2026-05-06T06:57:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-093
+  github_issue: null
+  item_type: task
+  title: 'PMAT-116: apr train + serve + diagnose (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T07:17:38Z
+  updated: 2026-05-06T07:17:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-094
+  github_issue: null
+  item_type: task
+  title: 'PMAT-117: apr export + debug + pretrain (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T07:37:43Z
+  updated: 2026-05-06T07:37:43Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-095
+  github_issue: null
+  item_type: task
+  title: 'PMAT-118: apr bench + diff + experiment (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T07:56:47Z
+  updated: 2026-05-06T07:56:47Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-096
+  github_issue: null
+  item_type: task
+  title: 'PMAT-119: centralize-cookbooks spec v1.1 alimentar amendment'
+  status: planned
+  priority: medium
+  assigned_to: null
+  created: 2026-05-06T08:10:48Z
+  updated: 2026-05-06T08:10:48Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-097
+  github_issue: null
+  item_type: task
+  title: 'PMAT-120: apr mcp + ollama + gpu (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:19:39Z
+  updated: 2026-05-06T08:19:39Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-098
+  github_issue: null
+  item_type: task
+  title: 'PMAT-121: apr decrypt + qa + pipeline (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:38:37Z
+  updated: 2026-05-06T08:38:37Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-099
+  github_issue: null
+  item_type: task
+  title: 'PMAT-122: contracts-macros + monte-carlo + tui (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:47:35Z
+  updated: 2026-05-06T08:47:35Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-100
+  github_issue: null
+  item_type: task
+  title: 'PMAT-123: speech + wasm + simd (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T08:58:42Z
+  updated: 2026-05-06T08:58:42Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-101
+  github_issue: null
+  item_type: task
+  title: 'PMAT-124: distributed + distillation + monitoring (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:07:43Z
+  updated: 2026-05-06T09:07:43Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-102
+  github_issue: null
+  item_type: task
+  title: 'PMAT-125: chat + api + code (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:18:41Z
+  updated: 2026-05-06T09:18:41Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-103
+  github_issue: null
+  item_type: task
+  title: 'PMAT-126: shell + acceleration + serverless (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:29:05Z
+  updated: 2026-05-06T09:29:05Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-104
+  github_issue: null
+  item_type: task
+  title: 'PMAT-127: creation + bundling + conversion (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:39:41Z
+  updated: 2026-05-06T09:39:41Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-105
+  github_issue: null
+  item_type: task
+  title: 'PMAT-128: visualization + advanced + cgp (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T09:51:57Z
+  updated: 2026-05-06T09:51:57Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-106
+  github_issue: null
+  item_type: task
+  title: 'PMAT-129: tsp + registry + inference (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:03:11Z
+  updated: 2026-05-06T10:03:11Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-107
+  github_issue: null
+  item_type: task
+  title: 'PMAT-130: format + gpu + deployment-stacks (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:15:38Z
+  updated: 2026-05-06T10:15:38Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-108
+  github_issue: null
+  item_type: task
+  title: 'PMAT-131: optimize + lint + analysis (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:26:25Z
+  updated: 2026-05-06T10:26:25Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-109
+  github_issue: null
+  item_type: task
+  title: 'PMAT-132: mcp + training + data-loading (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:37:34Z
+  updated: 2026-05-06T10:37:34Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-110
+  github_issue: null
+  item_type: task
+  title: 'PMAT-133: conversion + format + bundling (9 recipes)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-05-06T10:48:42Z
+  updated: 2026-05-06T10:48:42Z
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-111
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry::detect_from_config_str + register_alias; refactor cookbook detector to thin wrapper; flip 16 alias-eligible blocked entries to aliased
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:25:18Z
+  updated: 2026-05-08T20:25:32.529004933+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-112
+  github_issue: null
+  item_type: task
+  title: PMAT-320 architecture-demos v1.2 — consume upstream FamilyRegistry API (cross-repo wire-up + cookbook detector refactor + 16 alias entries flip)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-08T20:28:03Z
+  updated: 2026-05-08T20:45:52.876617864+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-113
+  github_issue: null
+  item_type: task
+  title: PMAT-321 architecture-demos kaizen — align kani_harnesses obligations with proof_obligations across 5 meta contracts
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-08T20:48:07Z
+  updated: 2026-05-08T20:54:42.231530727+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-114
+  github_issue: null
+  item_type: task
+  title: PMAT-322 architecture-demos kaizen — implement Kani harness stubs for 5 cross-family meta contracts (15 functions; closes declared-but-unimplemented gap for the meta tier)
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:03:18Z
+  updated: 2026-05-09T05:08:58.849703244+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-115
+  github_issue: null
+  item_type: task
+  title: PMAT-323 architecture-demos kaizen — 51 family-smoke Kani harness stubs (closes the declared-but-unimplemented gap entirely)
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-09T05:09:35Z
+  updated: 2026-05-09T05:12:49.334114758+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-116
+  github_issue: null
+  item_type: task
+  title: PMAT-324 architecture-demos D3 Kani 0.9 to 1.0 — wire cargo kani into CI; verifies all 108 declared harnesses on every PR
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-09T05:52:41Z
+  updated: 2026-05-09T05:59:39.877969650+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-117
+  github_issue: null
+  item_type: task
+  title: PMAT-330 fine-tuning-cookbook scaffolding — gen script, 155 contract stubs, CI gate
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:25:38Z
+  updated: 2026-05-10T09:50:28.576287249+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-118
+  github_issue: null
+  item_type: task
+  title: PMAT-331 fine-tuning-cookbook Tier 1.1 SFT minimal × 5 families
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:32:08Z
+  updated: 2026-05-10T09:50:40.260166404+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-119
+  github_issue: null
+  item_type: task
+  title: PMAT-332 fine-tuning Tier 1.2 Eval primitives × 5 (perplexity, accuracy, F1, ROUGE-L, BLEU)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:51:39Z
+  updated: 2026-05-10T09:59:12.536050809+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-120
+  github_issue: null
+  item_type: task
+  title: PMAT-333 fine-tuning Tier 1.3 Tabular regression × 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T09:59:30Z
+  updated: 2026-05-10T09:59:30.412372644+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-121
+  github_issue: null
+  item_type: task
+  title: 'New task: PMAT-121'
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-10T10:01:42.844137524+00:00
+  updated: 2026-05-10T10:08:23.846825234+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-122
+  github_issue: null
+  item_type: task
+  title: PMAT-334 fine-tuning Tier 1.4 Tabular classification × 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:08:51Z
+  updated: 2026-05-10T10:13:06.349763924+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-123
+  github_issue: null
+  item_type: task
+  title: PMAT-335 fine-tuning Tier 1.5 Smoke + bench × 5
+  status: completed
+  priority: medium
+  assigned_to: null
+  created: 2026-05-10T10:13:23Z
+  updated: 2026-05-10T10:17:16.172380542+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-124
+  github_issue: null
+  item_type: task
+  title: PMAT-338 fine-tuning Tier 2.1a LoRA rank 8 × 5 families
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:21:28Z
+  updated: 2026-05-10T10:26:00.946440393+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-125
+  github_issue: null
+  item_type: task
+  title: PMAT-339 fine-tuning Tier 2.1b LoRA rank 32 × 5 families
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:21:42Z
+  updated: 2026-05-10T10:26:04.631209373+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-126
+  github_issue: null
+  item_type: task
+  title: PMAT-340 fine-tuning Tier 2.2 QLoRA × 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:26:21Z
+  updated: 2026-05-10T10:30:05.820132167+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-127
+  github_issue: null
+  item_type: task
+  title: PMAT-341 fine-tuning Tier 2.3 Continued pretraining × 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T10:57:42Z
+  updated: 2026-05-10T11:25:39.072203772+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-128
+  github_issue: null
+  item_type: task
+  title: PMAT-342 Tier 2.4 Adapter merge x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T11:30:40Z
+  updated: 2026-05-10T11:30:42.948152445+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-129
+  github_issue: null
+  item_type: task
+  title: PMAT-343 Tier 2.5 PEFT variants x 9
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T11:42:15Z
+  updated: 2026-05-10T13:29:18.915149451+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-130
+  github_issue: null
+  item_type: task
+  title: PMAT-344 Tier 2.6 Memory-efficient optimizers x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T11:53:23Z
+  updated: 2026-05-10T12:32:08.313936264+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-131
+  github_issue: null
+  item_type: task
+  title: PMAT-345 Tier 2 closeout 2.7+2.8+2.9 (6 recipes)
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:01:06Z
+  updated: 2026-05-10T12:40:57.385526996+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-132
+  github_issue: null
+  item_type: task
+  title: PMAT-346 Tier 3.1 Instruction tuning x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T14:14:26.479832783+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-133
+  github_issue: null
+  item_type: task
+  title: PMAT-347 Tier 3.2 Hyperparameter optimization x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T13:10:15.615665950+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-134
+  github_issue: null
+  item_type: task
+  title: PMAT-348 Tier 3.3 Calibration x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:09:28Z
+  updated: 2026-05-10T13:44:35.653998510+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-135
+  github_issue: null
+  item_type: task
+  title: PMAT-349 Tier 3.4 Class imbalance x 5
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:32:58Z
+  updated: 2026-05-10T12:32:59.356158960+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-136
+  github_issue: null
+  item_type: task
+  title: PMAT-350 Tier 3.5 Multimodal + multitask + k-fold x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:39:32Z
+  updated: 2026-05-10T13:44:35.673282821+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-137
+  github_issue: null
+  item_type: task
+  title: PMAT-351 Tier 3.6+3.7+3.8 anomaly+open-set+uncertainty x 8
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:45:58Z
+  updated: 2026-05-10T13:44:10.237700954+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-138
+  github_issue: null
+  item_type: task
+  title: PMAT-352 Tier 3.9+3.10 image-encoders+optimizers x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:52:28Z
+  updated: 2026-05-10T13:44:35.260777188+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-139
+  github_issue: null
+  item_type: task
+  title: PMAT-353 Tier 3.11-3.16 single recipes x 6
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T12:58:29Z
+  updated: 2026-05-10T14:14:26.214985340+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-140
+  github_issue: null
+  item_type: task
+  title: PMAT-354 Tier 3 closeout 3.17+3.18 x 4
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:04:20Z
+  updated: 2026-05-10T13:04:20.744889826+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-141
+  github_issue: null
+  item_type: task
+  title: PMAT-355 Tier 4.1+4.2+4.3 DPO+ORPO+KTO x 11
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:10:40Z
+  updated: 2026-05-10T14:14:26.446898967+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-142
+  github_issue: null
+  item_type: task
+  title: PMAT-356 Tier 4.4+4.5 GRPO+PPO x 8
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:22:03Z
+  updated: 2026-05-10T14:22:38.046801795+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-143
+  github_issue: null
+  item_type: task
+  title: PMAT-357 Tier 4.6+4.7 RLAIF+reward x 6
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:34:11Z
+  updated: 2026-05-10T14:14:05.884607766+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-144
+  github_issue: null
+  item_type: task
+  title: PMAT-358 Tier 4.8+4.9 online+BCO/CPO/SimPO x 7
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:40:20Z
+  updated: 2026-05-10T14:22:02.561194847+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-145
+  github_issue: null
+  item_type: task
+  title: PMAT-359 Tier 4 closeout async_grpo+PRM+GKD+GSPO+MPO x 5
+  status: completed
+  priority: high
+  assigned_to: null
+  created: 2026-05-10T13:46:44Z
+  updated: 2026-05-10T14:18:39.898341389+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

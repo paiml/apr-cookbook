@@ -1,0 +1,136 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "Int4 quantization accuracy loss bound — F3 falsifiable claim"
+  references:
+    - "Dettmers et al. (2023) QLoRA: Efficient Finetuning of Quantized LLMs"
+    - "APR Cookbook Spec v3.0.0, Claim F3"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - quantization
+    - accuracy
+
+kernel_structure:
+  phases:
+    - name: "block_partition"
+      description: "Partition weight tensor into K-quant blocks of 32 weights each"
+      invariant: "Block size == 32; tensor_size % 32 == 0 after padding"
+    - name: "compute_scale"
+      description: "For each block, compute scale s = max(|w_i|) / 7 (signed int4 range [-8, 7])"
+      invariant: "s > 0 iff block has non-zero weights; s represented as f16 per block"
+    - name: "quantize"
+      description: "Round w_i / s to nearest integer and clamp to [-8, 7]"
+      invariant: "Quantization error per weight <= s / 2 (nearest-rounding bound)"
+    - name: "dequantize"
+      description: "Reconstruct approximation ŵ_i = q_i * s when loading for inference"
+      invariant: "||W - dequant(quant(W))||_F <= sqrt(n) * max_block_scale / 2"
+
+equations:
+  accuracy_loss:
+    formula: "ΔA = |accuracy(M_fp32) - accuracy(M_int4)|"
+    domain: "M_fp32: f32 model, M_int4: int4 quantized model, same architecture"
+    codomain: "ΔA ∈ [0, 1]"
+    invariants:
+      - "ΔA < 0.02 (F3 threshold: < 2% accuracy loss)"
+      - "ΔA decreases with model size (larger models quantize better)"
+    preconditions:
+      - "model_fp32.architecture() == model_int4.architecture()"
+      - "accuracy_fp32 >= 0.0 && accuracy_fp32 <= 1.0"
+      - "accuracy_int4 >= 0.0 && accuracy_int4 <= 1.0"
+    postconditions:
+      - "delta_accuracy >= 0.0 && delta_accuracy <= 1.0"
+      - "delta_accuracy < 0.02"
+      - "delta_accuracy.is_finite()"
+    lean_theorem: "Theorems.AccuracyLoss"
+
+  quantization_error:
+    formula: "E_q = ||W_fp32 - dequant(quant(W_fp32))||_F / ||W_fp32||_F"
+    domain: "W_fp32 ∈ ℝ^{m×n}, quant maps to int4"
+    codomain: "E_q ∈ [0, ∞)"
+    invariants:
+      - "E_q bounded by quantization step size: E_q <= scale / (2 * ||W||_F)"
+      - "E_q(Q4_K) < E_q(Q4_0) (K-quant uses per-block scales)"
+    preconditions:
+      - "weight.shape().len() == 2"
+      - "weight.iter().all(|v: &f32| v.is_finite())"
+      - "weight_frobenius_norm > 0.0"
+    postconditions:
+      - "relative_error >= 0.0"
+      - "relative_error <= scale / (2.0 * weight_frobenius_norm)"
+      - "relative_error < 0.05"
+    lean_theorem: "Theorems.QuantizationError"
+
+proof_obligations:
+  - type: bound
+    property: "Accuracy loss under 2%"
+    formal: "ΔA < 0.02 on standard benchmarks"
+    tolerance: 0.02
+    applies_to: accuracy_loss
+    lean:
+      theorem: "Theorems.AccuracyLossUnder2Percent"
+      module: "ProvableContracts.Int4.Quantization"
+      status: wip
+  - type: bound
+    property: "Quantization error bounded"
+    formal: "E_q < 0.05 for typical weight distributions"
+    tolerance: 0.05
+    applies_to: quantization_error
+    lean:
+      theorem: "Theorems.QuantizationErrorBounded"
+      module: "ProvableContracts.Int4.Quantization"
+      status: wip
+  - type: roundtrip
+    property: "Quant/dequant deterministic"
+    formal: "dequant(quant(W)) = dequant(quant(W)) for all W"
+    tolerance: 0.0
+    applies_to: quantization_error
+    lean:
+      theorem: "Theorems.QuantDequantDeterministic"
+      module: "ProvableContracts.Int4.Quantization"
+      status: proved
+
+falsification_tests:
+  - id: FALSIFY-Q4-001
+    rule: "F3 accuracy threshold"
+    prediction: "Int4 quantized model accuracy within 2% of fp32 baseline"
+    test: "Compare perplexity on WikiText2: fp32 vs Q4_K_M, assert delta < 2%"
+    if_fails: "Quantization range miscalibrated or outlier weights clipped"
+  - id: FALSIFY-Q4-002
+    rule: "Quantization error bound"
+    prediction: "Frobenius norm error < 5% of original weight norm"
+    test: "proptest: random f32 tensors, quantize to int4, measure relative error"
+    if_fails: "Scale factor computation loses precision at extremes"
+  - id: FALSIFY-Q4-003
+    rule: "Deterministic roundtrip"
+    prediction: "dequant(quant(W)) is bitwise identical across runs"
+    test: "Quantize same tensor twice, compare dequantized outputs"
+    if_fails: "Non-deterministic rounding or threading race"
+
+kani_harnesses:
+  - id: KANI-Q4-001
+    obligation: "Quant/dequant deterministic"
+    bound: 16
+    strategy: bounded_int
+    harness: "kani_harnesses::q4_quant_dequant_deterministic"
+  - id: KANI-Q4-002
+    obligation: "Accuracy loss under 2%"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::q4_accuracy_loss_bound"
+  - id: KANI-Q4-003
+    obligation: "Quantization error bounded"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::q4_quantization_error_bounded"
+
+qa_gate:
+  id: F-Q4-001
+  name: "Int4 Quantization Contract"
+  description: "Quantization accuracy and correctness quality gate"
+  checks:
+    - "accuracy_f3"
+    - "error_bound"
+    - "deterministic_roundtrip"
+  pass_criteria: "Accuracy loss < 2% + Frobenius error < 5%"

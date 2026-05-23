@@ -18,4 +18,4 @@ cargo run --example compliance_audit
 ```
 
 ## Source
-[`examples/advanced/compliance_audit.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/compliance_audit.rs)
+[`examples/advanced/compliance_audit/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/compliance_audit/main.rs)

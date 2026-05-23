@@ -1,0 +1,14 @@
+{
+  "architectures": ["GPT2LMHeadModel"],
+  "model_type": "gpt2",
+  "n_embd": 64,
+  "n_layer": 2,
+  "n_head": 4,
+  "n_positions": 128,
+  "n_ctx": 128,
+  "n_inner": 128,
+  "vocab_size": 256,
+  "layer_norm_epsilon": 1e-5,
+  "activation_function": "gelu_new",
+  "torch_dtype": "float32"
+}

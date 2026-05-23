@@ -1,6 +1,8 @@
 //! # Recipe: APR Model Remove CLI
 //!
 //! **Category**: CLI Tools
+//! **CLI Equivalent**: `apr rm`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
 //! **Dependencies**: None (default features)
@@ -28,6 +30,16 @@
 //! cargo run --example cli_apr_rm -- --demo
 //! cargo run --example cli_apr_rm -- --demo --dry-run
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::prelude::*;
 use clap::Parser;

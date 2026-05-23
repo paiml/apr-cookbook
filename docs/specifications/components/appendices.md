@@ -6,17 +6,11 @@
 
 | Feature | Description | Recipes |
 |---------|-------------|---------|
-| `default` | Core functionality | A.*, B.1-B.2, C.*, D.*, J.*, L.1-L.2 |
-| `encryption` | AES-256-GCM | B.3, E.* |
-| `signing` | Ed25519 signatures | B.4, E.*, L.4 |
-| `gpu` | GPU acceleration | I.* |
-| `browser` | WASM target | H.* |
-| `pacha` | Model registry | E.* |
-| `realizar` | Model serving | F.*, G.* |
-| `presentar` | UI widgets | H.2-H.4 |
-| `hf-hub` | HuggingFace integration | D.1, K.* |
-| `lambda` | AWS Lambda support | B.5, G.* |
-| `full` | All features | All recipes |
+| `default` | Core functionality — all recipes except B.3 | A.*, B.1-B.2/B.4-B.7, C.*, D.*, E.*, F.*, G.*, H.*, I.*, J.*, K.*, L.* |
+| `encryption` | AES-256-GCM model encryption | B.3 |
+| `full` | All features (`encryption`) | All recipes |
+
+**Note**: Only two feature flags exist in Cargo.toml. GPU, distributed, and speech patterns are **simulated** in cookbook examples — no feature flag needed.
 
 ---
 
@@ -35,7 +29,7 @@ Every recipe is classified by hardware requirements. The runtime fallback chain 
 | T2b | `wgpu` | WebGPU | Browser/native GPU compute via wgpu (Vulkan/Metal/DX12/WebGPU) |
 | T3 | `wasm` | wasm32 | Browser/edge via WebAssembly + SIMD128 |
 | T4 | `serverless` | Lambda/Edge | Constrained CPU, cold start budget, memory cap |
-| T5 | `distributed` | Multi-node | Cluster via repartir work-stealing scheduler |
+| T5 | `distributed` | Multi-node | Cluster compute (simulated in cookbook) |
 
 ### Detection Mechanisms
 
@@ -122,29 +116,40 @@ Before submitting a recipe, verify:
 
 | Category | Recipes | Status |
 |----------|---------|--------|
-| A: Model Creation | 5 | Implemented |
-| B: Binary Bundling | 5 | Implemented |
-| C: Continuous Training | 4 | Implemented |
+| A: Model Creation | 7 | Implemented |
+| B: Binary Bundling | 7 | Implemented |
+| C: Continuous Training | 16 | Implemented |
 | D: Format Conversion | 5 | Implemented |
-| E: Model Registry | 4 | Implemented |
-| F: API Integration | 4 | Implemented |
-| G: Serverless Deployment | 4 | Implemented |
-| H: WASM & Browser | 5 | Implemented |
-| I: GPU Acceleration | 4 | Implemented |
-| J: SIMD Acceleration | 4 | Implemented |
-| K: Model Distillation | 4 | Implemented |
-| L: CLI Tools | 4 | Implemented |
-| **Total IIUR** | **52** | **100%** |
+| E: Model Registry | 5 | Implemented |
+| F: API Integration | 5 | Implemented |
+| G: Serverless Deployment | 5 | Implemented |
+| H: WASM & Browser | 6 | Implemented |
+| I: GPU Acceleration | 8 | Implemented |
+| J: SIMD Acceleration | 6 | Implemented |
+| K: Model Distillation | 5 | Implemented |
+| L: CLI Tools | 16 | Implemented |
+| **Total IIUR** | **91** | **100%** |
 
 ### CLI Demo Status
 
 | Category | Recipes | Status |
 |----------|---------|--------|
-| optimize/ | 22 | In progress |
-| chat/ | 5 | In progress |
-| analysis/ | 11 | In progress |
-| format/ | 10 | In progress |
-| **Total CLI** | **48** | **Phased rollout** |
+| optimize/ | 23 | Implemented |
+| chat/ | 5 | Implemented |
+| analysis/ | 25 | Implemented |
+| format/ | 11 | Implemented |
+| **Total CLI** | **64** | **100%** |
+
+### Five Invariants Status
+
+| Invariant | Gate | Baseline | Status |
+|-----------|------|----------|--------|
+| A: CLI Recipe Parity | `make cli-parity` | 66/66 (100%) | **ENFORCED** |
+| B: Recipe Contract Grade A | `make contract-grade` | 341/341 (100%) | **ENFORCED** |
+| C: Model Format Coverage | `make format-coverage` | 341/341 (100%) | **ENFORCED** |
+| D: arXiv Citation | `make citation-check` | 341/341 (100%) | **ENFORCED** |
+| E: Docs Contract Coverage | `make docs-validate` | 264/267 (98.9%) | **ENFORCED** |
+| F: Variant Depth (≥3 recipes/sub) | `make variant-depth` | 66/66 (100%) | **ENFORCED** |
 
 ### Quality Gates Summary
 
@@ -167,7 +172,7 @@ Coverage:     95%+ minimum          Verified
 
 ### QA Review Checklist
 
-- [ ] All 52 IIUR recipes execute without error
+- [x] All 341 recipes execute without error (330/341 pass <10s, 11 compute-heavy benchmarks need 60s — verified 2026-04-23)
 - [ ] mdbook builds successfully
 - [ ] CI pipeline passes on all platforms
 - [ ] Git hooks enforce quality gates

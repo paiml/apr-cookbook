@@ -1,0 +1,164 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Phi-3 smoke inference invariants — config parse, qkv_proj_fused discriminator, fused-QKV tensor topology (7 per-layer), deterministic forward simulation"
+  references:
+    - "Abdin et al. (2024). Phi-3 Technical Report: A Highly Capable Language Model Locally on Your Phone. arXiv:2404.14219"
+    - "docs/specifications/architecture-demos.md"
+    - "examples/conversion/convert_phi_to_apr.rs (companion converter)"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - phi
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Read config.json; extract numeric fields and qkv_proj_fused presence"
+      invariant: "Three numeric fields parsed; qkv_proj_fused field present in body"
+    - name: forward
+      description: "Compute fused-vs-separate tensor count; run LCG seeded forward simulation"
+      invariant: "Per-layer count = 7 when qkv_fused (vs 9 Llama-shape); fused flag participates in checksum"
+    - name: verify
+      description: "Two consecutive smoke calls produce equal verdicts"
+      invariant: "Determinism across runs"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'phi'"
+      - "Missing qkv_proj_fused field surfaces LoaderUnavailable (Phi-3 discriminator)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, qkv_proj_fused, .. } => family == 'phi' AND qkv_proj_fused matches body"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
+
+  fused_qkv_topology:
+    formula: "expected_tensor_count(n, true) == 3 + 7n; expected_tensor_count(n, false) == 3 + 9n"
+    domain: "n: u32; qkv_fused: bool"
+    codomain: "u32"
+    invariants:
+      - "Fused mode replaces three projections with one qkv_proj — per-layer count drops by 2"
+    preconditions:
+      - "n ≥ 0"
+    postconditions:
+      - "expected_tensor_count(n, true) == 3 + 7n"
+      - "expected_tensor_count(n, false) == 3 + 9n"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, fused) is deterministic and fused-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; fused: bool"
+    codomain: "u32"
+    invariants:
+      - "Identical inputs produce equal output"
+      - "Fused flag affects accumulator initialization (different output)"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, f) == forward_sim(s, v, h, f)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Phi.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Phi"
+  - type: invariant
+    property: "Fused QKV drops two tensors per layer"
+    formal: "expected_tensor_count(n, true) == 3 + 7n"
+    tolerance: 0.0
+    applies_to: fused_qkv_topology
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.FusedQkvTopology"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Phi"
+  - type: invariant
+    property: "Forward simulation is fused-sensitive"
+    formal: "fused flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Phi.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Phi"
+
+falsification_tests:
+  - id: FALSIFY-PHI-001
+    rule: "qkv_proj_fused field is required and recognized"
+    prediction: "qkv_proj_fused == true for the bundled Phi fixture"
+    test: "cargo test --example inference_phi_smoke -- happy_path_qkv_fused"
+    if_fails: "Field detection broke or fixture lost qkv_proj_fused: true line"
+  - id: FALSIFY-PHI-002
+    rule: "Fused mode reduces tensor count from 21 to 17 for 2 layers"
+    prediction: "expected_tensor_count(2, true) == 17 != expected_tensor_count(2, false) == 21"
+    test: "cargo test --example inference_phi_smoke -- fused_drops_two_per_layer"
+    if_fails: "Fusion logic drift — tensor count formula no longer reflects QKV merging"
+  - id: FALSIFY-PHI-003
+    rule: "Forward simulation is fused-sensitive"
+    prediction: "forward_sim with fused=true != forward_sim with fused=false"
+    test: "cargo test --example inference_phi_smoke -- fused_flag_affects_checksum"
+    if_fails: "Fused flag dropped from accumulator seeding"
+
+kani_harnesses:
+  - id: KANI-PHI-001
+    obligation: "Forward simulation is fused-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::phi_smoke_deterministic"
+  - id: KANI-PHI-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::phi_smoke_invalid_fixture_total"
+  - id: KANI-PHI-003
+    obligation: "Fused QKV drops two tensors per layer"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::phi_fused_qkv_count"
+
+qa_gate:
+  id: F-PHI-001
+  name: "Phi-3 Smoke Inference Contract"
+  description: "Smoke load + qkv_proj_fused discriminator + fused-QKV tensor topology + deterministic forward simulation"
+  checks:
+    - "qkv_proj_fused_present"
+    - "fused_drops_two_per_layer"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

@@ -1,5 +1,6 @@
 //! Quantized model loading demonstration.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! This example shows how to work with quantized models (Q4_0, Q8_0)
 //! for reduced size and faster inference on edge devices.
 //!
@@ -16,6 +17,16 @@
 //! | F32    | Baseline      | None          |
 //! | Q8_0   | 75%           | <1%           |
 //! | Q4_0   | 87.5%         | 1-3%          |
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;

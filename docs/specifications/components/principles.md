@@ -72,7 +72,11 @@ Every recipe follows this canonical structure:
 ```
 examples/
 └── category/
-    └── recipe_name.rs
+    ├── recipe_name.rs           # Single-file recipes (< 500 lines)
+    └── recipe_name/             # Multi-file recipes (split for readability)
+        ├── main.rs              # Entry point + tests
+        ├── types.rs             # Type definitions
+        └── helpers.rs           # Implementation details
 ```
 
 ### File Template

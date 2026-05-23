@@ -1,5 +1,6 @@
 //! Distributed Inference Example with repartir
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates multi-node inference using the repartir distributed computing library.
 //!
 //! # repartir Features
@@ -36,6 +37,16 @@
 //! - **Complexity**: Advanced
 //! - **Dependencies**: repartir 1.1+
 //! - **IIUR**: Isolated, Idempotent, Useful, Reproducible
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Dean, J. et al. (2012). *Large Scale Distributed Deep Networks*. NeurIPS. arXiv:1206.5533
 
 use std::time::Instant;
 

@@ -1,0 +1,71 @@
+version: "1.0"
+name: sovereign-rag
+description: |
+  RAG pipeline with trueno-rag + trueno-db + realizar.
+  Deploys vector storage, embedding/retrieval, and generation in one stack.
+
+params:
+  model_path: "/opt/models/llama-2-7b.gguf"
+  embedding_dim: "384"
+  chunk_size: "512"
+
+machines:
+  rag-box:
+    hostname: rag-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, rag]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-rag
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  # Layer 1: Vector database
+  vector-db:
+    type: recipe
+    machine: rag-box
+    recipe: trueno-db-analytics
+    inputs:
+      port: 5433
+      data_dir: /opt/trueno-db/data
+      max_memory_mb: 2048
+      user: trueno
+
+  # Layer 2: RAG pipeline (after vector-db to serialize cargo installs on rag-box)
+  rag-pipeline:
+    type: recipe
+    machine: rag-box
+    recipe: trueno-rag-pipeline
+    depends_on: [vector-db]
+    inputs:
+      db_port: 5433
+      rag_port: 8090
+      embedding_dim: 384
+      chunk_size: 512
+      user: trueno
+
+  # Layer 3: Generation model (after rag-pipeline to serialize cargo installs on rag-box)
+  generation:
+    type: recipe
+    machine: rag-box
+    recipe: realizar-serve
+    depends_on: [rag-pipeline]
+    inputs:
+      model_path: "{{params.model_path}}"
+      model_format: gguf
+      quantization: q4_k_m
+      port: 8080
+      workers: 1
+      gpu_device: 0
+      user: realizar
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

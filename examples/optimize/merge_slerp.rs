@@ -1,6 +1,7 @@
 //! SLERP Model Merge
 //!
 //! CLI equivalent: `apr merge --strategy slerp`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Spherical Linear Interpolation (SLERP) interpolates between two models
 //! along a geodesic on the hypersphere rather than a straight line. This
@@ -20,6 +21,16 @@
 //! - Merging two models where you want smooth interpolation
 //! - Preserving weight magnitude during merge
 //! - When linear averaging causes quality degradation
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr merge model.apr          # APR native format
+//! apr merge model.gguf         # GGUF (llama.cpp compatible)
+//! apr merge model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wortsman, M. et al. (2022). *Model Soups: Averaging Weights of Multiple Fine-tuned Models Improves Accuracy*. ICML. arXiv:2203.05482
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

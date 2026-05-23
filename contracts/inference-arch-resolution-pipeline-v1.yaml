@@ -1,0 +1,187 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-08"
+  author: "PAIML Engineering"
+  description: "Architecture resolution pipeline — composes alias resolver and discriminator detector to map (hf_repo, config.json) to a single DetectedFamily"
+  references:
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/coverage-matrix.md"
+    - "contracts/inference-arch-detector-v1.yaml (composed component)"
+    - "contracts/inference-arch-alias-resolver-v1.yaml (composed component)"
+    - "https://github.com/paiml/aprender/pull/1562 (FamilyRegistry::resolve_alias + detect_from_config_str — open, not yet shipped)"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "inference-arch-detector-v1"
+    - "inference-arch-alias-resolver-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - pipeline
+    - composition
+    - forward-bridge
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext"
+      invariant: "context.temp_dir empty"
+    - name: alias_pass
+      description: "Try hf_repo against the alias table; if a glob/exact pattern matches, return AliasHit"
+      invariant: "Alias table covers 16 derived-model patterns; first-match-wins ordering"
+    - name: detector_pass
+      description: "If alias missed, run discriminator-based detector on config_body"
+      invariant: "Detector is total; produces DetectorVerdict for any input"
+    - name: verify
+      description: "Two consecutive resolve(hf_repo, body) calls produce equal verdicts"
+      invariant: "Resolution is deterministic per (hf_repo, body) input pair"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  pipeline_compose:
+    formula: "resolve(hf_repo, body) = alias_resolve(hf_repo) ?? detect_from_str(body) ?? Unknown"
+    domain: "(hf_repo: String, body: String)"
+    codomain: "ResolutionVerdict"
+    invariants:
+      - "Alias takes priority over detector when both fire"
+      - "Empty hf_repo skips alias pass; pipeline degrades to pure detector"
+      - "Empty body skips detector pass; pipeline degrades to pure alias"
+      - "Both empty inputs return InvalidInput"
+    preconditions:
+      - "hf_repo is valid UTF-8 (may be empty)"
+      - "body is valid UTF-8 (may be empty)"
+    postconditions:
+      - "match AliasHit { family, .. } => family ∈ {18 known families}"
+      - "match DetectorHit { family, .. } => family ∈ {18 known families}"
+      - "match Unknown { hf_repo, config_excerpt } => excerpt.len() ≤ 120"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Compose"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Compose"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchResolutionPipeline.lean"
+
+  alias_priority:
+    formula: "for r where alias_resolve(r) = Some(parent), resolve(r, body) = AliasHit { family: parent, .. } regardless of body"
+    domain: "(hf_repo: String, body: String)"
+    codomain: "ResolutionVerdict"
+    invariants:
+      - "Alias is authoritative — repo identifier is more specific than config-discriminator"
+      - "codellama/* + phi config still resolves to llama (alias wins)"
+      - "16 alias-eligible blocked entries all map to a known parent in {llama, mistral, gemma, gpt2, gptneox, opt}"
+    preconditions:
+      - "hf_repo matches a registered alias pattern"
+    postconditions:
+      - "verdict is AliasHit; family equals the registered parent"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.AliasPriority"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.AliasPriority"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchResolutionPipeline.lean"
+
+  determinism:
+    formula: "resolve(r, b) == resolve(r, b) for all (r, b)"
+    domain: "(hf_repo: String, body: String)"
+    codomain: "ResolutionVerdict"
+    invariants:
+      - "Resolution is a pure function of inputs (no global state, no clock, no RNG)"
+    preconditions:
+      - "hf_repo, body are valid UTF-8"
+    postconditions:
+      - "Two consecutive calls produce equal verdicts"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchResolutionPipeline.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Pipeline composition is total"
+    formal: "for all (r, b): String × String. resolve(r, b) ↦ ResolutionVerdict (no panic)"
+    tolerance: 0.0
+    applies_to: pipeline_compose
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Compose"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline"
+  - type: invariant
+    property: "Alias takes priority over detector"
+    formal: "for r where alias_resolve(r) = Some(p), resolve(r, _) = AliasHit { family: p, .. }"
+    tolerance: 0.0
+    applies_to: alias_priority
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.AliasPriority"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline"
+  - type: invariant
+    property: "Resolution is deterministic"
+    formal: "resolve(r, b) == resolve(r, b)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline.Determinism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchResolutionPipeline"
+
+falsification_tests:
+  - id: FALSIFY-PIPELINE-001
+    rule: "Alias hit beats detector hit when both apply"
+    prediction: "resolve(\"codellama/CodeLlama-7b-hf\", phi_config_body) returns AliasHit { family: 'llama', .. }, NOT DetectorHit { family: 'phi', .. }"
+    test: "cargo test --example inference_arch_resolution_pipeline -- alias_repo_with_mismatched_config_still_picks_alias"
+    if_fails: "Pipeline ordering broke; detector is now consulted before alias resolver"
+  - id: FALSIFY-PIPELINE-002
+    rule: "Pipeline degrades to pure detector when hf_repo is empty"
+    prediction: "resolve(\"\", phi_config_body) returns DetectorHit { family: 'phi', .. }"
+    test: "cargo test --example inference_arch_resolution_pipeline -- detector_works_with_empty_repo"
+    if_fails: "Pipeline rejects empty hf_repo as InvalidInput when it should fall through to detector"
+  - id: FALSIFY-PIPELINE-003
+    rule: "Pipeline degrades to pure alias when body is empty"
+    prediction: "resolve(\"codellama/CodeLlama-7b-hf\", \"\") returns AliasHit { family: 'llama', .. }"
+    test: "cargo test --example inference_arch_resolution_pipeline -- aliased_repo_with_empty_config_still_resolves"
+    if_fails: "Pipeline requires both inputs even when one is sufficient"
+  - id: FALSIFY-PIPELINE-004
+    rule: "All 16 alias-eligible blocked manifest entries resolve to a known parent"
+    prediction: "resolve(repo, \"\") returns AliasHit for all 16 patterns: codellama, tinyllama, vicuna, yi, smollm, smollm2, codestral, zephyr, dolphin, hermes, openchat, wizardcoder, distilgpt2, pythia, galactica, codegemma"
+    test: "cargo test --example inference_arch_resolution_pipeline -- all_alias_eligible_resolve_to_parent"
+    if_fails: "Alias table drifted from the manifest; one or more derived models lost their alias entry"
+  - id: FALSIFY-PIPELINE-005
+    rule: "Detector pass works on every certified manifest entry"
+    prediction: "resolve(\"paiml/<fam>-fixture\", fixture_body) returns DetectorHit for all 16 certified families"
+    test: "cargo test --example inference_arch_resolution_pipeline -- detector_works_on_all_18_certified_families"
+    if_fails: "Detector pass regressed on one or more in-progress fixtures"
+  - id: FALSIFY-PIPELINE-006
+    rule: "Resolution is deterministic across consecutive calls"
+    prediction: "resolve(repo, body) == resolve(repo, body) for any input pair"
+    test: "cargo test --example inference_arch_resolution_pipeline -- deterministic_across_runs"
+    if_fails: "Pipeline introduced non-determinism (clock, RNG, or globally-mutable state)"
+
+kani_harnesses:
+  - id: KANI-PIPELINE-001
+    obligation: "Pipeline composition is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_resolution_pipeline_total"
+  - id: KANI-PIPELINE-002
+    obligation: "Alias takes priority over detector"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_resolution_pipeline_alias_priority"
+  - id: KANI-PIPELINE-003
+    obligation: "Resolution is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_resolution_pipeline_deterministic"
+
+qa_gate:
+  id: F-PIPELINE-001
+  name: "Architecture Resolution Pipeline Contract"
+  description: "Composed alias-resolver + detector pipeline; alias-priority and determinism falsifiers"
+  checks:
+    - "alias_priority_holds"
+    - "pipeline_is_total"
+    - "resolution_is_deterministic"
+  pass_criteria: "All six falsification tests pass; 46/46 unit tests in inference_arch_resolution_pipeline green"

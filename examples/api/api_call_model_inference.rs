@@ -1,5 +1,6 @@
 //! # Recipe: API Model Inference Call
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example api_call_model_inference
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

@@ -18,4 +18,4 @@ cargo run --example distributed_pipeline_parallel
 ```
 
 ## Source
-[`examples/distributed/distributed_pipeline_parallel.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_pipeline_parallel.rs)
+[`examples/distributed/distributed_pipeline_parallel/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/distributed/distributed_pipeline_parallel/main.rs)

@@ -2,6 +2,7 @@
 //!
 //! **Category**: optimize
 //! **CLI Equivalent**: `apr finetune --method lora`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Demonstrates Low-Rank Adaptation (LoRA) fine-tuning of a pretrained model.
 //! LoRA freezes the original weights and injects small trainable rank-decomposition
@@ -23,6 +24,16 @@
 //! ```bash
 //! cargo run --example finetune_lora
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use entrenar::autograd::Tensor;

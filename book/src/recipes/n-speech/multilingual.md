@@ -18,4 +18,4 @@ cargo run --example speech_multilingual
 ```
 
 ## Source
-[`examples/speech/speech_multilingual.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_multilingual.rs)
+[`examples/speech/speech_multilingual/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_multilingual/main.rs)

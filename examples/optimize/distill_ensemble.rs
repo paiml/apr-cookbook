@@ -18,11 +18,22 @@
 //! ## Learning Objective
 //! Multi-teacher ensemble distillation with uniform and weighted ensembles.
 //! CLI equivalent: `apr distill --strategy ensemble`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! ## Run Command
 //! ```bash
 //! cargo run --example distill_ensemble
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use entrenar::distill::EnsembleDistiller;

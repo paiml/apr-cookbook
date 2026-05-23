@@ -1,0 +1,181 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "APR format conversion roundtrip correctness — GGUF, SafeTensors, ONNX"
+  references:
+    - "APR Cookbook Spec v3.0.0, Category D: Conversion Recipes"
+    - "Hugging Face SafeTensors Specification"
+    - "GGML GGUF Format Specification v3"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - format
+    - conversion
+    - correctness
+
+kernel_structure:
+  phases:
+    - name: "parse_source"
+      description: "Deserialize source format (APR, SafeTensors, or GGUF) into in-memory tensor map"
+      invariant: "tensor_count > 0; every tensor has non-empty shape and finite dtype"
+    - name: "remap_names"
+      description: "Apply format-specific name mapping (e.g., attn.q_proj ↔ blk.0.attn_q.weight)"
+      invariant: "Bijective mapping; no dropped or collided names"
+    - name: "serialize_target"
+      description: "Write tensors to target format preserving dtype, shape, and metadata"
+      invariant: "Byte-exact for lossless dtype pairs; quant_step-bounded for quantized"
+    - name: "verify_roundtrip"
+      description: "Deserialize target, compare max |T_out - T_in| against expected tolerance"
+      invariant: "max_abs_error == 0 for f32/f16/bf16; <= quant_step/2 for quantized"
+
+equations:
+  tensor_roundtrip:
+    formula: "||T_original - T_roundtrip||_∞ = 0 (lossless formats)"
+    domain: "T ∈ ℝ^shape, format ∈ {apr, safetensors, gguf_f32}"
+    codomain: "error ∈ {0}"
+    invariants:
+      - "Lossless for f32/f16/bf16 tensor data"
+      - "Tensor names preserved (possibly remapped via contract)"
+      - "Tensor shapes preserved exactly"
+      - "Tensor count preserved"
+    preconditions:
+      - "!tensors_original.is_empty()"
+      - "[\"apr\", \"safetensors\", \"gguf_f32\"].contains(&format.as_str())"
+      - "tensors_original.iter().all(|t| !t.shape().is_empty())"
+    postconditions:
+      - "max_abs_error == 0.0"
+      - "tensors_roundtrip.len() == tensors_original.len()"
+      - "tensors_roundtrip.iter().zip(&tensors_original).all(|(a, b)| a.shape() == b.shape())"
+      - "tensors_roundtrip.iter().zip(&tensors_original).all(|(a, b)| a.name() == b.name())"
+    lean_theorem: "Theorems.TensorRoundtrip"
+
+  quantized_roundtrip:
+    formula: "||T_original - T_roundtrip||_∞ <= quant_step / 2"
+    domain: "T quantized (Q4_K, Q6_K, etc.)"
+    codomain: "error bounded by quantization step"
+    invariants:
+      - "Quantized weights preserved in native representation"
+      - "No double-quantization (quant→dequant→requant)"
+    preconditions:
+      - "!tensor_original.data().is_empty()"
+      - "[\"Q4_K\", \"Q6_K\", \"Q4_0\", \"Q8_0\"].contains(&quant_scheme.as_str())"
+      - "quant_step > 0.0"
+    postconditions:
+      - "max_abs_error <= quant_step / 2.0"
+      - "tensor_roundtrip.dtype() == tensor_original.dtype()"
+      - "!double_quantization_detected(tensor_original, tensor_roundtrip)"
+    lean_theorem: "Theorems.QuantizedRoundtrip"
+
+  metadata_preservation:
+    formula: "metadata(converted) ⊇ metadata(original) ∩ target_schema"
+    domain: "source model with metadata"
+    codomain: "target model with metadata"
+    invariants:
+      - "Architecture name preserved"
+      - "Vocab size preserved"
+      - "Layer count preserved"
+      - "Format-specific metadata may be added (not lost)"
+    preconditions:
+      - "metadata_original.contains_key(\"architecture\")"
+      - "metadata_original.contains_key(\"vocab_size\")"
+      - "metadata_original.contains_key(\"n_layers\")"
+    postconditions:
+      - "metadata_converted.get(\"architecture\") == metadata_original.get(\"architecture\")"
+      - "metadata_converted.get(\"vocab_size\") == metadata_original.get(\"vocab_size\")"
+      - "metadata_converted.get(\"n_layers\") == metadata_original.get(\"n_layers\")"
+      - "metadata_original.iter().all(|(k, _)| target_schema.contains(k.as_str()) || metadata_converted.contains_key(k))"
+    lean_theorem: "Theorems.MetadataPreservation"
+
+proof_obligations:
+  - type: roundtrip
+    property: "Lossless tensor roundtrip"
+    formal: "export(import(model)) preserves all tensor data exactly"
+    tolerance: 0.0
+    applies_to: tensor_roundtrip
+    lean:
+      theorem: "Theorems.LosslessTensorRoundtrip"
+      module: "ProvableContracts.AprFormat.Roundtrip"
+      status: proved
+  - type: invariant
+    property: "Shape preservation"
+    formal: "shape(T_converted) = shape(T_original) for all tensors"
+    tolerance: 0.0
+    applies_to: tensor_roundtrip
+    lean:
+      theorem: "Theorems.ShapePreservation"
+      module: "ProvableContracts.AprFormat.Roundtrip"
+      status: proved
+  - type: invariant
+    property: "Count preservation"
+    formal: "num_tensors(converted) = num_tensors(original)"
+    tolerance: 0.0
+    applies_to: tensor_roundtrip
+    lean:
+      theorem: "Theorems.CountPreservation"
+      module: "ProvableContracts.AprFormat.Roundtrip"
+      status: proved
+  - type: invariant
+    property: "Metadata preservation"
+    formal: "arch, vocab_size, n_layers preserved across conversions"
+    tolerance: 0.0
+    applies_to: metadata_preservation
+    lean:
+      theorem: "Theorems.MetadataPreservation"
+      module: "ProvableContracts.AprFormat.Roundtrip"
+      status: proved
+
+falsification_tests:
+  - id: FALSIFY-FMT-001
+    rule: "Lossless roundtrip (APR ↔ SafeTensors)"
+    prediction: "apr → safetensors → apr preserves all tensor bytes"
+    test: "Convert model both ways, compare tensor data byte-for-byte"
+    if_fails: "Endianness swap error or dtype mapping wrong"
+  - id: FALSIFY-FMT-002
+    rule: "Lossless roundtrip (APR ↔ GGUF f32)"
+    prediction: "apr → gguf → apr preserves all f32 tensor data"
+    test: "Convert model both ways, compare tensor data"
+    if_fails: "GGUF row-major vs column-major layout not transposed"
+  - id: FALSIFY-FMT-003
+    rule: "Shape preservation"
+    prediction: "All tensor shapes identical after conversion"
+    test: "Compare shapes of every tensor before and after roundtrip"
+    if_fails: "Dimension order swapped or squeezed during conversion"
+  - id: FALSIFY-FMT-004
+    rule: "Metadata preservation"
+    prediction: "architecture, vocab_size, n_layers match after conversion"
+    test: "apr inspect original vs converted, compare key metadata fields"
+    if_fails: "Metadata field name mapping missing for target format"
+
+kani_harnesses:
+  - id: KANI-FMT-001
+    obligation: "Shape preservation"
+    bound: 8
+    strategy: bounded_int
+    harness: "kani_harnesses::fmt_shape_preservation"
+  - id: KANI-FMT-002
+    obligation: "Count preservation"
+    bound: 4
+    strategy: exhaustive
+    harness: "kani_harnesses::fmt_count_preservation"
+  - id: KANI-FMT-003
+    obligation: "Lossless tensor roundtrip"
+    bound: 16
+    strategy: bounded_int
+    harness: "kani_harnesses::fmt_lossless_tensor_roundtrip"
+  - id: KANI-FMT-004
+    obligation: "Metadata preservation"
+    bound: 4
+    strategy: compositional
+    harness: "kani_harnesses::fmt_metadata_preservation"
+
+qa_gate:
+  id: F-FMT-001
+  name: "Format Roundtrip Contract"
+  description: "Model format conversion correctness quality gate"
+  checks:
+    - "lossless_safetensors"
+    - "lossless_gguf"
+    - "shape_preservation"
+    - "metadata_preservation"
+  pass_criteria: "All roundtrip conversions lossless + metadata preserved"

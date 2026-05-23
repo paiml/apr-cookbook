@@ -18,4 +18,4 @@ cargo run --example analysis_tensors
 ```
 
 ## Source
-[`examples/analysis/analysis_tensors.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_tensors.rs)
+[`examples/analysis/analysis_tensors/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/analysis/analysis_tensors/main.rs)

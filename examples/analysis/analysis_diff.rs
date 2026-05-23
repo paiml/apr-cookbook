@@ -1,10 +1,21 @@
 //! # APR Model Diff
 //!
 //! CLI equivalent: `apr diff model_a.apr model_b.apr --weights --values`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Compares two APR models structurally and numerically. Reports tensor-level
 //! weight differences including L2 distance, max absolute diff, mean absolute
 //! diff, and cosine similarity. Essential for tracking fine-tuning impact.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr diff model.apr          # APR native format
+//! apr diff model.gguf         # GGUF (llama.cpp compatible)
+//! apr diff model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 

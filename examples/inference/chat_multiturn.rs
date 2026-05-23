@@ -1,5 +1,6 @@
 //! Multi-Turn Chat Inference Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! Demonstrates a chat-style inference loop with conversation history,
 //! system prompts, turn formatting, and context window management.
 //!
@@ -16,6 +17,16 @@
 //! ```bash
 //! cargo run --example chat_multiturn
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

@@ -1,5 +1,6 @@
 //! # Recipe: Model Health Check API
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: API Integration
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example api_model_health_check
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr serve model.apr          # APR native format
+//! apr serve model.gguf         # GGUF (llama.cpp compatible)
+//! apr serve model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -211,8 +222,7 @@ fn save_health_report(
     let report = Report {
         timestamp: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map(|d| d.as_secs())
-            .unwrap_or(0),
+            .map_or(0, |d| d.as_secs()),
         results,
         aggregate,
     };

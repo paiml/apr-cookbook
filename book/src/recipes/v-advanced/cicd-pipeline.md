@@ -18,4 +18,4 @@ cargo run --example cicd_model_pipeline
 ```
 
 ## Source
-[`examples/advanced/cicd_model_pipeline.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/cicd_model_pipeline.rs)
+[`examples/advanced/cicd_model_pipeline/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/advanced/cicd_model_pipeline/main.rs)

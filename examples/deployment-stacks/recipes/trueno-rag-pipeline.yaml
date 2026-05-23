@@ -1,0 +1,178 @@
+# Recipe: trueno-rag-pipeline — RAG pipeline with trueno-rag
+#
+# Deploys the trueno-rag retrieval service (assumes trueno-db is provided
+# by the trueno-db-analytics recipe via the vector-db stack layer):
+#   1. trueno-rag embedding + retrieval service
+#   2. Configuration, systemd unit, firewall rules
+#
+# Inputs:
+#   db_port (int, default: 5433) — trueno-db listen port
+#   rag_port (int, default: 8090) — trueno-rag API port
+#   embedding_dim (int, default: 384) — embedding vector dimension
+#   chunk_size (int, default: 512) — document chunk size in tokens
+#   user (string, default: trueno) — service account
+
+recipe:
+  name: trueno-rag-pipeline
+  version: "1.0"
+  description: "Trueno RAG pipeline — embedding, retrieval, and vector storage"
+  inputs:
+    db_port:
+      type: int
+      default: 5433
+      min: 1
+      max: 65535
+    rag_port:
+      type: int
+      default: 8090
+      min: 1
+      max: 65535
+    embedding_dim:
+      type: int
+      default: 384
+      min: 64
+      max: 4096
+    chunk_size:
+      type: int
+      default: 512
+      min: 64
+      max: 8192
+    user:
+      type: string
+      default: trueno
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/trueno
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/trueno
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  db-data-dir:
+    type: file
+    state: directory
+    path: /opt/trueno/db-data
+    owner: "{{inputs.user}}"
+    mode: "0700"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  rag-data-dir:
+    type: file
+    state: directory
+    path: /opt/trueno/rag-data
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  trueno-db-pkg:
+    type: package
+    provider: cargo
+    packages: [trueno-db]
+    depends_on: []
+    tags: [packages]
+
+  trueno-rag-pkg:
+    type: package
+    provider: cargo
+    packages: [trueno-rag-cli]
+    depends_on: []
+    tags: [packages]
+
+  db-config:
+    type: file
+    path: /opt/trueno/db-config.yaml
+    content: |
+      # trueno-db configuration
+      listen: 0.0.0.0:{{inputs.db_port}}
+      data_dir: /opt/trueno/db-data
+      max_memory_mb: 2048
+      wal_enabled: true
+      sync_mode: normal
+      max_connections: 64
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [db-data-dir]
+    tags: [config]
+
+  rag-config:
+    type: file
+    path: /opt/trueno/rag-config.yaml
+    content: |
+      # trueno-rag configuration
+      listen: 0.0.0.0:{{inputs.rag_port}}
+      db_endpoint: "http://localhost:{{inputs.db_port}}"
+      embedding_dim: {{inputs.embedding_dim}}
+      chunk_size: {{inputs.chunk_size}}
+      chunk_overlap: 64
+      data_dir: /opt/trueno/rag-data
+      index_type: hnsw
+      hnsw_m: 16
+      hnsw_ef: 200
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [rag-data-dir]
+    tags: [config]
+
+  rag-systemd-unit:
+    type: file
+    path: /etc/systemd/system/trueno-rag.service
+    content: |
+      [Unit]
+      Description=Trueno RAG Pipeline
+      After=network.target trueno-db.service
+      Requires=trueno-db.service
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/trueno-rag --config /opt/trueno/rag-config.yaml
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [trueno-rag-pkg, rag-config]
+    tags: [config, systemd]
+
+  rag-service:
+    type: service
+    name: trueno-rag
+    state: running
+    enabled: true
+    restart_on: [rag-systemd-unit, rag-config]
+    depends_on: [rag-systemd-unit]
+    tags: [services]
+
+  firewall-rag:
+    type: network
+    port: "{{inputs.rag_port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [rag-service]
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "trueno-rag-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.rag_port}}/health || systemctl restart trueno-rag"
+    user: root
+    depends_on: [rag-service]
+    tags: [monitoring]

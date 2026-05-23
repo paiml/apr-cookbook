@@ -18,4 +18,4 @@ cargo run --example inference_apr_run
 ```
 
 ## Source
-[`examples/inference/inference_apr_run.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/inference/inference_apr_run.rs)
+[`examples/inference/inference_apr_run/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/inference/inference_apr_run/main.rs)

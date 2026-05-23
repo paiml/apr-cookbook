@@ -1,6 +1,7 @@
 //! # Download and Cache Management
 //!
 //! **CLI equivalent:** `apr pull hf://org/model --cache ~/.cache/apr`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates a local cache manager for downloaded models. Handles
 //! cache misses (simulated download), cache hits (instant return),
@@ -11,6 +12,16 @@
 //! 2. Cache hit — second request returns cached path instantly
 //! 3. LRU eviction — remove oldest entries when cache is full
 //! 4. Cache stats — summary of cache contents and utilization
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};

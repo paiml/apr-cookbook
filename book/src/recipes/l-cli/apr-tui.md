@@ -18,4 +18,4 @@ cargo run --example cli_apr_tui
 ```
 
 ## Source
-[`examples/cli/cli_apr_tui.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/cli/cli_apr_tui.rs)
+[`examples/cli/cli_apr_tui/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/cli/cli_apr_tui/main.rs)

@@ -1,0 +1,147 @@
+# Recipe: alimentar-ingest — Data loading and distribution
+#
+# Deploys alimentar for data ingestion, preprocessing, and distribution:
+#   1. Service user + directories
+#   2. alimentar binary (cargo install)
+#   3. Ingestion config, systemd unit
+#   4. Cron-based periodic ingestion
+#
+# Inputs:
+#   source_dir (path) — source data directory
+#   output_dir (path, default: /opt/alimentar/output) — processed output
+#   format (enum, default: jsonl) — output data format
+#   parallelism (int, default: 4) — parallel ingestion workers
+#   user (string, default: alimentar) — service account
+
+recipe:
+  name: alimentar-ingest
+  version: "1.0"
+  description: "Alimentar data pipeline — ingestion, preprocessing, distribution"
+  inputs:
+    source_dir:
+      type: string
+      description: "Source data directory to ingest from"
+    output_dir:
+      type: string
+      default: /opt/alimentar/output
+    format:
+      type: enum
+      choices: [jsonl, parquet, arrow, csv]
+      default: jsonl
+    parallelism:
+      type: int
+      default: 4
+      min: 1
+      max: 64
+    user:
+      type: string
+      default: alimentar
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/alimentar
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/alimentar
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  output-dir:
+    type: file
+    state: directory
+    path: "{{inputs.output_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  staging-dir:
+    type: file
+    state: directory
+    path: /opt/alimentar/staging
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  logs-dir:
+    type: file
+    state: directory
+    path: /opt/alimentar/logs
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  alimentar-pkg:
+    type: package
+    provider: cargo
+    packages: [alimentar]
+    depends_on: []
+    tags: [packages]
+
+  config:
+    type: file
+    path: /opt/alimentar/config.yaml
+    content: |
+      # Alimentar ingestion configuration
+      source: {{inputs.source_dir}}
+      output: {{inputs.output_dir}}
+      staging: /opt/alimentar/staging
+      format: {{inputs.format}}
+      parallelism: {{inputs.parallelism}}
+
+      preprocessing:
+        dedup: true
+        normalize_unicode: true
+        min_length: 10
+        max_length: 1048576
+
+      logging:
+        dir: /opt/alimentar/logs
+        level: info
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [output-dir, staging-dir, logs-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/alimentar.service
+    content: |
+      [Unit]
+      Description=Alimentar Data Ingestion
+      After=network.target
+
+      [Service]
+      Type=oneshot
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/alimentar ingest --config /opt/alimentar/config.yaml
+      TimeoutStartSec=infinity
+      RemainAfterExit=yes
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [alimentar-pkg, config]
+    tags: [config, systemd]
+
+  ingest-cron:
+    type: cron
+    name: "alimentar-ingest"
+    schedule: "0 */4 * * *"
+    command: "/usr/local/bin/alimentar ingest --config /opt/alimentar/config.yaml >> /opt/alimentar/logs/cron.log 2>&1"
+    user: "{{inputs.user}}"
+    depends_on: [systemd-unit]
+    tags: [monitoring]

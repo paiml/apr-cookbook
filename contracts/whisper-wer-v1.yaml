@@ -1,0 +1,139 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-04-05"
+  author: "PAIML Engineering"
+  description: "Whisper.apr word error rate on LibriSpeech — F5 falsifiable claim"
+  references:
+    - "Radford et al. (2022) Robust Speech Recognition via Large-Scale Weak Supervision"
+    - "Panayotov et al. (2015) LibriSpeech: An ASR Corpus"
+    - "APR Cookbook Spec v3.0.0, Claim F5"
+  depends_on:
+    - "recipe-iiur-v1"
+    - "mmap-inference-v1"
+    - "int4-quantization-v1"
+  tags:
+    - speech
+    - whisper
+    - accuracy
+
+kernel_structure:
+  phases:
+    - name: "load_model"
+      description: "mmap whisper.apr; validate architecture and vocab; decode quantized weights on demand"
+      invariant: "model.architecture == 'whisper' && !weights.is_empty()"
+    - name: "mel_spectrogram"
+      description: "Convert 16kHz audio to 80-bin log-mel spectrogram using Hann window and STFT"
+      invariant: "mel_frames.shape == [80, ceil(audio_len / hop_length)]"
+    - name: "encoder_decoder"
+      description: "Run Whisper encoder (mel → hidden) + decoder (autoregressive token generation)"
+      invariant: "Token stream is prefix-closed; beam search depth bounded by beam_size"
+    - name: "wer_compute"
+      description: "Tokenize reference and hypothesis; compute Levenshtein edit distance / reference length"
+      invariant: "WER == (S + D + I) / N; WER >= 0 by construction"
+
+equations:
+  wer:
+    formula: "WER = (S + D + I) / N"
+    domain: "S: substitutions, D: deletions, I: insertions, N: reference word count"
+    codomain: "WER ∈ [0, ∞)"
+    invariants:
+      - "WER < 0.10 on LibriSpeech test-clean (F5 threshold)"
+      - "WER = 0 iff hypothesis = reference"
+      - "WER >= 0 (non-negative by construction)"
+    preconditions:
+      - "reference_word_count > 0"
+      - "substitutions + deletions + insertions <= reference_word_count * 10"
+      - "!hypothesis.is_empty() || reference_word_count > 0"
+    postconditions:
+      - "wer >= 0.0"
+      - "wer < 0.10"
+      - "(wer == 0.0) == (hypothesis == reference)"
+    lean_theorem: "Theorems.Wer"
+
+  format_parity:
+    formula: "ΔWER = |WER(whisper.apr) - WER(whisper.original)|"
+    domain: "Same model weights, different format"
+    codomain: "ΔWER ∈ [0, ∞)"
+    invariants:
+      - "ΔWER < 0.005 (format conversion preserves accuracy within 0.5%)"
+    preconditions:
+      - "wer_apr >= 0.0 && wer_original >= 0.0"
+      - "model_weights_hash(\"whisper.apr\") == model_weights_hash(\"whisper.original\")"
+      - "!test_utterances.is_empty()"
+    postconditions:
+      - "delta_wer >= 0.0"
+      - "delta_wer < 0.005"
+      - "delta_wer.is_finite()"
+    lean_theorem: "Theorems.FormatParity"
+
+proof_obligations:
+  - type: bound
+    property: "WER under 10%"
+    formal: "WER < 0.10 on LibriSpeech test-clean"
+    tolerance: 0.01
+    applies_to: wer
+    lean:
+      theorem: "Theorems.WerUnder10Percent"
+      module: "ProvableContracts.Whisper.Wer"
+      status: wip
+  - type: equivalence
+    property: "Format parity"
+    formal: "ΔWER < 0.005 between .apr and original format"
+    tolerance: 5.0e-3
+    applies_to: format_parity
+    lean:
+      theorem: "Theorems.FormatParity"
+      module: "ProvableContracts.Whisper.Wer"
+      status: proved
+  - type: invariant
+    property: "WER non-negative"
+    formal: "WER >= 0 for all inputs"
+    tolerance: 0.0
+    applies_to: wer
+    lean:
+      theorem: "Theorems.WerNonNegative"
+      module: "ProvableContracts.Whisper.Wer"
+      status: proved
+
+falsification_tests:
+  - id: FALSIFY-WER-001
+    rule: "F5 WER threshold"
+    prediction: "whisper.apr WER < 10% on LibriSpeech test-clean"
+    test: "Transcribe LibriSpeech test-clean, compute WER against reference"
+    if_fails: "Weight conversion introduced numerical drift in attention layers"
+  - id: FALSIFY-WER-002
+    rule: "Format parity"
+    prediction: "|WER(.apr) - WER(original)| < 0.5%"
+    test: "Compare WER of .apr model vs original HF model on same 100 utterances"
+    if_fails: "Tensor layout transposition error or quantization during conversion"
+  - id: FALSIFY-WER-003
+    rule: "WER non-negative"
+    prediction: "WER >= 0 for all audio inputs"
+    test: "proptest: random audio segments, verify WER >= 0"
+    if_fails: "Edit distance computation underflow"
+
+kani_harnesses:
+  - id: KANI-WER-001
+    obligation: "WER non-negative"
+    bound: 8
+    strategy: bounded_int
+    harness: "kani_harnesses::wer_non_negative"
+  - id: KANI-WER-002
+    obligation: "WER under 10%"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::wer_under_10_percent"
+  - id: KANI-WER-003
+    obligation: "Format parity"
+    bound: 8
+    strategy: stub_float
+    harness: "kani_harnesses::wer_format_parity"
+
+qa_gate:
+  id: F-WER-001
+  name: "Whisper WER Contract"
+  description: "Speech recognition accuracy quality gate"
+  checks:
+    - "wer_f5"
+    - "format_parity"
+  pass_criteria: "WER < 10% on LibriSpeech + format parity < 0.5%"

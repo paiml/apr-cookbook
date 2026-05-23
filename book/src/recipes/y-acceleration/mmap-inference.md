@@ -18,4 +18,4 @@ cargo run --example acceleration_mmap_inference
 ```
 
 ## Source
-[`examples/acceleration/acceleration_mmap_inference.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_mmap_inference.rs)
+[`examples/acceleration/acceleration_mmap_inference/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/acceleration/acceleration_mmap_inference/main.rs)

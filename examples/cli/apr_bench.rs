@@ -1,5 +1,6 @@
 //! Benchmark APR model inference performance.
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/cli-parity-v1.yaml
 //! This CLI tool measures inference latency and throughput for
 //! APR models, helping identify performance characteristics.
 //!
@@ -9,9 +10,20 @@
 //! cargo run --example apr_bench --release -- --help
 //! cargo run --example apr_bench --release -- --demo --iterations 1000
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr inspect model.apr          # APR native format
+//! apr inspect model.gguf         # GGUF (llama.cpp compatible)
+//! apr inspect model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Amershi, S. et al. (2019). *Software Engineering for Machine Learning: A Case Study*. ICSE. DOI: 10.1109/ICSE-SEIP.2019.00042
 
 use apr_cookbook::bundle::{BundledModel, ModelBundle};
 use apr_cookbook::Result;
+use aprender::demo::reliable::AdaptiveOutput;
 use clap::Parser;
 use std::path::PathBuf;
 use std::time::{Duration, Instant};
@@ -89,20 +101,24 @@ fn simulate_inference(model: &BundledModel, _batch_size: usize) {
 }
 
 fn run_benchmark(model: &BundledModel, args: &Args) -> BenchResult {
+    let output = AdaptiveOutput::new();
     let mut latencies = Vec::with_capacity(args.iterations);
 
     // Warmup
-    for _ in 0..args.warmup {
+    for i in 0..args.warmup {
+        output.progress(i + 1, args.warmup, "warmup");
         simulate_inference(model, args.batch_size);
     }
 
     // Benchmark
     let start = Instant::now();
-    for _ in 0..args.iterations {
+    for i in 0..args.iterations {
+        output.progress(i + 1, args.iterations, "benchmarking");
         let iter_start = Instant::now();
         simulate_inference(model, args.batch_size);
         latencies.push(iter_start.elapsed());
     }
+    output.status(""); // clear progress line
     let total_time = start.elapsed();
 
     // Calculate statistics

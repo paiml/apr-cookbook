@@ -1,9 +1,20 @@
 //! # APR Model Evaluation — Perplexity and Cross-Entropy
 //!
 //! CLI equivalent: `apr eval model.apr --dataset test.jsonl`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Evaluates an APR language model by computing perplexity and cross-entropy
 //! on synthetic test data. Uses the log-sum-exp trick for numerical stability.
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr eval model.apr          # APR native format
+//! apr eval model.gguf         # GGUF (llama.cpp compatible)
+//! apr eval model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

@@ -1,5 +1,6 @@
 //! # Recipe: Container Image for Lambda
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Serverless/Lambda
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example serverless_container_image
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Schleier-Smith, J. et al. (2021). *What Serverless Computing Is and Should Become*. CACM. DOI: 10.1145/3406011
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

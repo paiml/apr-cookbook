@@ -1,6 +1,7 @@
 //! # Low-Level Model File Debug Inspection
 //!
 //! CLI equivalent: `apr debug model.apr`
+//! Contract: contracts/recipe-iiur-v1.yaml
 //!
 //! Parses raw APR model bytes to extract header fields: magic bytes, version,
 //! flags (compressed, signed, encrypted), dtype, tensor count. Detects format
@@ -12,6 +13,16 @@
 //! - Format detection from magic bytes (APR2, GGUF, SafeTensors)
 //! - Annotated hex dump of the first 64 bytes
 //! - Graceful handling of corrupted files
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr debug model.apr          # APR native format
+//! apr debug model.gguf         # GGUF (llama.cpp compatible)
+//! apr debug model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Paleyes, A. et al. (2022). *Challenges in Deploying Machine Learning*. ACM Computing Surveys. DOI: 10.1145/3533378
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

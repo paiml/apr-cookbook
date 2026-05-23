@@ -1,5 +1,6 @@
 //! # Recipe: Online Learning with Single-Sample Updates
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml
 //! **Category**: Continuous Training
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example continuous_train_online_learning
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr finetune model.apr          # APR native format
+//! apr finetune model.gguf         # GGUF (llama.cpp compatible)
+//! apr finetune model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hu, E. et al. (2021). *LoRA: Low-Rank Adaptation of Large Language Models*. arXiv:2106.09685
 
 use apr_cookbook::prelude::*;
 use rand::Rng;

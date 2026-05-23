@@ -1,4 +1,6 @@
 //! Encrypted model bundling example.
+//! **CLI Equivalent**: `apr encrypt`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/aes256-gcm-decrypt-v1.yaml
 //!
 //! This example demonstrates loading encrypted APR models with password-based
 //! decryption using Argon2id key derivation and AES-256-GCM encryption.
@@ -20,6 +22,16 @@
 //! - Protecting proprietary models in distribution
 //! - Compliance with data protection regulations
 //! - Secure model deployment in untrusted environments
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr convert model.apr          # APR native format
+//! apr convert model.gguf         # GGUF (llama.cpp compatible)
+//! apr convert model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Jacob, B. et al. (2018). *Quantization and Training of Neural Networks for Efficient Integer-Arithmetic-Only Inference*. CVPR. arXiv:1712.05877
 
 use apr_cookbook::Result;
 #[cfg(feature = "encryption")]
@@ -87,12 +99,8 @@ mod demo {
     }
 
     pub(super) fn print_size_comparison(encrypted_path: &Path, unencrypted_path: &Path) {
-        let encrypted_size = std::fs::metadata(encrypted_path)
-            .map(|m| m.len())
-            .unwrap_or(0);
-        let unencrypted_size = std::fs::metadata(unencrypted_path)
-            .map(|m| m.len())
-            .unwrap_or(0);
+        let encrypted_size = std::fs::metadata(encrypted_path).map_or(0, |m| m.len());
+        let unencrypted_size = std::fs::metadata(unencrypted_path).map_or(0, |m| m.len());
 
         println!("File sizes:");
         println!("  Unencrypted: {} bytes", unencrypted_size);

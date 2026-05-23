@@ -1,0 +1,45 @@
+version: "1.0"
+name: sovereign-inference
+description: |
+  Single-machine model serving with realizar.
+  Deploys a GPU-accelerated inference server serving GGUF/safetensors models.
+
+params:
+  model_path: "/opt/models/llama-2-7b.gguf"
+  serve_port: "8080"
+  workers: "1"
+
+machines:
+  gpu-box:
+    hostname: gpu-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, inference]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-inference
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  inference-server:
+    type: recipe
+    machine: gpu-box
+    recipe: realizar-serve
+    inputs:
+      model_path: "{{params.model_path}}"
+      model_format: gguf
+      quantization: q4_k_m
+      port: 8080
+      workers: 1
+      gpu_device: 0
+      user: realizar
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

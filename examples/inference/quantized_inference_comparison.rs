@@ -1,5 +1,6 @@
 //! Quantized Inference Comparison Example
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! Compares inference across precision levels: FP32, Q8, and Q4.
 //! Measures accuracy degradation, latency improvements, and memory
 //! savings for each quantization level.
@@ -17,6 +18,16 @@
 //! ```bash
 //! cargo run --example quantized_inference_comparison
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr run model.apr          # APR native format
+//! apr run model.gguf         # GGUF (llama.cpp compatible)
+//! apr run model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Crankshaw, D. et al. (2017). *Clipper: A Low-Latency Online Prediction Serving System*. NSDI. arXiv:1612.03079
 
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};

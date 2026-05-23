@@ -1,0 +1,46 @@
+version: "1.0"
+name: sovereign-observability
+description: |
+  Observability stack with renacer.
+  Deploys syscall tracing, Jaeger distributed tracing, and Grafana dashboards.
+  Monitors all sovereign AI stack components.
+
+params:
+  grafana_port: "3000"
+  jaeger_port: "16686"
+  retention_days: "7"
+
+machines:
+  monitor-box:
+    hostname: monitor-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [observability]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-observability
+      ephemeral: true
+      privileged: true
+      init: true
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+
+resources:
+  observability:
+    type: recipe
+    machine: monitor-box
+    recipe: renacer-observability
+    inputs:
+      otlp_endpoint: "http://localhost:4317"
+      grafana_port: 3000
+      jaeger_port: 16686
+      retention_days: 7
+      user: renacer
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

@@ -18,4 +18,4 @@ cargo run --example speech_diarization
 ```
 
 ## Source
-[`examples/speech/speech_diarization.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_diarization.rs)
+[`examples/speech/speech_diarization/main.rs`](https://github.com/paiml/apr-cookbook/blob/main/examples/speech/speech_diarization/main.rs)

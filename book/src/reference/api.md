@@ -44,11 +44,7 @@ pub type Result<T> = std::result::Result<T, CookbookError>;
 
 ## Full Documentation
 
-Generated API docs are available at:
-
-- [docs.rs/apr-cookbook](https://docs.rs/apr-cookbook)
-
-Or generate locally:
+apr-cookbook is an examples workspace, not a published library — generate API docs locally:
 
 ```bash
 cargo doc --all-features --open

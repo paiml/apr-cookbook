@@ -1,5 +1,6 @@
 //! # Recipe: Quantization-Aware Distillation
 //!
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/int4-quantization-v1.yaml
 //! **Category**: Model Distillation
 //! **Isolation Level**: Full
 //! **Idempotency**: Guaranteed
@@ -24,6 +25,16 @@
 //! ```bash
 //! cargo run --example distill_quantization_aware
 //! ```
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr distill model.apr          # APR native format
+//! apr distill model.gguf         # GGUF (llama.cpp compatible)
+//! apr distill model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Hinton, G. et al. (2015). *Distilling the Knowledge in a Neural Network*. arXiv:1503.02531
 
 use apr_cookbook::prelude::*;
 use serde::{Deserialize, Serialize};

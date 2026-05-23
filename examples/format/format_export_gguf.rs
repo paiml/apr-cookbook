@@ -1,6 +1,7 @@
 //! # Export APR Model to GGUF Format
 //!
 //! **CLI equivalent:** `apr export model.apr --format gguf`
+//! Contract: contracts/recipe-iiur-v1.yaml, contracts/apr-format-roundtrip-v1.yaml
 //!
 //! Demonstrates exporting an APR v2 model to the GGUF (GPT-Generated
 //! Unified Format) format. GGUF is used by llama.cpp and friends for
@@ -11,6 +12,16 @@
 //! 2. Metadata mapping — APR metadata to GGUF key-value pairs
 //! 3. Tensor data conversion — APR tensors to GGUF tensor descriptors
 //! 4. Quantization type mapping — APR quantization levels to GGUF types
+//!
+//!
+//! ## Format Variants
+//! ```bash
+//! apr export model.apr          # APR native format
+//! apr export model.gguf         # GGUF (llama.cpp compatible)
+//! apr export model.safetensors  # SafeTensors (HuggingFace)
+//! ```
+//! ## References
+//! - Wolf, T. et al. (2020). *Transformers: State-of-the-Art Natural Language Processing*. EMNLP. DOI: 10.18653/v1/2020.emnlp-demos.6
 
 use apr_cookbook::prelude::*;
 use std::collections::HashMap;
