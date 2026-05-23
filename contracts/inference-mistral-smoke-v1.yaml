@@ -1,0 +1,171 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Mistral smoke inference invariants — config parse, sliding-window discriminator, tensor-name layout, deterministic forward simulation"
+  references:
+    - "Jiang et al. (2023). Mistral 7B. arXiv:2310.06825"
+    - "docs/specifications/architecture-demos.md"
+    - "tests/fixtures/architectures/mistral/README.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - mistral
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve bundled fixture path tests/fixtures/architectures/mistral/config.json"
+      invariant: "context.temp_dir exists and is empty; fixture path is readable"
+    - name: load
+      description: "Read config.json; extract num_hidden_layers, vocab_size, hidden_size, sliding_window"
+      invariant: "All four numeric fields present; sliding_window absence MUST surface LoaderUnavailable (Mistral-vs-Llama discriminator)"
+    - name: forward
+      description: "Generate expected_tensor_names(num_layers); run LCG forward_sim(seed=42, vocab, hidden, sliding_window)"
+      invariant: "Tensor name count == 3 + 9 * num_layers; sliding_window participates in iteration count"
+    - name: verify
+      description: "Two consecutive smoke() calls on identical inputs produce equal verdicts"
+      invariant: "Deterministic across same-process and across-process invocations"
+    - name: teardown
+      description: "Drop RecipeContext; verify temp_dir cleanup"
+      invariant: "!context.temp_dir.exists() after Drop"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Smoke is total: every input produces some Verdict (no panic)"
+      - "Family field on Ok arm always equals 'mistral'"
+      - "InvalidFixture iff !Path::new(fixture).exists()"
+      - "Missing sliding_window field surfaces LoaderUnavailable (NOT Ok)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'mistral'"
+      - "match Ok { layer_count, .. } => layer_count == config.num_hidden_layers"
+      - "match Ok { sliding_window, .. } => sliding_window == config.sliding_window"
+      - "match LoaderUnavailable { reason } => !reason.is_empty()"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
+
+  sliding_window_discriminator:
+    formula: "smoke(llama_fixture_no_sliding_window) ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "A config without sliding_window cannot be classified as Mistral"
+      - "Mistral-vs-Llama discriminator is the sliding_window field, not the tensor names"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "if !body.contains('sliding_window') then result is LoaderUnavailable"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, window) == forward_sim(seed, vocab, hidden, window)"
+    domain: "seed: u64; vocab: u32; hidden: u32; window: u32"
+    codomain: "u32"
+    invariants:
+      - "LCG state evolution is deterministic per (seed, iteration_count)"
+      - "Iteration count = min(vocab, hidden, window) — sliding_window MUST influence checksum"
+      - "Different (seed, window) pairs produce different checksums"
+    preconditions:
+      - "seed | 1 != 0"
+      - "min(vocab, hidden, window) >= 1"
+    postconditions:
+      - "forward_sim(s, v, h, w) == forward_sim(s, v, h, w)  for all s, v, h, w"
+      - "forward_sim(42, 256, 256, 16) != forward_sim(42, 256, 256, 64)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Mistral.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture: Path, fmt: String. smoke(fixture, fmt) ↦ SmokeVerdict (no panic)"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mistral"
+  - type: invariant
+    property: "Sliding-window field discriminates Mistral from Llama"
+    formal: "fixture lacks sliding_window key implies result is LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: sliding_window_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.SlidingWindowDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mistral"
+  - type: invariant
+    property: "Forward simulation is deterministic and window-sensitive"
+    formal: "forward_sim(s, v, h, w) is total and depends on w"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Mistral.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Mistral"
+
+falsification_tests:
+  - id: FALSIFY-MISTRAL-001
+    rule: "Smoke returns Ok with sliding_window=64 for the bundled valid fixture"
+    prediction: "smoke('tests/fixtures/architectures/mistral/config.json', 'safetensors') ↦ Ok with family=mistral, layer_count=2, sliding_window=64"
+    test: "cargo test --example inference_mistral_smoke -- happy_path_sliding_window_present"
+    if_fails: "Fixture format drifted, or sliding_window extraction broke"
+  - id: FALSIFY-MISTRAL-002
+    rule: "Forward simulation responds to sliding_window magnitude"
+    prediction: "forward_sim with window=16 != forward_sim with window=64 (same seed/vocab/hidden)"
+    test: "cargo test --example inference_mistral_smoke -- forward_sim_sliding_window_affects_output"
+    if_fails: "sliding_window dropped from iteration count — Mistral kernel collapsed to Llama equivalence"
+  - id: FALSIFY-MISTRAL-003
+    rule: "Tensor name layout matches Mistral convention (same as Llama topology)"
+    prediction: "expected_tensor_names(n).len() == 3 + 9n for n in {0, 2, 32}"
+    test: "cargo test --example inference_mistral_smoke -- expected_tensor_count_per_layer_count"
+    if_fails: "Per-layer Mistral tensor topology drifted from baseline"
+
+kani_harnesses:
+  - id: KANI-MISTRAL-001
+    obligation: "Forward simulation is deterministic and window-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mistral_smoke_deterministic"
+  - id: KANI-MISTRAL-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mistral_smoke_invalid_fixture_total"
+  - id: KANI-MISTRAL-003
+    obligation: "Sliding-window field discriminates Mistral from Llama"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::mistral_sliding_window_present"
+
+qa_gate:
+  id: F-MISTRAL-001
+  name: "Mistral Smoke Inference Contract"
+  description: "Smoke load + sliding-window discriminator + tensor-name layout + deterministic forward simulation for the mistral family"
+  checks:
+    - "loader_dispatch_returns_ok"
+    - "sliding_window_present"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass; SmokeVerdict::Ok for the bundled fixture"

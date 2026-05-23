@@ -1,0 +1,137 @@
+# Recipe: trueno-db-analytics — Standalone analytics database
+#
+# Deploys trueno-db as a standalone analytics/vector database:
+#   1. Service user + data directories
+#   2. trueno-db binary (cargo install)
+#   3. Configuration, systemd unit
+#   4. Firewall rule + health check
+#
+# Inputs:
+#   port (int, default: 5433) — listen port
+#   data_dir (path, default: /opt/trueno-db/data) — data directory
+#   max_memory_mb (int, default: 2048) — max memory in MB
+#   user (string, default: trueno) — service account
+
+recipe:
+  name: trueno-db-analytics
+  version: "1.0"
+  description: "Trueno-DB analytics database — columnar storage with vector support"
+  inputs:
+    port:
+      type: int
+      default: 5433
+      min: 1
+      max: 65535
+    data_dir:
+      type: string
+      default: /opt/trueno-db/data
+    max_memory_mb:
+      type: int
+      default: 2048
+      min: 256
+      max: 65536
+    user:
+      type: string
+      default: trueno
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/trueno-db
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/trueno-db
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  data-dir:
+    type: file
+    state: directory
+    path: "{{inputs.data_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0700"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  trueno-db-pkg:
+    type: package
+    provider: cargo
+    packages: [trueno-db]
+    depends_on: []
+    tags: [packages]
+
+  config:
+    type: file
+    path: /opt/trueno-db/config.yaml
+    content: |
+      # trueno-db standalone configuration
+      listen: 0.0.0.0:{{inputs.port}}
+      data_dir: {{inputs.data_dir}}
+      max_memory_mb: {{inputs.max_memory_mb}}
+      wal_enabled: true
+      sync_mode: normal
+      max_connections: 128
+      compaction_interval_secs: 3600
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [data-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/trueno-db.service
+    content: |
+      [Unit]
+      Description=Trueno Analytics Database
+      After=network.target
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/trueno-db --config /opt/trueno-db/config.yaml
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=65535
+      LimitMEMLOCK=infinity
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [trueno-db-pkg, config]
+    tags: [config, systemd]
+
+  db-service:
+    type: service
+    name: trueno-db
+    state: running
+    enabled: true
+    restart_on: [systemd-unit, config]
+    depends_on: [systemd-unit]
+    tags: [services]
+
+  firewall:
+    type: network
+    port: "{{inputs.port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [db-service]
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "trueno-db-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.port}}/health || systemctl restart trueno-db"
+    user: root
+    depends_on: [db-service]
+    tags: [monitoring]

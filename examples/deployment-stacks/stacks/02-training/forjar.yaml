@@ -1,0 +1,49 @@
+version: "1.0"
+name: sovereign-training
+description: |
+  Training pipeline with entrenar.
+  Deploys a GPU training environment for fine-tuning, LoRA, and model merging.
+
+params:
+  dataset_path: "/opt/datasets/training-data"
+  output_dir: "/opt/entrenar/output"
+  learning_rate: "2e-5"
+  epochs: "3"
+  batch_size: "8"
+  lora_rank: "16"
+
+machines:
+  train-box:
+    hostname: train-box
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, training]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-training
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  training-pipeline:
+    type: recipe
+    machine: train-box
+    recipe: entrenar-train
+    inputs:
+      dataset_path: "{{params.dataset_path}}"
+      output_dir: "{{params.output_dir}}"
+      learning_rate: "{{params.learning_rate}}"
+      epochs: 3
+      batch_size: 8
+      lora_rank: 16
+      gpu_device: 0
+      user: entrenar
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true

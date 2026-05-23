@@ -1,0 +1,158 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-10"
+  author: "PAIML Engineering"
+  description: "Fine-tuning recipe t2_lora_gptq: lora_quantized on phi"
+  references:
+    - "docs/specifications/fine-tuning-cookbook.md"
+    - "docs/specifications/fine-tuning-cookbook/manifest.yaml#t2_lora_gptq"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - finetune
+    - tier_2
+    - lora_quantized
+    - phi
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; load fixture"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: train
+      description: "Run apr finetune (or technique-specific entry point)"
+      invariant: "Training is deterministic for fixed seed=42"
+    - name: evaluate
+      description: "Run the recipe metric (loss, perplexity, accuracy, etc.)"
+      invariant: "Metric is finite; no NaN/Inf"
+    - name: verify
+      description: "Assert the falsifier"
+      invariant: "Two consecutive runs produce equal verdict"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  totality:
+    formula: "main() returns Result<()> for any well-formed fixture"
+    domain: "fixture: Path"
+    codomain: "Result<()>"
+    invariants:
+      - "main() is total — no panic for any well-formed input"
+    preconditions:
+      - "fixture is valid UTF-8 JSONL or CSV"
+    postconditions:
+      - "Result is Ok or Err; no panic"
+    lean_theorem: "ProvableContracts.Finetune.T2LoraGptq.Totality"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Totality"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T2LoraGptq.lean"
+
+  determinism:
+    formula: "main() with seed=42 produces equal output across runs"
+    domain: "seed: u64, fixture: Path"
+    codomain: "verdict: Hash"
+    invariants:
+      - "Two consecutive main() calls with seed=42 produce byte-equal output"
+    preconditions:
+      - "seed is fixed; fixture is identical"
+    postconditions:
+      - "verdict_1 == verdict_2"
+    lean_theorem: "ProvableContracts.Finetune.T2LoraGptq.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T2LoraGptq.lean"
+
+  convergence:
+    formula: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    domain: "fixture: Path, training_steps: u32"
+    codomain: "metric: f32"
+    invariants:
+      - "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    preconditions:
+      - "fixture is bounded, deterministic"
+    postconditions:
+      - "the falsifiable claim above holds on the bundled fixture"
+    lean_theorem: "ProvableContracts.Finetune.T2LoraGptq.Convergence"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Convergence"
+      status: not-applicable
+      module: "lean/ProvableContracts/Finetune/T2LoraGptq.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "main() is total"
+    formal: "for all fixture: Path. main() ↦ Result<()> (no panic)"
+    tolerance: 0.0
+    applies_to: totality
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Totality"
+      status: proved
+      module: "ProvableContracts.Finetune.T2LoraGptq"
+  - type: invariant
+    property: "main() is deterministic"
+    formal: "main(seed=42) == main(seed=42)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Determinism"
+      status: proved
+      module: "ProvableContracts.Finetune.T2LoraGptq"
+  - type: invariant
+    property: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    formal: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    tolerance: 0.0
+    applies_to: convergence
+    lean:
+      theorem: "ProvableContracts.Finetune.T2LoraGptq.Convergence"
+      status: not-applicable
+      module: "ProvableContracts.Finetune.T2LoraGptq"
+
+falsification_tests:
+  - id: FALSIFY-FT-T2_LORA_GPTQ-001
+    rule: "main() is total on the bundled fixture"
+    prediction: "main() returns Ok(()) on the bundled fixture"
+    test: "cargo test --example t2_lora_gptq -- recipe_runs"
+    if_fails: "Recipe panics or returns Err on the bundled fixture"
+  - id: FALSIFY-FT-T2_LORA_GPTQ-002
+    rule: "Two consecutive runs produce equal output (determinism)"
+    prediction: "main() with seed=42 produces equal verdict across two runs"
+    test: "cargo test --example t2_lora_gptq -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked (clock, RNG, threading)"
+  - id: FALSIFY-FT-T2_LORA_GPTQ-003
+    rule: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    prediction: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    test: "cargo test --example t2_lora_gptq -- falsifier_holds_on_fixture"
+    if_fails: "lora_quantized regression on bundled fixture"
+
+kani_harnesses:
+  - id: KANI-FT-T2_LORA_GPTQ-001
+    obligation: "main() is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t2_lora_gptq_total"
+  - id: KANI-FT-T2_LORA_GPTQ-002
+    obligation: "main() is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t2_lora_gptq_deterministic"
+  - id: KANI-FT-T2_LORA_GPTQ-003
+    obligation: "GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t2_lora_gptq_convergence"
+
+qa_gate:
+  id: F-FT-T2_LORA_GPTQ-001
+  name: "Fine-tuning t2_lora_gptq contract"
+  description: "lora_quantized on phi: GPTQ 4-bit base + LoRA: per-block reconstruction error ≤ tolerance × σ_block"
+  checks:
+    - main_is_total
+    - deterministic_across_runs
+    - falsifier_holds_on_fixture
+  pass_criteria: "All 3 falsification tests pass on bundled fixture"

@@ -1,0 +1,163 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Architecture alias resolver — HF-repo-pattern glob → parent family, demonstrating upstream aprender#1562 alias mechanism"
+  references:
+    - "https://github.com/paiml/aprender/pull/1562 (FamilyRegistry::register_alias upstream)"
+    - "docs/specifications/architecture-demos.md"
+    - "docs/specifications/architecture-demos/manifest.yaml (blocked-entries backlog)"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - alias
+    - upstream-bridge
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext"
+      invariant: "context.temp_dir empty"
+    - name: lookup
+      description: "Iterate registered aliases in order; first match wins"
+      invariant: "ALIASES is a non-empty const slice of (pattern, parent) tuples"
+    - name: match
+      description: "Glob-match each pattern against the input HF repo identifier"
+      invariant: "Match logic mirrors upstream alias_matches: '*' is suffix wildcard"
+    - name: classify
+      description: "Map match outcome to AliasVerdict::Ok / NoMatch / InvalidInput"
+      invariant: "Empty input ↦ InvalidInput; no match ↦ NoMatch; otherwise Ok"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  alias_total:
+    formula: "resolve(repo) ↦ Ok | NoMatch | InvalidInput"
+    domain: "repo: &str"
+    codomain: "AliasVerdict"
+    invariants:
+      - "Total: every input produces some Verdict (no panic)"
+      - "Empty repo string ↦ InvalidInput"
+    preconditions:
+      - "repo is a valid UTF-8 string"
+    postconditions:
+      - "match Ok { resolved_family, .. } => resolved_family ∈ {18 supported families}"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
+
+  glob_semantics:
+    formula: "alias_matches(pattern, repo) holds iff pattern matches repo by * suffix wildcard"
+    domain: "pattern, repo: &str"
+    codomain: "bool"
+    invariants:
+      - "Pattern with trailing '*' matches any repo whose prefix equals pattern minus '*'"
+      - "Pattern without '*' requires exact repo equality"
+    preconditions:
+      - "pattern, repo are valid UTF-8"
+    postconditions:
+      - "alias_matches(\"codellama/*\", \"codellama/CodeLlama-7b-hf\") == true"
+      - "alias_matches(\"codellama/*\", \"meta-llama/Llama-3-8B\") == false"
+      - "alias_matches(\"distilbert/distilgpt2\", \"distilbert/distilgpt2\") == true"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
+
+  determinism:
+    formula: "resolve(r) == resolve(r) for all r"
+    domain: "r: &str"
+    codomain: "AliasVerdict"
+    invariants:
+      - "Resolution is a pure function of input string"
+    preconditions:
+      - "r is valid UTF-8"
+    postconditions:
+      - "Two consecutive calls produce equal verdicts"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/ArchAliasResolver.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Resolver is total"
+    formal: "for all repo: &str. resolve(repo) ↦ AliasVerdict"
+    tolerance: 0.0
+    applies_to: alias_total
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Total"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
+  - type: invariant
+    property: "Glob matching is correct"
+    formal: "alias_matches respects '*' suffix-wildcard semantics"
+    tolerance: 0.0
+    applies_to: glob_semantics
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.GlobSemantics"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
+  - type: invariant
+    property: "Resolution is deterministic"
+    formal: "resolve(r) == resolve(r)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.ArchAliasResolver.Determinism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.ArchAliasResolver"
+
+falsification_tests:
+  - id: FALSIFY-ALIAS-001
+    rule: "codellama/* aliases to llama"
+    prediction: "resolve('codellama/CodeLlama-7b-hf') ↦ Ok { resolved_family: 'llama', matched_pattern: 'codellama/*' }"
+    test: "cargo test --example inference_arch_alias_resolver -- codellama_resolves_to_llama"
+    if_fails: "Llama-derivative aliases broken; codellama would no longer dispatch through llama loader"
+  - id: FALSIFY-ALIAS-002
+    rule: "Glob matching rejects mismatched prefix"
+    prediction: "alias_matches('codellama/*', 'meta-llama/Llama-3-8B') == false"
+    test: "cargo test --example inference_arch_alias_resolver -- glob_matches_prefix"
+    if_fails: "Glob semantics drifted; cross-org repos incorrectly resolve through wrong parent"
+  - id: FALSIFY-ALIAS-003
+    rule: "ALIASES covers all 16 blocked-alias backlog entries"
+    prediction: "ALIASES.len() == 16 (matches manifest's alias-eligible blocked count)"
+    test: "cargo test --example inference_arch_alias_resolver -- alias_count_covers_blocked_backlog"
+    if_fails: "Backlog drift; manifest gained an alias entry that the resolver doesn't cover"
+
+kani_harnesses:
+  - id: KANI-ALIAS-001
+    obligation: "Resolver is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_alias_resolver_total"
+  - id: KANI-ALIAS-002
+    obligation: "Resolution is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_alias_resolver_deterministic"
+  - id: KANI-ALIAS-003
+    obligation: "Glob matching is correct"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::arch_alias_resolver_glob_semantics"
+
+qa_gate:
+  id: F-ALIAS-001
+  name: "Architecture Alias Resolver Contract"
+  description: "HF-repo-pattern glob → parent family resolution mirroring upstream aprender#1562 alias mechanism"
+  checks:
+    - "resolver_is_total"
+    - "glob_semantics_correct"
+    - "all_16_alias_backlog_covered"
+  pass_criteria: "All three falsification tests pass; ALIASES covers manifest's alias-eligible backlog"

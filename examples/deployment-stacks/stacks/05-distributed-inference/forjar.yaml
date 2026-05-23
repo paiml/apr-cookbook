@@ -1,0 +1,93 @@
+version: "1.0"
+name: sovereign-distributed-inference
+description: |
+  Multi-node distributed inference with repartir + realizar.
+  GPU nodes serve models, worker nodes handle distributed coordination.
+
+params:
+  model_path: "/opt/models/llama-2-70b.gguf"
+
+machines:
+  gpu-node:
+    hostname: gpu-node
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [gpu-compute, inference]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-dist-gpu
+      ephemeral: true
+      privileged: true
+      init: true
+
+  worker-node:
+    hostname: worker-node
+    addr: container
+    user: root
+    arch: x86_64
+    roles: [worker]
+    transport: container
+    container:
+      runtime: docker
+      image: forjar-test-target
+      name: sovereign-dist-worker
+      ephemeral: true
+      privileged: true
+      init: true
+
+resources:
+  # Layer 1: Distributed workers
+  worker:
+    type: recipe
+    machine: worker-node
+    recipe: repartir-worker
+    inputs:
+      listen_port: 9000
+      tls_cert: certs/worker-cert.pem
+      tls_key: certs/worker-key.pem
+      max_tasks: 4
+      backends: cpu
+      user: repartir
+
+  # Layer 2: GPU inference server
+  inference:
+    type: recipe
+    machine: gpu-node
+    recipe: realizar-serve
+    inputs:
+      model_path: "{{params.model_path}}"
+      model_format: gguf
+      quantization: q4_k_m
+      port: 8080
+      workers: 2
+      gpu_device: 0
+      user: realizar
+
+  # Layer 3: Coordination config
+  fleet-config:
+    type: file
+    machine: gpu-node
+    path: /opt/realizar/fleet.yaml
+    content: |
+      # Distributed inference fleet configuration
+      workers:
+        - host: worker-node
+          port: 9000
+          tls: true
+      inference:
+        model: {{params.model_path}}
+        port: 8080
+        distributed: true
+    owner: realizar
+    mode: "0644"
+    depends_on: []
+    tags: [config]
+
+policy:
+  failure: stop_on_first
+  tripwire: true
+  lock_file: true
+  parallel_machines: true

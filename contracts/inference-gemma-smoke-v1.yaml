@@ -1,0 +1,161 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Gemma smoke inference invariants — config parse, query_pre_attn_scalar discriminator, deterministic forward simulation"
+  references:
+    - "Gemma Team (2024). Gemma. arXiv:2403.08295"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - gemma
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Read config.json; extract numeric fields including query_pre_attn_scalar"
+      invariant: "Four numeric fields parsed; query_pre_attn_scalar present"
+    - name: forward
+      description: "Run LCG seeded forward simulation seeded with query_scalar"
+      invariant: "query_scalar participates in accumulator initialization"
+    - name: verify
+      description: "Determinism across runs"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'gemma'"
+      - "Missing query_pre_attn_scalar surfaces LoaderUnavailable (Gemma discriminator)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'gemma'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
+
+  query_scalar_discriminator:
+    formula: "config without query_pre_attn_scalar ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Gemma scales queries before attention; Llama does not declare this field"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { query_scalar_x10, .. } => query_scalar_x10 == 10 * config.query_pre_attn_scalar"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, scalar) is deterministic and scalar-sensitive"
+    domain: "seed: u64; vocab,hidden,scalar: u32"
+    codomain: "u32"
+    invariants:
+      - "scalar seeds the accumulator"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, sc) == forward_sim(s, v, h, sc)"
+      - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Gemma.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Gemma"
+  - type: invariant
+    property: "query_pre_attn_scalar required"
+    formal: "fixture without query_pre_attn_scalar ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: query_scalar_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.QueryScalarDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Gemma"
+  - type: invariant
+    property: "Forward simulation is scalar-sensitive"
+    formal: "scalar participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Gemma.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Gemma"
+
+falsification_tests:
+  - id: FALSIFY-GEMMA-001
+    rule: "query_pre_attn_scalar is required and recognized"
+    prediction: "query_scalar_x10 == 160 (16 * 10) for the bundled Gemma fixture"
+    test: "cargo test --example inference_gemma_smoke -- happy_path_query_scalar_present"
+    if_fails: "Field detection broke"
+  - id: FALSIFY-GEMMA-002
+    rule: "Forward simulation is scalar-sensitive"
+    prediction: "forward_sim with scalar=16 != forward_sim with scalar=32"
+    test: "cargo test --example inference_gemma_smoke -- query_scalar_affects_checksum"
+    if_fails: "scalar dropped from accumulator seeding"
+  - id: FALSIFY-GEMMA-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_gemma_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-GEMMA-001
+    obligation: "Forward simulation is scalar-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gemma_smoke_deterministic"
+  - id: KANI-GEMMA-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gemma_smoke_invalid_fixture_total"
+  - id: KANI-GEMMA-003
+    obligation: "query_pre_attn_scalar required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gemma_query_scalar_present"
+
+qa_gate:
+  id: F-GEMMA-001
+  name: "Gemma Smoke Inference Contract"
+  description: "Smoke load + query_pre_attn_scalar discriminator + deterministic forward simulation"
+  checks:
+    - "query_scalar_present"
+    - "query_scalar_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

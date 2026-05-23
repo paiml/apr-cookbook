@@ -1,0 +1,164 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "BERT smoke inference invariants — config parse, encoder-only discriminator (type_vocab_size for token-type embeddings), deterministic forward simulation"
+  references:
+    - "Devlin et al. (2018). BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding. arXiv:1810.04805"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - bert
+    - encoder-only
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Extract BERT-specific fields including type_vocab_size"
+      invariant: "Four numeric fields parsed; type_vocab_size identifies encoder-only"
+    - name: forward
+      description: "LCG forward sim seeded with type_vocab_size"
+      invariant: "type_vocab_size participates in checksum"
+    - name: verify
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'bert'"
+      - "is_encoder_only is always true on Ok arm"
+      - "Missing type_vocab_size surfaces LoaderUnavailable (BERT discriminator)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, is_encoder_only, .. } => family == 'bert' AND is_encoder_only == true"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
+
+  encoder_only_discriminator:
+    formula: "config without type_vocab_size ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "BERT carries type_vocab_size for token-type embeddings (sentence-pair tasks)"
+      - "Decoder-only LMs (Llama, Mistral, etc.) do not have type_vocab_size"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { type_vocab_size, .. } => type_vocab_size == config.type_vocab_size"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, type_vocab) is deterministic and type-vocab-sensitive"
+    domain: "seed: u64; vocab,hidden,type_vocab: u32"
+    codomain: "u32"
+    invariants:
+      - "type_vocab seeds the accumulator"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, t) == forward_sim(s, v, h, t)"
+      - "forward_sim(42, 256, 64, 2) != forward_sim(42, 256, 64, 4)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Bert.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+  - type: invariant
+    property: "type_vocab_size required"
+    formal: "fixture without type_vocab_size ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: encoder_only_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.EncoderOnlyDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+  - type: invariant
+    property: "Forward simulation is type-vocab-sensitive"
+    formal: "type_vocab_size participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Bert.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Bert"
+
+falsification_tests:
+  - id: FALSIFY-BERT-001
+    rule: "type_vocab_size identifies encoder-only models"
+    prediction: "type_vocab_size == 2 AND is_encoder_only == true for the bundled BERT fixture"
+    test: "cargo test --example inference_bert_smoke -- happy_path_type_vocab_size_present"
+    if_fails: "Field detection broke or BERT discriminator removed"
+  - id: FALSIFY-BERT-002
+    rule: "Forward simulation is type-vocab-sensitive"
+    prediction: "forward_sim with type_vocab=2 != forward_sim with type_vocab=4"
+    test: "cargo test --example inference_bert_smoke -- type_vocab_size_affects_checksum"
+    if_fails: "type_vocab dropped from accumulator"
+  - id: FALSIFY-BERT-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_bert_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-BERT-001
+    obligation: "Forward simulation is type-vocab-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::bert_smoke_deterministic"
+  - id: KANI-BERT-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::bert_smoke_invalid_fixture_total"
+  - id: KANI-BERT-003
+    obligation: "type_vocab_size required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::bert_encoder_only_marker"
+
+qa_gate:
+  id: F-BERT-001
+  name: "BERT Smoke Inference Contract"
+  description: "Smoke load + encoder-only discriminator + deterministic forward simulation"
+  checks:
+    - "type_vocab_size_present"
+    - "type_vocab_size_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

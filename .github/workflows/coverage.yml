@@ -1,0 +1,58 @@
+# Coverage — weekly cron + manual dispatch
+# Lifted out of CI's Quality Gate (PMAT-328) because cargo llvm-cov
+# re-instruments + recompiles the workspace, doubling target/ size on top
+# of the dep-duplication tracked at aprender#1599. On the PR critical path
+# this caused persistent "No space left on device" / "ld signal 7" failures.
+name: Coverage
+
+on:
+  schedule:
+    # Sundays at 03:00 UTC — off-peak runner availability
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  coverage:
+    name: cargo llvm-cov (weekly)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Free disk space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true   # weekly tolerates the slow ~3GB removal
+          docker-images: true
+          swap-storage: true
+
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: llvm-tools-preview
+
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: coverage-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Install cargo-llvm-cov
+        run: cargo install cargo-llvm-cov --locked
+
+      - name: Run coverage (lib + tests, skip examples for disk)
+        # Same scope as Quality Gate's test step. Examples are not
+        # instrumented for coverage — they're demonstration code, not
+        # subject to the 95% coverage gate.
+        run: cargo llvm-cov --all-features --lib --tests --lcov --output-path lcov.info
+
+      - name: Upload to codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: lcov.info
+          fail_ci_if_error: false
+        continue-on-error: true

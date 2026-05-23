@@ -1,17 +1,23 @@
 # APR Cookbook Specification
 
-**Version**: 5.0.0
+**Version**: 6.1.0
 **Status**: ACTIVE
 **MSRV**: 1.89
-**Date**: 2026-04-22
+**Date**: 2026-05-05
 **Repository**: [github.com/paiml/apr-cookbook](https://github.com/paiml/apr-cookbook)
 **Sovereign Stack**: APR-MONO v0.31.2 ([github.com/paiml/aprender](https://github.com/paiml/aprender))
+
+**v6.1.0 (2026-05-05)**: Closes the **expand-cookbooks initiative** (spec: [`expand-cookbooks.md`](expand-cookbooks.md)). Adds **44 recipes** across 6 new categories (`code/`, `tsp/`, `shell/`, `monte-carlo/`, `cgp/`, `contracts-macros/`) and 8 extended categories (`cli/`, `serve/`, `mcp/`, `analysis/`, `acceleration/`, `bundling/`, `conversion/`, `distillation/`). Closes the gap between the cookbook and aprender 0.31.0..0.31.2 (Unreleased): Claude Code parity (`apr code`), GPU/CPU oracle bisection (the silent-GPU-gibberish canary), apr publish end-to-end, apr serve anthropic (Claude Messages API drop-in), MCP M5 transports (SSE/WebSocket/notifications), and the 6 published sister crates (`aprender-{mcp,tsp,shell,monte-carlo,cgp,contracts-macros}` v0.31.2) each with ≥3 recipes. Cookbook now at 420 recipes across 34 categories.
+
+**v5.1.0 (2026-05-05)**: Add **SHIP-TWO-001 fine-tune-from-init workflow** cross-reference (new §"SHIP-TWO-001 Workflow" section below). The aprender §50.4 cascade landed `apr pretrain --init <PATH>.apr` end-to-end on 2026-05-05 (PRs #1471-#1494, post-INTEGRATION-COMPLETE per aprender SPEC-SHIP-TWO-001 §53). Companion recipes for fine-tuning from public Qwen2.5-Coder-0.5B-Instruct via `apr tokenize import-hf` + `apr tokenize encode-corpus` + `apr pretrain --init` are tracked here as the operator-facing cookbook surface for the SHIP-TWO-001 spec.
 
 ---
 
 ## Executive Summary
 
-The APR Cookbook is the technical manual for production ML deployment using the `.apr` format. It provides idiomatic Rust examples that demonstrate model bundling, format conversion, browser/edge deployment (WASM), SIMD/GPU acceleration, and CLI tooling — all as single-binary artifacts with zero Python/CUDA runtime dependency (CPU path; GPU path requires CUDA libraries at inference time).
+The APR Cookbook is the **umbrella technical manual for the PAIML sovereign AI stack**: model bundling and deployment (`.apr`), data loading (`alimentar`/`aprender-data`), declarative visualization (`presentar`), and infrastructure-as-recipes (`sovereign`/`forjar`). All examples are idiomatic Rust, all artifacts are IIUR-graded, all performance claims are falsifiable. Everything ships as single-binary artifacts with zero Python/CUDA runtime dependency (CPU path; GPU path requires CUDA libraries at inference time).
+
+v6.0.0 reflects the centralization of three previously-separate cookbooks (sovereign-ai-cookbook, alimentar's example tree, presentar's example tree) into this repository per [docs/specifications/centralize-cookbooks.md](centralize-cookbooks.md). The repository slug, crate name, and Pages URL are preserved; the scope is what expanded.
 
 **APR v2 Format** introduces binary tensor indices, LZ4/ZSTD compression, zero-copy mmap loading, and Int4/Int8 quantization. Fair BF16 → Int4+LZ4 size comparison yields ~2–3× reduction (measured in [aprender/docs/benchmarks/FORMAT_PARITY_REPORT.md:17](https://github.com/paiml/aprender/blob/main/docs/benchmarks/FORMAT_PARITY_REPORT.md)). Larger ratios (e.g. 6.3× for F32 → Q4_K_M) confuse precision drop with format advantage.
 
@@ -27,12 +33,17 @@ The APR Cookbook is the technical manual for production ML deployment using the 
 ## Technology Stack
 
 ```
-APR Cookbook v5.0 — APR-MONO Integration
+APR Cookbook v6.0 — Umbrella Sovereign-Stack Cookbook
 ├── Examples Layer (this repo)
 │   ├── 91 IIUR recipes (Categories A-L)
 │   ├── 64 CLI demo recipes (optimize, chat, analysis, format)
 │   ├── 186 variant-depth recipes (PMAT-049/050/051 sprints — ≥3 per subcommand)
-│   └── 341 total examples across 24 categories (2026-04-23)
+│   ├── 14 deployment-stack wrappers + 10 stack compositions + 1 jetson tree
+│   │     (PMAT-065 centralize-cookbooks, ex-sovereign-ai-cookbook)
+│   ├── 18 data-loading examples (PMAT-066 centralize-cookbooks, ex-alimentar)
+│   ├── 1 visualization validator + 28 declarative configs
+│   │     (PMAT-067 centralize-cookbooks, ex-presentar)
+│   └── ~388 total examples across 28 categories (2026-05-04)
 ├── Framework Layer — APR-MONO v0.31.2 crates from crates.io
 │   │   (optional `[patch.crates-io]` override for local ../aprender co-dev)
 │   ├── aprender-core 0.31.2         — package `aprender-core`, lib `aprender`
@@ -163,6 +174,51 @@ When a recipe demonstrates a workflow that has a parity benchmark, it should inc
 //! ## Parity
 //! - Benchmark: [qwen-coder-deploy](https://github.com/paiml/qwen-coder-deploy) — APR vs 4 runtimes
 //! - Competing: `ollama run qwen2.5-coder:1.5b` (see parity repo for tok/s comparison)
+```
+
+---
+
+## SHIP-TWO-001 Workflow — Fine-tune from APR Init (added v5.1.0)
+
+The aprender SPEC-SHIP-TWO-001 (`docs/specifications/aprender-train/ship-two-models-spec.md` in [paiml/aprender](https://github.com/paiml/aprender)) drives the production of two artifacts:
+
+- **MODEL-1**: A 7B-class Qwen2.5-Coder distilled / quantized teacher (currently 91% ship-ready; 9% blocked on SHIP-007 GPU root cause).
+- **MODEL-2**: A 0.5B-class fine-tune of public Qwen2.5-Coder-0.5B-Instruct on a Python+permissive code corpus (currently 57% ship-ready; gated on val_loss < 9.38 evidence from a LIVE 500-step run).
+
+The §50.4 cascade (PRs #1471-#1506 in aprender, 2026-05-04 to 2026-05-05) landed the operator-facing CLI surface for MODEL-2's fine-tune workflow. The cookbook documents this workflow as a 4-step recipe operators can run end-to-end. Each step is contract-bound and falsifier-pinned per [`feedback_falsifier_first_cascade_pattern.md`](https://github.com/paiml/aprender/blob/main/docs/specifications/aprender-train/ship-two-models-spec.md).
+
+### 4-Step Recipe
+
+| Step | Command | What it does | Contract |
+|---|---|---|---|
+| 5g.0 | `apr tokenize import-hf --input <Qwen-tokenizer.json> --output <DIR>` | Extract HF BPE → aprender vocab.json + merges.txt + manifest.json | [`apr-cli-tokenize-import-hf-v1`](https://github.com/paiml/aprender/blob/main/contracts/apr-cli-tokenize-import-hf-v1.yaml) v1.1.0 PARTIAL_ALGORITHM_LEVEL |
+| 5g.1 | `apr tokenize encode-corpus --corpus <jsonl> --tokenizer <DIR> --output <shards>` | Encode corpus to flat u32 .bin shards consumable by `ShardBatchIter` | [`pretokenize-bin-v1`](https://github.com/paiml/aprender/blob/main/contracts/pretokenize-bin-v1.yaml) |
+| 5g.2 | `apr pretrain --init <Qwen.apr> --tokenizer <DIR> --dataset <shards> --mode finetune --num-steps 500` | LIVE 500-step fine-tune from the pretrained checkpoint | [`apr-pretrain-from-init-v1`](https://github.com/paiml/aprender/blob/main/contracts/apr-pretrain-from-init-v1.yaml) v1.2.0 + [`apr-pretrain-arch-polymorphic-v1`](https://github.com/paiml/aprender/blob/main/contracts/apr-pretrain-arch-polymorphic-v1.yaml) v1.5.0 FUNCTIONAL |
+| 5g.3 | (verdict step — operator inspects checkpoint val_loss) | Flips MODEL-2 ship % from 57% → ≥58% when val_loss < 9.38 | SHIP-TWO-001 §50.4 step 5g.3 |
+
+### Why these steps exist (§54-§57 spec history)
+
+The SHIP-TWO-001 §50.4 cascade re-scoped multiple times as live source inspection surfaced hidden coupling:
+
+- **§54**: 5g originally framed as "1 dispatch, 0 LOC" — re-scoped to 5g.0/5g.1/5g.2/5g.3 after live smoke surfaced that HF tokenizers don't have aprender-compatible vocab.json layouts.
+- **§55**: Polymorphic preflight relaxed from `tokenizer_vocab == model_vocab` to `tokenizer_vocab ≤ model_vocab` (RELAXED bound) when `--init` is set, because HF-distributed checkpoints (Qwen2.5/Llama2/Mistral) standardly declare `vocab_size` larger than tokenizer.json materializes (reserved/special slots).
+- **§56**: 5g.1 LIVE smoke validated the chain end-to-end on a 5000-doc slice (13 valid u32 shards produced; ~110 sec / M-token throughput).
+- **§57**: Drift sweep cleaned PV-VER-001 across §50.4 cascade contracts (PRs #1502/#1504/#1505/#1506); zero dangling test references remain across all 870+ contracts.
+
+The recipe above maps each step to its contract; operators can run `cargo run --release -p aprender-contracts-cli --bin pv -- validate <contract>` to verify falsifier bindings before dispatching the step.
+
+### Cross-Reference: SHIP-TWO-001 in apr-leaderboard
+
+When MODEL-2 ships (val_loss < 9.38 attained), the resulting checkpoint will appear in [paiml/apr-leaderboard](https://github.com/paiml/apr-leaderboard) alongside competing Python-stack models. The leaderboard quantifies the load-bearing claim "PAIML stack alone produces a competitive 0.5B-class code model without Python/CUDA toolchain dependencies" — the same claim §50.4 cascade ships at the runtime level.
+
+### Recipe Cross-Reference Convention (for SHIP-TWO-001)
+
+```rust
+//! ## SHIP-TWO-001
+//! - Spec: [aprender §50.4](https://github.com/paiml/aprender/blob/main/docs/specifications/aprender-train/ship-two-models-spec.md)
+//! - Step: 5g.X (where X ∈ {0, 1, 2, 3})
+//! - Contract: <name>-v<N>.yaml (see table above)
+//! - Leaderboard: see [apr-leaderboard](https://github.com/paiml/apr-leaderboard) for ship-% verification
 ```
 
 ---

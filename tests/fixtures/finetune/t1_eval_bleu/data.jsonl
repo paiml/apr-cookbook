@@ -1,0 +1,10 @@
+{"ref": "the quick brown fox jumps over the lazy dog in the morning", "hyp": "the quick brown fox jumps over the lazy dog in the morning"}
+{"ref": "supervised fine tuning trains language models on labeled instruction data", "hyp": "supervised fine tuning trains language models on labeled instruction data"}
+{"ref": "low rank adaptation freezes the base weights and trains rank decomposition", "hyp": "low rank adaptation freezes the base weights and trains rank decomposition"}
+{"ref": "direct preference optimization implicit reward model bypasses ppo", "hyp": "direct preference optimization implicit reward model bypasses ppo"}
+{"ref": "knowledge distillation transfers behavior from teacher model to student", "hyp": "knowledge distillation transfers behavior from teacher model to student"}
+{"ref": "only", "hyp": "only"}
+{"ref": "alone", "hyp": "alone"}
+{"ref": "single", "hyp": "single"}
+{"ref": "lone", "hyp": "lone"}
+{"ref": "solo", "hyp": "solo"}

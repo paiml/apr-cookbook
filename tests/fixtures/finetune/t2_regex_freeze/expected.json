@@ -1,0 +1,5 @@
+{
+  "recipe_id": "t2_regex_freeze",
+  "technique": "regex_freeze",
+  "comment": "PMAT-330 placeholder; the implementing PMAT-3NN ticket replaces this with the real expected output of main() on data.jsonl"
+}
