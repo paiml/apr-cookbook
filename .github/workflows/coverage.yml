@@ -51,7 +51,7 @@ jobs:
         run: cargo llvm-cov --all-features --lib --tests --lcov --output-path lcov.info
 
       - name: Upload to codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v6
         with:
           files: lcov.info
           fail_ci_if_error: false
