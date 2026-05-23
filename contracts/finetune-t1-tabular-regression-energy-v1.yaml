@@ -1,0 +1,158 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-10"
+  author: "PAIML Engineering"
+  description: "Fine-tuning recipe t1_tabular_regression_energy: tabular_regression on tabular-only"
+  references:
+    - "docs/specifications/fine-tuning-cookbook.md"
+    - "docs/specifications/fine-tuning-cookbook/manifest.yaml#t1_tabular_regression_energy"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - finetune
+    - tier_1
+    - tabular_regression
+    - tabular-only
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; load fixture"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: train
+      description: "Run apr finetune (or technique-specific entry point)"
+      invariant: "Training is deterministic for fixed seed=42"
+    - name: evaluate
+      description: "Run the recipe metric (loss, perplexity, accuracy, etc.)"
+      invariant: "Metric is finite; no NaN/Inf"
+    - name: verify
+      description: "Assert the falsifier"
+      invariant: "Two consecutive runs produce equal verdict"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  totality:
+    formula: "main() returns Result<()> for any well-formed fixture"
+    domain: "fixture: Path"
+    codomain: "Result<()>"
+    invariants:
+      - "main() is total — no panic for any well-formed input"
+    preconditions:
+      - "fixture is valid UTF-8 JSONL or CSV"
+    postconditions:
+      - "Result is Ok or Err; no panic"
+    lean_theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Totality"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Totality"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T1TabularRegressionEnergy.lean"
+
+  determinism:
+    formula: "main() with seed=42 produces equal output across runs"
+    domain: "seed: u64, fixture: Path"
+    codomain: "verdict: Hash"
+    invariants:
+      - "Two consecutive main() calls with seed=42 produce byte-equal output"
+    preconditions:
+      - "seed is fixed; fixture is identical"
+    postconditions:
+      - "verdict_1 == verdict_2"
+    lean_theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T1TabularRegressionEnergy.lean"
+
+  convergence:
+    formula: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    domain: "fixture: Path, training_steps: u32"
+    codomain: "metric: f32"
+    invariants:
+      - "MAE on energy-consumption synthetic ≤ 5% of target range"
+    preconditions:
+      - "fixture is bounded, deterministic"
+    postconditions:
+      - "the falsifiable claim above holds on the bundled fixture"
+    lean_theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Convergence"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Convergence"
+      status: not-applicable
+      module: "lean/ProvableContracts/Finetune/T1TabularRegressionEnergy.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "main() is total"
+    formal: "for all fixture: Path. main() ↦ Result<()> (no panic)"
+    tolerance: 0.0
+    applies_to: totality
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Totality"
+      status: proved
+      module: "ProvableContracts.Finetune.T1TabularRegressionEnergy"
+  - type: invariant
+    property: "main() is deterministic"
+    formal: "main(seed=42) == main(seed=42)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Determinism"
+      status: proved
+      module: "ProvableContracts.Finetune.T1TabularRegressionEnergy"
+  - type: invariant
+    property: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    formal: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    tolerance: 0.0
+    applies_to: convergence
+    lean:
+      theorem: "ProvableContracts.Finetune.T1TabularRegressionEnergy.Convergence"
+      status: not-applicable
+      module: "ProvableContracts.Finetune.T1TabularRegressionEnergy"
+
+falsification_tests:
+  - id: FALSIFY-FT-T1_TABULAR_REGRESSION_ENERGY-001
+    rule: "main() is total on the bundled fixture"
+    prediction: "main() returns Ok(()) on the bundled fixture"
+    test: "cargo test --example t1_tabular_regression_energy -- recipe_runs"
+    if_fails: "Recipe panics or returns Err on the bundled fixture"
+  - id: FALSIFY-FT-T1_TABULAR_REGRESSION_ENERGY-002
+    rule: "Two consecutive runs produce equal output (determinism)"
+    prediction: "main() with seed=42 produces equal verdict across two runs"
+    test: "cargo test --example t1_tabular_regression_energy -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked (clock, RNG, threading)"
+  - id: FALSIFY-FT-T1_TABULAR_REGRESSION_ENERGY-003
+    rule: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    prediction: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    test: "cargo test --example t1_tabular_regression_energy -- falsifier_holds_on_fixture"
+    if_fails: "tabular_regression regression on bundled fixture"
+
+kani_harnesses:
+  - id: KANI-FT-T1_TABULAR_REGRESSION_ENERGY-001
+    obligation: "main() is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t1_tabular_regression_energy_total"
+  - id: KANI-FT-T1_TABULAR_REGRESSION_ENERGY-002
+    obligation: "main() is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t1_tabular_regression_energy_deterministic"
+  - id: KANI-FT-T1_TABULAR_REGRESSION_ENERGY-003
+    obligation: "MAE on energy-consumption synthetic ≤ 5% of target range"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t1_tabular_regression_energy_convergence"
+
+qa_gate:
+  id: F-FT-T1_TABULAR_REGRESSION_ENERGY-001
+  name: "Fine-tuning t1_tabular_regression_energy contract"
+  description: "tabular_regression on tabular-only: MAE on energy-consumption synthetic ≤ 5% of target range"
+  checks:
+    - main_is_total
+    - deterministic_across_runs
+    - falsifier_holds_on_fixture
+  pass_criteria: "All 3 falsification tests pass on bundled fixture"

@@ -1,0 +1,135 @@
+# Recipe: pacha-registry — Model and data registry
+#
+# Deploys pacha as a local model/data registry:
+#   1. Service user + storage directories
+#   2. pacha binary (cargo install)
+#   3. Registry config, systemd unit
+#   4. Firewall rule + health check
+#
+# Inputs:
+#   port (int, default: 8070) — registry API port
+#   storage_dir (path, default: /opt/pacha/storage) — artifact storage
+#   max_storage_gb (int, default: 100) — max storage in GB
+#   user (string, default: pacha) — service account
+
+recipe:
+  name: pacha-registry
+  version: "1.0"
+  description: "Pacha model/data registry — artifact versioning and distribution"
+  inputs:
+    port:
+      type: int
+      default: 8070
+      min: 1
+      max: 65535
+    storage_dir:
+      type: string
+      default: /opt/pacha/storage
+    max_storage_gb:
+      type: int
+      default: 100
+      min: 10
+      max: 10000
+    user:
+      type: string
+      default: pacha
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/pacha
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/pacha
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  storage-dir:
+    type: file
+    state: directory
+    path: "{{inputs.storage_dir}}"
+    owner: "{{inputs.user}}"
+    mode: "0700"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  pacha-pkg:
+    type: package
+    provider: cargo
+    packages: [pacha]
+    depends_on: []
+    tags: [packages]
+
+  config:
+    type: file
+    path: /opt/pacha/config.yaml
+    content: |
+      # Pacha registry configuration
+      listen: 0.0.0.0:{{inputs.port}}
+      storage_dir: {{inputs.storage_dir}}
+      max_storage_gb: {{inputs.max_storage_gb}}
+      dedup: true
+      checksum: blake3
+      gc_interval_hours: 24
+    owner: "{{inputs.user}}"
+    mode: "0640"
+    depends_on: [storage-dir]
+    tags: [config]
+
+  systemd-unit:
+    type: file
+    path: /etc/systemd/system/pacha.service
+    content: |
+      [Unit]
+      Description=Pacha Model/Data Registry
+      After=network.target
+
+      [Service]
+      Type=simple
+      User={{inputs.user}}
+      ExecStart=/usr/local/bin/pacha serve --config /opt/pacha/config.yaml
+      Restart=on-failure
+      RestartSec=5
+      LimitNOFILE=65535
+
+      [Install]
+      WantedBy=multi-user.target
+    owner: root
+    mode: "0644"
+    depends_on: [pacha-pkg, config]
+    tags: [config, systemd]
+
+  pacha-service:
+    type: service
+    name: pacha
+    state: running
+    enabled: true
+    restart_on: [systemd-unit, config]
+    depends_on: [systemd-unit]
+    tags: [services]
+
+  firewall:
+    type: network
+    port: "{{inputs.port}}"
+    protocol: tcp
+    action: allow
+    depends_on: [pacha-service]
+    tags: [network, firewall]
+
+  health-check:
+    type: cron
+    name: "pacha-health"
+    schedule: "*/5 * * * *"
+    command: "curl -sf http://localhost:{{inputs.port}}/health || systemctl restart pacha"
+    user: root
+    depends_on: [pacha-service]
+    tags: [monitoring]

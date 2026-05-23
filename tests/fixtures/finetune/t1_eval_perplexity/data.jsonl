@@ -1,0 +1,5 @@
+{"vocab_size": 10, "expected_ppl": 10}
+{"vocab_size": 100, "expected_ppl": 100}
+{"vocab_size": 1000, "expected_ppl": 1000}
+{"vocab_size": 10000, "expected_ppl": 10000}
+{"vocab_size": 50000, "expected_ppl": 50000}

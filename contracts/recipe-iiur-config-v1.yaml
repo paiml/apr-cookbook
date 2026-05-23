@@ -1,0 +1,186 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-04"
+  author: "PAIML Engineering"
+  description: |
+    IIUR contract for declarative-config recipes (YAML, .prs).
+    The graded artifact is a Rust wrapper (the loader/validator) that loads,
+    parses, and validates declarative configs under its purview. Idempotence
+    and isolation apply to the WRAPPER, not the configs themselves.
+    Added by PMAT-065 (centralize-cookbooks migration).
+  references:
+    - "APR Cookbook Spec v6.0.0, IIUR Principles"
+    - "docs/specifications/centralize-cookbooks/iiur-conformance.md"
+    - "Morris (2020) Infrastructure as Code"
+  depends_on:
+    - "contracts/recipe-iiur-v1.yaml"
+  registry: false
+  tags:
+    - recipe
+    - quality
+    - iiur
+    - declarative-config
+
+kernel_structure:
+  phases:
+    - name: "load"
+      description: "Read declarative file(s) from disk or include_str! into memory"
+      invariant: "Source bytes available; no I/O failures"
+    - name: "parse"
+      description: "Deserialize bytes to typed value (serde_yaml::Value or equivalent)"
+      invariant: "Parse succeeds; well-formed YAML/PRS"
+    - name: "validate"
+      description: "Assert schema and required-field invariants"
+      invariant: "All required keys present and well-typed"
+    - name: "report"
+      description: "Print summary of validated configs (recipe count, key fields)"
+      invariant: "Report is deterministic; no wall-clock or random elements"
+
+equations:
+  parse_total:
+    formula: "∀ cfg ∈ scope. parse(cfg) ∈ Ok(_)"
+    domain: "cfg: bytes"
+    codomain: "Result<Value>"
+    invariants:
+      - "Every declarative config under wrapper scope parses without error"
+      - "Parsing is pure (no I/O, no allocation tracking, no mutation)"
+    preconditions:
+      - "Config files exist at declared paths"
+      - "Files are valid YAML or PRS encoding"
+    postconditions:
+      - "Returned Value is a fully-realized tree (no lazy nodes)"
+    lean_theorem: "Theorems.ParseTotal"
+
+  schema_validity:
+    formula: "∀ cfg. validate(parse(cfg)) ∈ Ok(_) ⇒ required_fields(cfg) ⊆ keys(cfg)"
+    domain: "cfg: parsed Value"
+    codomain: "Result<ParsedShape>"
+    invariants:
+      - "Every successfully-validated config has its required keys present"
+      - "Validation is type-checked at compile time via the Rust wrapper"
+    preconditions:
+      - "Config is well-formed (parse succeeded)"
+    postconditions:
+      - "Returned ParsedShape has all required fields populated"
+    lean_theorem: "Theorems.SchemaValidity"
+
+  no_side_effects:
+    formula: "side_effects(wrapper) ⊆ {stdout_println, tempfile_alloc}"
+    domain: "wrapper: fn() -> Result<()>"
+    codomain: "{∅, stdout, tempfile}"
+    invariants:
+      - "Wrapper performs no network I/O"
+      - "Wrapper performs no writes outside RecipeContext temp directory"
+      - "Wrapper performs no environment mutation"
+    preconditions:
+      - "RecipeContext::new succeeds"
+    postconditions:
+      - "Filesystem state unchanged outside temp dir"
+      - "No DNS or HTTP calls made"
+    lean_theorem: "Theorems.NoSideEffects"
+
+proof_obligations:
+  - type: invariant
+    property: "Doc header present"
+    formal: "Wrapper file begins with IIUR doc header including Contract and Citation lines"
+    tolerance: 0.0
+    applies_to: parse_total
+    lean:
+      theorem: "Theorems.DocHeaderPresent"
+      module: "ProvableContracts.Recipe.IiurConfig"
+      status: wip
+  - type: invariant
+    property: "Parse succeeds"
+    formal: "All declared config files parse to typed value without error"
+    tolerance: 0.0
+    applies_to: parse_total
+    lean:
+      theorem: "Theorems.ParseSucceeds"
+      module: "ProvableContracts.Recipe.IiurConfig"
+      status: wip
+  - type: invariant
+    property: "Schema invariants asserted"
+    formal: "At least one #[test] checks a config-specific schema field"
+    tolerance: 0.0
+    applies_to: schema_validity
+    lean:
+      theorem: "Theorems.SchemaInvariantsAsserted"
+      module: "ProvableContracts.Recipe.IiurConfig"
+      status: wip
+  - type: invariant
+    property: "No network I/O"
+    formal: "Wrapper performs no network I/O (offline-only per cookbook policy)"
+    tolerance: 0.0
+    applies_to: no_side_effects
+    lean:
+      theorem: "Theorems.NoNetwork"
+      module: "ProvableContracts.Recipe.IiurConfig"
+      status: wip
+  - type: invariant
+    property: "No unwrap in main"
+    formal: "Wrapper main() body has zero unwrap()/expect() calls (tests may use them)"
+    tolerance: 0.0
+    applies_to: no_side_effects
+    lean:
+      theorem: "Theorems.NoUnwrapInMain"
+      module: "ProvableContracts.Recipe.IiurConfig"
+      status: wip
+
+falsification_tests:
+  - id: FALSIFY-IIUR-CFG-001
+    rule: "Parse totality"
+    prediction: "Every config in scope parses without error"
+    test: "Wrapper iterates declared configs, parses each, asserts no error"
+    if_fails: "Schema drift, malformed YAML, missing file"
+  - id: FALSIFY-IIUR-CFG-002
+    rule: "Schema invariants"
+    prediction: "Every config has required fields populated"
+    test: "Wrapper test asserts presence and type of recipe-specific keys"
+    if_fails: "Field renamed, type changed, or required field dropped upstream"
+  - id: FALSIFY-IIUR-CFG-003
+    rule: "Offline operation"
+    prediction: "Wrapper runs with no network and produces same output"
+    test: "Run with `unshare -n` (Linux) or in offline CI shard"
+    if_fails: "Wrapper attempted DNS resolution or HTTP fetch"
+  - id: FALSIFY-IIUR-CFG-004
+    rule: "No unwrap in main"
+    prediction: "Wrapper main() body has zero unwrap()/expect() calls"
+    test: "grep -E 'unwrap\\(\\)|expect\\(' on wrapper main fn body asserts empty"
+    if_fails: "Wrapper uses unwrap() in main path; will panic on schema drift"
+  - id: FALSIFY-IIUR-CFG-005
+    rule: "Doc header present"
+    prediction: "Wrapper file begins with IIUR doc header including Contract: and Citation: lines"
+    test: "Parse first 30 lines of wrapper file, assert both lines present"
+    if_fails: "Wrapper missing doc header; not graded under correct contract"
+
+kani_harnesses:
+  - id: KANI-IIUR-CFG-001
+    obligation: "Parse totality — bounded YAML"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::iiur_cfg_parse_total"
+  - id: KANI-IIUR-CFG-002
+    obligation: "Schema validity — required fields"
+    bound: 4
+    strategy: exhaustive
+    harness: "kani_harnesses::iiur_cfg_schema_validity"
+  - id: KANI-IIUR-CFG-003
+    obligation: "No side effects — wrapper purity"
+    bound: 4
+    strategy: exhaustive
+    harness: "kani_harnesses::iiur_cfg_no_side_effects"
+
+qa_gate:
+  id: F-IIUR-CFG-001
+  name: "Declarative-Config Recipe IIUR Contract"
+  description: |
+    Declarative-config recipe quality gate. Applies to deployment-stack
+    wrappers (sovereign YAMLs) and visualization wrappers (presentar
+    YAML/.prs files).
+  checks:
+    - "doc_header_present"
+    - "parse_succeeds"
+    - "schema_invariants_asserted"
+    - "no_network"
+    - "no_unwrap_in_main"
+  pass_criteria: "All 5 obligations hold for every wrapper graded under this contract"

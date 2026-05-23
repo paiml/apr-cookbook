@@ -1,0 +1,162 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Qwen3.5 smoke inference invariants — config parse, tie_word_embeddings discriminator, weight-tied tensor count, deterministic forward simulation"
+  references:
+    - "Qwen Team (2026). Qwen3.5 Technical Report. (HF model card)"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - qwen3_5
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Read config.json; extract numeric fields"
+      invariant: "Three numeric fields parsed; tie_word_embeddings field is present"
+    - name: forward
+      description: "Run LCG seeded forward simulation"
+      invariant: "When tied, lm_head.weight is dropped from tensor count (2+9n vs 3+9n)"
+    - name: verify
+      description: "Two consecutive smoke calls produce equal verdicts"
+      invariant: "Determinism across runs"
+    - name: teardown
+      description: "Drop RecipeContext; verify temp_dir cleanup"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'qwen3_5'"
+      - "Missing tie_word_embeddings field surfaces LoaderUnavailable"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'qwen3_5'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3_5.lean"
+
+  tied_word_embeddings:
+    formula: "tie_word_embeddings == true ↦ tensor_count = 2 + 9n (not 3 + 9n)"
+    domain: "n: u32; tied: bool"
+    codomain: "u32"
+    invariants:
+      - "When tied, lm_head shares weights with embed_tokens — no separate tensor"
+    preconditions:
+      - "n ≥ 0"
+    postconditions:
+      - "expected_tensor_count(n, true) == 2 + 9n"
+      - "expected_tensor_count(n, false) == 3 + 9n"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.TiedWordEmbeddings"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.TiedWordEmbeddings"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3_5.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, tied) is deterministic and tied-sensitive"
+    domain: "seed: u64; vocab: u32; tied: bool"
+    codomain: "u32"
+    invariants:
+      - "Tied flag affects accumulator initialization"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, t) == forward_sim(s, v, t)"
+      - "forward_sim(42, 256, true) != forward_sim(42, 256, false)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen3_5.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Tied embeddings drop lm_head from tensor count"
+    formal: "expected_tensor_count(n, true) == 2 + 9n"
+    tolerance: 0.0
+    applies_to: tied_word_embeddings
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.TiedWordEmbeddings"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+  - type: invariant
+    property: "Forward simulation is tied-sensitive"
+    formal: "tied flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen3_5.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen3_5"
+
+falsification_tests:
+  - id: FALSIFY-QWEN3_5-001
+    rule: "tie_word_embeddings is required and recognized"
+    prediction: "tie_word_embeddings == true for the bundled Qwen3.5 fixture"
+    test: "cargo test --example inference_qwen3_5_smoke -- happy_path_tied_word_embeddings_true"
+    if_fails: "Field detection broke or fixture lost the tie_word_embeddings: true line"
+  - id: FALSIFY-QWEN3_5-002
+    rule: "Tied embeddings drop lm_head from tensor count"
+    prediction: "expected_tensor_count(2, true) == 20 != expected_tensor_count(2, false) == 21"
+    test: "cargo test --example inference_qwen3_5_smoke -- tensor_count_drops_lm_head_when_tied"
+    if_fails: "Tying logic drift — tensor count formula no longer reflects weight sharing"
+  - id: FALSIFY-QWEN3_5-003
+    rule: "Forward simulation is tied-sensitive"
+    prediction: "forward_sim with tied=true != forward_sim with tied=false"
+    test: "cargo test --example inference_qwen3_5_smoke -- tied_flag_affects_checksum"
+    if_fails: "Tied flag dropped from accumulator seeding"
+
+kani_harnesses:
+  - id: KANI-QWEN3_5-001
+    obligation: "Forward simulation is tied-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_smoke_deterministic"
+  - id: KANI-QWEN3_5-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_smoke_invalid_fixture_total"
+  - id: KANI-QWEN3_5-003
+    obligation: "Tied embeddings drop lm_head from tensor count"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen3_5_tied_word_embeddings_present"
+
+qa_gate:
+  id: F-QWEN3_5-001
+  name: "Qwen3.5 Smoke Inference Contract"
+  description: "Smoke load + tied-embeddings discriminator + deterministic forward simulation"
+  checks:
+    - "tie_word_embeddings_present"
+    - "tied_drops_lm_head"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

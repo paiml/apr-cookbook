@@ -20,3 +20,22 @@ SC1100
 # attempt instead of string content. All hits are in string literals.
 SC1078
 SC2188
+
+# SC1035 / SC1068: "Missing space after 'for'/'in' keyword" and "Don't put
+# spaces around the = in 'let' assignments". False positives when a bash
+# script embeds Rust source via heredocs — bashrs reads the Rust `for` /
+# `in` / `let` tokens as bash syntax. The heredoc-emitted Rust is the
+# generator's *output* (recipe stub source code), not bash that runs.
+SC1035
+SC1068
+
+# DET002: "Non-deterministic timestamp usage". `date +%Y-%m-%d` is
+# intentional for contract metadata — every emitted contract records its
+# creation date. Determinism would defeat the audit trail.
+DET002
+
+# SEC010: "Path traversal risk in cat / mv". Manifest-supplied paths are
+# guarded at function entry (guard_path rejects absolute paths and `..`),
+# but bashrs cannot follow the call graph to verify the guard. All affected
+# call sites are post-guard.
+SEC010

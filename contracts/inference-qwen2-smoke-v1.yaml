@@ -1,0 +1,164 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Qwen2 smoke inference invariants — config parse, rope_theta=1M discriminator, qkv-bias tensor layout, deterministic forward simulation"
+  references:
+    - "Yang et al. (2024). Qwen2 Technical Report. arXiv:2407.10671"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - qwen2
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: load
+      description: "Read config.json; extract numeric fields"
+      invariant: "Four numeric fields parsed; rope_theta >= 100000 (Qwen2 magnitude)"
+    - name: forward
+      description: "Run LCG seeded forward simulation"
+      invariant: "12 per-layer tensor entries (Qwen2 has q/k/v biases unlike Llama); LCG includes rope_theta in state increment"
+    - name: verify
+      description: "Two consecutive smoke calls produce equal verdicts"
+      invariant: "Two consecutive smoke() calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext; verify temp_dir cleanup"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Total: every input produces some Verdict"
+      - "Family on Ok arm always 'qwen2'"
+      - "rope_theta < 100000 surfaces LoaderUnavailable (rejects Llama configs)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'qwen2'"
+      - "match Ok { rope_theta_million, .. } => rope_theta_million >= 1"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
+
+  qkv_bias_layout:
+    formula: "expected_tensor_names(n).len() == 3 + 12n"
+    domain: "n: u32"
+    codomain: "Vec<String>"
+    invariants:
+      - "Per-layer count is 12 (Qwen2 vs Llama 9): q/k/v add bias terms"
+    preconditions:
+      - "n ≤ 256"
+    postconditions:
+      - "Per-layer entries include {q,k,v}_proj.bias"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, rope_theta) is deterministic and rope-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; rope_theta: u64"
+    codomain: "u32"
+    invariants:
+      - "Identical inputs produce equal output"
+      - "Different rope_theta produces different output (rope_theta participates in LCG increment)"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, r) == forward_sim(s, v, h, r)"
+      - "forward_sim(42, 256, 64, 10000) != forward_sim(42, 256, 64, 1000000)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Qwen2.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen2"
+  - type: invariant
+    property: "Qwen2 has 12 per-layer tensor entries"
+    formal: "expected_tensor_names(n).len() == 3 + 12n"
+    tolerance: 0.0
+    applies_to: qkv_bias_layout
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.QkvBiasLayout"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen2"
+  - type: invariant
+    property: "Forward simulation is rope-sensitive"
+    formal: "rope_theta participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Qwen2.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Qwen2"
+
+falsification_tests:
+  - id: FALSIFY-QWEN2-001
+    rule: "rope_theta=1M is required to classify as Qwen2"
+    prediction: "rope_theta_million == 1 for the bundled Qwen2 fixture"
+    test: "cargo test --example inference_qwen2_smoke -- rope_theta_is_one_million"
+    if_fails: "rope_theta extraction broke or fixture was edited away from Qwen2 magnitude"
+  - id: FALSIFY-QWEN2-002
+    rule: "Qwen2 has q/k/v biases unlike Llama"
+    prediction: "expected_tensor_names(1) contains model.layers.0.self_attn.{q,k,v}_proj.bias"
+    test: "cargo test --example inference_qwen2_smoke -- qkv_biases_present"
+    if_fails: "Per-layer tensor topology drifted from Qwen2 baseline"
+  - id: FALSIFY-QWEN2-003
+    rule: "Forward simulation is rope-sensitive"
+    prediction: "forward_sim with rope=10000 != forward_sim with rope=1000000"
+    test: "cargo test --example inference_qwen2_smoke -- rope_theta_affects_checksum"
+    if_fails: "rope_theta dropped from LCG state — Qwen2 collapsed to Llama equivalence"
+
+kani_harnesses:
+  - id: KANI-QWEN2-001
+    obligation: "Forward simulation is rope-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen2_smoke_deterministic"
+  - id: KANI-QWEN2-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen2_smoke_invalid_fixture_total"
+  - id: KANI-QWEN2-003
+    obligation: "Qwen2 has 12 per-layer tensor entries"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::qwen2_qkv_bias_count"
+
+qa_gate:
+  id: F-QWEN2-001
+  name: "Qwen2 Smoke Inference Contract"
+  description: "Smoke load + rope_theta discriminator + qkv-bias topology + deterministic forward simulation for the qwen2 family"
+  checks:
+    - "rope_theta_one_million"
+    - "qkv_biases_present"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

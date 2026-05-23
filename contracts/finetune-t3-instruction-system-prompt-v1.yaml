@@ -1,0 +1,158 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-10"
+  author: "PAIML Engineering"
+  description: "Fine-tuning recipe t3_instruction_system_prompt: instruction_tune on gemma"
+  references:
+    - "docs/specifications/fine-tuning-cookbook.md"
+    - "docs/specifications/fine-tuning-cookbook/manifest.yaml#t3_instruction_system_prompt"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - finetune
+    - tier_3
+    - instruction_tune
+    - gemma
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; load fixture"
+      invariant: "context.temp_dir empty; fixture path readable"
+    - name: train
+      description: "Run apr finetune (or technique-specific entry point)"
+      invariant: "Training is deterministic for fixed seed=42"
+    - name: evaluate
+      description: "Run the recipe metric (loss, perplexity, accuracy, etc.)"
+      invariant: "Metric is finite; no NaN/Inf"
+    - name: verify
+      description: "Assert the falsifier"
+      invariant: "Two consecutive runs produce equal verdict"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  totality:
+    formula: "main() returns Result<()> for any well-formed fixture"
+    domain: "fixture: Path"
+    codomain: "Result<()>"
+    invariants:
+      - "main() is total — no panic for any well-formed input"
+    preconditions:
+      - "fixture is valid UTF-8 JSONL or CSV"
+    postconditions:
+      - "Result is Ok or Err; no panic"
+    lean_theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Totality"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Totality"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T3InstructionSystemPrompt.lean"
+
+  determinism:
+    formula: "main() with seed=42 produces equal output across runs"
+    domain: "seed: u64, fixture: Path"
+    codomain: "verdict: Hash"
+    invariants:
+      - "Two consecutive main() calls with seed=42 produce byte-equal output"
+    preconditions:
+      - "seed is fixed; fixture is identical"
+    postconditions:
+      - "verdict_1 == verdict_2"
+    lean_theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Determinism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Determinism"
+      status: proved
+      module: "lean/ProvableContracts/Finetune/T3InstructionSystemPrompt.lean"
+
+  convergence:
+    formula: "system-prompt prefix is masked from loss but visible to forward pass"
+    domain: "fixture: Path, training_steps: u32"
+    codomain: "metric: f32"
+    invariants:
+      - "system-prompt prefix is masked from loss but visible to forward pass"
+    preconditions:
+      - "fixture is bounded, deterministic"
+    postconditions:
+      - "the falsifiable claim above holds on the bundled fixture"
+    lean_theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Convergence"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Convergence"
+      status: not-applicable
+      module: "lean/ProvableContracts/Finetune/T3InstructionSystemPrompt.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "main() is total"
+    formal: "for all fixture: Path. main() ↦ Result<()> (no panic)"
+    tolerance: 0.0
+    applies_to: totality
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Totality"
+      status: proved
+      module: "ProvableContracts.Finetune.T3InstructionSystemPrompt"
+  - type: invariant
+    property: "main() is deterministic"
+    formal: "main(seed=42) == main(seed=42)"
+    tolerance: 0.0
+    applies_to: determinism
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Determinism"
+      status: proved
+      module: "ProvableContracts.Finetune.T3InstructionSystemPrompt"
+  - type: invariant
+    property: "system-prompt prefix is masked from loss but visible to forward pass"
+    formal: "system-prompt prefix is masked from loss but visible to forward pass"
+    tolerance: 0.0
+    applies_to: convergence
+    lean:
+      theorem: "ProvableContracts.Finetune.T3InstructionSystemPrompt.Convergence"
+      status: not-applicable
+      module: "ProvableContracts.Finetune.T3InstructionSystemPrompt"
+
+falsification_tests:
+  - id: FALSIFY-FT-T3_INSTRUCTION_SYSTEM_PROMPT-001
+    rule: "main() is total on the bundled fixture"
+    prediction: "main() returns Ok(()) on the bundled fixture"
+    test: "cargo test --example t3_instruction_system_prompt -- recipe_runs"
+    if_fails: "Recipe panics or returns Err on the bundled fixture"
+  - id: FALSIFY-FT-T3_INSTRUCTION_SYSTEM_PROMPT-002
+    rule: "Two consecutive runs produce equal output (determinism)"
+    prediction: "main() with seed=42 produces equal verdict across two runs"
+    test: "cargo test --example t3_instruction_system_prompt -- deterministic_across_runs"
+    if_fails: "Non-determinism leaked (clock, RNG, threading)"
+  - id: FALSIFY-FT-T3_INSTRUCTION_SYSTEM_PROMPT-003
+    rule: "system-prompt prefix is masked from loss but visible to forward pass"
+    prediction: "system-prompt prefix is masked from loss but visible to forward pass"
+    test: "cargo test --example t3_instruction_system_prompt -- falsifier_holds_on_fixture"
+    if_fails: "instruction_tune regression on bundled fixture"
+
+kani_harnesses:
+  - id: KANI-FT-T3_INSTRUCTION_SYSTEM_PROMPT-001
+    obligation: "main() is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t3_instruction_system_prompt_total"
+  - id: KANI-FT-T3_INSTRUCTION_SYSTEM_PROMPT-002
+    obligation: "main() is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t3_instruction_system_prompt_deterministic"
+  - id: KANI-FT-T3_INSTRUCTION_SYSTEM_PROMPT-003
+    obligation: "system-prompt prefix is masked from loss but visible to forward pass"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::ft_t3_instruction_system_prompt_convergence"
+
+qa_gate:
+  id: F-FT-T3_INSTRUCTION_SYSTEM_PROMPT-001
+  name: "Fine-tuning t3_instruction_system_prompt contract"
+  description: "instruction_tune on gemma: system-prompt prefix is masked from loss but visible to forward pass"
+  checks:
+    - main_is_total
+    - deterministic_across_runs
+    - falsifier_holds_on_fixture
+  pass_criteria: "All 3 falsification tests pass on bundled fixture"

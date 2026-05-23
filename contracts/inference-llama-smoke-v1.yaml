@@ -1,0 +1,171 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Llama smoke inference invariants — config parse, tensor-name layout, deterministic forward simulation"
+  references:
+    - "Touvron et al. (2023). LLaMA: Open and Efficient Foundation Language Models. arXiv:2302.13971"
+    - "docs/specifications/architecture-demos.md"
+    - "tests/fixtures/architectures/llama/README.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - llama
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve bundled fixture path tests/fixtures/architectures/llama/config.json"
+      invariant: "context.temp_dir exists and is empty; fixture path is readable"
+    - name: load
+      description: "Read fixture config.json and extract num_hidden_layers, vocab_size, hidden_size"
+      invariant: "All three numeric fields are present and parse as i64; otherwise LoaderUnavailable"
+    - name: forward
+      description: "Generate expected_tensor_names(num_layers) and run LCG forward_sim with seed 42"
+      invariant: "Tensor name count == 3 + 9 * num_layers; forward_sim returns nonzero u32 for non-trivial vocab/hidden"
+    - name: verify
+      description: "Two consecutive smoke() calls on identical inputs produce equal verdicts"
+      invariant: "Deterministic across same-process and across-process invocations"
+    - name: teardown
+      description: "Drop RecipeContext; verify temp_dir cleanup"
+      invariant: "!context.temp_dir.exists() after Drop; no residual file outside CARGO_MANIFEST_DIR"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Smoke is total: every input produces some Verdict (no panic)"
+      - "Family field on Ok arm always equals 'llama'"
+      - "InvalidFixture iff !Path::new(fixture).exists()"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'llama'"
+      - "match Ok { layer_count, .. } => layer_count == config.num_hidden_layers"
+      - "match LoaderUnavailable { reason } => !reason.is_empty()"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
+
+  tensor_validation:
+    formula: "expected_tensor_names(n) ↦ vec of length 3 + 9n"
+    domain: "n: u32"
+    codomain: "Vec<String>"
+    invariants:
+      - "Tensor names follow Llama naming convention (model.layers.<i>.{attn|mlp}.<proj>.weight)"
+      - "All four attention projections (q,k,v,o) appear per layer"
+      - "All three SwiGLU MLP projections (gate, up, down) appear per layer"
+    preconditions:
+      - "n ≤ 256 (cookbook fixture invariant — micro-config only)"
+    postconditions:
+      - "result.len() == 3 + 9 * n"
+      - "result.iter().all(|s| s.ends_with(.weight))"
+      - "for i in 0..n: result.contains(model.layers.<i>.self_attn.q_proj.weight)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden) == forward_sim(seed, vocab, hidden)"
+    domain: "seed: u64; vocab: u32; hidden: u32"
+    codomain: "u32"
+    invariants:
+      - "LCG state evolution is deterministic per (seed, iteration_count)"
+      - "Different seeds produce different checksums for non-trivial vocab/hidden"
+    preconditions:
+      - "seed != 0 OR seed | 1 != 0  (LCG requires odd state)"
+      - "min(vocab, hidden) >= 1"
+    postconditions:
+      - "forward_sim(s, v, h) == forward_sim(s, v, h)  for all s, v, h"
+      - "forward_sim(42, 256, 64) != forward_sim(99, 256, 64)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/Llama.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture: Path, fmt: String. smoke(fixture, fmt) ↦ SmokeVerdict (no panic)"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Llama"
+  - type: invariant
+    property: "Tensor name count matches Llama topology"
+    formal: "expected_tensor_names(n).len() == 3 + 9n"
+    tolerance: 0.0
+    applies_to: tensor_validation
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.TensorValidation"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Llama"
+  - type: invariant
+    property: "Forward simulation is deterministic"
+    formal: "forward_sim(s, v, h) == forward_sim(s, v, h)"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.Llama.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.Llama"
+
+falsification_tests:
+  - id: FALSIFY-LLAMA-001
+    rule: "Smoke returns Ok for the bundled valid fixture"
+    prediction: "smoke('tests/fixtures/architectures/llama/config.json', 'safetensors') ↦ Ok with family=llama, layer_count=2"
+    test: "cargo test --example inference_llama_smoke -- happy_path_returns_ok_with_family"
+    if_fails: "Fixture format drifted, or extract_number lost JSON-key resolution"
+  - id: FALSIFY-LLAMA-002
+    rule: "Forward simulation is deterministic across two consecutive calls"
+    prediction: "Two smoke() invocations on the same fixture produce byte-equal SmokeVerdict::Ok values"
+    test: "cargo test --example inference_llama_smoke -- deterministic_checksum_across_runs"
+    if_fails: "Non-determinism leaked from RNG seeding, threading, or state mutation"
+  - id: FALSIFY-LLAMA-003
+    rule: "Tensor name layout matches Llama convention for n layers"
+    prediction: "expected_tensor_names(n).len() == 3 + 9n for n in {0, 2, 32}"
+    test: "cargo test --example inference_llama_smoke -- expected_tensor_count_per_layer_count"
+    if_fails: "Llama topology assumption broke (extra/missing per-layer tensor)"
+
+kani_harnesses:
+  - id: KANI-LLAMA-001
+    obligation: "Forward simulation is deterministic"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::llama_smoke_deterministic"
+  - id: KANI-LLAMA-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::llama_smoke_invalid_fixture_total"
+  - id: KANI-LLAMA-003
+    obligation: "Tensor name count matches Llama topology"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::llama_tensor_count_layout"
+
+qa_gate:
+  id: F-LLAMA-001
+  name: "Llama Smoke Inference Contract"
+  description: "Smoke load + tensor-name layout + deterministic forward simulation for the llama family"
+  checks:
+    - "loader_dispatch_returns_ok"
+    - "tensor_validation_passes"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass; SmokeVerdict::Ok for the bundled fixture"

@@ -1,0 +1,161 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "GPT-NeoX smoke inference invariants — config parse, use_parallel_residual discriminator (parallel attention+FFN), deterministic forward simulation"
+  references:
+    - "Black et al. (2022). GPT-NeoX-20B. arXiv:2204.06745"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - gptneox
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "Construct RecipeContext; resolve fixture path"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Read config.json; extract numeric fields and use_parallel_residual presence"
+      invariant: "Three numeric fields parsed; use_parallel_residual field present"
+    - name: forward
+      description: "Run LCG seeded forward simulation; parallel flag seeds accumulator"
+      invariant: "parallel_residual flag participates in checksum"
+    - name: verify
+      description: "Determinism across runs"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'gptneox'"
+      - "Missing use_parallel_residual surfaces LoaderUnavailable"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, parallel_residual, .. } => family == 'gptneox' AND parallel_residual matches body"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
+
+  parallel_residual_discriminator:
+    formula: "config without use_parallel_residual ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "GPT-NeoX runs attention + FFN in parallel; field declares the topology"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "if !body.contains('use_parallel_residual') then result is LoaderUnavailable"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, parallel) is deterministic and parallel-sensitive"
+    domain: "seed: u64; vocab,hidden: u32; parallel: bool"
+    codomain: "u32"
+    invariants:
+      - "parallel flag affects accumulator initialization"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, p) == forward_sim(s, v, h, p)"
+      - "forward_sim(42, 256, 64, true) != forward_sim(42, 256, 64, false)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/GptNeox.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
+  - type: invariant
+    property: "use_parallel_residual is required"
+    formal: "fixture without use_parallel_residual ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: parallel_residual_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ParallelResidualDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
+  - type: invariant
+    property: "Forward simulation is parallel-sensitive"
+    formal: "parallel flag participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.GptNeox.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.GptNeox"
+
+falsification_tests:
+  - id: FALSIFY-GPTNEOX-001
+    rule: "use_parallel_residual is required and recognized"
+    prediction: "parallel_residual == true for the bundled GPT-NeoX fixture"
+    test: "cargo test --example inference_gptneox_smoke -- happy_path_parallel_residual_true"
+    if_fails: "Field detection broke"
+  - id: FALSIFY-GPTNEOX-002
+    rule: "Forward simulation is parallel-sensitive"
+    prediction: "forward_sim with parallel=true != forward_sim with parallel=false"
+    test: "cargo test --example inference_gptneox_smoke -- parallel_flag_affects_checksum"
+    if_fails: "parallel dropped from accumulator seeding"
+  - id: FALSIFY-GPTNEOX-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_gptneox_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-GPTNEOX-001
+    obligation: "Forward simulation is parallel-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gptneox_smoke_deterministic"
+  - id: KANI-GPTNEOX-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gptneox_smoke_invalid_fixture_total"
+  - id: KANI-GPTNEOX-003
+    obligation: "use_parallel_residual is required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::gptneox_parallel_residual_present"
+
+qa_gate:
+  id: F-GPTNEOX-001
+  name: "GPT-NeoX Smoke Inference Contract"
+  description: "Smoke load + use_parallel_residual discriminator + deterministic forward simulation"
+  checks:
+    - "parallel_residual_present"
+    - "parallel_flag_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"

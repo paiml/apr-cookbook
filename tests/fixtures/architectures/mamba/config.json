@@ -1,0 +1,12 @@
+{
+  "architectures": ["MambaForCausalLM"],
+  "model_type": "mamba",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "vocab_size": 256,
+  "state_size": 16,
+  "conv_kernel": 4,
+  "expand": 2,
+  "use_bias": false,
+  "torch_dtype": "float32"
+}

@@ -52,6 +52,12 @@ struct_excessive_bools = "allow"
 too_many_lines = "allow"
 enum_variant_names = "allow"
 no_effect_underscore_binding = "allow"
+# Allowed for migrated alimentar examples (PMAT-066 centralize-cookbooks).
+# These match style decisions in the upstream alimentar repo where the examples
+# originated — flipping them would require touching every migrated file.
+cast_lossless = "allow"
+float_cmp = "allow"
+for_kv_map = "allow"
 
 [profile.release]
 lto = "thin"
@@ -74,12 +80,15 @@ clap = { version = "4", features = ["derive"] }
 # Serialization
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+# YAML parsing for deployment-stack recipe wrappers (PMAT-065)
+serde_yaml = "0.9"
 
 # Error handling
 thiserror = "1"
 
 # Recipe infrastructure
 rand = { version = "0.8", features = ["std_rng"] }
+regex = "1"
 tempfile = "3"
 
 # Compression (for Lambda packaging)
@@ -90,6 +99,8 @@ blake3 = "1"
 lz4_flex = "0.11.3"
 zstd = "0.13.3"
 ed25519-dalek = "2.1.1"
+# Rayon for the MoE dispatch parallelism bench (PMAT-085)
+rayon = "1.10"
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
@@ -108,6 +119,21 @@ memmap2 = "0.9"
 # In-process contract validation (replaces external `pv` dependency)
 # package `aprender-contracts`, lib name `provable_contracts`
 aprender-contracts = "0.31.2"
+# Data loading (PMAT-066 centralize-cookbooks: ex-alimentar examples)
+# package `aprender-data`, lib name `alimentar` — use directly, no deprecation shim
+alimentar = { version = "0.31.2", package = "aprender-data", features = ["doctest"] }
+arrow = { version = "57", default-features = false, features = ["prettyprint", "ipc"] }
+# Note: serde_yaml moved to [dependencies] by PMAT-065 (validate_recipe in lib);
+# PMAT-067's visualization validator uses the same dep transitively.
+
+# Sister crates (PMAT-073 expand-cookbooks: 6 crates, 18 recipes minimum).
+# Lib names differ from package names — see subcrate-coverage.md for usage.
+aprender-mcp = "0.31.2"               # lib `aprender_mcp`
+aprender-tsp = "0.31.2"               # lib `aprender_tsp`
+aprender-shell = "0.31.2"             # lib `aprender_shell`
+aprender-monte-carlo = "0.31.2"       # lib `aprender_monte_carlo`
+aprender-cgp = "0.31.2"               # lib `cgp` (CUDA feature opt-in via local cargo features)
+aprender-contracts-macros = "0.31.2"  # lib `provable_contracts_macros` (proc-macro)
 
 # ---------------------------------------------------------------------------
 # Local-development patch: point the four APR-MONO deps at a co-checked-out
@@ -122,8 +148,16 @@ aprender-contracts = "0.31.2"
 # aprender-contracts = { path = "../aprender/crates/aprender-contracts" }
 
 [features]
-default = []
+default = ["doctest"]
 encryption = ["aprender/format-encryption"]
+# doctest enables alimentar's doctest module (used by prose_detection example).
+# In default by design — the cookbook always wants alimentar's full surface.
+doctest = []
+# Empty marker features for alimentar example cfg() guards. The examples were
+# written against an alimentar Cargo with optional `shuffle` and `repl` features.
+# Cookbook always builds them in, so the cfg gates are no-ops here.
+shuffle = []
+repl = []
 full = ["encryption"]
 
 # --- Examples ---
@@ -1535,3 +1569,6296 @@ path = "examples/cli/validate_fix_suggestions.rs"
 [[example]]
 name = "validate_batch"
 path = "examples/cli/validate_batch.rs"
+
+# --- Deployment Stacks (PMAT-065 centralize-cookbooks, ex-sovereign-ai-cookbook) ---
+
+[[example]]
+name = "alimentar_ingest"
+path = "examples/deployment-stacks/alimentar_ingest.rs"
+
+[[example]]
+name = "apr_inference_server"
+path = "examples/deployment-stacks/apr_inference_server.rs"
+
+[[example]]
+name = "batuta_agent"
+path = "examples/deployment-stacks/batuta_agent.rs"
+
+[[example]]
+name = "entrenar_train"
+path = "examples/deployment-stacks/entrenar_train.rs"
+
+[[example]]
+name = "jetson_edge_base"
+path = "examples/deployment-stacks/jetson_edge_base.rs"
+
+[[example]]
+name = "pacha_registry"
+path = "examples/deployment-stacks/pacha_registry.rs"
+
+[[example]]
+name = "pepita_sandbox"
+path = "examples/deployment-stacks/pepita_sandbox.rs"
+
+[[example]]
+name = "realizar_serve"
+path = "examples/deployment-stacks/realizar_serve.rs"
+
+[[example]]
+name = "renacer_observability"
+path = "examples/deployment-stacks/renacer_observability.rs"
+
+[[example]]
+name = "repartir_worker"
+path = "examples/deployment-stacks/repartir_worker.rs"
+
+[[example]]
+name = "sovereign_ai_stack"
+path = "examples/deployment-stacks/sovereign_ai_stack.rs"
+
+[[example]]
+name = "trueno_db_analytics"
+path = "examples/deployment-stacks/trueno_db_analytics.rs"
+
+[[example]]
+name = "trueno_rag_pipeline"
+path = "examples/deployment-stacks/trueno_rag_pipeline.rs"
+
+[[example]]
+name = "whisper_apr_asr"
+path = "examples/deployment-stacks/whisper_apr_asr.rs"
+
+# --- Data Loading (PMAT-066 centralize-cookbooks, ex-alimentar) ---
+
+[[example]]
+name = "basic_loading"
+path = "examples/data-loading/basic_loading.rs"
+
+[[example]]
+name = "cli_batch_commands"
+path = "examples/data-loading/cli_batch_commands.rs"
+
+[[example]]
+name = "dataloader_batching"
+path = "examples/data-loading/dataloader_batching.rs"
+
+[[example]]
+name = "doctest_extraction"
+path = "examples/data-loading/doctest_extraction.rs"
+
+[[example]]
+name = "drift_detection"
+path = "examples/data-loading/drift_detection.rs"
+
+[[example]]
+name = "federated_split"
+path = "examples/data-loading/federated_split.rs"
+
+[[example]]
+name = "hub_publishing"
+path = "examples/data-loading/hub_publishing.rs"
+
+[[example]]
+name = "prose_detection"
+path = "examples/data-loading/prose_detection.rs"
+
+[[example]]
+name = "quality_check"
+path = "examples/data-loading/quality_check.rs"
+
+[[example]]
+name = "registry_publish"
+path = "examples/data-loading/registry_publish.rs"
+
+[[example]]
+name = "repl_commands"
+path = "examples/data-loading/repl_commands.rs"
+
+[[example]]
+name = "repl_completer"
+path = "examples/data-loading/repl_completer.rs"
+
+[[example]]
+name = "repl_display_config"
+path = "examples/data-loading/repl_display_config.rs"
+
+[[example]]
+name = "repl_health_status"
+path = "examples/data-loading/repl_health_status.rs"
+
+[[example]]
+name = "repl_session"
+path = "examples/data-loading/repl_session.rs"
+
+[[example]]
+name = "streaming_large"
+path = "examples/data-loading/streaming_large.rs"
+
+[[example]]
+name = "transforms_pipeline"
+path = "examples/data-loading/transforms_pipeline.rs"
+
+[[example]]
+name = "tui_viewer"
+path = "examples/data-loading/tui_viewer.rs"
+
+# --- Visualization (PMAT-067 centralize-cookbooks, ex-presentar) ---
+
+[[example]]
+name = "load_visualization"
+path = "examples/visualization/load_visualization.rs"
+
+# --- aprender-mcp embedded recipes (PMAT-079 expand-cookbooks) ---
+
+[[example]]
+name = "mcp_embedded_initialize_handshake"
+path = "examples/mcp/mcp_embedded_initialize_handshake.rs"
+
+[[example]]
+name = "mcp_embedded_tools_list_discovery"
+path = "examples/mcp/mcp_embedded_tools_list_discovery.rs"
+
+[[example]]
+name = "mcp_embedded_protocol_invariants"
+path = "examples/mcp/mcp_embedded_protocol_invariants.rs"
+
+# --- aprender-monte-carlo recipes (PMAT-082 expand-cookbooks) ---
+
+[[example]]
+name = "mc_stock_price_simulation_gbm"
+path = "examples/monte-carlo/mc_stock_price_simulation_gbm.rs"
+
+[[example]]
+name = "mc_value_at_risk_historical_vs_parametric"
+path = "examples/monte-carlo/mc_value_at_risk_historical_vs_parametric.rs"
+
+[[example]]
+name = "mc_business_revenue_forecast"
+path = "examples/monte-carlo/mc_business_revenue_forecast.rs"
+
+# --- aprender-contracts-macros recipes (PMAT-084 expand-cookbooks) ---
+
+[[example]]
+name = "contracts_macros_attribute_basic"
+path = "examples/contracts-macros/contracts_macros_attribute_basic.rs"
+
+[[example]]
+name = "contracts_macros_env_key_convention"
+path = "examples/contracts-macros/contracts_macros_env_key_convention.rs"
+
+[[example]]
+name = "contracts_macros_runtime_validator_bridge"
+path = "examples/contracts-macros/contracts_macros_runtime_validator_bridge.rs"
+
+# --- aprender-tsp recipes (PMAT-080 expand-cookbooks) ---
+
+[[example]]
+name = "tsp_solve_with_tabu"
+path = "examples/tsp/tsp_solve_with_tabu.rs"
+
+[[example]]
+name = "tsp_distance_matrix_explicit"
+path = "examples/tsp/tsp_distance_matrix_explicit.rs"
+
+[[example]]
+name = "tsp_compare_tabu_vs_genetic"
+path = "examples/tsp/tsp_compare_tabu_vs_genetic.rs"
+
+# --- aprender-cgp recipes (PMAT-083 expand-cookbooks) ---
+
+[[example]]
+name = "cgp_regression_detector_baseline_vs_current"
+path = "examples/cgp/cgp_regression_detector_baseline_vs_current.rs"
+
+[[example]]
+name = "cgp_roofline_classify_kernel"
+path = "examples/cgp/cgp_roofline_classify_kernel.rs"
+
+[[example]]
+name = "cgp_roofline_ridge_point_per_precision"
+path = "examples/cgp/cgp_roofline_ridge_point_per_precision.rs"
+
+# --- aprender-shell recipes (PMAT-081 expand-cookbooks) ---
+
+[[example]]
+name = "shell_history_parse_zsh"
+path = "examples/shell/shell_history_parse_zsh.rs"
+
+[[example]]
+name = "shell_corpus_from_string"
+path = "examples/shell/shell_corpus_from_string.rs"
+
+[[example]]
+name = "shell_trie_prefix_completion"
+path = "examples/shell/shell_trie_prefix_completion.rs"
+
+# --- apr code agentic recipes (PMAT-074 expand-cookbooks) ---
+
+[[example]]
+name = "code_custom_agent_definition"
+path = "examples/code/code_custom_agent_definition.rs"
+
+[[example]]
+name = "code_skill_discovery"
+path = "examples/code/code_skill_discovery.rs"
+
+[[example]]
+name = "code_hook_session_start"
+path = "examples/code/code_hook_session_start.rs"
+
+[[example]]
+name = "code_mcp_client_config"
+path = "examples/code/code_mcp_client_config.rs"
+
+[[example]]
+name = "code_slash_command_extension"
+path = "examples/code/code_slash_command_extension.rs"
+
+[[example]]
+name = "code_subagent_spawn_payload"
+path = "examples/code/code_subagent_spawn_payload.rs"
+
+[[example]]
+name = "code_worktree_isolation_permission_mode"
+path = "examples/code/code_worktree_isolation_permission_mode.rs"
+# --- apr serve recipes (PMAT-077 expand-cookbooks) ---
+
+[[example]]
+name = "serve_anthropic_messages_api_drop_in"
+path = "examples/serve/serve_anthropic_messages_api_drop_in.rs"
+
+[[example]]
+name = "serve_plan_hf_dryrun_no_weights"
+path = "examples/serve/serve_plan_hf_dryrun_no_weights.rs"
+# --- GPU/CPU oracle bisection (PMAT-075 expand-cookbooks) ---
+
+[[example]]
+name = "cli_trace_save_tensor_layer0"
+path = "examples/cli/cli_trace_save_tensor_layer0.rs"
+
+[[example]]
+name = "cli_diff_values_aprt_stage"
+path = "examples/cli/cli_diff_values_aprt_stage.rs"
+
+[[example]]
+name = "analysis_cpu_vs_gpu_parity_gate"
+path = "examples/analysis/analysis_cpu_vs_gpu_parity_gate.rs"
+# --- apr publish end-to-end (PMAT-076 expand-cookbooks) ---
+
+[[example]]
+name = "cli_publish_manifest_full"
+path = "examples/cli/cli_publish_manifest_full.rs"
+
+[[example]]
+name = "cli_validate_manifest_safetensors_dtype"
+path = "examples/cli/cli_validate_manifest_safetensors_dtype.rs"
+
+[[example]]
+name = "cli_publish_parent_chain_termination"
+path = "examples/cli/cli_publish_parent_chain_termination.rs"
+# --- MCP M5 transports + notifications (PMAT-078 expand-cookbooks) ---
+
+[[example]]
+name = "mcp_sse_event_envelope"
+path = "examples/mcp/mcp_sse_event_envelope.rs"
+
+[[example]]
+name = "mcp_websocket_frame_envelope"
+path = "examples/mcp/mcp_websocket_frame_envelope.rs"
+
+[[example]]
+name = "mcp_notification_progress_token"
+path = "examples/mcp/mcp_notification_progress_token.rs"
+
+[[example]]
+name = "mcp_byte_parity_dispatcher_swap"
+path = "examples/mcp/mcp_byte_parity_dispatcher_swap.rs"
+# --- Tier 3 perf benches (PMAT-085 expand-cookbooks) ---
+
+[[example]]
+name = "acceleration_moe_rayon_dispatch_bench"
+path = "examples/acceleration/acceleration_moe_rayon_dispatch_bench.rs"
+
+[[example]]
+name = "acceleration_mmap_per_tensor_diff_bench"
+path = "examples/acceleration/acceleration_mmap_per_tensor_diff_bench.rs"
+
+[[example]]
+name = "bundle_streaming_q4k_large_model"
+path = "examples/bundling/bundle_streaming_q4k_large_model.rs"
+
+[[example]]
+name = "conversion_gguf_legacy_quant_fallback"
+path = "examples/conversion/conversion_gguf_legacy_quant_fallback.rs"
+
+[[example]]
+name = "inference_qwen3_moe_numerical_parity_smoke"
+path = "examples/inference/inference_qwen3_moe_numerical_parity_smoke.rs"
+
+# --- Tier 4 authoring patterns + distill (PMAT-086 expand-cookbooks) ---
+
+[[example]]
+name = "analysis_contract_algorithm_binding_pattern"
+path = "examples/analysis/analysis_contract_algorithm_binding_pattern.rs"
+
+[[example]]
+name = "analysis_pv_check_parity_authoring"
+path = "examples/analysis/analysis_pv_check_parity_authoring.rs"
+
+[[example]]
+name = "analysis_json_schema_draft7_meta_validation"
+path = "examples/analysis/analysis_json_schema_draft7_meta_validation.rs"
+
+[[example]]
+name = "distill_against_contract_v1"
+path = "examples/distillation/distill_against_contract_v1.rs"
+
+# --- apr stamp + compare-hf + check (PMAT-088 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_stamp_provenance_basic"
+path = "examples/cli/cli_stamp_provenance_basic.rs"
+
+[[example]]
+name = "cli_stamp_preserves_tensor_bytes"
+path = "examples/cli/cli_stamp_preserves_tensor_bytes.rs"
+
+[[example]]
+name = "cli_stamp_spdx_validation"
+path = "examples/cli/cli_stamp_spdx_validation.rs"
+
+[[example]]
+name = "cli_compare_hf_tensor_filter"
+path = "examples/cli/cli_compare_hf_tensor_filter.rs"
+
+[[example]]
+name = "cli_compare_hf_threshold_gate"
+path = "examples/cli/cli_compare_hf_threshold_gate.rs"
+
+[[example]]
+name = "cli_compare_hf_offline_safety"
+path = "examples/cli/cli_compare_hf_offline_safety.rs"
+
+[[example]]
+name = "cli_check_pipeline_integrity_smoke"
+path = "examples/cli/cli_check_pipeline_integrity_smoke.rs"
+
+[[example]]
+name = "cli_check_skip_contract_diagnostic"
+path = "examples/cli/cli_check_skip_contract_diagnostic.rs"
+
+[[example]]
+name = "cli_check_json_output_schema"
+path = "examples/cli/cli_check_json_output_schema.rs"
+
+# --- FP8 / NF4 / GPTQ lint coverage (PMAT-089 expand-cookbooks followup) ---
+
+[[example]]
+name = "fp8_lint_happy"
+path = "examples/lint/fp8_lint_happy.rs"
+
+[[example]]
+name = "fp8_lint_saturation_violation"
+path = "examples/lint/fp8_lint_saturation_violation.rs"
+
+[[example]]
+name = "fp8_lint_capability_gate"
+path = "examples/lint/fp8_lint_capability_gate.rs"
+
+[[example]]
+name = "nf4_lint_happy"
+path = "examples/lint/nf4_lint_happy.rs"
+
+[[example]]
+name = "nf4_lint_codebook_violation"
+path = "examples/lint/nf4_lint_codebook_violation.rs"
+
+[[example]]
+name = "nf4_lint_double_quant_parity"
+path = "examples/lint/nf4_lint_double_quant_parity.rs"
+
+[[example]]
+name = "gptq_lint_happy"
+path = "examples/lint/gptq_lint_happy.rs"
+
+[[example]]
+name = "gptq_lint_cosine_violation"
+path = "examples/lint/gptq_lint_cosine_violation.rs"
+
+[[example]]
+name = "gptq_lint_flag_combinations"
+path = "examples/lint/gptq_lint_flag_combinations.rs"
+
+# --- registry / cache lint coverage (PMAT-090 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_quota_lint_happy"
+path = "examples/lint/registry_quota_lint_happy.rs"
+
+[[example]]
+name = "registry_quota_lint_atomic_violation"
+path = "examples/lint/registry_quota_lint_atomic_violation.rs"
+
+[[example]]
+name = "registry_quota_lint_tenant_overage"
+path = "examples/lint/registry_quota_lint_tenant_overage.rs"
+
+[[example]]
+name = "rm_gc_lint_happy"
+path = "examples/lint/rm_gc_lint_happy.rs"
+
+[[example]]
+name = "rm_gc_lint_orphan_detection"
+path = "examples/lint/rm_gc_lint_orphan_detection.rs"
+
+[[example]]
+name = "rm_gc_lint_refcount_conservation"
+path = "examples/lint/rm_gc_lint_refcount_conservation.rs"
+
+[[example]]
+name = "shared_cache_lint_happy"
+path = "examples/lint/shared_cache_lint_happy.rs"
+
+[[example]]
+name = "shared_cache_lint_dedup_audit"
+path = "examples/lint/shared_cache_lint_dedup_audit.rs"
+
+[[example]]
+name = "shared_cache_lint_permission_matrix"
+path = "examples/lint/shared_cache_lint_permission_matrix.rs"
+
+# --- ollama-tools / typical-p / imatrix lint coverage (PMAT-091 expand-cookbooks followup) ---
+
+[[example]]
+name = "ollama_tools_lint_happy"
+path = "examples/lint/ollama_tools_lint_happy.rs"
+
+[[example]]
+name = "ollama_tools_lint_allowlist_gate"
+path = "examples/lint/ollama_tools_lint_allowlist_gate.rs"
+
+[[example]]
+name = "ollama_tools_lint_streaming_ndjson"
+path = "examples/lint/ollama_tools_lint_streaming_ndjson.rs"
+
+[[example]]
+name = "typical_p_lint_happy"
+path = "examples/lint/typical_p_lint_happy.rs"
+
+[[example]]
+name = "typical_p_lint_entropy_truncation"
+path = "examples/lint/typical_p_lint_entropy_truncation.rs"
+
+[[example]]
+name = "typical_p_lint_min_keep_floor"
+path = "examples/lint/typical_p_lint_min_keep_floor.rs"
+
+[[example]]
+name = "imatrix_lint_happy"
+path = "examples/lint/imatrix_lint_happy.rs"
+
+[[example]]
+name = "imatrix_lint_nan_detection"
+path = "examples/lint/imatrix_lint_nan_detection.rs"
+
+[[example]]
+name = "imatrix_lint_corpus_entropy"
+path = "examples/lint/imatrix_lint_corpus_entropy.rs"
+
+# --- embeddings / unified-search / grad-norm lint coverage (PMAT-092 expand-cookbooks followup) ---
+
+[[example]]
+name = "embeddings_lint_happy"
+path = "examples/lint/embeddings_lint_happy.rs"
+
+[[example]]
+name = "embeddings_lint_l2_norm_check"
+path = "examples/lint/embeddings_lint_l2_norm_check.rs"
+
+[[example]]
+name = "embeddings_lint_dim_consistency"
+path = "examples/lint/embeddings_lint_dim_consistency.rs"
+
+[[example]]
+name = "unified_search_lint_happy"
+path = "examples/lint/unified_search_lint_happy.rs"
+
+[[example]]
+name = "unified_search_lint_rrf_recompute"
+path = "examples/lint/unified_search_lint_rrf_recompute.rs"
+
+[[example]]
+name = "unified_search_lint_offline_consistency"
+path = "examples/lint/unified_search_lint_offline_consistency.rs"
+
+[[example]]
+name = "grad_norm_happy"
+path = "examples/lint/grad_norm_happy.rs"
+
+[[example]]
+name = "grad_norm_spike_detection"
+path = "examples/lint/grad_norm_spike_detection.rs"
+
+[[example]]
+name = "grad_norm_divergence_run"
+path = "examples/lint/grad_norm_divergence_run.rs"
+
+# --- oracle / probar / qa coverage (PMAT-093 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_oracle_family_introspection"
+path = "examples/cli/cli_oracle_family_introspection.rs"
+
+[[example]]
+name = "cli_oracle_compliance_gate"
+path = "examples/cli/cli_oracle_compliance_gate.rs"
+
+[[example]]
+name = "cli_oracle_size_constraint_filter"
+path = "examples/cli/cli_oracle_size_constraint_filter.rs"
+
+[[example]]
+name = "cli_probar_export_envelope"
+path = "examples/cli/cli_probar_export_envelope.rs"
+
+[[example]]
+name = "cli_probar_golden_diff"
+path = "examples/cli/cli_probar_golden_diff.rs"
+
+[[example]]
+name = "cli_probar_layer_pattern_filter"
+path = "examples/cli/cli_probar_layer_pattern_filter.rs"
+
+[[example]]
+name = "cli_qa_assertion_envelope"
+path = "examples/cli/cli_qa_assertion_envelope.rs"
+
+[[example]]
+name = "cli_qa_warmup_iteration_budget"
+path = "examples/cli/cli_qa_warmup_iteration_budget.rs"
+
+[[example]]
+name = "cli_qa_safetensors_parity_required"
+path = "examples/cli/cli_qa_safetensors_parity_required.rs"
+
+# --- cbtop / qualify / rosetta coverage (PMAT-094 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_cbtop_ci_threshold_gate"
+path = "examples/cli/cli_cbtop_ci_threshold_gate.rs"
+
+[[example]]
+name = "cli_cbtop_speculative_decoding_envelope"
+path = "examples/cli/cli_cbtop_speculative_decoding_envelope.rs"
+
+[[example]]
+name = "cli_cbtop_headless_json_schema"
+path = "examples/cli/cli_cbtop_headless_json_schema.rs"
+
+[[example]]
+name = "cli_qualify_tier_progression"
+path = "examples/cli/cli_qualify_tier_progression.rs"
+
+[[example]]
+name = "cli_qualify_skip_list_filter"
+path = "examples/cli/cli_qualify_skip_list_filter.rs"
+
+[[example]]
+name = "cli_qualify_timeout_budget"
+path = "examples/cli/cli_qualify_timeout_budget.rs"
+
+[[example]]
+name = "cli_rosetta_chain_planner"
+path = "examples/cli/cli_rosetta_chain_planner.rs"
+
+[[example]]
+name = "cli_rosetta_round_trip_verify"
+path = "examples/cli/cli_rosetta_round_trip_verify.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_stats"
+path = "examples/cli/cli_rosetta_fingerprint_stats.rs"
+
+# --- diagnose / decrypt / tokenize coverage (PMAT-095 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_diagnose_five_whys_chain"
+path = "examples/cli/cli_diagnose_five_whys_chain.rs"
+
+[[example]]
+name = "cli_diagnose_jsonl_corpus_validator"
+path = "examples/cli/cli_diagnose_jsonl_corpus_validator.rs"
+
+[[example]]
+name = "cli_diagnose_model_size_inference"
+path = "examples/cli/cli_diagnose_model_size_inference.rs"
+
+[[example]]
+name = "cli_decrypt_invocation_envelope"
+path = "examples/cli/cli_decrypt_invocation_envelope.rs"
+
+[[example]]
+name = "cli_decrypt_key_format_validation"
+path = "examples/cli/cli_decrypt_key_format_validation.rs"
+
+[[example]]
+name = "cli_decrypt_aead_tag_verification"
+path = "examples/cli/cli_decrypt_aead_tag_verification.rs"
+
+[[example]]
+name = "cli_tokenize_plan_estimator"
+path = "examples/cli/cli_tokenize_plan_estimator.rs"
+
+[[example]]
+name = "cli_tokenize_hf_import_validation"
+path = "examples/cli/cli_tokenize_hf_import_validation.rs"
+
+[[example]]
+name = "cli_tokenize_corpus_shard_planner"
+path = "examples/cli/cli_tokenize_corpus_shard_planner.rs"
+
+# --- showcase / ptx-map / rosetta compare-inference (PMAT-096 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_showcase_tier_baseline_matrix"
+path = "examples/cli/cli_showcase_tier_baseline_matrix.rs"
+
+[[example]]
+name = "cli_showcase_step_dispatcher"
+path = "examples/cli/cli_showcase_step_dispatcher.rs"
+
+[[example]]
+name = "cli_showcase_runs_floor_enforcement"
+path = "examples/cli/cli_showcase_runs_floor_enforcement.rs"
+
+[[example]]
+name = "cli_ptx_map_kernel_filter"
+path = "examples/cli/cli_ptx_map_kernel_filter.rs"
+
+[[example]]
+name = "cli_ptx_map_reverse_lookup"
+path = "examples/cli/cli_ptx_map_reverse_lookup.rs"
+
+[[example]]
+name = "cli_ptx_map_prefill_vs_decode"
+path = "examples/cli/cli_ptx_map_prefill_vs_decode.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_envelope"
+path = "examples/cli/cli_rosetta_compare_inference_envelope.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_logit_diff"
+path = "examples/cli/cli_rosetta_compare_inference_logit_diff.rs"
+
+[[example]]
+name = "cli_rosetta_compare_inference_temperature_modes"
+path = "examples/cli/cli_rosetta_compare_inference_temperature_modes.rs"
+
+# --- rosetta diff-tensors / validate-stats / fingerprint extension (PMAT-097 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_rosetta_diff_tensors_layout_check"
+path = "examples/cli/cli_rosetta_diff_tensors_layout_check.rs"
+
+[[example]]
+name = "cli_rosetta_diff_tensors_value_sampler"
+path = "examples/cli/cli_rosetta_diff_tensors_value_sampler.rs"
+
+[[example]]
+name = "cli_rosetta_diff_tensors_pad_token_signal"
+path = "examples/cli/cli_rosetta_diff_tensors_pad_token_signal.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_threshold_gate"
+path = "examples/cli/cli_rosetta_validate_stats_threshold_gate.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_reference_or_fingerprints"
+path = "examples/cli/cli_rosetta_validate_stats_reference_or_fingerprints.rs"
+
+[[example]]
+name = "cli_rosetta_validate_stats_per_tensor_report"
+path = "examples/cli/cli_rosetta_validate_stats_per_tensor_report.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_filter_pattern"
+path = "examples/cli/cli_rosetta_fingerprint_filter_pattern.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_diff_mode"
+path = "examples/cli/cli_rosetta_fingerprint_diff_mode.rs"
+
+[[example]]
+name = "cli_rosetta_fingerprint_json_envelope"
+path = "examples/cli/cli_rosetta_fingerprint_json_envelope.rs"
+
+# --- rosetta inspect/convert + publish extension (PMAT-098 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_rosetta_inspect_format_detector"
+path = "examples/cli/cli_rosetta_inspect_format_detector.rs"
+
+[[example]]
+name = "cli_rosetta_inspect_hexdump_window"
+path = "examples/cli/cli_rosetta_inspect_hexdump_window.rs"
+
+[[example]]
+name = "cli_rosetta_inspect_tensor_table"
+path = "examples/cli/cli_rosetta_inspect_tensor_table.rs"
+
+[[example]]
+name = "cli_rosetta_convert_quantize_envelope"
+path = "examples/cli/cli_rosetta_convert_quantize_envelope.rs"
+
+[[example]]
+name = "cli_rosetta_convert_extension_inference"
+path = "examples/cli/cli_rosetta_convert_extension_inference.rs"
+
+[[example]]
+name = "cli_rosetta_convert_external_tokenizer"
+path = "examples/cli/cli_rosetta_convert_external_tokenizer.rs"
+
+[[example]]
+name = "cli_publish_repo_id_validator"
+path = "examples/cli/cli_publish_repo_id_validator.rs"
+
+[[example]]
+name = "cli_publish_pipeline_tag_allowlist"
+path = "examples/cli/cli_publish_pipeline_tag_allowlist.rs"
+
+[[example]]
+name = "cli_publish_dry_run_diff"
+path = "examples/cli/cli_publish_dry_run_diff.rs"
+
+# --- import / explain / export extension (PMAT-099 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_import_strict_mode_envelope"
+path = "examples/cli/cli_import_strict_mode_envelope.rs"
+
+[[example]]
+name = "cli_import_provenance_chain_enforcement"
+path = "examples/cli/cli_import_provenance_chain_enforcement.rs"
+
+[[example]]
+name = "cli_import_no_config_inference_risk"
+path = "examples/cli/cli_import_no_config_inference_risk.rs"
+
+[[example]]
+name = "cli_explain_kernel_dispatch_pipeline"
+path = "examples/cli/cli_explain_kernel_dispatch_pipeline.rs"
+
+[[example]]
+name = "cli_explain_proof_status_aggregator"
+path = "examples/cli/cli_explain_proof_status_aggregator.rs"
+
+[[example]]
+name = "cli_explain_error_code_lookup"
+path = "examples/cli/cli_explain_error_code_lookup.rs"
+
+[[example]]
+name = "cli_export_format_allowlist"
+path = "examples/cli/cli_export_format_allowlist.rs"
+
+[[example]]
+name = "cli_export_batch_csv_planner"
+path = "examples/cli/cli_export_batch_csv_planner.rs"
+
+[[example]]
+name = "cli_export_plan_mode_envelope"
+path = "examples/cli/cli_export_plan_mode_envelope.rs"
+
+# --- canary / hex / flow extension (PMAT-100 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_canary_create_envelope"
+path = "examples/cli/cli_canary_create_envelope.rs"
+
+[[example]]
+name = "cli_canary_check_verdict"
+path = "examples/cli/cli_canary_check_verdict.rs"
+
+[[example]]
+name = "cli_canary_directory_layout"
+path = "examples/cli/cli_canary_directory_layout.rs"
+
+[[example]]
+name = "cli_hex_offset_parser"
+path = "examples/cli/cli_hex_offset_parser.rs"
+
+[[example]]
+name = "cli_hex_slice_range_parser"
+path = "examples/cli/cli_hex_slice_range_parser.rs"
+
+[[example]]
+name = "cli_hex_view_mode_dispatcher"
+path = "examples/cli/cli_hex_view_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_flow_component_filter"
+path = "examples/cli/cli_flow_component_filter.rs"
+
+[[example]]
+name = "cli_flow_dot_renderer"
+path = "examples/cli/cli_flow_dot_renderer.rs"
+
+[[example]]
+name = "cli_flow_layer_aggregation"
+path = "examples/cli/cli_flow_layer_aggregation.rs"
+
+# --- monitor / pull / debug extension (PMAT-101 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_monitor_refresh_throttle"
+path = "examples/cli/cli_monitor_refresh_throttle.rs"
+
+[[example]]
+name = "cli_monitor_format_dispatcher"
+path = "examples/cli/cli_monitor_format_dispatcher.rs"
+
+[[example]]
+name = "cli_monitor_metrics_envelope"
+path = "examples/cli/cli_monitor_metrics_envelope.rs"
+
+[[example]]
+name = "cli_pull_alias_resolver"
+path = "examples/cli/cli_pull_alias_resolver.rs"
+
+[[example]]
+name = "cli_pull_dataset_glob_filter"
+path = "examples/cli/cli_pull_dataset_glob_filter.rs"
+
+[[example]]
+name = "cli_pull_revision_pin_resolver"
+path = "examples/cli/cli_pull_revision_pin_resolver.rs"
+
+[[example]]
+name = "cli_debug_string_extractor"
+path = "examples/cli/cli_debug_string_extractor.rs"
+
+[[example]]
+name = "cli_debug_drama_classifier"
+path = "examples/cli/cli_debug_drama_classifier.rs"
+
+[[example]]
+name = "cli_debug_limit_truncator"
+path = "examples/cli/cli_debug_limit_truncator.rs"
+
+# --- profile / experiment / runs extension (PMAT-102 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_profile_naive_detection_threshold"
+path = "examples/cli/cli_profile_naive_detection_threshold.rs"
+
+[[example]]
+name = "cli_profile_format_dispatcher"
+path = "examples/cli/cli_profile_format_dispatcher.rs"
+
+[[example]]
+name = "cli_profile_perf_grade_thresholds"
+path = "examples/cli/cli_profile_perf_grade_thresholds.rs"
+
+[[example]]
+name = "cli_experiment_view_run_filter"
+path = "examples/cli/cli_experiment_view_run_filter.rs"
+
+[[example]]
+name = "cli_experiment_view_loss_curve_render"
+path = "examples/cli/cli_experiment_view_loss_curve_render.rs"
+
+[[example]]
+name = "cli_experiment_param_diff_renderer"
+path = "examples/cli/cli_experiment_param_diff_renderer.rs"
+
+[[example]]
+name = "cli_runs_ls_sparkline_renderer"
+path = "examples/cli/cli_runs_ls_sparkline_renderer.rs"
+
+[[example]]
+name = "cli_runs_show_metric_summary"
+path = "examples/cli/cli_runs_show_metric_summary.rs"
+
+[[example]]
+name = "cli_runs_diff_two_runs"
+path = "examples/cli/cli_runs_diff_two_runs.rs"
+
+# --- encrypt / registry-aliases / eval extension (PMAT-103 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_encrypt_passphrase_strength"
+path = "examples/cli/cli_encrypt_passphrase_strength.rs"
+
+[[example]]
+name = "cli_encrypt_keystream_envelope"
+path = "examples/cli/cli_encrypt_keystream_envelope.rs"
+
+[[example]]
+name = "cli_encrypt_force_overwrite_policy"
+path = "examples/cli/cli_encrypt_force_overwrite_policy.rs"
+
+[[example]]
+name = "cli_registry_aliases_yaml_loader"
+path = "examples/cli/cli_registry_aliases_yaml_loader.rs"
+
+[[example]]
+name = "cli_registry_aliases_json_envelope"
+path = "examples/cli/cli_registry_aliases_json_envelope.rs"
+
+[[example]]
+name = "cli_registry_aliases_collision_detection"
+path = "examples/cli/cli_registry_aliases_collision_detection.rs"
+
+[[example]]
+name = "cli_eval_perplexity_threshold_gate"
+path = "examples/cli/cli_eval_perplexity_threshold_gate.rs"
+
+[[example]]
+name = "cli_eval_dataset_dispatcher"
+path = "examples/cli/cli_eval_dataset_dispatcher.rs"
+
+[[example]]
+name = "cli_eval_pass_at_k_temperature_pairing"
+path = "examples/cli/cli_eval_pass_at_k_temperature_pairing.rs"
+
+# --- pretrain / finetune / prune extension (PMAT-104 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_pretrain_divergence_guard"
+path = "examples/cli/cli_pretrain_divergence_guard.rs"
+
+[[example]]
+name = "cli_pretrain_mode_dispatcher"
+path = "examples/cli/cli_pretrain_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_pretrain_run_dir_layout"
+path = "examples/cli/cli_pretrain_run_dir_layout.rs"
+
+[[example]]
+name = "cli_finetune_method_picker"
+path = "examples/cli/cli_finetune_method_picker.rs"
+
+[[example]]
+name = "cli_finetune_checkpoint_format_csv"
+path = "examples/cli/cli_finetune_checkpoint_format_csv.rs"
+
+[[example]]
+name = "cli_finetune_merge_mode_envelope"
+path = "examples/cli/cli_finetune_merge_mode_envelope.rs"
+
+[[example]]
+name = "cli_prune_method_validator"
+path = "examples/cli/cli_prune_method_validator.rs"
+
+[[example]]
+name = "cli_prune_remove_layers_parser"
+path = "examples/cli/cli_prune_remove_layers_parser.rs"
+
+[[example]]
+name = "cli_prune_target_ratio_band"
+path = "examples/cli/cli_prune_target_ratio_band.rs"
+
+# --- serve / quantize / merge extension (PMAT-105 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_serve_plan_capacity_estimator"
+path = "examples/cli/cli_serve_plan_capacity_estimator.rs"
+
+[[example]]
+name = "cli_serve_run_port_validator"
+path = "examples/cli/cli_serve_run_port_validator.rs"
+
+[[example]]
+name = "cli_serve_run_endpoint_router"
+path = "examples/cli/cli_serve_run_endpoint_router.rs"
+
+[[example]]
+name = "cli_quantize_scheme_size_predictor"
+path = "examples/cli/cli_quantize_scheme_size_predictor.rs"
+
+[[example]]
+name = "cli_quantize_format_compatibility"
+path = "examples/cli/cli_quantize_format_compatibility.rs"
+
+[[example]]
+name = "cli_quantize_batch_csv_planner"
+path = "examples/cli/cli_quantize_batch_csv_planner.rs"
+
+[[example]]
+name = "cli_merge_strategy_dispatcher"
+path = "examples/cli/cli_merge_strategy_dispatcher.rs"
+
+[[example]]
+name = "cli_merge_weights_csv_parser"
+path = "examples/cli/cli_merge_weights_csv_parser.rs"
+
+[[example]]
+name = "cli_merge_dare_drop_rate_band"
+path = "examples/cli/cli_merge_dare_drop_rate_band.rs"
+
+# --- distill / train / data extension (PMAT-106 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_distill_strategy_dispatcher"
+path = "examples/cli/cli_distill_strategy_dispatcher.rs"
+
+[[example]]
+name = "cli_distill_temperature_alpha_band"
+path = "examples/cli/cli_distill_temperature_alpha_band.rs"
+
+[[example]]
+name = "cli_distill_stage_dispatcher"
+path = "examples/cli/cli_distill_stage_dispatcher.rs"
+
+[[example]]
+name = "cli_train_watch_restart_policy"
+path = "examples/cli/cli_train_watch_restart_policy.rs"
+
+[[example]]
+name = "cli_train_sweep_grid_generator"
+path = "examples/cli/cli_train_sweep_grid_generator.rs"
+
+[[example]]
+name = "cli_train_halving_round_planner"
+path = "examples/cli/cli_train_halving_round_planner.rs"
+
+[[example]]
+name = "cli_data_split_stratified_ratios"
+path = "examples/cli/cli_data_split_stratified_ratios.rs"
+
+[[example]]
+name = "cli_data_balance_strategy_picker"
+path = "examples/cli/cli_data_balance_strategy_picker.rs"
+
+[[example]]
+name = "cli_data_decontaminate_ngram_overlap"
+path = "examples/cli/cli_data_decontaminate_ngram_overlap.rs"
+
+# --- pipeline / gpu / mcp extension (PMAT-107 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_pipeline_dag_topological_sort"
+path = "examples/cli/cli_pipeline_dag_topological_sort.rs"
+
+[[example]]
+name = "cli_pipeline_status_state_machine"
+path = "examples/cli/cli_pipeline_status_state_machine.rs"
+
+[[example]]
+name = "cli_pipeline_validate_manifest_schema"
+path = "examples/cli/cli_pipeline_validate_manifest_schema.rs"
+
+[[example]]
+name = "cli_gpu_vram_reservation_planner"
+path = "examples/cli/cli_gpu_vram_reservation_planner.rs"
+
+[[example]]
+name = "cli_gpu_device_capability_filter"
+path = "examples/cli/cli_gpu_device_capability_filter.rs"
+
+[[example]]
+name = "cli_gpu_oom_recovery_advisor"
+path = "examples/cli/cli_gpu_oom_recovery_advisor.rs"
+
+[[example]]
+name = "cli_mcp_tool_manifest_envelope"
+path = "examples/cli/cli_mcp_tool_manifest_envelope.rs"
+
+[[example]]
+name = "cli_mcp_jsonrpc_request_validator"
+path = "examples/cli/cli_mcp_jsonrpc_request_validator.rs"
+
+[[example]]
+name = "cli_mcp_error_response_codes"
+path = "examples/cli/cli_mcp_error_response_codes.rs"
+
+# --- tui / validate / ollama-chat-lint extension (PMAT-108 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_tui_panel_layout_calculator"
+path = "examples/cli/cli_tui_panel_layout_calculator.rs"
+
+[[example]]
+name = "cli_tui_keybinding_matcher"
+path = "examples/cli/cli_tui_keybinding_matcher.rs"
+
+[[example]]
+name = "cli_tui_search_filter_predicate"
+path = "examples/cli/cli_tui_search_filter_predicate.rs"
+
+[[example]]
+name = "cli_validate_quality_score_aggregator"
+path = "examples/cli/cli_validate_quality_score_aggregator.rs"
+
+[[example]]
+name = "cli_validate_strict_warning_promoter"
+path = "examples/cli/cli_validate_strict_warning_promoter.rs"
+
+[[example]]
+name = "cli_validate_min_score_gate"
+path = "examples/cli/cli_validate_min_score_gate.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_eval_count_consistency"
+path = "examples/cli/cli_ollama_chat_lint_eval_count_consistency.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_role_state_machine"
+path = "examples/cli/cli_ollama_chat_lint_role_state_machine.rs"
+
+[[example]]
+name = "cli_ollama_chat_lint_message_content_validation"
+path = "examples/cli/cli_ollama_chat_lint_message_content_validation.rs"
+
+# --- bench / inspect / trace extension (PMAT-109 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_bench_percentiles_csv_parser"
+path = "examples/cli/cli_bench_percentiles_csv_parser.rs"
+
+[[example]]
+name = "cli_bench_h12_throughput_gate"
+path = "examples/cli/cli_bench_h12_throughput_gate.rs"
+
+[[example]]
+name = "cli_bench_warmup_iterations_envelope"
+path = "examples/cli/cli_bench_warmup_iterations_envelope.rs"
+
+[[example]]
+name = "cli_inspect_view_mode_dispatcher"
+path = "examples/cli/cli_inspect_view_mode_dispatcher.rs"
+
+[[example]]
+name = "cli_inspect_weight_stats_aggregator"
+path = "examples/cli/cli_inspect_weight_stats_aggregator.rs"
+
+[[example]]
+name = "cli_inspect_vocab_token_query"
+path = "examples/cli/cli_inspect_vocab_token_query.rs"
+
+[[example]]
+name = "cli_trace_save_tensor_layer_range"
+path = "examples/cli/cli_trace_save_tensor_layer_range.rs"
+
+[[example]]
+name = "cli_trace_stage_csv_dispatcher"
+path = "examples/cli/cli_trace_stage_csv_dispatcher.rs"
+
+[[example]]
+name = "cli_trace_diff_mode_envelope"
+path = "examples/cli/cli_trace_diff_mode_envelope.rs"
+
+# --- compile / validate-manifest / tensors extension (PMAT-110 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_compile_target_triple_validator"
+path = "examples/cli/cli_compile_target_triple_validator.rs"
+
+[[example]]
+name = "cli_compile_optimization_flags"
+path = "examples/cli/cli_compile_optimization_flags.rs"
+
+[[example]]
+name = "cli_compile_output_path_resolver"
+path = "examples/cli/cli_compile_output_path_resolver.rs"
+
+[[example]]
+name = "cli_validate_manifest_falsify_envelope"
+path = "examples/cli/cli_validate_manifest_falsify_envelope.rs"
+
+[[example]]
+name = "cli_validate_manifest_sha256_format"
+path = "examples/cli/cli_validate_manifest_sha256_format.rs"
+
+[[example]]
+name = "cli_validate_manifest_offline_safety"
+path = "examples/cli/cli_validate_manifest_offline_safety.rs"
+
+[[example]]
+name = "cli_tensors_filter_pattern"
+path = "examples/cli/cli_tensors_filter_pattern.rs"
+
+[[example]]
+name = "cli_tensors_limit_truncator"
+path = "examples/cli/cli_tensors_limit_truncator.rs"
+
+[[example]]
+name = "cli_tensors_stats_aggregator"
+path = "examples/cli/cli_tensors_stats_aggregator.rs"
+
+# --- parity / ptx / tune extension (PMAT-111 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_parity_token_divergence_classifier"
+path = "examples/cli/cli_parity_token_divergence_classifier.rs"
+
+[[example]]
+name = "cli_parity_default_prompt_envelope"
+path = "examples/cli/cli_parity_default_prompt_envelope.rs"
+
+[[example]]
+name = "cli_parity_assert_mode_exit_codes"
+path = "examples/cli/cli_parity_assert_mode_exit_codes.rs"
+
+[[example]]
+name = "cli_ptx_register_pressure_threshold"
+path = "examples/cli/cli_ptx_register_pressure_threshold.rs"
+
+[[example]]
+name = "cli_ptx_strict_mode_whitelist"
+path = "examples/cli/cli_ptx_strict_mode_whitelist.rs"
+
+[[example]]
+name = "cli_ptx_kernel_name_parser"
+path = "examples/cli/cli_ptx_kernel_name_parser.rs"
+
+[[example]]
+name = "cli_tune_strategy_picker"
+path = "examples/cli/cli_tune_strategy_picker.rs"
+
+[[example]]
+name = "cli_tune_scheduler_dispatcher"
+path = "examples/cli/cli_tune_scheduler_dispatcher.rs"
+
+[[example]]
+name = "cli_tune_budget_compat_matrix"
+path = "examples/cli/cli_tune_budget_compat_matrix.rs"
+
+# --- eval / merge / quantize extension (PMAT-112 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_eval_bleu_score_classifier"
+path = "examples/cli/cli_eval_bleu_score_classifier.rs"
+
+[[example]]
+name = "cli_eval_top_k_accuracy_gate"
+path = "examples/cli/cli_eval_top_k_accuracy_gate.rs"
+
+[[example]]
+name = "cli_eval_metric_dispatcher"
+path = "examples/cli/cli_eval_metric_dispatcher.rs"
+
+[[example]]
+name = "cli_merge_ties_density_gate"
+path = "examples/cli/cli_merge_ties_density_gate.rs"
+
+[[example]]
+name = "cli_merge_slerp_t_clamp"
+path = "examples/cli/cli_merge_slerp_t_clamp.rs"
+
+[[example]]
+name = "cli_merge_signed_conflict_resolver"
+path = "examples/cli/cli_merge_signed_conflict_resolver.rs"
+
+[[example]]
+name = "cli_quantize_mixed_precision_selector"
+path = "examples/cli/cli_quantize_mixed_precision_selector.rs"
+
+[[example]]
+name = "cli_quantize_calibration_budget"
+path = "examples/cli/cli_quantize_calibration_budget.rs"
+
+[[example]]
+name = "cli_quantize_scale_zero_point_validator"
+path = "examples/cli/cli_quantize_scale_zero_point_validator.rs"
+
+# --- distill / finetune / prune extension (PMAT-113 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_distill_layer_pairer"
+path = "examples/cli/cli_distill_layer_pairer.rs"
+
+[[example]]
+name = "cli_distill_loss_combiner"
+path = "examples/cli/cli_distill_loss_combiner.rs"
+
+[[example]]
+name = "cli_distill_ensemble_weighter"
+path = "examples/cli/cli_distill_ensemble_weighter.rs"
+
+[[example]]
+name = "cli_finetune_lora_rank_picker"
+path = "examples/cli/cli_finetune_lora_rank_picker.rs"
+
+[[example]]
+name = "cli_finetune_lr_scheduler_picker"
+path = "examples/cli/cli_finetune_lr_scheduler_picker.rs"
+
+[[example]]
+name = "cli_finetune_grad_accum_budget"
+path = "examples/cli/cli_finetune_grad_accum_budget.rs"
+
+[[example]]
+name = "cli_prune_wanda_activation_scorer"
+path = "examples/cli/cli_prune_wanda_activation_scorer.rs"
+
+[[example]]
+name = "cli_prune_sparsity_ramp_validator"
+path = "examples/cli/cli_prune_sparsity_ramp_validator.rs"
+
+[[example]]
+name = "cli_prune_lottery_ticket_warmup"
+path = "examples/cli/cli_prune_lottery_ticket_warmup.rs"
+
+# --- registry / explain / monitor extension (PMAT-114 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_registry_uri_parser"
+path = "examples/cli/cli_registry_uri_parser.rs"
+
+[[example]]
+name = "cli_registry_lineage_cycle_detector"
+path = "examples/cli/cli_registry_lineage_cycle_detector.rs"
+
+[[example]]
+name = "cli_registry_semver_tag_matcher"
+path = "examples/cli/cli_registry_semver_tag_matcher.rs"
+
+[[example]]
+name = "cli_explain_saliency_rank_classifier"
+path = "examples/cli/cli_explain_saliency_rank_classifier.rs"
+
+[[example]]
+name = "cli_explain_ig_steps_validator"
+path = "examples/cli/cli_explain_ig_steps_validator.rs"
+
+[[example]]
+name = "cli_explain_ablation_envelope"
+path = "examples/cli/cli_explain_ablation_envelope.rs"
+
+[[example]]
+name = "cli_monitor_quantile_picker"
+path = "examples/cli/cli_monitor_quantile_picker.rs"
+
+[[example]]
+name = "cli_monitor_drift_threshold_gate"
+path = "examples/cli/cli_monitor_drift_threshold_gate.rs"
+
+[[example]]
+name = "cli_monitor_log_rotation_budget"
+path = "examples/cli/cli_monitor_log_rotation_budget.rs"
+
+# --- encrypt / profile / import extension (PMAT-115 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_encrypt_kdf_iterations_validator"
+path = "examples/cli/cli_encrypt_kdf_iterations_validator.rs"
+
+[[example]]
+name = "cli_encrypt_nonce_uniqueness_checker"
+path = "examples/cli/cli_encrypt_nonce_uniqueness_checker.rs"
+
+[[example]]
+name = "cli_encrypt_aad_envelope"
+path = "examples/cli/cli_encrypt_aad_envelope.rs"
+
+[[example]]
+name = "cli_profile_sampling_rate_budget"
+path = "examples/cli/cli_profile_sampling_rate_budget.rs"
+
+[[example]]
+name = "cli_profile_flame_depth_limit"
+path = "examples/cli/cli_profile_flame_depth_limit.rs"
+
+[[example]]
+name = "cli_profile_hot_function_classifier"
+path = "examples/cli/cli_profile_hot_function_classifier.rs"
+
+[[example]]
+name = "cli_import_format_auto_detector"
+path = "examples/cli/cli_import_format_auto_detector.rs"
+
+[[example]]
+name = "cli_import_dtype_coercion_validator"
+path = "examples/cli/cli_import_dtype_coercion_validator.rs"
+
+[[example]]
+name = "cli_import_sharding_plan_validator"
+path = "examples/cli/cli_import_sharding_plan_validator.rs"
+
+# --- train / serve / diagnose extension (PMAT-116 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_train_early_stop_patience"
+path = "examples/cli/cli_train_early_stop_patience.rs"
+
+[[example]]
+name = "cli_train_lr_finder_validator"
+path = "examples/cli/cli_train_lr_finder_validator.rs"
+
+[[example]]
+name = "cli_train_checkpoint_planner"
+path = "examples/cli/cli_train_checkpoint_planner.rs"
+
+[[example]]
+name = "cli_serve_max_tokens_cap"
+path = "examples/cli/cli_serve_max_tokens_cap.rs"
+
+[[example]]
+name = "cli_serve_streaming_chunk_size"
+path = "examples/cli/cli_serve_streaming_chunk_size.rs"
+
+[[example]]
+name = "cli_serve_kv_cache_budget"
+path = "examples/cli/cli_serve_kv_cache_budget.rs"
+
+[[example]]
+name = "cli_diagnose_grad_nan_scanner"
+path = "examples/cli/cli_diagnose_grad_nan_scanner.rs"
+
+[[example]]
+name = "cli_diagnose_param_count_sanity"
+path = "examples/cli/cli_diagnose_param_count_sanity.rs"
+
+[[example]]
+name = "cli_diagnose_weight_histogram_classifier"
+path = "examples/cli/cli_diagnose_weight_histogram_classifier.rs"
+
+# --- export / debug / pretrain extension (PMAT-117 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_export_target_dtype_validator"
+path = "examples/cli/cli_export_target_dtype_validator.rs"
+
+[[example]]
+name = "cli_export_opset_compat_matrix"
+path = "examples/cli/cli_export_opset_compat_matrix.rs"
+
+[[example]]
+name = "cli_export_output_naming_pattern"
+path = "examples/cli/cli_export_output_naming_pattern.rs"
+
+[[example]]
+name = "cli_debug_layer_glob_matcher"
+path = "examples/cli/cli_debug_layer_glob_matcher.rs"
+
+[[example]]
+name = "cli_debug_breakpoint_planner"
+path = "examples/cli/cli_debug_breakpoint_planner.rs"
+
+[[example]]
+name = "cli_debug_tensor_diff_tolerance"
+path = "examples/cli/cli_debug_tensor_diff_tolerance.rs"
+
+[[example]]
+name = "cli_pretrain_curriculum_validator"
+path = "examples/cli/cli_pretrain_curriculum_validator.rs"
+
+[[example]]
+name = "cli_pretrain_epoch_budget_calc"
+path = "examples/cli/cli_pretrain_epoch_budget_calc.rs"
+
+[[example]]
+name = "cli_pretrain_grad_clip_threshold"
+path = "examples/cli/cli_pretrain_grad_clip_threshold.rs"
+
+# --- bench / diff / experiment extension (PMAT-118 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_bench_cv_stability_gate"
+path = "examples/cli/cli_bench_cv_stability_gate.rs"
+
+[[example]]
+name = "cli_bench_batch_sweep_planner"
+path = "examples/cli/cli_bench_batch_sweep_planner.rs"
+
+[[example]]
+name = "cli_bench_unit_normalizer"
+path = "examples/cli/cli_bench_unit_normalizer.rs"
+
+[[example]]
+name = "cli_diff_shape_compatibility"
+path = "examples/cli/cli_diff_shape_compatibility.rs"
+
+[[example]]
+name = "cli_diff_magnitude_classifier"
+path = "examples/cli/cli_diff_magnitude_classifier.rs"
+
+[[example]]
+name = "cli_diff_structural_renderer"
+path = "examples/cli/cli_diff_structural_renderer.rs"
+
+[[example]]
+name = "cli_experiment_run_id_collision"
+path = "examples/cli/cli_experiment_run_id_collision.rs"
+
+[[example]]
+name = "cli_experiment_metric_compare_gate"
+path = "examples/cli/cli_experiment_metric_compare_gate.rs"
+
+[[example]]
+name = "cli_experiment_hypothesis_envelope"
+path = "examples/cli/cli_experiment_hypothesis_envelope.rs"
+
+# --- mcp / ollama / gpu extension (PMAT-120 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_mcp_resource_uri_scheme"
+path = "examples/cli/cli_mcp_resource_uri_scheme.rs"
+
+[[example]]
+name = "cli_mcp_transport_dispatcher"
+path = "examples/cli/cli_mcp_transport_dispatcher.rs"
+
+[[example]]
+name = "cli_mcp_batch_request_envelope"
+path = "examples/cli/cli_mcp_batch_request_envelope.rs"
+
+[[example]]
+name = "cli_ollama_model_name_parser"
+path = "examples/cli/cli_ollama_model_name_parser.rs"
+
+[[example]]
+name = "cli_ollama_embed_dim_validator"
+path = "examples/cli/cli_ollama_embed_dim_validator.rs"
+
+[[example]]
+name = "cli_ollama_token_rate_gate"
+path = "examples/cli/cli_ollama_token_rate_gate.rs"
+
+[[example]]
+name = "cli_gpu_nccl_strategy_picker"
+path = "examples/cli/cli_gpu_nccl_strategy_picker.rs"
+
+[[example]]
+name = "cli_gpu_peer_access_topology"
+path = "examples/cli/cli_gpu_peer_access_topology.rs"
+
+[[example]]
+name = "cli_gpu_fp8_capability_checker"
+path = "examples/cli/cli_gpu_fp8_capability_checker.rs"
+
+# --- decrypt / qa / pipeline extension (PMAT-121 expand-cookbooks followup) ---
+
+[[example]]
+name = "cli_decrypt_output_collision_detector"
+path = "examples/cli/cli_decrypt_output_collision_detector.rs"
+
+[[example]]
+name = "cli_decrypt_verify_ordering"
+path = "examples/cli/cli_decrypt_verify_ordering.rs"
+
+[[example]]
+name = "cli_decrypt_key_rotation_grace"
+path = "examples/cli/cli_decrypt_key_rotation_grace.rs"
+
+[[example]]
+name = "cli_qa_tier_aggregator"
+path = "examples/cli/cli_qa_tier_aggregator.rs"
+
+[[example]]
+name = "cli_qa_regression_delta_classifier"
+path = "examples/cli/cli_qa_regression_delta_classifier.rs"
+
+[[example]]
+name = "cli_qa_parallel_test_budget"
+path = "examples/cli/cli_qa_parallel_test_budget.rs"
+
+[[example]]
+name = "cli_pipeline_retry_policy_envelope"
+path = "examples/cli/cli_pipeline_retry_policy_envelope.rs"
+
+[[example]]
+name = "cli_pipeline_concurrency_limiter"
+path = "examples/cli/cli_pipeline_concurrency_limiter.rs"
+
+[[example]]
+name = "cli_pipeline_stage_skip_predicate"
+path = "examples/cli/cli_pipeline_stage_skip_predicate.rs"
+
+# --- contracts-macros / monte-carlo / tui extension (PMAT-122 expand-cookbooks followup) ---
+
+[[example]]
+name = "contracts_macros_multi_equation_dispatch"
+path = "examples/contracts-macros/contracts_macros_multi_equation_dispatch.rs"
+
+[[example]]
+name = "contracts_macros_pre_post_envelope"
+path = "examples/contracts-macros/contracts_macros_pre_post_envelope.rs"
+
+[[example]]
+name = "contracts_macros_no_op_degradation"
+path = "examples/contracts-macros/contracts_macros_no_op_degradation.rs"
+
+[[example]]
+name = "mc_correlated_portfolio_var"
+path = "examples/monte-carlo/mc_correlated_portfolio_var.rs"
+
+[[example]]
+name = "mc_mm1_queue_little_law"
+path = "examples/monte-carlo/mc_mm1_queue_little_law.rs"
+
+[[example]]
+name = "mc_safety_stock_planner"
+path = "examples/monte-carlo/mc_safety_stock_planner.rs"
+
+[[example]]
+name = "cli_tui_color_theme_dispatcher"
+path = "examples/cli/cli_tui_color_theme_dispatcher.rs"
+
+[[example]]
+name = "cli_tui_resize_event_throttle"
+path = "examples/cli/cli_tui_resize_event_throttle.rs"
+
+[[example]]
+name = "cli_tui_pager_buffer_planner"
+path = "examples/cli/cli_tui_pager_buffer_planner.rs"
+
+# --- speech / wasm / simd extension (PMAT-123 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_audio_format_validator"
+path = "examples/speech/speech_audio_format_validator.rs"
+
+[[example]]
+name = "speech_vad_threshold_classifier"
+path = "examples/speech/speech_vad_threshold_classifier.rs"
+
+[[example]]
+name = "speech_chunk_overlap_planner"
+path = "examples/speech/speech_chunk_overlap_planner.rs"
+
+[[example]]
+name = "wasm_memory_growth_policy"
+path = "examples/wasm/wasm_memory_growth_policy.rs"
+
+[[example]]
+name = "wasm_capability_check"
+path = "examples/wasm/wasm_capability_check.rs"
+
+[[example]]
+name = "wasm_module_cache_strategy"
+path = "examples/wasm/wasm_module_cache_strategy.rs"
+
+[[example]]
+name = "simd_alignment_validator"
+path = "examples/simd/simd_alignment_validator.rs"
+
+[[example]]
+name = "simd_unroll_factor_picker"
+path = "examples/simd/simd_unroll_factor_picker.rs"
+
+[[example]]
+name = "simd_horizontal_reduce_dispatcher"
+path = "examples/simd/simd_horizontal_reduce_dispatcher.rs"
+
+# --- distributed / distillation / monitoring extension (PMAT-124 expand-cookbooks followup) ---
+
+[[example]]
+name = "distributed_shard_partition_planner"
+path = "examples/distributed/distributed_shard_partition_planner.rs"
+
+[[example]]
+name = "distributed_allreduce_strategy"
+path = "examples/distributed/distributed_allreduce_strategy.rs"
+
+[[example]]
+name = "distributed_failure_recovery"
+path = "examples/distributed/distributed_failure_recovery.rs"
+
+[[example]]
+name = "distill_temperature_search_envelope"
+path = "examples/distillation/distill_temperature_search_envelope.rs"
+
+[[example]]
+name = "distill_dataset_synth_ratio"
+path = "examples/distillation/distill_dataset_synth_ratio.rs"
+
+[[example]]
+name = "distill_self_distill_bootstrap"
+path = "examples/distillation/distill_self_distill_bootstrap.rs"
+
+[[example]]
+name = "monitor_anomaly_z_score_classifier"
+path = "examples/monitoring/monitor_anomaly_z_score_classifier.rs"
+
+[[example]]
+name = "monitor_sla_uptime_calc"
+path = "examples/monitoring/monitor_sla_uptime_calc.rs"
+
+[[example]]
+name = "monitor_aggregation_window_dispatcher"
+path = "examples/monitoring/monitor_aggregation_window_dispatcher.rs"
+
+# --- chat / api / code extension (PMAT-125 expand-cookbooks followup) ---
+
+[[example]]
+name = "chat_role_state_machine"
+path = "examples/chat/chat_role_state_machine.rs"
+
+[[example]]
+name = "chat_token_budget_truncation"
+path = "examples/chat/chat_token_budget_truncation.rs"
+
+[[example]]
+name = "chat_template_renderer"
+path = "examples/chat/chat_template_renderer.rs"
+
+[[example]]
+name = "api_token_bucket_rate_limiter"
+path = "examples/api/api_token_bucket_rate_limiter.rs"
+
+[[example]]
+name = "api_request_id_correlation"
+path = "examples/api/api_request_id_correlation.rs"
+
+[[example]]
+name = "api_response_cache_ttl"
+path = "examples/api/api_response_cache_ttl.rs"
+
+[[example]]
+name = "code_diff_hunk_parser"
+path = "examples/code/code_diff_hunk_parser.rs"
+
+[[example]]
+name = "code_indent_normalizer"
+path = "examples/code/code_indent_normalizer.rs"
+
+[[example]]
+name = "code_lint_severity_aggregator"
+path = "examples/code/code_lint_severity_aggregator.rs"
+
+# --- shell / acceleration / serverless extension (PMAT-126 expand-cookbooks followup) ---
+
+[[example]]
+name = "shell_pipe_redirection_parser"
+path = "examples/shell/shell_pipe_redirection_parser.rs"
+
+[[example]]
+name = "shell_brace_expander"
+path = "examples/shell/shell_brace_expander.rs"
+
+[[example]]
+name = "shell_quote_state_classifier"
+path = "examples/shell/shell_quote_state_classifier.rs"
+
+[[example]]
+name = "acceleration_kernel_dispatch_planner"
+path = "examples/acceleration/acceleration_kernel_dispatch_planner.rs"
+
+[[example]]
+name = "acceleration_arithmetic_intensity"
+path = "examples/acceleration/acceleration_arithmetic_intensity.rs"
+
+[[example]]
+name = "acceleration_thread_pool_sizer"
+path = "examples/acceleration/acceleration_thread_pool_sizer.rs"
+
+[[example]]
+name = "serverless_cold_start_classifier"
+path = "examples/serverless/serverless_cold_start_classifier.rs"
+
+[[example]]
+name = "serverless_lambda_pricing_matrix"
+path = "examples/serverless/serverless_lambda_pricing_matrix.rs"
+
+[[example]]
+name = "serverless_concurrency_validator"
+path = "examples/serverless/serverless_concurrency_validator.rs"
+
+# --- creation / bundling / conversion extension (PMAT-127 expand-cookbooks followup) ---
+
+[[example]]
+name = "create_init_scheme_dispatcher"
+path = "examples/creation/create_init_scheme_dispatcher.rs"
+
+[[example]]
+name = "create_vocab_size_validator"
+path = "examples/creation/create_vocab_size_validator.rs"
+
+[[example]]
+name = "create_embedding_tying_envelope"
+path = "examples/creation/create_embedding_tying_envelope.rs"
+
+[[example]]
+name = "bundle_manifest_header_validator"
+path = "examples/bundling/bundle_manifest_header_validator.rs"
+
+[[example]]
+name = "bundle_compression_ratio_calc"
+path = "examples/bundling/bundle_compression_ratio_calc.rs"
+
+[[example]]
+name = "bundle_signing_chain_builder"
+path = "examples/bundling/bundle_signing_chain_builder.rs"
+
+[[example]]
+name = "convert_dtype_loss_estimator"
+path = "examples/conversion/convert_dtype_loss_estimator.rs"
+
+[[example]]
+name = "convert_tensor_name_remapper"
+path = "examples/conversion/convert_tensor_name_remapper.rs"
+
+[[example]]
+name = "convert_format_version_matrix"
+path = "examples/conversion/convert_format_version_matrix.rs"
+
+# --- visualization / advanced / cgp extension (PMAT-128 expand-cookbooks followup) ---
+
+[[example]]
+name = "viz_color_palette_picker"
+path = "examples/visualization/viz_color_palette_picker.rs"
+
+[[example]]
+name = "viz_axis_scale_classifier"
+path = "examples/visualization/viz_axis_scale_classifier.rs"
+
+[[example]]
+name = "viz_legend_placement_optimizer"
+path = "examples/visualization/viz_legend_placement_optimizer.rs"
+
+[[example]]
+name = "adv_recipe_dependency_dag"
+path = "examples/advanced/adv_recipe_dependency_dag.rs"
+
+[[example]]
+name = "adv_iiur_compliance_scorer"
+path = "examples/advanced/adv_iiur_compliance_scorer.rs"
+
+[[example]]
+name = "adv_capability_manifest_validator"
+path = "examples/advanced/adv_capability_manifest_validator.rs"
+
+[[example]]
+name = "cgp_baseline_diff_classifier"
+path = "examples/cgp/cgp_baseline_diff_classifier.rs"
+
+[[example]]
+name = "cgp_kernel_metric_aggregator"
+path = "examples/cgp/cgp_kernel_metric_aggregator.rs"
+
+[[example]]
+name = "cgp_proof_status_dispatcher"
+path = "examples/cgp/cgp_proof_status_dispatcher.rs"
+
+# --- tsp / registry / inference extension (PMAT-129 expand-cookbooks followup) ---
+
+[[example]]
+name = "tsp_christofides_ratio"
+path = "examples/tsp/tsp_christofides_ratio.rs"
+
+[[example]]
+name = "tsp_nearest_neighbor"
+path = "examples/tsp/tsp_nearest_neighbor.rs"
+
+[[example]]
+name = "tsp_two_opt_swap_improver"
+path = "examples/tsp/tsp_two_opt_swap_improver.rs"
+
+[[example]]
+name = "registry_manifest_schema"
+path = "examples/registry/registry_manifest_schema.rs"
+
+[[example]]
+name = "registry_hash_pin_enforcer"
+path = "examples/registry/registry_hash_pin_enforcer.rs"
+
+[[example]]
+name = "registry_gc_policy"
+path = "examples/registry/registry_gc_policy.rs"
+
+[[example]]
+name = "inference_kv_cache_lru"
+path = "examples/inference/inference_kv_cache_lru.rs"
+
+[[example]]
+name = "inference_beam_search_width"
+path = "examples/inference/inference_beam_search_width.rs"
+
+[[example]]
+name = "inference_top_p_nucleus"
+path = "examples/inference/inference_top_p_nucleus.rs"
+
+# --- format / gpu / deployment-stacks extension (PMAT-130 expand-cookbooks followup) ---
+
+[[example]]
+name = "format_bf16_vs_fp16_mantissa"
+path = "examples/format/format_bf16_vs_fp16_mantissa.rs"
+
+[[example]]
+name = "format_manifest_tensor_count"
+path = "examples/format/format_manifest_tensor_count.rs"
+
+[[example]]
+name = "format_endianness_detector"
+path = "examples/format/format_endianness_detector.rs"
+
+[[example]]
+name = "gpu_warp_divergence_classifier"
+path = "examples/gpu/gpu_warp_divergence_classifier.rs"
+
+[[example]]
+name = "gpu_occupancy_calculator"
+path = "examples/gpu/gpu_occupancy_calculator.rs"
+
+[[example]]
+name = "gpu_memory_bandwidth_roofline"
+path = "examples/gpu/gpu_memory_bandwidth_roofline.rs"
+
+[[example]]
+name = "deploy_pod_replica_scheduler"
+path = "examples/deployment-stacks/deploy_pod_replica_scheduler.rs"
+
+[[example]]
+name = "deploy_blue_green_cutover"
+path = "examples/deployment-stacks/deploy_blue_green_cutover.rs"
+
+[[example]]
+name = "deploy_canary_traffic_ramp"
+path = "examples/deployment-stacks/deploy_canary_traffic_ramp.rs"
+
+# --- optimize / lint / analysis extension (PMAT-131 expand-cookbooks followup) ---
+
+[[example]]
+name = "optimize_warmup_cosine_lr"
+path = "examples/optimize/optimize_warmup_cosine_lr.rs"
+
+[[example]]
+name = "optimize_micro_batch_grad_accum"
+path = "examples/optimize/optimize_micro_batch_grad_accum.rs"
+
+[[example]]
+name = "optimize_adamw_vs_lion_picker"
+path = "examples/optimize/optimize_adamw_vs_lion_picker.rs"
+
+[[example]]
+name = "lint_cors_origin_allowlist"
+path = "examples/lint/lint_cors_origin_allowlist.rs"
+
+[[example]]
+name = "lint_prompt_pii_redactor"
+path = "examples/lint/lint_prompt_pii_redactor.rs"
+
+[[example]]
+name = "lint_schema_drift_detector"
+path = "examples/lint/lint_schema_drift_detector.rs"
+
+[[example]]
+name = "analysis_p99_throughput_gate"
+path = "examples/analysis/analysis_p99_throughput_gate.rs"
+
+[[example]]
+name = "analysis_latency_breakdown"
+path = "examples/analysis/analysis_latency_breakdown.rs"
+
+[[example]]
+name = "analysis_memory_leak_detector"
+path = "examples/analysis/analysis_memory_leak_detector.rs"
+
+# --- mcp / training / data-loading extension (PMAT-132 expand-cookbooks followup) ---
+
+[[example]]
+name = "mcp_resource_uri_resolver"
+path = "examples/mcp/mcp_resource_uri_resolver.rs"
+
+[[example]]
+name = "mcp_tool_signature_validator"
+path = "examples/mcp/mcp_tool_signature_validator.rs"
+
+[[example]]
+name = "mcp_session_lifecycle"
+path = "examples/mcp/mcp_session_lifecycle.rs"
+
+[[example]]
+name = "training_lr_combo_scheduler"
+path = "examples/training/training_lr_combo_scheduler.rs"
+
+[[example]]
+name = "training_curriculum_filter"
+path = "examples/training/training_curriculum_filter.rs"
+
+[[example]]
+name = "training_grad_clip_norm"
+path = "examples/training/training_grad_clip_norm.rs"
+
+[[example]]
+name = "data_streaming_buffer_size"
+path = "examples/data-loading/data_streaming_buffer_size.rs"
+
+[[example]]
+name = "data_shuffle_seed_validator"
+path = "examples/data-loading/data_shuffle_seed_validator.rs"
+
+[[example]]
+name = "data_row_dedup_strategy"
+path = "examples/data-loading/data_row_dedup_strategy.rs"
+
+# --- conversion / format / bundling extension (PMAT-133 expand-cookbooks followup) ---
+
+[[example]]
+name = "convert_layout_transposer"
+path = "examples/conversion/convert_layout_transposer.rs"
+
+[[example]]
+name = "convert_quantization_rescaler"
+path = "examples/conversion/convert_quantization_rescaler.rs"
+
+[[example]]
+name = "convert_safetensors_header"
+path = "examples/conversion/convert_safetensors_header.rs"
+
+[[example]]
+name = "format_stride_encoder"
+path = "examples/format/format_stride_encoder.rs"
+
+[[example]]
+name = "format_alignment_padding"
+path = "examples/format/format_alignment_padding.rs"
+
+[[example]]
+name = "format_gguf_metadata_key"
+path = "examples/format/format_gguf_metadata_key.rs"
+
+[[example]]
+name = "bundle_cache_key_deriver"
+path = "examples/bundling/bundle_cache_key_deriver.rs"
+
+[[example]]
+name = "bundle_table_of_contents"
+path = "examples/bundling/bundle_table_of_contents.rs"
+
+[[example]]
+name = "bundle_integrity_checksum"
+path = "examples/bundling/bundle_integrity_checksum.rs"
+
+# --- simd / wasm / serverless extension (PMAT-134 expand-cookbooks followup) ---
+
+[[example]]
+name = "simd_mask_lane_predicate"
+path = "examples/simd/simd_mask_lane_predicate.rs"
+
+[[example]]
+name = "simd_prefetch_distance_picker"
+path = "examples/simd/simd_prefetch_distance_picker.rs"
+
+[[example]]
+name = "simd_fma_fusion_gate"
+path = "examples/simd/simd_fma_fusion_gate.rs"
+
+[[example]]
+name = "wasm_threads_atomics_gate"
+path = "examples/wasm/wasm_threads_atomics_gate.rs"
+
+[[example]]
+name = "wasm_simd128_dispatch"
+path = "examples/wasm/wasm_simd128_dispatch.rs"
+
+[[example]]
+name = "wasm_wasi_capability_grant"
+path = "examples/wasm/wasm_wasi_capability_grant.rs"
+
+[[example]]
+name = "serverless_timeout_budget_picker"
+path = "examples/serverless/serverless_timeout_budget_picker.rs"
+
+[[example]]
+name = "serverless_provisioned_concurrency"
+path = "examples/serverless/serverless_provisioned_concurrency.rs"
+
+[[example]]
+name = "serverless_vpc_cold_start"
+path = "examples/serverless/serverless_vpc_cold_start.rs"
+
+# --- mcp / training / data-loading round 2 (PMAT-135 expand-cookbooks followup) ---
+
+[[example]]
+name = "mcp_request_id_correlator"
+path = "examples/mcp/mcp_request_id_correlator.rs"
+
+[[example]]
+name = "mcp_capability_handshake_diff"
+path = "examples/mcp/mcp_capability_handshake_diff.rs"
+
+[[example]]
+name = "mcp_error_code_classifier"
+path = "examples/mcp/mcp_error_code_classifier.rs"
+
+[[example]]
+name = "training_lr_warmup_decay"
+path = "examples/training/training_lr_warmup_decay.rs"
+
+[[example]]
+name = "training_loss_spike_detector"
+path = "examples/training/training_loss_spike_detector.rs"
+
+[[example]]
+name = "training_eval_cadence"
+path = "examples/training/training_eval_cadence.rs"
+
+[[example]]
+name = "data_compression_codec"
+path = "examples/data-loading/data_compression_codec.rs"
+
+[[example]]
+name = "data_sample_quota_balancer"
+path = "examples/data-loading/data_sample_quota_balancer.rs"
+
+[[example]]
+name = "data_train_val_test_split"
+path = "examples/data-loading/data_train_val_test_split.rs"
+
+# --- bundling / conversion / format round 2 (PMAT-136 expand-cookbooks followup) ---
+
+[[example]]
+name = "bundle_mmap_offset_calculator"
+path = "examples/bundling/bundle_mmap_offset_calculator.rs"
+
+[[example]]
+name = "bundle_metadata_versioning"
+path = "examples/bundling/bundle_metadata_versioning.rs"
+
+[[example]]
+name = "bundle_tensor_dedup"
+path = "examples/bundling/bundle_tensor_dedup.rs"
+
+[[example]]
+name = "convert_endianness_swapper"
+path = "examples/conversion/convert_endianness_swapper.rs"
+
+[[example]]
+name = "convert_dtype_widener"
+path = "examples/conversion/convert_dtype_widener.rs"
+
+[[example]]
+name = "convert_sparse_csr_to_dense"
+path = "examples/conversion/convert_sparse_csr_to_dense.rs"
+
+[[example]]
+name = "format_magic_bytes_validator"
+path = "examples/format/format_magic_bytes_validator.rs"
+
+[[example]]
+name = "format_version_compat_matrix"
+path = "examples/format/format_version_compat_matrix.rs"
+
+[[example]]
+name = "format_tensor_name_canonicalizer"
+path = "examples/format/format_tensor_name_canonicalizer.rs"
+
+# --- gpu / monitoring / distillation extension (PMAT-137 expand-cookbooks followup) ---
+
+[[example]]
+name = "gpu_kv_cache_paging"
+path = "examples/gpu/gpu_kv_cache_paging.rs"
+
+[[example]]
+name = "gpu_tensor_parallel_split"
+path = "examples/gpu/gpu_tensor_parallel_split.rs"
+
+[[example]]
+name = "gpu_pcie_bandwidth_tier"
+path = "examples/gpu/gpu_pcie_bandwidth_tier.rs"
+
+[[example]]
+name = "monitor_drift_psi"
+path = "examples/monitoring/monitor_drift_psi.rs"
+
+[[example]]
+name = "monitor_alert_dedup_window"
+path = "examples/monitoring/monitor_alert_dedup_window.rs"
+
+[[example]]
+name = "monitor_slo_burn_rate"
+path = "examples/monitoring/monitor_slo_burn_rate.rs"
+
+[[example]]
+name = "distill_temperature_picker"
+path = "examples/distillation/distill_temperature_picker.rs"
+
+[[example]]
+name = "distill_dataset_filter"
+path = "examples/distillation/distill_dataset_filter.rs"
+
+[[example]]
+name = "distill_layer_alignment_planner"
+path = "examples/distillation/distill_layer_alignment_planner.rs"
+
+# --- registry / api / simd round 2 (PMAT-138 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_signature_chain"
+path = "examples/registry/registry_signature_chain.rs"
+
+[[example]]
+name = "registry_quota_per_user"
+path = "examples/registry/registry_quota_per_user.rs"
+
+[[example]]
+name = "registry_gc_orphans"
+path = "examples/registry/registry_gc_orphans.rs"
+
+[[example]]
+name = "api_circuit_breaker_state"
+path = "examples/api/api_circuit_breaker_state.rs"
+
+[[example]]
+name = "api_request_timeout_classifier"
+path = "examples/api/api_request_timeout_classifier.rs"
+
+[[example]]
+name = "api_admission_control_queue"
+path = "examples/api/api_admission_control_queue.rs"
+
+[[example]]
+name = "simd_loop_carried_dep_detector"
+path = "examples/simd/simd_loop_carried_dep_detector.rs"
+
+[[example]]
+name = "simd_alignment_strategy"
+path = "examples/simd/simd_alignment_strategy.rs"
+
+[[example]]
+name = "simd_aos_to_soa"
+path = "examples/simd/simd_aos_to_soa.rs"
+
+# --- wasm / distributed / advanced extension (PMAT-139 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_module_size_budget"
+path = "examples/wasm/wasm_module_size_budget.rs"
+
+[[example]]
+name = "wasm_export_table_validator"
+path = "examples/wasm/wasm_export_table_validator.rs"
+
+[[example]]
+name = "wasm_browser_compat_matrix"
+path = "examples/wasm/wasm_browser_compat_matrix.rs"
+
+[[example]]
+name = "distributed_pipeline_microbatch"
+path = "examples/distributed/distributed_pipeline_microbatch.rs"
+
+[[example]]
+name = "distributed_lamport_clock"
+path = "examples/distributed/distributed_lamport_clock.rs"
+
+[[example]]
+name = "distributed_phi_failure_detector"
+path = "examples/distributed/distributed_phi_failure_detector.rs"
+
+[[example]]
+name = "adv_pipeline_dag"
+path = "examples/advanced/adv_pipeline_dag.rs"
+
+[[example]]
+name = "adv_canary_promotion_gate"
+path = "examples/advanced/adv_canary_promotion_gate.rs"
+
+[[example]]
+name = "adv_speculative_decode_window"
+path = "examples/advanced/adv_speculative_decode_window.rs"
+
+# --- speech / monitoring / gpu round 3 (PMAT-140 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_audio_resampler"
+path = "examples/speech/speech_audio_resampler.rs"
+
+[[example]]
+name = "speech_word_timestamp_align"
+path = "examples/speech/speech_word_timestamp_align.rs"
+
+[[example]]
+name = "speech_language_id_confidence"
+path = "examples/speech/speech_language_id_confidence.rs"
+
+[[example]]
+name = "monitor_inference_cost"
+path = "examples/monitoring/monitor_inference_cost.rs"
+
+[[example]]
+name = "monitor_percentile_summary"
+path = "examples/monitoring/monitor_percentile_summary.rs"
+
+[[example]]
+name = "monitor_dropped_request_classifier"
+path = "examples/monitoring/monitor_dropped_request_classifier.rs"
+
+[[example]]
+name = "gpu_collective_op_picker"
+path = "examples/gpu/gpu_collective_op_picker.rs"
+
+[[example]]
+name = "gpu_warp_scheduler_dispatch"
+path = "examples/gpu/gpu_warp_scheduler_dispatch.rs"
+
+[[example]]
+name = "gpu_l1_shared_mem_partition"
+path = "examples/gpu/gpu_l1_shared_mem_partition.rs"
+
+# --- distillation / monitoring / advanced round 3 (PMAT-141 expand-cookbooks followup) ---
+
+[[example]]
+name = "distill_quantile_calibration"
+path = "examples/distillation/distill_quantile_calibration.rs"
+
+[[example]]
+name = "distill_attention_transfer_loss"
+path = "examples/distillation/distill_attention_transfer_loss.rs"
+
+[[example]]
+name = "distill_intermediate_feature_match"
+path = "examples/distillation/distill_intermediate_feature_match.rs"
+
+[[example]]
+name = "monitor_log_sampling"
+path = "examples/monitoring/monitor_log_sampling.rs"
+
+[[example]]
+name = "monitor_capacity_planner"
+path = "examples/monitoring/monitor_capacity_planner.rs"
+
+[[example]]
+name = "monitor_circuit_log_emit"
+path = "examples/monitoring/monitor_circuit_log_emit.rs"
+
+[[example]]
+name = "adv_kv_cache_eviction"
+path = "examples/advanced/adv_kv_cache_eviction.rs"
+
+[[example]]
+name = "adv_chunked_prefill"
+path = "examples/advanced/adv_chunked_prefill.rs"
+
+[[example]]
+name = "adv_request_priority_router"
+path = "examples/advanced/adv_request_priority_router.rs"
+
+# --- wasm / distributed / advanced (PMAT-142 crosses 900 recipes) ---
+
+[[example]]
+name = "wasm_memory_growth_strategy"
+path = "examples/wasm/wasm_memory_growth_strategy.rs"
+
+[[example]]
+name = "wasm_export_section_size"
+path = "examples/wasm/wasm_export_section_size.rs"
+
+[[example]]
+name = "wasm_imported_function_count"
+path = "examples/wasm/wasm_imported_function_count.rs"
+
+[[example]]
+name = "distributed_zero_copy_rdma"
+path = "examples/distributed/distributed_zero_copy_rdma.rs"
+
+[[example]]
+name = "distributed_byzantine_quorum"
+path = "examples/distributed/distributed_byzantine_quorum.rs"
+
+[[example]]
+name = "distributed_eventual_consistency_window"
+path = "examples/distributed/distributed_eventual_consistency_window.rs"
+
+[[example]]
+name = "adv_continuous_batching"
+path = "examples/advanced/adv_continuous_batching.rs"
+
+[[example]]
+name = "adv_quantize_pipeline"
+path = "examples/advanced/adv_quantize_pipeline.rs"
+
+[[example]]
+name = "adv_replica_failover"
+path = "examples/advanced/adv_replica_failover.rs"
+
+# --- registry / api / gpu round (PMAT-143 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_immutable_tag_policy"
+path = "examples/registry/registry_immutable_tag_policy.rs"
+
+[[example]]
+name = "registry_alias_resolver_chain"
+path = "examples/registry/registry_alias_resolver_chain.rs"
+
+[[example]]
+name = "registry_pull_throttle"
+path = "examples/registry/registry_pull_throttle.rs"
+
+[[example]]
+name = "api_streaming_chunk_size"
+path = "examples/api/api_streaming_chunk_size.rs"
+
+[[example]]
+name = "api_idempotency_key_dedup"
+path = "examples/api/api_idempotency_key_dedup.rs"
+
+[[example]]
+name = "api_oauth_token_refresh_window"
+path = "examples/api/api_oauth_token_refresh_window.rs"
+
+[[example]]
+name = "gpu_register_spill"
+path = "examples/gpu/gpu_register_spill.rs"
+
+[[example]]
+name = "gpu_warp_specialization"
+path = "examples/gpu/gpu_warp_specialization.rs"
+
+[[example]]
+name = "gpu_async_memcpy_overlap"
+path = "examples/gpu/gpu_async_memcpy_overlap.rs"
+
+# --- serverless / training / monitoring (PMAT-144 expand-cookbooks followup) ---
+
+[[example]]
+name = "serverless_image_layer_caching"
+path = "examples/serverless/serverless_image_layer_caching.rs"
+
+[[example]]
+name = "serverless_concurrency_limit"
+path = "examples/serverless/serverless_concurrency_limit.rs"
+
+[[example]]
+name = "serverless_step_function_router"
+path = "examples/serverless/serverless_step_function_router.rs"
+
+[[example]]
+name = "training_grad_accum_steps"
+path = "examples/training/training_grad_accum_steps.rs"
+
+[[example]]
+name = "training_optimizer_state_memory"
+path = "examples/training/training_optimizer_state_memory.rs"
+
+[[example]]
+name = "training_loss_scaler"
+path = "examples/training/training_loss_scaler.rs"
+
+[[example]]
+name = "monitor_health_check_endpoint"
+path = "examples/monitoring/monitor_health_check_endpoint.rs"
+
+[[example]]
+name = "monitor_metric_cardinality"
+path = "examples/monitoring/monitor_metric_cardinality.rs"
+
+[[example]]
+name = "monitor_trace_sampling"
+path = "examples/monitoring/monitor_trace_sampling.rs"
+
+# --- distillation / advanced / distributed (PMAT-145 expand-cookbooks followup) ---
+
+[[example]]
+name = "distill_white_box_logit_match"
+path = "examples/distillation/distill_white_box_logit_match.rs"
+
+[[example]]
+name = "distill_data_augmentation"
+path = "examples/distillation/distill_data_augmentation.rs"
+
+[[example]]
+name = "distill_temperature_anneal"
+path = "examples/distillation/distill_temperature_anneal.rs"
+
+[[example]]
+name = "adv_request_coalescing"
+path = "examples/advanced/adv_request_coalescing.rs"
+
+[[example]]
+name = "adv_kv_quantization"
+path = "examples/advanced/adv_kv_quantization.rs"
+
+[[example]]
+name = "adv_speculative_tree_attention"
+path = "examples/advanced/adv_speculative_tree_attention.rs"
+
+[[example]]
+name = "distributed_consistent_hash"
+path = "examples/distributed/distributed_consistent_hash.rs"
+
+[[example]]
+name = "distributed_split_brain_detector"
+path = "examples/distributed/distributed_split_brain_detector.rs"
+
+[[example]]
+name = "distributed_priority_queue"
+path = "examples/distributed/distributed_priority_queue.rs"
+
+# --- wasm / training / gpu (PMAT-146 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_simd_lane_dispatcher"
+path = "examples/wasm/wasm_simd_lane_dispatcher.rs"
+
+[[example]]
+name = "wasm_globals_section"
+path = "examples/wasm/wasm_globals_section.rs"
+
+[[example]]
+name = "wasm_table_index_resolver"
+path = "examples/wasm/wasm_table_index_resolver.rs"
+
+[[example]]
+name = "training_zero3_partitioning"
+path = "examples/training/training_zero3_partitioning.rs"
+
+[[example]]
+name = "training_pretrain_data_mix"
+path = "examples/training/training_pretrain_data_mix.rs"
+
+[[example]]
+name = "training_long_context_extension"
+path = "examples/training/training_long_context_extension.rs"
+
+[[example]]
+name = "gpu_pcie_p2p_topology"
+path = "examples/gpu/gpu_pcie_p2p_topology.rs"
+
+[[example]]
+name = "gpu_gqa_group_picker"
+path = "examples/gpu/gpu_gqa_group_picker.rs"
+
+[[example]]
+name = "gpu_kernel_fusion"
+path = "examples/gpu/gpu_kernel_fusion.rs"
+
+# --- registry / monitoring / simd (PMAT-147 expand-cookbooks followup) ---
+
+[[example]]
+name = "registry_metadata_search"
+path = "examples/registry/registry_metadata_search.rs"
+
+[[example]]
+name = "registry_provenance_attestation"
+path = "examples/registry/registry_provenance_attestation.rs"
+
+[[example]]
+name = "registry_dependency_resolver"
+path = "examples/registry/registry_dependency_resolver.rs"
+
+[[example]]
+name = "monitor_log_correlation"
+path = "examples/monitoring/monitor_log_correlation.rs"
+
+[[example]]
+name = "monitor_ingest_backpressure"
+path = "examples/monitoring/monitor_ingest_backpressure.rs"
+
+[[example]]
+name = "monitor_seasonal_decompose"
+path = "examples/monitoring/monitor_seasonal_decompose.rs"
+
+[[example]]
+name = "simd_strided_load"
+path = "examples/simd/simd_strided_load.rs"
+
+[[example]]
+name = "simd_horizontal_max"
+path = "examples/simd/simd_horizontal_max.rs"
+
+[[example]]
+name = "simd_zigzag_packer"
+path = "examples/simd/simd_zigzag_packer.rs"
+
+# --- bundling / conversion / format round 3 (PMAT-148 expand-cookbooks followup) ---
+
+[[example]]
+name = "bundle_compression_picker"
+path = "examples/bundling/bundle_compression_picker.rs"
+
+[[example]]
+name = "bundle_streaming_unpack"
+path = "examples/bundling/bundle_streaming_unpack.rs"
+
+[[example]]
+name = "bundle_pre_load_warmup"
+path = "examples/bundling/bundle_pre_load_warmup.rs"
+
+[[example]]
+name = "convert_lossy_check"
+path = "examples/conversion/convert_lossy_check.rs"
+
+[[example]]
+name = "convert_metadata_passthrough"
+path = "examples/conversion/convert_metadata_passthrough.rs"
+
+[[example]]
+name = "convert_tensor_view_strider"
+path = "examples/conversion/convert_tensor_view_strider.rs"
+
+[[example]]
+name = "format_zip_eocd"
+path = "examples/format/format_zip_eocd.rs"
+
+[[example]]
+name = "format_arrow_ipc"
+path = "examples/format/format_arrow_ipc.rs"
+
+[[example]]
+name = "format_avro_schema_resolver"
+path = "examples/format/format_avro_schema_resolver.rs"
+
+# --- speech / distillation / advanced (PMAT-149 expand-cookbooks followup) ---
+
+[[example]]
+name = "speech_vad_threshold"
+path = "examples/speech/speech_vad_threshold.rs"
+
+[[example]]
+name = "speech_diarization_count"
+path = "examples/speech/speech_diarization_count.rs"
+
+[[example]]
+name = "speech_punctuation_restorer"
+path = "examples/speech/speech_punctuation_restorer.rs"
+
+[[example]]
+name = "distill_curriculum_difficulty"
+path = "examples/distillation/distill_curriculum_difficulty.rs"
+
+[[example]]
+name = "distill_response_pruning"
+path = "examples/distillation/distill_response_pruning.rs"
+
+[[example]]
+name = "distill_self_consistency_filter"
+path = "examples/distillation/distill_self_consistency_filter.rs"
+
+[[example]]
+name = "adv_long_context_retrieval_split"
+path = "examples/advanced/adv_long_context_retrieval_split.rs"
+
+[[example]]
+name = "adv_tool_call_validator"
+path = "examples/advanced/adv_tool_call_validator.rs"
+
+[[example]]
+name = "adv_safety_classifier_threshold"
+path = "examples/advanced/adv_safety_classifier_threshold.rs"
+
+# --- distributed / gpu / registry (PMAT-150 expand-cookbooks followup) ---
+
+[[example]]
+name = "distributed_ring_chunks"
+path = "examples/distributed/distributed_ring_chunks.rs"
+
+[[example]]
+name = "distributed_grad_compression"
+path = "examples/distributed/distributed_grad_compression.rs"
+
+[[example]]
+name = "distributed_collective_overlap"
+path = "examples/distributed/distributed_collective_overlap.rs"
+
+[[example]]
+name = "gpu_tensor_core_alignment"
+path = "examples/gpu/gpu_tensor_core_alignment.rs"
+
+[[example]]
+name = "gpu_dynamic_shape_handler"
+path = "examples/gpu/gpu_dynamic_shape_handler.rs"
+
+[[example]]
+name = "gpu_warp_size_dispatch"
+path = "examples/gpu/gpu_warp_size_dispatch.rs"
+
+[[example]]
+name = "registry_artifact_size_quota"
+path = "examples/registry/registry_artifact_size_quota.rs"
+
+[[example]]
+name = "registry_oci_index"
+path = "examples/registry/registry_oci_index.rs"
+
+[[example]]
+name = "registry_pull_secret_validator"
+path = "examples/registry/registry_pull_secret_validator.rs"
+
+# --- wasm / monitoring / training (PMAT-151 expand-cookbooks followup) ---
+
+[[example]]
+name = "wasm_relaxed_simd"
+path = "examples/wasm/wasm_relaxed_simd.rs"
+
+[[example]]
+name = "wasm_component_export"
+path = "examples/wasm/wasm_component_export.rs"
+
+[[example]]
+name = "wasm_function_table_growth"
+path = "examples/wasm/wasm_function_table_growth.rs"
+
+[[example]]
+name = "monitor_aggregation_window"
+path = "examples/monitoring/monitor_aggregation_window.rs"
+
+[[example]]
+name = "monitor_log_pii_redact"
+path = "examples/monitoring/monitor_log_pii_redact.rs"
+
+[[example]]
+name = "monitor_synthetic_probe"
+path = "examples/monitoring/monitor_synthetic_probe.rs"
+
+[[example]]
+name = "training_attention_dropout"
+path = "examples/training/training_attention_dropout.rs"
+
+[[example]]
+name = "training_label_smoothing"
+path = "examples/training/training_label_smoothing.rs"
+
+[[example]]
+name = "training_warmup_steps"
+path = "examples/training/training_warmup_steps.rs"
+
+# --- distillation / advanced / gpu (PMAT-152 — catalog crosses 1000 recipes) ---
+
+[[example]]
+name = "distill_progressive_freeze"
+path = "examples/distillation/distill_progressive_freeze.rs"
+
+[[example]]
+name = "distill_skill_cluster_router"
+path = "examples/distillation/distill_skill_cluster_router.rs"
+
+[[example]]
+name = "distill_loss_weight_schedule"
+path = "examples/distillation/distill_loss_weight_schedule.rs"
+
+[[example]]
+name = "distill_cross_layer_match"
+path = "examples/distillation/distill_cross_layer_match.rs"
+
+[[example]]
+name = "adv_token_budget"
+path = "examples/advanced/adv_token_budget.rs"
+
+[[example]]
+name = "adv_chain_of_thought"
+path = "examples/advanced/adv_chain_of_thought.rs"
+
+[[example]]
+name = "adv_multimodal_router"
+path = "examples/advanced/adv_multimodal_router.rs"
+
+[[example]]
+name = "adv_retry_backoff"
+path = "examples/advanced/adv_retry_backoff.rs"
+
+[[example]]
+name = "gpu_kernel_autotune"
+path = "examples/gpu/gpu_kernel_autotune.rs"
+
+[[example]]
+name = "gpu_persistent_kernel"
+path = "examples/gpu/gpu_persistent_kernel.rs"
+
+[[example]]
+name = "gpu_pinned_memory_pipeline"
+path = "examples/gpu/gpu_pinned_memory_pipeline.rs"
+
+[[example]]
+name = "gpu_cuda_graph_capture"
+path = "examples/gpu/gpu_cuda_graph_capture.rs"
+
+[[example]]
+name = "gpu_shared_mem_bank"
+path = "examples/gpu/gpu_shared_mem_bank.rs"
+
+# --- bundling / conversion / format round 4 (PMAT-153 post-milestone) ---
+
+[[example]]
+name = "bundle_zero_copy_handoff"
+path = "examples/bundling/bundle_zero_copy_handoff.rs"
+
+[[example]]
+name = "bundle_partial_load"
+path = "examples/bundling/bundle_partial_load.rs"
+
+[[example]]
+name = "bundle_signing_attestation"
+path = "examples/bundling/bundle_signing_attestation.rs"
+
+[[example]]
+name = "convert_safetensors_header_to_apr"
+path = "examples/conversion/convert_safetensors_header_to_apr.rs"
+
+[[example]]
+name = "convert_dtype_promote"
+path = "examples/conversion/convert_dtype_promote.rs"
+
+[[example]]
+name = "convert_quant_calibration"
+path = "examples/conversion/convert_quant_calibration.rs"
+
+[[example]]
+name = "format_pickle_safety"
+path = "examples/format/format_pickle_safety.rs"
+
+[[example]]
+name = "format_npy_header"
+path = "examples/format/format_npy_header.rs"
+
+[[example]]
+name = "format_protobuf_varint"
+path = "examples/format/format_protobuf_varint.rs"
+
+# --- distillation / monitoring / advanced (PMAT-154 post-milestone) ---
+
+[[example]]
+name = "distill_teacher_ensemble"
+path = "examples/distillation/distill_teacher_ensemble.rs"
+
+[[example]]
+name = "distill_continual_replay"
+path = "examples/distillation/distill_continual_replay.rs"
+
+[[example]]
+name = "distill_capacity_match"
+path = "examples/distillation/distill_capacity_match.rs"
+
+[[example]]
+name = "monitor_correlated_failures"
+path = "examples/monitoring/monitor_correlated_failures.rs"
+
+[[example]]
+name = "monitor_canary_metric"
+path = "examples/monitoring/monitor_canary_metric.rs"
+
+[[example]]
+name = "monitor_query_pattern"
+path = "examples/monitoring/monitor_query_pattern.rs"
+
+[[example]]
+name = "adv_chunked_response_buffer"
+path = "examples/advanced/adv_chunked_response_buffer.rs"
+
+[[example]]
+name = "adv_provenance_chain"
+path = "examples/advanced/adv_provenance_chain.rs"
+
+[[example]]
+name = "adv_response_redactor"
+path = "examples/advanced/adv_response_redactor.rs"
+
+# --- distillation / monitoring / advanced (PMAT-155) ---
+
+[[example]]
+name = "distill_logit_smoothing"
+path = "examples/distillation/distill_logit_smoothing.rs"
+
+[[example]]
+name = "distill_per_class_temperature"
+path = "examples/distillation/distill_per_class_temperature.rs"
+
+[[example]]
+name = "distill_token_level_kd"
+path = "examples/distillation/distill_token_level_kd.rs"
+
+[[example]]
+name = "monitor_p99_outlier"
+path = "examples/monitoring/monitor_p99_outlier.rs"
+
+[[example]]
+name = "monitor_request_size_histogram"
+path = "examples/monitoring/monitor_request_size_histogram.rs"
+
+[[example]]
+name = "monitor_thread_pool_saturation"
+path = "examples/monitoring/monitor_thread_pool_saturation.rs"
+
+[[example]]
+name = "adv_quota_token_bucket"
+path = "examples/advanced/adv_quota_token_bucket.rs"
+
+[[example]]
+name = "adv_request_dedup_cache"
+path = "examples/advanced/adv_request_dedup_cache.rs"
+
+[[example]]
+name = "adv_warmup_classifier"
+path = "examples/advanced/adv_warmup_classifier.rs"
+
+# --- distillation / monitoring / advanced (PMAT-156) ---
+
+[[example]]
+name = "distill_grad_clip_picker"
+path = "examples/distillation/distill_grad_clip_picker.rs"
+
+[[example]]
+name = "distill_dropout_match"
+path = "examples/distillation/distill_dropout_match.rs"
+
+[[example]]
+name = "distill_attention_head_align"
+path = "examples/distillation/distill_attention_head_align.rs"
+
+[[example]]
+name = "monitor_gpu_thermal_throttle"
+path = "examples/monitoring/monitor_gpu_thermal_throttle.rs"
+
+[[example]]
+name = "monitor_gradient_norm_alert"
+path = "examples/monitoring/monitor_gradient_norm_alert.rs"
+
+[[example]]
+name = "monitor_cache_hit_rate"
+path = "examples/monitoring/monitor_cache_hit_rate.rs"
+
+[[example]]
+name = "adv_response_schema_match"
+path = "examples/advanced/adv_response_schema_match.rs"
+
+[[example]]
+name = "adv_circuit_breaker"
+path = "examples/advanced/adv_circuit_breaker.rs"
+
+[[example]]
+name = "adv_priority_queue_eviction"
+path = "examples/advanced/adv_priority_queue_eviction.rs"
+
+# --- distillation / monitoring / advanced (PMAT-157) ---
+
+[[example]]
+name = "distill_loss_mask_padding"
+path = "examples/distillation/distill_loss_mask_padding.rs"
+
+[[example]]
+name = "distill_lr_schedule_match"
+path = "examples/distillation/distill_lr_schedule_match.rs"
+
+[[example]]
+name = "distill_block_skip"
+path = "examples/distillation/distill_block_skip.rs"
+
+[[example]]
+name = "monitor_disk_io_pressure"
+path = "examples/monitoring/monitor_disk_io_pressure.rs"
+
+[[example]]
+name = "monitor_packet_loss_rate"
+path = "examples/monitoring/monitor_packet_loss_rate.rs"
+
+[[example]]
+name = "monitor_concurrent_inflight"
+path = "examples/monitoring/monitor_concurrent_inflight.rs"
+
+[[example]]
+name = "adv_session_affinity_router"
+path = "examples/advanced/adv_session_affinity_router.rs"
+
+[[example]]
+name = "adv_request_id_format"
+path = "examples/advanced/adv_request_id_format.rs"
+
+[[example]]
+name = "adv_response_compression_picker"
+path = "examples/advanced/adv_response_compression_picker.rs"
+
+# --- distillation / monitoring / advanced (PMAT-158) ---
+
+[[example]]
+name = "distill_grad_accum_picker"
+path = "examples/distillation/distill_grad_accum_picker.rs"
+
+[[example]]
+name = "distill_warmup_kd_only"
+path = "examples/distillation/distill_warmup_kd_only.rs"
+
+[[example]]
+name = "distill_token_skipping"
+path = "examples/distillation/distill_token_skipping.rs"
+
+[[example]]
+name = "monitor_token_throughput"
+path = "examples/monitoring/monitor_token_throughput.rs"
+
+[[example]]
+name = "monitor_oom_predict"
+path = "examples/monitoring/monitor_oom_predict.rs"
+
+[[example]]
+name = "monitor_log_volume_anomaly"
+path = "examples/monitoring/monitor_log_volume_anomaly.rs"
+
+[[example]]
+name = "adv_admission_quota_per_tenant"
+path = "examples/advanced/adv_admission_quota_per_tenant.rs"
+
+[[example]]
+name = "adv_payload_size_limit"
+path = "examples/advanced/adv_payload_size_limit.rs"
+
+[[example]]
+name = "adv_idempotency_key"
+path = "examples/advanced/adv_idempotency_key.rs"
+
+# --- distillation / monitoring / advanced (PMAT-159) ---
+
+[[example]]
+name = "distill_softlabel_topk"
+path = "examples/distillation/distill_softlabel_topk.rs"
+
+[[example]]
+name = "distill_layer_skip_connection"
+path = "examples/distillation/distill_layer_skip_connection.rs"
+
+[[example]]
+name = "distill_kl_floor"
+path = "examples/distillation/distill_kl_floor.rs"
+
+[[example]]
+name = "monitor_session_drop"
+path = "examples/monitoring/monitor_session_drop.rs"
+
+[[example]]
+name = "monitor_p50_drift"
+path = "examples/monitoring/monitor_p50_drift.rs"
+
+[[example]]
+name = "monitor_db_pool_exhaustion"
+path = "examples/monitoring/monitor_db_pool_exhaustion.rs"
+
+[[example]]
+name = "adv_request_priority_aging"
+path = "examples/advanced/adv_request_priority_aging.rs"
+
+[[example]]
+name = "adv_response_diff_validator"
+path = "examples/advanced/adv_response_diff_validator.rs"
+
+[[example]]
+name = "adv_correlation_id_propagator"
+path = "examples/advanced/adv_correlation_id_propagator.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-160) ---
+
+[[example]]
+name = "contracts_macros_inverse_postcond"
+path = "examples/contracts-macros/contracts_macros_inverse_postcond.rs"
+
+[[example]]
+name = "contracts_macros_tolerance_propagation"
+path = "examples/contracts-macros/contracts_macros_tolerance_propagation.rs"
+
+[[example]]
+name = "contracts_macros_status_provenance"
+path = "examples/contracts-macros/contracts_macros_status_provenance.rs"
+
+[[example]]
+name = "mc_inference_p99_estimator"
+path = "examples/monte-carlo/mc_inference_p99_estimator.rs"
+
+[[example]]
+name = "mc_capacity_planner"
+path = "examples/monte-carlo/mc_capacity_planner.rs"
+
+[[example]]
+name = "mc_failure_chain_propagation"
+path = "examples/monte-carlo/mc_failure_chain_propagation.rs"
+
+[[example]]
+name = "tui_progress_state"
+path = "examples/tui/tui_progress_state.rs"
+
+[[example]]
+name = "tui_layout_split"
+path = "examples/tui/tui_layout_split.rs"
+
+[[example]]
+name = "tui_keymap_dispatch"
+path = "examples/tui/tui_keymap_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-161) ---
+
+[[example]]
+name = "contracts_macros_dispatch_fallback"
+path = "examples/contracts-macros/contracts_macros_dispatch_fallback.rs"
+
+[[example]]
+name = "contracts_macros_phase_chain"
+path = "examples/contracts-macros/contracts_macros_phase_chain.rs"
+
+[[example]]
+name = "contracts_macros_obligation_diff"
+path = "examples/contracts-macros/contracts_macros_obligation_diff.rs"
+
+[[example]]
+name = "mc_token_throughput_sim"
+path = "examples/monte-carlo/mc_token_throughput_sim.rs"
+
+[[example]]
+name = "mc_retry_chain_success"
+path = "examples/monte-carlo/mc_retry_chain_success.rs"
+
+[[example]]
+name = "mc_inference_jitter"
+path = "examples/monte-carlo/mc_inference_jitter.rs"
+
+[[example]]
+name = "tui_table_pager"
+path = "examples/tui/tui_table_pager.rs"
+
+[[example]]
+name = "tui_truncate_ellipsis"
+path = "examples/tui/tui_truncate_ellipsis.rs"
+
+[[example]]
+name = "tui_severity_color"
+path = "examples/tui/tui_severity_color.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-162) ---
+
+[[example]]
+name = "contracts_macros_pre_violation_classify"
+path = "examples/contracts-macros/contracts_macros_pre_violation_classify.rs"
+
+[[example]]
+name = "contracts_macros_module_binding"
+path = "examples/contracts-macros/contracts_macros_module_binding.rs"
+
+[[example]]
+name = "contracts_macros_pure_check"
+path = "examples/contracts-macros/contracts_macros_pure_check.rs"
+
+[[example]]
+name = "mc_load_shed_threshold"
+path = "examples/monte-carlo/mc_load_shed_threshold.rs"
+
+[[example]]
+name = "mc_cache_warmup_curve"
+path = "examples/monte-carlo/mc_cache_warmup_curve.rs"
+
+[[example]]
+name = "mc_decode_branching_path"
+path = "examples/monte-carlo/mc_decode_branching_path.rs"
+
+[[example]]
+name = "tui_breadcrumb_path"
+path = "examples/tui/tui_breadcrumb_path.rs"
+
+[[example]]
+name = "tui_modal_focus_stack"
+path = "examples/tui/tui_modal_focus_stack.rs"
+
+[[example]]
+name = "tui_input_buffer"
+path = "examples/tui/tui_input_buffer.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-163) ---
+
+[[example]]
+name = "contracts_macros_invariant_chain"
+path = "examples/contracts-macros/contracts_macros_invariant_chain.rs"
+
+[[example]]
+name = "contracts_macros_dependency_graph"
+path = "examples/contracts-macros/contracts_macros_dependency_graph.rs"
+
+[[example]]
+name = "contracts_macros_yaml_lint"
+path = "examples/contracts-macros/contracts_macros_yaml_lint.rs"
+
+[[example]]
+name = "mc_request_arrival_poisson"
+path = "examples/monte-carlo/mc_request_arrival_poisson.rs"
+
+[[example]]
+name = "mc_priority_queue_wait"
+path = "examples/monte-carlo/mc_priority_queue_wait.rs"
+
+[[example]]
+name = "mc_kv_eviction_compare"
+path = "examples/monte-carlo/mc_kv_eviction_compare.rs"
+
+[[example]]
+name = "tui_status_bar_compose"
+path = "examples/tui/tui_status_bar_compose.rs"
+
+[[example]]
+name = "tui_diff_renderer"
+path = "examples/tui/tui_diff_renderer.rs"
+
+[[example]]
+name = "tui_dropdown_filter"
+path = "examples/tui/tui_dropdown_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-164 — crosses 1100) ---
+
+[[example]]
+name = "contracts_macros_falsification_witness"
+path = "examples/contracts-macros/contracts_macros_falsification_witness.rs"
+
+[[example]]
+name = "contracts_macros_alphabet_check"
+path = "examples/contracts-macros/contracts_macros_alphabet_check.rs"
+
+[[example]]
+name = "contracts_macros_obligation_severity"
+path = "examples/contracts-macros/contracts_macros_obligation_severity.rs"
+
+[[example]]
+name = "mc_drop_in_replacement_test"
+path = "examples/monte-carlo/mc_drop_in_replacement_test.rs"
+
+[[example]]
+name = "mc_dataset_split_uniformity"
+path = "examples/monte-carlo/mc_dataset_split_uniformity.rs"
+
+[[example]]
+name = "mc_request_size_pareto"
+path = "examples/monte-carlo/mc_request_size_pareto.rs"
+
+[[example]]
+name = "tui_form_validation"
+path = "examples/tui/tui_form_validation.rs"
+
+[[example]]
+name = "tui_spinner_frame"
+path = "examples/tui/tui_spinner_frame.rs"
+
+[[example]]
+name = "tui_paragraph_wrap"
+path = "examples/tui/tui_paragraph_wrap.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-165) ---
+
+[[example]]
+name = "contracts_macros_kani_status"
+path = "examples/contracts-macros/contracts_macros_kani_status.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signature"
+path = "examples/contracts-macros/contracts_macros_recipe_signature.rs"
+
+[[example]]
+name = "contracts_macros_metric_threshold"
+path = "examples/contracts-macros/contracts_macros_metric_threshold.rs"
+
+[[example]]
+name = "mc_dropout_resilience"
+path = "examples/monte-carlo/mc_dropout_resilience.rs"
+
+[[example]]
+name = "mc_eval_split_significance"
+path = "examples/monte-carlo/mc_eval_split_significance.rs"
+
+[[example]]
+name = "mc_birthday_collision"
+path = "examples/monte-carlo/mc_birthday_collision.rs"
+
+[[example]]
+name = "tui_command_palette"
+path = "examples/tui/tui_command_palette.rs"
+
+[[example]]
+name = "tui_modal_keymap"
+path = "examples/tui/tui_modal_keymap.rs"
+
+[[example]]
+name = "tui_scroll_state"
+path = "examples/tui/tui_scroll_state.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-166) ---
+
+[[example]]
+name = "contracts_macros_recipe_id_canon"
+path = "examples/contracts-macros/contracts_macros_recipe_id_canon.rs"
+
+[[example]]
+name = "contracts_macros_constant_propagation"
+path = "examples/contracts-macros/contracts_macros_constant_propagation.rs"
+
+[[example]]
+name = "contracts_macros_pre_post_partition"
+path = "examples/contracts-macros/contracts_macros_pre_post_partition.rs"
+
+[[example]]
+name = "mc_throughput_concurrency_curve"
+path = "examples/monte-carlo/mc_throughput_concurrency_curve.rs"
+
+[[example]]
+name = "mc_calibration_drift"
+path = "examples/monte-carlo/mc_calibration_drift.rs"
+
+[[example]]
+name = "mc_data_freshness_lag"
+path = "examples/monte-carlo/mc_data_freshness_lag.rs"
+
+[[example]]
+name = "tui_text_search_highlight"
+path = "examples/tui/tui_text_search_highlight.rs"
+
+[[example]]
+name = "tui_tree_view_collapse"
+path = "examples/tui/tui_tree_view_collapse.rs"
+
+[[example]]
+name = "tui_clip_to_visible"
+path = "examples/tui/tui_clip_to_visible.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-167) ---
+
+[[example]]
+name = "contracts_macros_recipe_meta_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_meta_audit.rs"
+
+[[example]]
+name = "contracts_macros_obligation_arity"
+path = "examples/contracts-macros/contracts_macros_obligation_arity.rs"
+
+[[example]]
+name = "contracts_macros_violation_history"
+path = "examples/contracts-macros/contracts_macros_violation_history.rs"
+
+[[example]]
+name = "mc_resource_contention"
+path = "examples/monte-carlo/mc_resource_contention.rs"
+
+[[example]]
+name = "mc_request_routing_a_b"
+path = "examples/monte-carlo/mc_request_routing_a_b.rs"
+
+[[example]]
+name = "mc_eviction_under_pressure"
+path = "examples/monte-carlo/mc_eviction_under_pressure.rs"
+
+[[example]]
+name = "tui_horizontal_scroll"
+path = "examples/tui/tui_horizontal_scroll.rs"
+
+[[example]]
+name = "tui_overlay_z_order"
+path = "examples/tui/tui_overlay_z_order.rs"
+
+[[example]]
+name = "tui_resize_constraints"
+path = "examples/tui/tui_resize_constraints.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-168) ---
+
+[[example]]
+name = "contracts_macros_priority_sort"
+path = "examples/contracts-macros/contracts_macros_priority_sort.rs"
+
+[[example]]
+name = "contracts_macros_attribute_round_trip"
+path = "examples/contracts-macros/contracts_macros_attribute_round_trip.rs"
+
+[[example]]
+name = "contracts_macros_lean_filename"
+path = "examples/contracts-macros/contracts_macros_lean_filename.rs"
+
+[[example]]
+name = "mc_replica_lag_distribution"
+path = "examples/monte-carlo/mc_replica_lag_distribution.rs"
+
+[[example]]
+name = "mc_quantization_loss_estimator"
+path = "examples/monte-carlo/mc_quantization_loss_estimator.rs"
+
+[[example]]
+name = "mc_inference_burst_buffer"
+path = "examples/monte-carlo/mc_inference_burst_buffer.rs"
+
+[[example]]
+name = "tui_table_sort_indicator"
+path = "examples/tui/tui_table_sort_indicator.rs"
+
+[[example]]
+name = "tui_progress_eta_format"
+path = "examples/tui/tui_progress_eta_format.rs"
+
+[[example]]
+name = "tui_log_tail_buffer"
+path = "examples/tui/tui_log_tail_buffer.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-169) ---
+
+[[example]]
+name = "contracts_macros_proof_dependency"
+path = "examples/contracts-macros/contracts_macros_proof_dependency.rs"
+
+[[example]]
+name = "contracts_macros_alias_resolver"
+path = "examples/contracts-macros/contracts_macros_alias_resolver.rs"
+
+[[example]]
+name = "contracts_macros_obligation_tag_filter"
+path = "examples/contracts-macros/contracts_macros_obligation_tag_filter.rs"
+
+[[example]]
+name = "mc_warmup_sample_efficiency"
+path = "examples/monte-carlo/mc_warmup_sample_efficiency.rs"
+
+[[example]]
+name = "mc_request_lifetime"
+path = "examples/monte-carlo/mc_request_lifetime.rs"
+
+[[example]]
+name = "mc_skewed_load_distribution"
+path = "examples/monte-carlo/mc_skewed_load_distribution.rs"
+
+[[example]]
+name = "tui_grid_focus_navigation"
+path = "examples/tui/tui_grid_focus_navigation.rs"
+
+[[example]]
+name = "tui_alert_dismiss_state"
+path = "examples/tui/tui_alert_dismiss_state.rs"
+
+[[example]]
+name = "tui_action_undo_stack"
+path = "examples/tui/tui_action_undo_stack.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-170) ---
+
+[[example]]
+name = "contracts_macros_invariant_drift_alert"
+path = "examples/contracts-macros/contracts_macros_invariant_drift_alert.rs"
+
+[[example]]
+name = "contracts_macros_recipe_decomposition"
+path = "examples/contracts-macros/contracts_macros_recipe_decomposition.rs"
+
+[[example]]
+name = "contracts_macros_obligation_coverage_pct"
+path = "examples/contracts-macros/contracts_macros_obligation_coverage_pct.rs"
+
+[[example]]
+name = "mc_chaos_monkey_failures"
+path = "examples/monte-carlo/mc_chaos_monkey_failures.rs"
+
+[[example]]
+name = "mc_token_billing_estimator"
+path = "examples/monte-carlo/mc_token_billing_estimator.rs"
+
+[[example]]
+name = "mc_replica_failover_time"
+path = "examples/monte-carlo/mc_replica_failover_time.rs"
+
+[[example]]
+name = "tui_select_popup"
+path = "examples/tui/tui_select_popup.rs"
+
+[[example]]
+name = "tui_resize_grid_layout"
+path = "examples/tui/tui_resize_grid_layout.rs"
+
+[[example]]
+name = "tui_loading_skeleton"
+path = "examples/tui/tui_loading_skeleton.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-171) ---
+
+[[example]]
+name = "contracts_macros_recipe_id_uniqueness"
+path = "examples/contracts-macros/contracts_macros_recipe_id_uniqueness.rs"
+
+[[example]]
+name = "contracts_macros_proof_age_audit"
+path = "examples/contracts-macros/contracts_macros_proof_age_audit.rs"
+
+[[example]]
+name = "contracts_macros_obligation_renaming"
+path = "examples/contracts-macros/contracts_macros_obligation_renaming.rs"
+
+[[example]]
+name = "mc_request_collision_dedup"
+path = "examples/monte-carlo/mc_request_collision_dedup.rs"
+
+[[example]]
+name = "mc_warmup_to_target"
+path = "examples/monte-carlo/mc_warmup_to_target.rs"
+
+[[example]]
+name = "mc_token_streaming_jitter"
+path = "examples/monte-carlo/mc_token_streaming_jitter.rs"
+
+[[example]]
+name = "tui_chart_axis_ticks"
+path = "examples/tui/tui_chart_axis_ticks.rs"
+
+[[example]]
+name = "tui_widget_focus_chain"
+path = "examples/tui/tui_widget_focus_chain.rs"
+
+[[example]]
+name = "tui_message_box_align"
+path = "examples/tui/tui_message_box_align.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-172) ---
+
+[[example]]
+name = "contracts_macros_arxiv_citation_lint"
+path = "examples/contracts-macros/contracts_macros_arxiv_citation_lint.rs"
+
+[[example]]
+name = "contracts_macros_priority_inversion"
+path = "examples/contracts-macros/contracts_macros_priority_inversion.rs"
+
+[[example]]
+name = "contracts_macros_lemma_reuse_count"
+path = "examples/contracts-macros/contracts_macros_lemma_reuse_count.rs"
+
+[[example]]
+name = "mc_quantized_round_trip"
+path = "examples/monte-carlo/mc_quantized_round_trip.rs"
+
+[[example]]
+name = "mc_disk_seek_pattern"
+path = "examples/monte-carlo/mc_disk_seek_pattern.rs"
+
+[[example]]
+name = "mc_circuit_open_rate"
+path = "examples/monte-carlo/mc_circuit_open_rate.rs"
+
+[[example]]
+name = "tui_modal_slide_transition"
+path = "examples/tui/tui_modal_slide_transition.rs"
+
+[[example]]
+name = "tui_help_panel_state"
+path = "examples/tui/tui_help_panel_state.rs"
+
+[[example]]
+name = "tui_history_navigation"
+path = "examples/tui/tui_history_navigation.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-173) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_resolver"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_resolver.rs"
+
+[[example]]
+name = "contracts_macros_phase_dag_order"
+path = "examples/contracts-macros/contracts_macros_phase_dag_order.rs"
+
+[[example]]
+name = "contracts_macros_lean_axiom_audit"
+path = "examples/contracts-macros/contracts_macros_lean_axiom_audit.rs"
+
+[[example]]
+name = "mc_speculative_decode_acceptance"
+path = "examples/monte-carlo/mc_speculative_decode_acceptance.rs"
+
+[[example]]
+name = "mc_log_aggregation_window"
+path = "examples/monte-carlo/mc_log_aggregation_window.rs"
+
+[[example]]
+name = "mc_kv_cache_hit_under_eviction"
+path = "examples/monte-carlo/mc_kv_cache_hit_under_eviction.rs"
+
+[[example]]
+name = "tui_progress_smooth_eta"
+path = "examples/tui/tui_progress_smooth_eta.rs"
+
+[[example]]
+name = "tui_split_pane_resize"
+path = "examples/tui/tui_split_pane_resize.rs"
+
+[[example]]
+name = "tui_keyboard_repeat_rate"
+path = "examples/tui/tui_keyboard_repeat_rate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-174) ---
+
+[[example]]
+name = "contracts_macros_field_default_inference"
+path = "examples/contracts-macros/contracts_macros_field_default_inference.rs"
+
+[[example]]
+name = "contracts_macros_recipe_hash_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_hash_consistency.rs"
+
+[[example]]
+name = "contracts_macros_obligation_parametric"
+path = "examples/contracts-macros/contracts_macros_obligation_parametric.rs"
+
+[[example]]
+name = "mc_request_size_log_normal"
+path = "examples/monte-carlo/mc_request_size_log_normal.rs"
+
+[[example]]
+name = "mc_concurrency_collapse"
+path = "examples/monte-carlo/mc_concurrency_collapse.rs"
+
+[[example]]
+name = "mc_token_dropout_resilience"
+path = "examples/monte-carlo/mc_token_dropout_resilience.rs"
+
+[[example]]
+name = "tui_table_cell_render"
+path = "examples/tui/tui_table_cell_render.rs"
+
+[[example]]
+name = "tui_clipboard_buffer"
+path = "examples/tui/tui_clipboard_buffer.rs"
+
+[[example]]
+name = "tui_command_history"
+path = "examples/tui/tui_command_history.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-175 — crosses 1200) ---
+
+[[example]]
+name = "contracts_macros_obligation_compose"
+path = "examples/contracts-macros/contracts_macros_obligation_compose.rs"
+
+[[example]]
+name = "contracts_macros_recipe_lifecycle"
+path = "examples/contracts-macros/contracts_macros_recipe_lifecycle.rs"
+
+[[example]]
+name = "contracts_macros_yaml_schema_diff"
+path = "examples/contracts-macros/contracts_macros_yaml_schema_diff.rs"
+
+[[example]]
+name = "mc_warm_vs_cold_cache"
+path = "examples/monte-carlo/mc_warm_vs_cold_cache.rs"
+
+[[example]]
+name = "mc_priority_starvation"
+path = "examples/monte-carlo/mc_priority_starvation.rs"
+
+[[example]]
+name = "mc_idempotency_collision"
+path = "examples/monte-carlo/mc_idempotency_collision.rs"
+
+[[example]]
+name = "tui_search_index_navigate"
+path = "examples/tui/tui_search_index_navigate.rs"
+
+[[example]]
+name = "tui_progress_indeterminate"
+path = "examples/tui/tui_progress_indeterminate.rs"
+
+[[example]]
+name = "tui_password_mask"
+path = "examples/tui/tui_password_mask.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-176) ---
+
+[[example]]
+name = "contracts_macros_recipe_status_summary"
+path = "examples/contracts-macros/contracts_macros_recipe_status_summary.rs"
+
+[[example]]
+name = "contracts_macros_invariant_witness_pair"
+path = "examples/contracts-macros/contracts_macros_invariant_witness_pair.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_routing"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_routing.rs"
+
+[[example]]
+name = "mc_token_compress_ratio"
+path = "examples/monte-carlo/mc_token_compress_ratio.rs"
+
+[[example]]
+name = "mc_consensus_quorum_failure"
+path = "examples/monte-carlo/mc_consensus_quorum_failure.rs"
+
+[[example]]
+name = "mc_eviction_thrashing"
+path = "examples/monte-carlo/mc_eviction_thrashing.rs"
+
+[[example]]
+name = "tui_progress_multi_bar"
+path = "examples/tui/tui_progress_multi_bar.rs"
+
+[[example]]
+name = "tui_input_autocomplete"
+path = "examples/tui/tui_input_autocomplete.rs"
+
+[[example]]
+name = "tui_status_dot_indicator"
+path = "examples/tui/tui_status_dot_indicator.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-177) ---
+
+[[example]]
+name = "contracts_macros_proof_obligation_score"
+path = "examples/contracts-macros/contracts_macros_proof_obligation_score.rs"
+
+[[example]]
+name = "contracts_macros_recipe_change_log"
+path = "examples/contracts-macros/contracts_macros_recipe_change_log.rs"
+
+[[example]]
+name = "contracts_macros_yaml_indent_check"
+path = "examples/contracts-macros/contracts_macros_yaml_indent_check.rs"
+
+[[example]]
+name = "mc_burst_buffer_overflow"
+path = "examples/monte-carlo/mc_burst_buffer_overflow.rs"
+
+[[example]]
+name = "mc_distill_label_corruption"
+path = "examples/monte-carlo/mc_distill_label_corruption.rs"
+
+[[example]]
+name = "mc_jit_amortization"
+path = "examples/monte-carlo/mc_jit_amortization.rs"
+
+[[example]]
+name = "tui_layout_constraint_solver"
+path = "examples/tui/tui_layout_constraint_solver.rs"
+
+[[example]]
+name = "tui_chart_bar_render"
+path = "examples/tui/tui_chart_bar_render.rs"
+
+[[example]]
+name = "tui_dialog_button_focus"
+path = "examples/tui/tui_dialog_button_focus.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-178) ---
+
+[[example]]
+name = "contracts_macros_signature_hash"
+path = "examples/contracts-macros/contracts_macros_signature_hash.rs"
+
+[[example]]
+name = "contracts_macros_obligation_lock_file"
+path = "examples/contracts-macros/contracts_macros_obligation_lock_file.rs"
+
+[[example]]
+name = "contracts_macros_lean_compile_status"
+path = "examples/contracts-macros/contracts_macros_lean_compile_status.rs"
+
+[[example]]
+name = "mc_correlated_burst"
+path = "examples/monte-carlo/mc_correlated_burst.rs"
+
+[[example]]
+name = "mc_streaming_underflow"
+path = "examples/monte-carlo/mc_streaming_underflow.rs"
+
+[[example]]
+name = "mc_kv_zipf_hit_rate"
+path = "examples/monte-carlo/mc_kv_zipf_hit_rate.rs"
+
+[[example]]
+name = "tui_breadcrumb_click_target"
+path = "examples/tui/tui_breadcrumb_click_target.rs"
+
+[[example]]
+name = "tui_marquee_scroll"
+path = "examples/tui/tui_marquee_scroll.rs"
+
+[[example]]
+name = "tui_calendar_grid"
+path = "examples/tui/tui_calendar_grid.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-179) ---
+
+[[example]]
+name = "contracts_macros_obligation_count_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_count_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_unicode_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_unicode_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_orphan_detector"
+path = "examples/contracts-macros/contracts_macros_recipe_orphan_detector.rs"
+
+[[example]]
+name = "mc_load_balancer_least_conn"
+path = "examples/monte-carlo/mc_load_balancer_least_conn.rs"
+
+[[example]]
+name = "mc_request_coalescing"
+path = "examples/monte-carlo/mc_request_coalescing.rs"
+
+[[example]]
+name = "mc_circuit_breaker_recovery"
+path = "examples/monte-carlo/mc_circuit_breaker_recovery.rs"
+
+[[example]]
+name = "tui_breadcrumb_collapse"
+path = "examples/tui/tui_breadcrumb_collapse.rs"
+
+[[example]]
+name = "tui_color_contrast_pass"
+path = "examples/tui/tui_color_contrast_pass.rs"
+
+[[example]]
+name = "tui_keybinding_dispatch"
+path = "examples/tui/tui_keybinding_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-180) ---
+
+[[example]]
+name = "contracts_macros_recipe_tag_taxonomy"
+path = "examples/contracts-macros/contracts_macros_recipe_tag_taxonomy.rs"
+
+[[example]]
+name = "contracts_macros_yaml_anchor_cycle"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_cycle.rs"
+
+[[example]]
+name = "contracts_macros_proof_module_index"
+path = "examples/contracts-macros/contracts_macros_proof_module_index.rs"
+
+[[example]]
+name = "mc_inventory_replenishment"
+path = "examples/monte-carlo/mc_inventory_replenishment.rs"
+
+[[example]]
+name = "mc_traffic_light_intersection"
+path = "examples/monte-carlo/mc_traffic_light_intersection.rs"
+
+[[example]]
+name = "mc_db_lock_wait_time"
+path = "examples/monte-carlo/mc_db_lock_wait_time.rs"
+
+[[example]]
+name = "tui_quote_block_render"
+path = "examples/tui/tui_quote_block_render.rs"
+
+[[example]]
+name = "tui_inline_diff_view"
+path = "examples/tui/tui_inline_diff_view.rs"
+
+[[example]]
+name = "tui_password_strength_meter"
+path = "examples/tui/tui_password_strength_meter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-181) ---
+
+[[example]]
+name = "contracts_macros_severity_propagation"
+path = "examples/contracts-macros/contracts_macros_severity_propagation.rs"
+
+[[example]]
+name = "contracts_macros_yaml_indent_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_indent_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_freshness_window"
+path = "examples/contracts-macros/contracts_macros_recipe_freshness_window.rs"
+
+[[example]]
+name = "mc_token_refill_rate_match"
+path = "examples/monte-carlo/mc_token_refill_rate_match.rs"
+
+[[example]]
+name = "mc_battery_discharge_curve"
+path = "examples/monte-carlo/mc_battery_discharge_curve.rs"
+
+[[example]]
+name = "mc_pipeline_stage_bottleneck"
+path = "examples/monte-carlo/mc_pipeline_stage_bottleneck.rs"
+
+[[example]]
+name = "tui_indent_guides_render"
+path = "examples/tui/tui_indent_guides_render.rs"
+
+[[example]]
+name = "tui_status_pulse_dot"
+path = "examples/tui/tui_status_pulse_dot.rs"
+
+[[example]]
+name = "tui_minimap_render"
+path = "examples/tui/tui_minimap_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-182) ---
+
+[[example]]
+name = "contracts_macros_obligation_chain_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_chain_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_id_format"
+path = "examples/contracts-macros/contracts_macros_recipe_id_format.rs"
+
+[[example]]
+name = "contracts_macros_proof_status_transition"
+path = "examples/contracts-macros/contracts_macros_proof_status_transition.rs"
+
+[[example]]
+name = "mc_disk_io_queue_depth"
+path = "examples/monte-carlo/mc_disk_io_queue_depth.rs"
+
+[[example]]
+name = "mc_dns_resolver_cache"
+path = "examples/monte-carlo/mc_dns_resolver_cache.rs"
+
+[[example]]
+name = "mc_supply_chain_lead_time_jitter"
+path = "examples/monte-carlo/mc_supply_chain_lead_time_jitter.rs"
+
+[[example]]
+name = "tui_log_level_filter"
+path = "examples/tui/tui_log_level_filter.rs"
+
+[[example]]
+name = "tui_duration_humanize"
+path = "examples/tui/tui_duration_humanize.rs"
+
+[[example]]
+name = "tui_table_zebra_stripe"
+path = "examples/tui/tui_table_zebra_stripe.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-183) ---
+
+[[example]]
+name = "contracts_macros_obligation_dedupe"
+path = "examples/contracts-macros/contracts_macros_obligation_dedupe.rs"
+
+[[example]]
+name = "contracts_macros_yaml_default_field_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_default_field_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_priority_classifier"
+path = "examples/contracts-macros/contracts_macros_recipe_priority_classifier.rs"
+
+[[example]]
+name = "mc_lru_vs_fifo_eviction"
+path = "examples/monte-carlo/mc_lru_vs_fifo_eviction.rs"
+
+[[example]]
+name = "mc_consensus_round_latency"
+path = "examples/monte-carlo/mc_consensus_round_latency.rs"
+
+[[example]]
+name = "mc_a_star_path_cost"
+path = "examples/monte-carlo/mc_a_star_path_cost.rs"
+
+[[example]]
+name = "tui_color_palette_quantize"
+path = "examples/tui/tui_color_palette_quantize.rs"
+
+[[example]]
+name = "tui_text_alignment"
+path = "examples/tui/tui_text_alignment.rs"
+
+[[example]]
+name = "tui_focus_ring_traversal"
+path = "examples/tui/tui_focus_ring_traversal.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-184) ---
+
+[[example]]
+name = "contracts_macros_phase_dependency_check"
+path = "examples/contracts-macros/contracts_macros_phase_dependency_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_envelope_size_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_envelope_size_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_benchmark_envelope"
+path = "examples/contracts-macros/contracts_macros_recipe_benchmark_envelope.rs"
+
+[[example]]
+name = "mc_kafka_partition_skew"
+path = "examples/monte-carlo/mc_kafka_partition_skew.rs"
+
+[[example]]
+name = "mc_garbage_collection_pause"
+path = "examples/monte-carlo/mc_garbage_collection_pause.rs"
+
+[[example]]
+name = "mc_random_walk_2d_diffusion"
+path = "examples/monte-carlo/mc_random_walk_2d_diffusion.rs"
+
+[[example]]
+name = "tui_truncate_path_with_dots"
+path = "examples/tui/tui_truncate_path_with_dots.rs"
+
+[[example]]
+name = "tui_kbd_chord_render"
+path = "examples/tui/tui_kbd_chord_render.rs"
+
+[[example]]
+name = "tui_tag_chip_render"
+path = "examples/tui/tui_tag_chip_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-185) ---
+
+[[example]]
+name = "contracts_macros_obligation_assignee_balance"
+path = "examples/contracts-macros/contracts_macros_obligation_assignee_balance.rs"
+
+[[example]]
+name = "contracts_macros_yaml_required_field_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_required_field_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_count_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_count_audit.rs"
+
+[[example]]
+name = "mc_p_value_under_null"
+path = "examples/monte-carlo/mc_p_value_under_null.rs"
+
+[[example]]
+name = "mc_bayesian_ab_winrate"
+path = "examples/monte-carlo/mc_bayesian_ab_winrate.rs"
+
+[[example]]
+name = "mc_voting_majority_consensus"
+path = "examples/monte-carlo/mc_voting_majority_consensus.rs"
+
+[[example]]
+name = "tui_diff_three_way_render"
+path = "examples/tui/tui_diff_three_way_render.rs"
+
+[[example]]
+name = "tui_command_line_history_dedupe"
+path = "examples/tui/tui_command_line_history_dedupe.rs"
+
+[[example]]
+name = "tui_progress_band_color"
+path = "examples/tui/tui_progress_band_color.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-186) ---
+
+[[example]]
+name = "contracts_macros_obligation_satisfied_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_satisfied_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_comment_density"
+path = "examples/contracts-macros/contracts_macros_yaml_comment_density.rs"
+
+[[example]]
+name = "contracts_macros_recipe_diff_minimum"
+path = "examples/contracts-macros/contracts_macros_recipe_diff_minimum.rs"
+
+[[example]]
+name = "mc_dropout_dependency"
+path = "examples/monte-carlo/mc_dropout_dependency.rs"
+
+[[example]]
+name = "mc_traveling_salesman_random"
+path = "examples/monte-carlo/mc_traveling_salesman_random.rs"
+
+[[example]]
+name = "mc_bloom_filter_false_positive"
+path = "examples/monte-carlo/mc_bloom_filter_false_positive.rs"
+
+[[example]]
+name = "tui_split_button_render"
+path = "examples/tui/tui_split_button_render.rs"
+
+[[example]]
+name = "tui_text_search_match_count"
+path = "examples/tui/tui_text_search_match_count.rs"
+
+[[example]]
+name = "tui_aspect_ratio_grid"
+path = "examples/tui/tui_aspect_ratio_grid.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-187) ---
+
+[[example]]
+name = "contracts_macros_obligation_review_age"
+path = "examples/contracts-macros/contracts_macros_obligation_review_age.rs"
+
+[[example]]
+name = "contracts_macros_yaml_macros_expansion_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_macros_expansion_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_link_health"
+path = "examples/contracts-macros/contracts_macros_recipe_link_health.rs"
+
+[[example]]
+name = "mc_packet_loss_burst_pattern"
+path = "examples/monte-carlo/mc_packet_loss_burst_pattern.rs"
+
+[[example]]
+name = "mc_quorum_read_consistency"
+path = "examples/monte-carlo/mc_quorum_read_consistency.rs"
+
+[[example]]
+name = "mc_lazy_replication_lag"
+path = "examples/monte-carlo/mc_lazy_replication_lag.rs"
+
+[[example]]
+name = "tui_unicode_emoji_width"
+path = "examples/tui/tui_unicode_emoji_width.rs"
+
+[[example]]
+name = "tui_clipboard_paste_filter"
+path = "examples/tui/tui_clipboard_paste_filter.rs"
+
+[[example]]
+name = "tui_search_jump_list"
+path = "examples/tui/tui_search_jump_list.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-188) ---
+
+[[example]]
+name = "contracts_macros_obligation_breaking_change_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_breaking_change_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_kebab_case_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_kebab_case_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_runtime_budget"
+path = "examples/contracts-macros/contracts_macros_recipe_runtime_budget.rs"
+
+[[example]]
+name = "mc_password_brute_force_eta"
+path = "examples/monte-carlo/mc_password_brute_force_eta.rs"
+
+[[example]]
+name = "mc_blackjack_house_edge"
+path = "examples/monte-carlo/mc_blackjack_house_edge.rs"
+
+[[example]]
+name = "mc_random_forest_voting"
+path = "examples/monte-carlo/mc_random_forest_voting.rs"
+
+[[example]]
+name = "tui_word_wrap"
+path = "examples/tui/tui_word_wrap.rs"
+
+[[example]]
+name = "tui_alphabetical_index_jump"
+path = "examples/tui/tui_alphabetical_index_jump.rs"
+
+[[example]]
+name = "tui_animation_easing_curve"
+path = "examples/tui/tui_animation_easing_curve.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-189) ---
+
+[[example]]
+name = "contracts_macros_obligation_test_traceability"
+path = "examples/contracts-macros/contracts_macros_obligation_test_traceability.rs"
+
+[[example]]
+name = "contracts_macros_yaml_block_scalar_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_block_scalar_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_categorize_by_keyword"
+path = "examples/contracts-macros/contracts_macros_recipe_categorize_by_keyword.rs"
+
+[[example]]
+name = "mc_two_armed_bandit_thompson"
+path = "examples/monte-carlo/mc_two_armed_bandit_thompson.rs"
+
+[[example]]
+name = "mc_simulated_annealing_optimum"
+path = "examples/monte-carlo/mc_simulated_annealing_optimum.rs"
+
+[[example]]
+name = "mc_monty_hall_problem"
+path = "examples/monte-carlo/mc_monty_hall_problem.rs"
+
+[[example]]
+name = "tui_segmented_control_render"
+path = "examples/tui/tui_segmented_control_render.rs"
+
+[[example]]
+name = "tui_window_layout_anchor"
+path = "examples/tui/tui_window_layout_anchor.rs"
+
+[[example]]
+name = "tui_breadcrumb_search_filter"
+path = "examples/tui/tui_breadcrumb_search_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-190) ---
+
+[[example]]
+name = "contracts_macros_obligation_export_csv"
+path = "examples/contracts-macros/contracts_macros_obligation_export_csv.rs"
+
+[[example]]
+name = "contracts_macros_yaml_alias_resolution_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_alias_resolution_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signature_diff"
+path = "examples/contracts-macros/contracts_macros_recipe_signature_diff.rs"
+
+[[example]]
+name = "mc_random_graph_connectedness"
+path = "examples/monte-carlo/mc_random_graph_connectedness.rs"
+
+[[example]]
+name = "mc_throttle_token_bucket_fairness"
+path = "examples/monte-carlo/mc_throttle_token_bucket_fairness.rs"
+
+[[example]]
+name = "mc_warehouse_pick_path_length"
+path = "examples/monte-carlo/mc_warehouse_pick_path_length.rs"
+
+[[example]]
+name = "tui_clipboard_history_circular"
+path = "examples/tui/tui_clipboard_history_circular.rs"
+
+[[example]]
+name = "tui_progress_throughput_avg"
+path = "examples/tui/tui_progress_throughput_avg.rs"
+
+[[example]]
+name = "tui_resize_safe_truncate"
+path = "examples/tui/tui_resize_safe_truncate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-191) ---
+
+[[example]]
+name = "contracts_macros_obligation_owner_filter"
+path = "examples/contracts-macros/contracts_macros_obligation_owner_filter.rs"
+
+[[example]]
+name = "contracts_macros_yaml_quote_style_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_quote_style_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_assignment"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_assignment.rs"
+
+[[example]]
+name = "mc_disk_failure_raid"
+path = "examples/monte-carlo/mc_disk_failure_raid.rs"
+
+[[example]]
+name = "mc_caching_layer_warmup"
+path = "examples/monte-carlo/mc_caching_layer_warmup.rs"
+
+[[example]]
+name = "mc_request_signature_verification_throughput"
+path = "examples/monte-carlo/mc_request_signature_verification_throughput.rs"
+
+[[example]]
+name = "tui_command_palette_score"
+path = "examples/tui/tui_command_palette_score.rs"
+
+[[example]]
+name = "tui_input_validation_state"
+path = "examples/tui/tui_input_validation_state.rs"
+
+[[example]]
+name = "tui_table_column_resize"
+path = "examples/tui/tui_table_column_resize.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-192) ---
+
+[[example]]
+name = "contracts_macros_obligation_history_log"
+path = "examples/contracts-macros/contracts_macros_obligation_history_log.rs"
+
+[[example]]
+name = "contracts_macros_yaml_anchor_naming"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_naming.rs"
+
+[[example]]
+name = "contracts_macros_recipe_changelog_entry"
+path = "examples/contracts-macros/contracts_macros_recipe_changelog_entry.rs"
+
+[[example]]
+name = "mc_loadbalancer_health_check"
+path = "examples/monte-carlo/mc_loadbalancer_health_check.rs"
+
+[[example]]
+name = "mc_distributed_lock_contention"
+path = "examples/monte-carlo/mc_distributed_lock_contention.rs"
+
+[[example]]
+name = "mc_jobqueue_completion_time"
+path = "examples/monte-carlo/mc_jobqueue_completion_time.rs"
+
+[[example]]
+name = "tui_radio_group_select"
+path = "examples/tui/tui_radio_group_select.rs"
+
+[[example]]
+name = "tui_drag_drop_constrain"
+path = "examples/tui/tui_drag_drop_constrain.rs"
+
+[[example]]
+name = "tui_typeahead_completion"
+path = "examples/tui/tui_typeahead_completion.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-193) ---
+
+[[example]]
+name = "contracts_macros_obligation_type_consistency"
+path = "examples/contracts-macros/contracts_macros_obligation_type_consistency.rs"
+
+[[example]]
+name = "contracts_macros_yaml_dotted_path_lookup"
+path = "examples/contracts-macros/contracts_macros_yaml_dotted_path_lookup.rs"
+
+[[example]]
+name = "contracts_macros_recipe_review_round_count"
+path = "examples/contracts-macros/contracts_macros_recipe_review_round_count.rs"
+
+[[example]]
+name = "mc_clock_drift_compensation"
+path = "examples/monte-carlo/mc_clock_drift_compensation.rs"
+
+[[example]]
+name = "mc_lru_admission_filter"
+path = "examples/monte-carlo/mc_lru_admission_filter.rs"
+
+[[example]]
+name = "mc_geo_distance_routing"
+path = "examples/monte-carlo/mc_geo_distance_routing.rs"
+
+[[example]]
+name = "tui_toast_notification_render"
+path = "examples/tui/tui_toast_notification_render.rs"
+
+[[example]]
+name = "tui_search_replace_preview"
+path = "examples/tui/tui_search_replace_preview.rs"
+
+[[example]]
+name = "tui_undo_redo_stack"
+path = "examples/tui/tui_undo_redo_stack.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-194) ---
+
+[[example]]
+name = "contracts_macros_obligation_lifecycle_state"
+path = "examples/contracts-macros/contracts_macros_obligation_lifecycle_state.rs"
+
+[[example]]
+name = "contracts_macros_yaml_max_nesting_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_max_nesting_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_dependency_height"
+path = "examples/contracts-macros/contracts_macros_recipe_dependency_height.rs"
+
+[[example]]
+name = "mc_random_polygon_area"
+path = "examples/monte-carlo/mc_random_polygon_area.rs"
+
+[[example]]
+name = "mc_token_pricing_arbitrage"
+path = "examples/monte-carlo/mc_token_pricing_arbitrage.rs"
+
+[[example]]
+name = "mc_event_correlation_window"
+path = "examples/monte-carlo/mc_event_correlation_window.rs"
+
+[[example]]
+name = "tui_breadcrumb_separator_style"
+path = "examples/tui/tui_breadcrumb_separator_style.rs"
+
+[[example]]
+name = "tui_table_pagination_indicator"
+path = "examples/tui/tui_table_pagination_indicator.rs"
+
+[[example]]
+name = "tui_resize_split_constraint"
+path = "examples/tui/tui_resize_split_constraint.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-195) ---
+
+[[example]]
+name = "contracts_macros_obligation_namespace_collision"
+path = "examples/contracts-macros/contracts_macros_obligation_namespace_collision.rs"
+
+[[example]]
+name = "contracts_macros_yaml_inline_array_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_inline_array_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_breaking_change_log"
+path = "examples/contracts-macros/contracts_macros_recipe_breaking_change_log.rs"
+
+[[example]]
+name = "mc_load_test_ramp_up"
+path = "examples/monte-carlo/mc_load_test_ramp_up.rs"
+
+[[example]]
+name = "mc_session_affinity_routing"
+path = "examples/monte-carlo/mc_session_affinity_routing.rs"
+
+[[example]]
+name = "mc_priority_queue_aging"
+path = "examples/monte-carlo/mc_priority_queue_aging.rs"
+
+[[example]]
+name = "tui_form_field_tab_order"
+path = "examples/tui/tui_form_field_tab_order.rs"
+
+[[example]]
+name = "tui_status_history_compact"
+path = "examples/tui/tui_status_history_compact.rs"
+
+[[example]]
+name = "tui_chart_legend_swatch"
+path = "examples/tui/tui_chart_legend_swatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-196) ---
+
+[[example]]
+name = "contracts_macros_obligation_audit_log"
+path = "examples/contracts-macros/contracts_macros_obligation_audit_log.rs"
+
+[[example]]
+name = "contracts_macros_yaml_anchor_unused"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_unused.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_runtime_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_runtime_audit.rs"
+
+[[example]]
+name = "mc_chi_squared_uniformity"
+path = "examples/monte-carlo/mc_chi_squared_uniformity.rs"
+
+[[example]]
+name = "mc_walking_meander"
+path = "examples/monte-carlo/mc_walking_meander.rs"
+
+[[example]]
+name = "mc_priority_inversion_detect"
+path = "examples/monte-carlo/mc_priority_inversion_detect.rs"
+
+[[example]]
+name = "tui_button_kbd_mnemonic"
+path = "examples/tui/tui_button_kbd_mnemonic.rs"
+
+[[example]]
+name = "tui_input_max_length_indicator"
+path = "examples/tui/tui_input_max_length_indicator.rs"
+
+[[example]]
+name = "tui_overflow_marker_render"
+path = "examples/tui/tui_overflow_marker_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-197) ---
+
+[[example]]
+name = "contracts_macros_obligation_join_status"
+path = "examples/contracts-macros/contracts_macros_obligation_join_status.rs"
+
+[[example]]
+name = "contracts_macros_yaml_required_top_level"
+path = "examples/contracts-macros/contracts_macros_yaml_required_top_level.rs"
+
+[[example]]
+name = "contracts_macros_recipe_priority_decay"
+path = "examples/contracts-macros/contracts_macros_recipe_priority_decay.rs"
+
+[[example]]
+name = "mc_traffic_jam_density"
+path = "examples/monte-carlo/mc_traffic_jam_density.rs"
+
+[[example]]
+name = "mc_neural_dropout_inference"
+path = "examples/monte-carlo/mc_neural_dropout_inference.rs"
+
+[[example]]
+name = "mc_caching_eviction_oldest"
+path = "examples/monte-carlo/mc_caching_eviction_oldest.rs"
+
+[[example]]
+name = "tui_minilist_filter_render"
+path = "examples/tui/tui_minilist_filter_render.rs"
+
+[[example]]
+name = "tui_resize_overflow_compact"
+path = "examples/tui/tui_resize_overflow_compact.rs"
+
+[[example]]
+name = "tui_chart_threshold_overlay"
+path = "examples/tui/tui_chart_threshold_overlay.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-198) ---
+
+[[example]]
+name = "contracts_macros_obligation_priority_inheritance"
+path = "examples/contracts-macros/contracts_macros_obligation_priority_inheritance.rs"
+
+[[example]]
+name = "contracts_macros_yaml_field_alphabetize"
+path = "examples/contracts-macros/contracts_macros_yaml_field_alphabetize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_naming"
+path = "examples/contracts-macros/contracts_macros_recipe_test_naming.rs"
+
+[[example]]
+name = "mc_genetic_algorithm_convergence"
+path = "examples/monte-carlo/mc_genetic_algorithm_convergence.rs"
+
+[[example]]
+name = "mc_voronoi_cell_area"
+path = "examples/monte-carlo/mc_voronoi_cell_area.rs"
+
+[[example]]
+name = "mc_zipf_request_distribution"
+path = "examples/monte-carlo/mc_zipf_request_distribution.rs"
+
+[[example]]
+name = "tui_color_scheme_validate"
+path = "examples/tui/tui_color_scheme_validate.rs"
+
+[[example]]
+name = "tui_arrow_key_navigation"
+path = "examples/tui/tui_arrow_key_navigation.rs"
+
+[[example]]
+name = "tui_pixel_art_palette_render"
+path = "examples/tui/tui_pixel_art_palette_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-199) ---
+
+[[example]]
+name = "contracts_macros_obligation_subset_check"
+path = "examples/contracts-macros/contracts_macros_obligation_subset_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_default_value_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_default_value_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_estimated_complexity"
+path = "examples/contracts-macros/contracts_macros_recipe_estimated_complexity.rs"
+
+[[example]]
+name = "mc_pi_estimation_buffon"
+path = "examples/monte-carlo/mc_pi_estimation_buffon.rs"
+
+[[example]]
+name = "mc_kalman_filter_smoothing"
+path = "examples/monte-carlo/mc_kalman_filter_smoothing.rs"
+
+[[example]]
+name = "mc_coupon_collector"
+path = "examples/monte-carlo/mc_coupon_collector.rs"
+
+[[example]]
+name = "tui_marquee_speed_control"
+path = "examples/tui/tui_marquee_speed_control.rs"
+
+[[example]]
+name = "tui_form_layout_grid"
+path = "examples/tui/tui_form_layout_grid.rs"
+
+[[example]]
+name = "tui_emoji_picker_filter"
+path = "examples/tui/tui_emoji_picker_filter.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-200, milestone batch) ---
+
+[[example]]
+name = "contracts_macros_obligation_severity_escalate"
+path = "examples/contracts-macros/contracts_macros_obligation_severity_escalate.rs"
+
+[[example]]
+name = "contracts_macros_yaml_path_normalize"
+path = "examples/contracts-macros/contracts_macros_yaml_path_normalize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_release_blocker"
+path = "examples/contracts-macros/contracts_macros_recipe_release_blocker.rs"
+
+[[example]]
+name = "mc_random_walk_drunkard"
+path = "examples/monte-carlo/mc_random_walk_drunkard.rs"
+
+[[example]]
+name = "mc_genetic_drift_population"
+path = "examples/monte-carlo/mc_genetic_drift_population.rs"
+
+[[example]]
+name = "mc_pareto_principle_80_20"
+path = "examples/monte-carlo/mc_pareto_principle_80_20.rs"
+
+[[example]]
+name = "tui_command_history_search_pattern"
+path = "examples/tui/tui_command_history_search_pattern.rs"
+
+[[example]]
+name = "tui_progress_estimate_remaining"
+path = "examples/tui/tui_progress_estimate_remaining.rs"
+
+[[example]]
+name = "tui_help_overlay_dismiss"
+path = "examples/tui/tui_help_overlay_dismiss.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-201) ---
+
+[[example]]
+name = "contracts_macros_obligation_split_grouping"
+path = "examples/contracts-macros/contracts_macros_obligation_split_grouping.rs"
+
+[[example]]
+name = "contracts_macros_yaml_url_validation"
+path = "examples/contracts-macros/contracts_macros_yaml_url_validation.rs"
+
+[[example]]
+name = "contracts_macros_recipe_outdated_dep"
+path = "examples/contracts-macros/contracts_macros_recipe_outdated_dep.rs"
+
+[[example]]
+name = "mc_dice_throw_distribution"
+path = "examples/monte-carlo/mc_dice_throw_distribution.rs"
+
+[[example]]
+name = "mc_blockchain_fork_resolve"
+path = "examples/monte-carlo/mc_blockchain_fork_resolve.rs"
+
+[[example]]
+name = "mc_kademlia_routing_lookup"
+path = "examples/monte-carlo/mc_kademlia_routing_lookup.rs"
+
+[[example]]
+name = "tui_inline_code_render"
+path = "examples/tui/tui_inline_code_render.rs"
+
+[[example]]
+name = "tui_clipboard_paste_pending"
+path = "examples/tui/tui_clipboard_paste_pending.rs"
+
+[[example]]
+name = "tui_input_history_navigate"
+path = "examples/tui/tui_input_history_navigate.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-202) ---
+
+[[example]]
+name = "contracts_macros_obligation_blame_chain"
+path = "examples/contracts-macros/contracts_macros_obligation_blame_chain.rs"
+
+[[example]]
+name = "contracts_macros_yaml_reserved_word_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_reserved_word_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_generated_marker"
+path = "examples/contracts-macros/contracts_macros_recipe_generated_marker.rs"
+
+[[example]]
+name = "mc_random_partition_set"
+path = "examples/monte-carlo/mc_random_partition_set.rs"
+
+[[example]]
+name = "mc_simulated_pi_dart"
+path = "examples/monte-carlo/mc_simulated_pi_dart.rs"
+
+[[example]]
+name = "mc_revenue_max_pricing"
+path = "examples/monte-carlo/mc_revenue_max_pricing.rs"
+
+[[example]]
+name = "tui_password_input_mask"
+path = "examples/tui/tui_password_input_mask.rs"
+
+[[example]]
+name = "tui_diff_word_level"
+path = "examples/tui/tui_diff_word_level.rs"
+
+[[example]]
+name = "tui_kbd_shortcuts_render"
+path = "examples/tui/tui_kbd_shortcuts_render.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-203) ---
+
+[[example]]
+name = "contracts_macros_obligation_age_audit"
+path = "examples/contracts-macros/contracts_macros_obligation_age_audit.rs"
+
+[[example]]
+name = "contracts_macros_yaml_alias_dup_check"
+path = "examples/contracts-macros/contracts_macros_yaml_alias_dup_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_tag_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_tag_consistency.rs"
+
+[[example]]
+name = "mc_gamblers_ruin"
+path = "examples/monte-carlo/mc_gamblers_ruin.rs"
+
+[[example]]
+name = "mc_knapsack_random"
+path = "examples/monte-carlo/mc_knapsack_random.rs"
+
+[[example]]
+name = "mc_tsp_random_search"
+path = "examples/monte-carlo/mc_tsp_random_search.rs"
+
+[[example]]
+name = "tui_smart_indent_continue"
+path = "examples/tui/tui_smart_indent_continue.rs"
+
+[[example]]
+name = "tui_braces_match_highlight"
+path = "examples/tui/tui_braces_match_highlight.rs"
+
+[[example]]
+name = "tui_find_replace_count"
+path = "examples/tui/tui_find_replace_count.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-204) ---
+
+[[example]]
+name = "contracts_macros_coverage_band_check"
+path = "examples/contracts-macros/contracts_macros_coverage_band_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_revision_bump"
+path = "examples/contracts-macros/contracts_macros_recipe_revision_bump.rs"
+
+[[example]]
+name = "contracts_macros_spec_drift_audit"
+path = "examples/contracts-macros/contracts_macros_spec_drift_audit.rs"
+
+[[example]]
+name = "mc_reservoir_sample"
+path = "examples/monte-carlo/mc_reservoir_sample.rs"
+
+[[example]]
+name = "mc_metropolis_hastings_target"
+path = "examples/monte-carlo/mc_metropolis_hastings_target.rs"
+
+[[example]]
+name = "mc_geomean_estimate"
+path = "examples/monte-carlo/mc_geomean_estimate.rs"
+
+[[example]]
+name = "tui_line_number_render"
+path = "examples/tui/tui_line_number_render.rs"
+
+[[example]]
+name = "tui_trailing_ws_highlight"
+path = "examples/tui/tui_trailing_ws_highlight.rs"
+
+[[example]]
+name = "tui_theme_switch_apply"
+path = "examples/tui/tui_theme_switch_apply.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-205) ---
+
+[[example]]
+name = "contracts_macros_obligation_checksum"
+path = "examples/contracts-macros/contracts_macros_obligation_checksum.rs"
+
+[[example]]
+name = "contracts_macros_recipe_risk_score"
+path = "examples/contracts-macros/contracts_macros_recipe_risk_score.rs"
+
+[[example]]
+name = "contracts_macros_yaml_quoted_keys_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_quoted_keys_audit.rs"
+
+[[example]]
+name = "mc_brownian_motion_path"
+path = "examples/monte-carlo/mc_brownian_motion_path.rs"
+
+[[example]]
+name = "mc_bootstrap_resample_mean"
+path = "examples/monte-carlo/mc_bootstrap_resample_mean.rs"
+
+[[example]]
+name = "mc_antithetic_variance_reduce"
+path = "examples/monte-carlo/mc_antithetic_variance_reduce.rs"
+
+[[example]]
+name = "tui_spell_check_underline"
+path = "examples/tui/tui_spell_check_underline.rs"
+
+[[example]]
+name = "tui_fold_block_collapse"
+path = "examples/tui/tui_fold_block_collapse.rs"
+
+[[example]]
+name = "tui_notification_toast_queue"
+path = "examples/tui/tui_notification_toast_queue.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-206) ---
+
+[[example]]
+name = "contracts_macros_recipe_reviewer_assign"
+path = "examples/contracts-macros/contracts_macros_recipe_reviewer_assign.rs"
+
+[[example]]
+name = "contracts_macros_witness_dag_check"
+path = "examples/contracts-macros/contracts_macros_witness_dag_check.rs"
+
+[[example]]
+name = "contracts_macros_yaml_seq_padding_norm"
+path = "examples/contracts-macros/contracts_macros_yaml_seq_padding_norm.rs"
+
+[[example]]
+name = "mc_hit_or_miss_integration"
+path = "examples/monte-carlo/mc_hit_or_miss_integration.rs"
+
+[[example]]
+name = "mc_sphere_volume_estimate"
+path = "examples/monte-carlo/mc_sphere_volume_estimate.rs"
+
+[[example]]
+name = "mc_stratified_sampling"
+path = "examples/monte-carlo/mc_stratified_sampling.rs"
+
+[[example]]
+name = "tui_cursor_blink_phase"
+path = "examples/tui/tui_cursor_blink_phase.rs"
+
+[[example]]
+name = "tui_sidebar_toggle_state"
+path = "examples/tui/tui_sidebar_toggle_state.rs"
+
+[[example]]
+name = "tui_tooltip_show_delay"
+path = "examples/tui/tui_tooltip_show_delay.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-207) ---
+
+[[example]]
+name = "contracts_macros_yaml_doc_separator_check"
+path = "examples/contracts-macros/contracts_macros_yaml_doc_separator_check.rs"
+
+[[example]]
+name = "contracts_macros_spec_hash_pin"
+path = "examples/contracts-macros/contracts_macros_spec_hash_pin.rs"
+
+[[example]]
+name = "contracts_macros_recipe_quarantine_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_quarantine_audit.rs"
+
+[[example]]
+name = "mc_st_petersburg_paradox"
+path = "examples/monte-carlo/mc_st_petersburg_paradox.rs"
+
+[[example]]
+name = "mc_polya_urn_color_balance"
+path = "examples/monte-carlo/mc_polya_urn_color_balance.rs"
+
+[[example]]
+name = "mc_control_variate_reduction"
+path = "examples/monte-carlo/mc_control_variate_reduction.rs"
+
+[[example]]
+name = "tui_menu_render_aligned"
+path = "examples/tui/tui_menu_render_aligned.rs"
+
+[[example]]
+name = "tui_word_count_status"
+path = "examples/tui/tui_word_count_status.rs"
+
+[[example]]
+name = "tui_live_preview_throttle"
+path = "examples/tui/tui_live_preview_throttle.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-208) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_chain_depth"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_chain_depth.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_handoff"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_handoff.rs"
+
+[[example]]
+name = "contracts_macros_deprecation_window_audit"
+path = "examples/contracts-macros/contracts_macros_deprecation_window_audit.rs"
+
+[[example]]
+name = "mc_rejection_sampling_normal"
+path = "examples/monte-carlo/mc_rejection_sampling_normal.rs"
+
+[[example]]
+name = "mc_inverse_cdf_sample"
+path = "examples/monte-carlo/mc_inverse_cdf_sample.rs"
+
+[[example]]
+name = "mc_coin_flip_max_streak"
+path = "examples/monte-carlo/mc_coin_flip_max_streak.rs"
+
+[[example]]
+name = "tui_sticky_header_pin"
+path = "examples/tui/tui_sticky_header_pin.rs"
+
+[[example]]
+name = "tui_popup_dialog_modal"
+path = "examples/tui/tui_popup_dialog_modal.rs"
+
+[[example]]
+name = "tui_select_box_arrow_nav"
+path = "examples/tui/tui_select_box_arrow_nav.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-209) ---
+
+[[example]]
+name = "contracts_macros_yaml_string_truncate"
+path = "examples/contracts-macros/contracts_macros_yaml_string_truncate.rs"
+
+[[example]]
+name = "contracts_macros_recipe_severity_aggregate"
+path = "examples/contracts-macros/contracts_macros_recipe_severity_aggregate.rs"
+
+[[example]]
+name = "contracts_macros_recipe_test_skip_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_test_skip_audit.rs"
+
+[[example]]
+name = "mc_secretary_problem"
+path = "examples/monte-carlo/mc_secretary_problem.rs"
+
+[[example]]
+name = "mc_chinese_restaurant_process"
+path = "examples/monte-carlo/mc_chinese_restaurant_process.rs"
+
+[[example]]
+name = "mc_hash_collision_birthday"
+path = "examples/monte-carlo/mc_hash_collision_birthday.rs"
+
+[[example]]
+name = "tui_pane_split_compute"
+path = "examples/tui/tui_pane_split_compute.rs"
+
+[[example]]
+name = "tui_keymap_register_chord"
+path = "examples/tui/tui_keymap_register_chord.rs"
+
+[[example]]
+name = "tui_gradient_fill_compute"
+path = "examples/tui/tui_gradient_fill_compute.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-210) ---
+
+[[example]]
+name = "contracts_macros_yaml_canonical_form"
+path = "examples/contracts-macros/contracts_macros_yaml_canonical_form.rs"
+
+[[example]]
+name = "contracts_macros_recipe_label_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_label_consistency.rs"
+
+[[example]]
+name = "contracts_macros_witness_count_min"
+path = "examples/contracts-macros/contracts_macros_witness_count_min.rs"
+
+[[example]]
+name = "mc_spinning_wheel_payout"
+path = "examples/monte-carlo/mc_spinning_wheel_payout.rs"
+
+[[example]]
+name = "mc_texas_holdem_pocket_pair"
+path = "examples/monte-carlo/mc_texas_holdem_pocket_pair.rs"
+
+[[example]]
+name = "mc_gibbs_sampler_bivariate"
+path = "examples/monte-carlo/mc_gibbs_sampler_bivariate.rs"
+
+[[example]]
+name = "tui_toolbar_btn_overflow"
+path = "examples/tui/tui_toolbar_btn_overflow.rs"
+
+[[example]]
+name = "tui_date_picker_validate"
+path = "examples/tui/tui_date_picker_validate.rs"
+
+[[example]]
+name = "tui_tabbed_view_switch"
+path = "examples/tui/tui_tabbed_view_switch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-211) ---
+
+[[example]]
+name = "contracts_macros_recipe_freeze_check"
+path = "examples/contracts-macros/contracts_macros_recipe_freeze_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_compat_matrix"
+path = "examples/contracts-macros/contracts_macros_recipe_compat_matrix.rs"
+
+[[example]]
+name = "contracts_macros_witness_replay_audit"
+path = "examples/contracts-macros/contracts_macros_witness_replay_audit.rs"
+
+[[example]]
+name = "mc_markov_text_generator"
+path = "examples/monte-carlo/mc_markov_text_generator.rs"
+
+[[example]]
+name = "mc_coalescent_tree_sample"
+path = "examples/monte-carlo/mc_coalescent_tree_sample.rs"
+
+[[example]]
+name = "mc_secretary_two_choice"
+path = "examples/monte-carlo/mc_secretary_two_choice.rs"
+
+[[example]]
+name = "tui_range_slider_validate"
+path = "examples/tui/tui_range_slider_validate.rs"
+
+[[example]]
+name = "tui_context_menu_show"
+path = "examples/tui/tui_context_menu_show.rs"
+
+[[example]]
+name = "tui_drawer_slide_compute"
+path = "examples/tui/tui_drawer_slide_compute.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-212) ---
+
+[[example]]
+name = "contracts_macros_yaml_block_indent_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_block_indent_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_metadata_min"
+path = "examples/contracts-macros/contracts_macros_recipe_metadata_min.rs"
+
+[[example]]
+name = "contracts_macros_witness_origin_trace"
+path = "examples/contracts-macros/contracts_macros_witness_origin_trace.rs"
+
+[[example]]
+name = "mc_german_tank_problem"
+path = "examples/monte-carlo/mc_german_tank_problem.rs"
+
+[[example]]
+name = "mc_prisoner_box_strategy"
+path = "examples/monte-carlo/mc_prisoner_box_strategy.rs"
+
+[[example]]
+name = "mc_full_shuffle_quality"
+path = "examples/monte-carlo/mc_full_shuffle_quality.rs"
+
+[[example]]
+name = "tui_syntax_token_classify"
+path = "examples/tui/tui_syntax_token_classify.rs"
+
+[[example]]
+name = "tui_wrap_strategy_compute"
+path = "examples/tui/tui_wrap_strategy_compute.rs"
+
+[[example]]
+name = "tui_column_header_sort_cycle"
+path = "examples/tui/tui_column_header_sort_cycle.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-213) ---
+
+[[example]]
+name = "contracts_macros_recipe_attestation_chain"
+path = "examples/contracts-macros/contracts_macros_recipe_attestation_chain.rs"
+
+[[example]]
+name = "contracts_macros_severity_decay_curve"
+path = "examples/contracts-macros/contracts_macros_severity_decay_curve.rs"
+
+[[example]]
+name = "contracts_macros_invariant_drift_window"
+path = "examples/contracts-macros/contracts_macros_invariant_drift_window.rs"
+
+[[example]]
+name = "mc_levy_flight_step"
+path = "examples/monte-carlo/mc_levy_flight_step.rs"
+
+[[example]]
+name = "mc_hawkes_self_exciting_process"
+path = "examples/monte-carlo/mc_hawkes_self_exciting_process.rs"
+
+[[example]]
+name = "mc_grid_walk_2d_diffusion"
+path = "examples/monte-carlo/mc_grid_walk_2d_diffusion.rs"
+
+[[example]]
+name = "tui_smooth_scroll_velocity"
+path = "examples/tui/tui_smooth_scroll_velocity.rs"
+
+[[example]]
+name = "tui_carousel_advance_step"
+path = "examples/tui/tui_carousel_advance_step.rs"
+
+[[example]]
+name = "tui_tag_cloud_size_compute"
+path = "examples/tui/tui_tag_cloud_size_compute.rs"
+
+# --- contracts-macros / monte-carlo / wasm (PMAT-214) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_namespace"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_namespace.rs"
+
+[[example]]
+name = "contracts_macros_recipe_publish_gate"
+path = "examples/contracts-macros/contracts_macros_recipe_publish_gate.rs"
+
+[[example]]
+name = "contracts_macros_witness_aging_decay"
+path = "examples/contracts-macros/contracts_macros_witness_aging_decay.rs"
+
+[[example]]
+name = "mc_galton_board_distribution"
+path = "examples/monte-carlo/mc_galton_board_distribution.rs"
+
+[[example]]
+name = "mc_kelly_criterion_bet_size"
+path = "examples/monte-carlo/mc_kelly_criterion_bet_size.rs"
+
+[[example]]
+name = "mc_jidoka_guard_failure_rate"
+path = "examples/monte-carlo/mc_jidoka_guard_failure_rate.rs"
+
+[[example]]
+name = "wasm_start_section_validate"
+path = "examples/wasm/wasm_start_section_validate.rs"
+
+[[example]]
+name = "wasm_data_segment_overlap"
+path = "examples/wasm/wasm_data_segment_overlap.rs"
+
+[[example]]
+name = "wasm_tail_call_dispatch"
+path = "examples/wasm/wasm_tail_call_dispatch.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-215, simular-themed MC) ---
+
+[[example]]
+name = "contracts_macros_yaml_emit_format_check"
+path = "examples/contracts-macros/contracts_macros_yaml_emit_format_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_signoff_required"
+path = "examples/contracts-macros/contracts_macros_recipe_signoff_required.rs"
+
+[[example]]
+name = "contracts_macros_invariant_baseline_diff"
+path = "examples/contracts-macros/contracts_macros_invariant_baseline_diff.rs"
+
+[[example]]
+name = "mc_work_steal_scheduler_balance"
+path = "examples/monte-carlo/mc_work_steal_scheduler_balance.rs"
+
+[[example]]
+name = "mc_sim_clock_drift_detect"
+path = "examples/monte-carlo/mc_sim_clock_drift_detect.rs"
+
+[[example]]
+name = "mc_deterministic_replay_diverge"
+path = "examples/monte-carlo/mc_deterministic_replay_diverge.rs"
+
+[[example]]
+name = "tui_sparkline_render"
+path = "examples/tui/tui_sparkline_render.rs"
+
+[[example]]
+name = "tui_ascii_histogram_render"
+path = "examples/tui/tui_ascii_histogram_render.rs"
+
+[[example]]
+name = "tui_gauge_meter_render"
+path = "examples/tui/tui_gauge_meter_render.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-216) ---
+
+[[example]]
+name = "contracts_macros_yaml_envelope_quote"
+path = "examples/contracts-macros/contracts_macros_yaml_envelope_quote.rs"
+
+[[example]]
+name = "contracts_macros_recipe_ttl_check"
+path = "examples/contracts-macros/contracts_macros_recipe_ttl_check.rs"
+
+[[example]]
+name = "contracts_macros_invariant_split_check"
+path = "examples/contracts-macros/contracts_macros_invariant_split_check.rs"
+
+[[example]]
+name = "mc_circuit_recovery_time"
+path = "examples/monte-carlo/mc_circuit_recovery_time.rs"
+
+[[example]]
+name = "mc_exponential_backoff_jitter"
+path = "examples/monte-carlo/mc_exponential_backoff_jitter.rs"
+
+[[example]]
+name = "mc_jitter_buffer_underrun"
+path = "examples/monte-carlo/mc_jitter_buffer_underrun.rs"
+
+[[example]]
+name = "wasm_import_count_budget"
+path = "examples/wasm/wasm_import_count_budget.rs"
+
+[[example]]
+name = "simd_dot_product_lane"
+path = "examples/simd/simd_dot_product_lane.rs"
+
+[[example]]
+name = "simd_horizontal_min_lanes"
+path = "examples/simd/simd_horizontal_min_lanes.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-217) ---
+
+[[example]]
+name = "contracts_macros_yaml_tab_indent_reject"
+path = "examples/contracts-macros/contracts_macros_yaml_tab_indent_reject.rs"
+
+[[example]]
+name = "contracts_macros_recipe_archive_safe"
+path = "examples/contracts-macros/contracts_macros_recipe_archive_safe.rs"
+
+[[example]]
+name = "contracts_macros_invariant_compose_chain"
+path = "examples/contracts-macros/contracts_macros_invariant_compose_chain.rs"
+
+[[example]]
+name = "mc_epidemic_sir_model"
+path = "examples/monte-carlo/mc_epidemic_sir_model.rs"
+
+[[example]]
+name = "mc_count_min_sketch_estimate"
+path = "examples/monte-carlo/mc_count_min_sketch_estimate.rs"
+
+[[example]]
+name = "mc_negative_binomial_overdisp"
+path = "examples/monte-carlo/mc_negative_binomial_overdisp.rs"
+
+[[example]]
+name = "tui_loading_dots_animation"
+path = "examples/tui/tui_loading_dots_animation.rs"
+
+[[example]]
+name = "tui_empty_state_render"
+path = "examples/tui/tui_empty_state_render.rs"
+
+[[example]]
+name = "tui_active_indicator_dot"
+path = "examples/tui/tui_active_indicator_dot.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-218) ---
+
+[[example]]
+name = "contracts_macros_yaml_anchor_alphabetize"
+path = "examples/contracts-macros/contracts_macros_yaml_anchor_alphabetize.rs"
+
+[[example]]
+name = "contracts_macros_recipe_changelog_versi"
+path = "examples/contracts-macros/contracts_macros_recipe_changelog_versi.rs"
+
+[[example]]
+name = "contracts_macros_spec_release_notes"
+path = "examples/contracts-macros/contracts_macros_spec_release_notes.rs"
+
+[[example]]
+name = "mc_zipf_law_word_freq"
+path = "examples/monte-carlo/mc_zipf_law_word_freq.rs"
+
+[[example]]
+name = "mc_gaussian_kde_estimate"
+path = "examples/monte-carlo/mc_gaussian_kde_estimate.rs"
+
+[[example]]
+name = "mc_rng_period_check"
+path = "examples/monte-carlo/mc_rng_period_check.rs"
+
+[[example]]
+name = "wasm_memory_grow_step"
+path = "examples/wasm/wasm_memory_grow_step.rs"
+
+[[example]]
+name = "wasm_atomic_wait_timeout"
+path = "examples/wasm/wasm_atomic_wait_timeout.rs"
+
+[[example]]
+name = "simd_saturating_arithmetic"
+path = "examples/simd/simd_saturating_arithmetic.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-219) ---
+
+[[example]]
+name = "contracts_macros_yaml_block_scalar_norm"
+path = "examples/contracts-macros/contracts_macros_yaml_block_scalar_norm.rs"
+
+[[example]]
+name = "contracts_macros_recipe_pre_publish_lint"
+path = "examples/contracts-macros/contracts_macros_recipe_pre_publish_lint.rs"
+
+[[example]]
+name = "contracts_macros_invariant_atomicity"
+path = "examples/contracts-macros/contracts_macros_invariant_atomicity.rs"
+
+[[example]]
+name = "mc_card_shuffle_riffle"
+path = "examples/monte-carlo/mc_card_shuffle_riffle.rs"
+
+[[example]]
+name = "mc_brownian_bridge_path"
+path = "examples/monte-carlo/mc_brownian_bridge_path.rs"
+
+[[example]]
+name = "mc_inhomog_poisson_thinning"
+path = "examples/monte-carlo/mc_inhomog_poisson_thinning.rs"
+
+[[example]]
+name = "tui_banner_alert_render"
+path = "examples/tui/tui_banner_alert_render.rs"
+
+[[example]]
+name = "tui_terminal_bell_throttle"
+path = "examples/tui/tui_terminal_bell_throttle.rs"
+
+[[example]]
+name = "tui_pill_badge_render"
+path = "examples/tui/tui_pill_badge_render.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-220) ---
+
+[[example]]
+name = "contracts_macros_yaml_doc_seq_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_doc_seq_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_locale_consistency"
+path = "examples/contracts-macros/contracts_macros_recipe_locale_consistency.rs"
+
+[[example]]
+name = "contracts_macros_severity_score_normalize"
+path = "examples/contracts-macros/contracts_macros_severity_score_normalize.rs"
+
+[[example]]
+name = "mc_preferential_attachment_growth"
+path = "examples/monte-carlo/mc_preferential_attachment_growth.rs"
+
+[[example]]
+name = "mc_m_m_1_queue_wait"
+path = "examples/monte-carlo/mc_m_m_1_queue_wait.rs"
+
+[[example]]
+name = "mc_rumor_spread_dk_model"
+path = "examples/monte-carlo/mc_rumor_spread_dk_model.rs"
+
+[[example]]
+name = "wasm_table_max_size_check"
+path = "examples/wasm/wasm_table_max_size_check.rs"
+
+[[example]]
+name = "simd_lane_swizzle_validate"
+path = "examples/simd/simd_lane_swizzle_validate.rs"
+
+[[example]]
+name = "simd_pop_count_lane"
+path = "examples/simd/simd_pop_count_lane.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-221) ---
+
+[[example]]
+name = "contracts_macros_yaml_alias_resolve_chain"
+path = "examples/contracts-macros/contracts_macros_yaml_alias_resolve_chain.rs"
+
+[[example]]
+name = "contracts_macros_recipe_owner_email_valid"
+path = "examples/contracts-macros/contracts_macros_recipe_owner_email_valid.rs"
+
+[[example]]
+name = "contracts_macros_invariant_priority_band"
+path = "examples/contracts-macros/contracts_macros_invariant_priority_band.rs"
+
+[[example]]
+name = "mc_buffon_needle_pi"
+path = "examples/monte-carlo/mc_buffon_needle_pi.rs"
+
+[[example]]
+name = "mc_self_avoiding_walk"
+path = "examples/monte-carlo/mc_self_avoiding_walk.rs"
+
+[[example]]
+name = "mc_random_binary_tree"
+path = "examples/monte-carlo/mc_random_binary_tree.rs"
+
+[[example]]
+name = "tui_fps_meter_smooth"
+path = "examples/tui/tui_fps_meter_smooth.rs"
+
+[[example]]
+name = "tui_cursor_shape_phase"
+path = "examples/tui/tui_cursor_shape_phase.rs"
+
+[[example]]
+name = "tui_task_status_check"
+path = "examples/tui/tui_task_status_check.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-222) ---
+
+[[example]]
+name = "contracts_macros_yaml_explicit_tag_audit"
+path = "examples/contracts-macros/contracts_macros_yaml_explicit_tag_audit.rs"
+
+[[example]]
+name = "contracts_macros_recipe_dependent_count"
+path = "examples/contracts-macros/contracts_macros_recipe_dependent_count.rs"
+
+[[example]]
+name = "contracts_macros_invariant_proof_lang"
+path = "examples/contracts-macros/contracts_macros_invariant_proof_lang.rs"
+
+[[example]]
+name = "mc_bond_percolation_threshold"
+path = "examples/monte-carlo/mc_bond_percolation_threshold.rs"
+
+[[example]]
+name = "mc_forest_fire_spread"
+path = "examples/monte-carlo/mc_forest_fire_spread.rs"
+
+[[example]]
+name = "mc_elementary_ca_rule30"
+path = "examples/monte-carlo/mc_elementary_ca_rule30.rs"
+
+[[example]]
+name = "wasm_custom_section_emit"
+path = "examples/wasm/wasm_custom_section_emit.rs"
+
+[[example]]
+name = "wasm_name_section_validate"
+path = "examples/wasm/wasm_name_section_validate.rs"
+
+[[example]]
+name = "simd_count_trailing_zeros_lane"
+path = "examples/simd/simd_count_trailing_zeros_lane.rs"
+
+# --- contracts-macros / monte-carlo / tui (PMAT-223) ---
+
+[[example]]
+name = "contracts_macros_yaml_root_node_check"
+path = "examples/contracts-macros/contracts_macros_yaml_root_node_check.rs"
+
+[[example]]
+name = "contracts_macros_recipe_namespace_audit"
+path = "examples/contracts-macros/contracts_macros_recipe_namespace_audit.rs"
+
+[[example]]
+name = "contracts_macros_invariant_negated_classify"
+path = "examples/contracts-macros/contracts_macros_invariant_negated_classify.rs"
+
+[[example]]
+name = "mc_polya_ballot_problem"
+path = "examples/monte-carlo/mc_polya_ballot_problem.rs"
+
+[[example]]
+name = "mc_ising_model_2d"
+path = "examples/monte-carlo/mc_ising_model_2d.rs"
+
+[[example]]
+name = "mc_boltzmann_distribution"
+path = "examples/monte-carlo/mc_boltzmann_distribution.rs"
+
+[[example]]
+name = "tui_color_swatch_render"
+path = "examples/tui/tui_color_swatch_render.rs"
+
+[[example]]
+name = "tui_search_input_box"
+path = "examples/tui/tui_search_input_box.rs"
+
+[[example]]
+name = "tui_inline_emoji_replace"
+path = "examples/tui/tui_inline_emoji_replace.rs"
+
+# --- contracts-macros / monte-carlo / wasm + simd (PMAT-224) ---
+
+[[example]]
+name = "contracts_macros_yaml_seq_dedupe"
+path = "examples/contracts-macros/contracts_macros_yaml_seq_dedupe.rs"
+
+[[example]]
+name = "contracts_macros_yaml_collection_size_max"
+path = "examples/contracts-macros/contracts_macros_yaml_collection_size_max.rs"
+
+[[example]]
+name = "contracts_macros_recipe_complete_pct"
+path = "examples/contracts-macros/contracts_macros_recipe_complete_pct.rs"
+
+[[example]]
+name = "mc_elephant_walk_memory"
+path = "examples/monte-carlo/mc_elephant_walk_memory.rs"
+
+[[example]]
+name = "mc_island_model_migration"
+path = "examples/monte-carlo/mc_island_model_migration.rs"
+
+[[example]]
+name = "mc_firefly_optimization"
+path = "examples/monte-carlo/mc_firefly_optimization.rs"
+
+[[example]]
+name = "wasm_magic_bytes_check"
+path = "examples/wasm/wasm_magic_bytes_check.rs"
+
+[[example]]
+name = "wasm_features_compat_check"
+path = "examples/wasm/wasm_features_compat_check.rs"
+
+[[example]]
+name = "simd_sum_lanes_reduce"
+path = "examples/simd/simd_sum_lanes_reduce.rs"
+
+# --- architecture-demos (PMAT-300+) ---
+
+[[example]]
+name = "inference_bert_smoke"
+path = "examples/inference/inference_bert_smoke.rs"
+
+[[example]]
+name = "inference_deepseek_smoke"
+path = "examples/inference/inference_deepseek_smoke.rs"
+
+[[example]]
+name = "inference_falcon_h1_smoke"
+path = "examples/inference/inference_falcon_h1_smoke.rs"
+
+[[example]]
+name = "inference_gemma_smoke"
+path = "examples/inference/inference_gemma_smoke.rs"
+
+[[example]]
+name = "inference_gpt2_smoke"
+path = "examples/inference/inference_gpt2_smoke.rs"
+
+[[example]]
+name = "inference_gptneox_smoke"
+path = "examples/inference/inference_gptneox_smoke.rs"
+
+[[example]]
+name = "inference_llama_smoke"
+path = "examples/inference/inference_llama_smoke.rs"
+
+[[example]]
+name = "inference_mamba_smoke"
+path = "examples/inference/inference_mamba_smoke.rs"
+
+[[example]]
+name = "inference_mistral_smoke"
+path = "examples/inference/inference_mistral_smoke.rs"
+
+[[example]]
+name = "inference_openelm_smoke"
+path = "examples/inference/inference_openelm_smoke.rs"
+
+[[example]]
+name = "inference_opt_smoke"
+path = "examples/inference/inference_opt_smoke.rs"
+
+[[example]]
+name = "inference_phi_smoke"
+path = "examples/inference/inference_phi_smoke.rs"
+
+[[example]]
+name = "inference_qwen2_smoke"
+path = "examples/inference/inference_qwen2_smoke.rs"
+
+[[example]]
+name = "inference_qwen3_smoke"
+path = "examples/inference/inference_qwen3_smoke.rs"
+
+[[example]]
+name = "inference_qwen3_5_smoke"
+path = "examples/inference/inference_qwen3_5_smoke.rs"
+
+[[example]]
+name = "inference_rwkv7_smoke"
+path = "examples/inference/inference_rwkv7_smoke.rs"
+
+# --- architecture-demos v1.1 (PMAT-309) ---
+
+[[example]]
+name = "inference_arch_detector"
+path = "examples/inference/inference_arch_detector.rs"
+
+[[example]]
+name = "inference_arch_summary"
+path = "examples/inference/inference_arch_summary.rs"
+
+[[example]]
+name = "inference_arch_compare"
+path = "examples/inference/inference_arch_compare.rs"
+
+[[example]]
+name = "inference_arch_quirk_audit"
+path = "examples/inference/inference_arch_quirk_audit.rs"
+
+[[example]]
+name = "inference_arch_alias_resolver"
+path = "examples/inference/inference_arch_alias_resolver.rs"
+
+# --- architecture-demos v1.2 (PMAT-320) ---
+
+[[example]]
+name = "inference_arch_resolution_pipeline"
+path = "examples/inference/inference_arch_resolution_pipeline.rs"
+
+# --- fine-tuning-cookbook Tier 1.1 — SFT minimal × 5 (PMAT-331) ---
+
+[[example]]
+name = "t1_sft_minimal_llama"
+path = "examples/finetune/t1_sft_minimal_llama.rs"
+
+[[example]]
+name = "t1_sft_minimal_mistral"
+path = "examples/finetune/t1_sft_minimal_mistral.rs"
+
+[[example]]
+name = "t1_sft_minimal_phi"
+path = "examples/finetune/t1_sft_minimal_phi.rs"
+
+[[example]]
+name = "t1_sft_minimal_qwen"
+path = "examples/finetune/t1_sft_minimal_qwen.rs"
+
+[[example]]
+name = "t1_sft_minimal_gemma"
+path = "examples/finetune/t1_sft_minimal_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 1.2 — Eval primitives × 5 (PMAT-332) ---
+
+[[example]]
+name = "t1_eval_perplexity"
+path = "examples/finetune/t1_eval_perplexity.rs"
+
+[[example]]
+name = "t1_eval_accuracy"
+path = "examples/finetune/t1_eval_accuracy.rs"
+
+[[example]]
+name = "t1_eval_f1"
+path = "examples/finetune/t1_eval_f1.rs"
+
+[[example]]
+name = "t1_eval_rouge_l"
+path = "examples/finetune/t1_eval_rouge_l.rs"
+
+[[example]]
+name = "t1_eval_bleu"
+path = "examples/finetune/t1_eval_bleu.rs"
+
+# --- fine-tuning-cookbook Tier 1.3 — Tabular regression × 5 (PMAT-333) ---
+
+[[example]]
+name = "t1_tabular_regression_housing"
+path = "examples/finetune/t1_tabular_regression_housing.rs"
+
+[[example]]
+name = "t1_tabular_regression_energy"
+path = "examples/finetune/t1_tabular_regression_energy.rs"
+
+[[example]]
+name = "t1_tabular_regression_timeseries"
+path = "examples/finetune/t1_tabular_regression_timeseries.rs"
+
+[[example]]
+name = "t1_tabular_regression_multitarget"
+path = "examples/finetune/t1_tabular_regression_multitarget.rs"
+
+[[example]]
+name = "t1_tabular_regression_missing"
+path = "examples/finetune/t1_tabular_regression_missing.rs"
+
+# --- fine-tuning-cookbook Tier 1.4 — Tabular classification × 5 (PMAT-334) ---
+
+[[example]]
+name = "t1_tabular_binary"
+path = "examples/finetune/t1_tabular_binary.rs"
+
+[[example]]
+name = "t1_tabular_3class"
+path = "examples/finetune/t1_tabular_3class.rs"
+
+[[example]]
+name = "t1_tabular_7class"
+path = "examples/finetune/t1_tabular_7class.rs"
+
+[[example]]
+name = "t1_tabular_100class"
+path = "examples/finetune/t1_tabular_100class.rs"
+
+[[example]]
+name = "t1_tabular_imbalanced"
+path = "examples/finetune/t1_tabular_imbalanced.rs"
+
+# --- fine-tuning-cookbook Tier 1.5 — Smoke + bench × 5 (PMAT-335) ---
+
+[[example]]
+name = "t1_smoke_plan"
+path = "examples/finetune/t1_smoke_plan.rs"
+
+[[example]]
+name = "t1_smoke_resume"
+path = "examples/finetune/t1_smoke_resume.rs"
+
+[[example]]
+name = "t1_smoke_early_stop"
+path = "examples/finetune/t1_smoke_early_stop.rs"
+
+[[example]]
+name = "t1_smoke_dry_run"
+path = "examples/finetune/t1_smoke_dry_run.rs"
+
+[[example]]
+name = "t1_smoke_bench"
+path = "examples/finetune/t1_smoke_bench.rs"
+
+# --- fine-tuning-cookbook Tier 2.1 — LoRA × 10 (rank 8 + rank 32) × 5 families (PMAT-338+339) ---
+
+[[example]]
+name = "t2_lora_rank8_llama"
+path = "examples/finetune/t2_lora_rank8_llama.rs"
+
+[[example]]
+name = "t2_lora_rank32_llama"
+path = "examples/finetune/t2_lora_rank32_llama.rs"
+
+[[example]]
+name = "t2_lora_rank8_mistral"
+path = "examples/finetune/t2_lora_rank8_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank32_mistral"
+path = "examples/finetune/t2_lora_rank32_mistral.rs"
+
+[[example]]
+name = "t2_lora_rank8_phi"
+path = "examples/finetune/t2_lora_rank8_phi.rs"
+
+[[example]]
+name = "t2_lora_rank32_phi"
+path = "examples/finetune/t2_lora_rank32_phi.rs"
+
+[[example]]
+name = "t2_lora_rank8_qwen"
+path = "examples/finetune/t2_lora_rank8_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank32_qwen"
+path = "examples/finetune/t2_lora_rank32_qwen.rs"
+
+[[example]]
+name = "t2_lora_rank8_gemma"
+path = "examples/finetune/t2_lora_rank8_gemma.rs"
+
+[[example]]
+name = "t2_lora_rank32_gemma"
+path = "examples/finetune/t2_lora_rank32_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.2 — QLoRA × 5 (PMAT-340) ---
+
+[[example]]
+name = "t2_qlora_4bit_rank8_llama"
+path = "examples/finetune/t2_qlora_4bit_rank8_llama.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank16_mistral"
+path = "examples/finetune/t2_qlora_4bit_rank16_mistral.rs"
+
+[[example]]
+name = "t2_qlora_4bit_rank32_phi"
+path = "examples/finetune/t2_qlora_4bit_rank32_phi.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_qwen"
+path = "examples/finetune/t2_qlora_double_quant_qwen.rs"
+
+[[example]]
+name = "t2_qlora_double_quant_off_gemma"
+path = "examples/finetune/t2_qlora_double_quant_off_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 2.3 — Continued pretraining × 5 (PMAT-341) ---
+
+[[example]]
+name = "t2_continued_pretrain_legal"
+path = "examples/finetune/t2_continued_pretrain_legal.rs"
+
+[[example]]
+name = "t2_continued_pretrain_code"
+path = "examples/finetune/t2_continued_pretrain_code.rs"
+
+[[example]]
+name = "t2_continued_pretrain_medical"
+path = "examples/finetune/t2_continued_pretrain_medical.rs"
+
+[[example]]
+name = "t2_continued_pretrain_codeswitch"
+path = "examples/finetune/t2_continued_pretrain_codeswitch.rs"
+
+[[example]]
+name = "t2_continued_pretrain_scientific"
+path = "examples/finetune/t2_continued_pretrain_scientific.rs"
+
+# --- fine-tuning-cookbook Tier 2.4 — Adapter merge × 5 (PMAT-342) ---
+
+[[example]]
+name = "t2_adapter_merge_ties"
+path = "examples/finetune/t2_adapter_merge_ties.rs"
+
+[[example]]
+name = "t2_adapter_merge_dare"
+path = "examples/finetune/t2_adapter_merge_dare.rs"
+
+[[example]]
+name = "t2_adapter_merge_slerp"
+path = "examples/finetune/t2_adapter_merge_slerp.rs"
+
+[[example]]
+name = "t2_adapter_merge_average"
+path = "examples/finetune/t2_adapter_merge_average.rs"
+
+[[example]]
+name = "t2_adapter_merge_multilora"
+path = "examples/finetune/t2_adapter_merge_multilora.rs"
+
+# --- fine-tuning-cookbook Tier 2.5 — PEFT variants × 9 (PMAT-343) ---
+
+[[example]]
+name = "t2_peft_corda_init"
+path = "examples/finetune/t2_peft_corda_init.rs"
+
+[[example]]
+name = "t2_peft_eva_init"
+path = "examples/finetune/t2_peft_eva_init.rs"
+
+[[example]]
+name = "t2_peft_pissa_init"
+path = "examples/finetune/t2_peft_pissa_init.rs"
+
+[[example]]
+name = "t2_peft_loftq_init"
+path = "examples/finetune/t2_peft_loftq_init.rs"
+
+[[example]]
+name = "t2_oft"
+path = "examples/finetune/t2_oft.rs"
+
+[[example]]
+name = "t2_ln_tuning"
+path = "examples/finetune/t2_ln_tuning.rs"
+
+[[example]]
+name = "t2_tinylora"
+path = "examples/finetune/t2_tinylora.rs"
+
+[[example]]
+name = "t2_vblora"
+path = "examples/finetune/t2_vblora.rs"
+
+[[example]]
+name = "t2_regex_freeze"
+path = "examples/finetune/t2_regex_freeze.rs"
+
+# --- fine-tuning-cookbook Tier 2.6 — Memory-efficient optimizers × 5 (PMAT-344) ---
+
+[[example]]
+name = "t2_galore"
+path = "examples/finetune/t2_galore.rs"
+
+[[example]]
+name = "t2_badam"
+path = "examples/finetune/t2_badam.rs"
+
+[[example]]
+name = "t2_apollo"
+path = "examples/finetune/t2_apollo.rs"
+
+[[example]]
+name = "t2_dora"
+path = "examples/finetune/t2_dora.rs"
+
+[[example]]
+name = "t2_freeze_tuning"
+path = "examples/finetune/t2_freeze_tuning.rs"
+
+# --- fine-tuning-cookbook Tier 2.7-2.9 closeout × 6 (PMAT-345) ---
+
+[[example]]
+name = "t2_lora_aqlm"
+path = "examples/finetune/t2_lora_aqlm.rs"
+
+[[example]]
+name = "t2_lora_awq"
+path = "examples/finetune/t2_lora_awq.rs"
+
+[[example]]
+name = "t2_lora_gptq"
+path = "examples/finetune/t2_lora_gptq.rs"
+
+[[example]]
+name = "t2_relora"
+path = "examples/finetune/t2_relora.rs"
+
+[[example]]
+name = "t2_lisa"
+path = "examples/finetune/t2_lisa.rs"
+
+[[example]]
+name = "t2_neftune"
+path = "examples/finetune/t2_neftune.rs"
+
+# --- fine-tuning-cookbook Tier 3.1 — Instruction tuning × 5 (PMAT-346) ---
+
+[[example]]
+name = "t3_instruction_alpaca"
+path = "examples/finetune/t3_instruction_alpaca.rs"
+
+[[example]]
+name = "t3_instruction_sharegpt"
+path = "examples/finetune/t3_instruction_sharegpt.rs"
+
+[[example]]
+name = "t3_instruction_openassistant"
+path = "examples/finetune/t3_instruction_openassistant.rs"
+
+[[example]]
+name = "t3_instruction_chat_template"
+path = "examples/finetune/t3_instruction_chat_template.rs"
+
+[[example]]
+name = "t3_instruction_system_prompt"
+path = "examples/finetune/t3_instruction_system_prompt.rs"
+
+# --- fine-tuning-cookbook Tier 3.2 — Hyperparameter optimization × 5 (PMAT-347) ---
+
+[[example]]
+name = "t3_hyperopt_grid"
+path = "examples/finetune/t3_hyperopt_grid.rs"
+
+[[example]]
+name = "t3_hyperopt_random"
+path = "examples/finetune/t3_hyperopt_random.rs"
+
+[[example]]
+name = "t3_hyperopt_tpe"
+path = "examples/finetune/t3_hyperopt_tpe.rs"
+
+[[example]]
+name = "t3_hyperopt_asha"
+path = "examples/finetune/t3_hyperopt_asha.rs"
+
+[[example]]
+name = "t3_hyperopt_hyperband"
+path = "examples/finetune/t3_hyperopt_hyperband.rs"
+
+# --- fine-tuning-cookbook Tier 3.3 — Calibration × 5 (PMAT-348) ---
+
+[[example]]
+name = "t3_calibration_temperature"
+path = "examples/finetune/t3_calibration_temperature.rs"
+
+[[example]]
+name = "t3_calibration_platt"
+path = "examples/finetune/t3_calibration_platt.rs"
+
+[[example]]
+name = "t3_calibration_isotonic"
+path = "examples/finetune/t3_calibration_isotonic.rs"
+
+[[example]]
+name = "t3_calibration_conformal"
+path = "examples/finetune/t3_calibration_conformal.rs"
+
+[[example]]
+name = "t3_calibration_ensemble"
+path = "examples/finetune/t3_calibration_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 3.4 — Class imbalance × 5 (PMAT-349) ---
+
+[[example]]
+name = "t3_imbalance_weighted"
+path = "examples/finetune/t3_imbalance_weighted.rs"
+
+[[example]]
+name = "t3_imbalance_focal"
+path = "examples/finetune/t3_imbalance_focal.rs"
+
+[[example]]
+name = "t3_imbalance_smote"
+path = "examples/finetune/t3_imbalance_smote.rs"
+
+[[example]]
+name = "t3_imbalance_threshold"
+path = "examples/finetune/t3_imbalance_threshold.rs"
+
+[[example]]
+name = "t3_imbalance_costsensitive"
+path = "examples/finetune/t3_imbalance_costsensitive.rs"
+
+# --- fine-tuning-cookbook Tier 3.5 — Multimodal + multitask + k-fold × 5 (PMAT-350) ---
+
+[[example]]
+name = "t3_multimodal_text_image"
+path = "examples/finetune/t3_multimodal_text_image.rs"
+
+[[example]]
+name = "t3_multimodal_text_tabular"
+path = "examples/finetune/t3_multimodal_text_tabular.rs"
+
+[[example]]
+name = "t3_multimodal_multitask"
+path = "examples/finetune/t3_multimodal_multitask.rs"
+
+[[example]]
+name = "t3_multimodal_zero_shot"
+path = "examples/finetune/t3_multimodal_zero_shot.rs"
+
+[[example]]
+name = "t3_kfold_cv"
+path = "examples/finetune/t3_kfold_cv.rs"
+
+# --- fine-tuning-cookbook Tier 3.6+3.7+3.8 — anomaly + open-set + uncertainty × 8 (PMAT-351) ---
+
+[[example]]
+name = "t3_anomaly_deep_sad"
+path = "examples/finetune/t3_anomaly_deep_sad.rs"
+
+[[example]]
+name = "t3_anomaly_deep_svdd"
+path = "examples/finetune/t3_anomaly_deep_svdd.rs"
+
+[[example]]
+name = "t3_anomaly_drocc"
+path = "examples/finetune/t3_anomaly_drocc.rs"
+
+[[example]]
+name = "t3_open_set_baseline"
+path = "examples/finetune/t3_open_set_baseline.rs"
+
+[[example]]
+name = "t3_open_set_entropic"
+path = "examples/finetune/t3_open_set_entropic.rs"
+
+[[example]]
+name = "t3_open_set_objectosphere"
+path = "examples/finetune/t3_open_set_objectosphere.rs"
+
+[[example]]
+name = "t3_uncertainty_mc_dropout"
+path = "examples/finetune/t3_uncertainty_mc_dropout.rs"
+
+[[example]]
+name = "t3_uncertainty_calibrated"
+path = "examples/finetune/t3_uncertainty_calibrated.rs"
+
+# --- fine-tuning-cookbook Tier 3.9+3.10 — image-encoders + optimizers × 5 (PMAT-352) ---
+
+[[example]]
+name = "t3_image_encoder_clip"
+path = "examples/finetune/t3_image_encoder_clip.rs"
+
+[[example]]
+name = "t3_image_encoder_dinov2_lp"
+path = "examples/finetune/t3_image_encoder_dinov2_lp.rs"
+
+[[example]]
+name = "t3_image_encoder_siglip"
+path = "examples/finetune/t3_image_encoder_siglip.rs"
+
+[[example]]
+name = "t3_optimizer_muon"
+path = "examples/finetune/t3_optimizer_muon.rs"
+
+[[example]]
+name = "t3_optimizer_schedule_free"
+path = "examples/finetune/t3_optimizer_schedule_free.rs"
+
+# --- fine-tuning-cookbook Tier 3.11–3.16 single recipes × 6 (PMAT-353) ---
+
+[[example]]
+name = "t3_lbfgs"
+path = "examples/finetune/t3_lbfgs.rs"
+
+[[example]]
+name = "t3_multitask_famo"
+path = "examples/finetune/t3_multitask_famo.rs"
+
+[[example]]
+name = "t3_semantic_segmentation_segformer"
+path = "examples/finetune/t3_semantic_segmentation_segformer.rs"
+
+[[example]]
+name = "t3_structured_output_json"
+path = "examples/finetune/t3_structured_output_json.rs"
+
+[[example]]
+name = "t3_mamba_encoder_text"
+path = "examples/finetune/t3_mamba_encoder_text.rs"
+
+[[example]]
+name = "t3_hypernetwork"
+path = "examples/finetune/t3_hypernetwork.rs"
+
+# --- fine-tuning-cookbook Tier 3.17+3.18 closeout × 4 (PMAT-354) ---
+
+[[example]]
+name = "t3_qat_fp8"
+path = "examples/finetune/t3_qat_fp8.rs"
+
+[[example]]
+name = "t3_qat_mxfp4"
+path = "examples/finetune/t3_qat_mxfp4.rs"
+
+[[example]]
+name = "t3_sample_packing"
+path = "examples/finetune/t3_sample_packing.rs"
+
+[[example]]
+name = "t3_fsdp_lora"
+path = "examples/finetune/t3_fsdp_lora.rs"
+
+# --- fine-tuning-cookbook Tier 4.1+4.2+4.3 — DPO+ORPO+KTO × 11 (PMAT-355) ---
+
+[[example]]
+name = "t4_dpo_llama"
+path = "examples/finetune/t4_dpo_llama.rs"
+
+[[example]]
+name = "t4_dpo_mistral"
+path = "examples/finetune/t4_dpo_mistral.rs"
+
+[[example]]
+name = "t4_dpo_phi"
+path = "examples/finetune/t4_dpo_phi.rs"
+
+[[example]]
+name = "t4_dpo_qwen"
+path = "examples/finetune/t4_dpo_qwen.rs"
+
+[[example]]
+name = "t4_dpo_gemma"
+path = "examples/finetune/t4_dpo_gemma.rs"
+
+[[example]]
+name = "t4_orpo_llama"
+path = "examples/finetune/t4_orpo_llama.rs"
+
+[[example]]
+name = "t4_orpo_mistral"
+path = "examples/finetune/t4_orpo_mistral.rs"
+
+[[example]]
+name = "t4_orpo_qwen"
+path = "examples/finetune/t4_orpo_qwen.rs"
+
+[[example]]
+name = "t4_kto_llama"
+path = "examples/finetune/t4_kto_llama.rs"
+
+[[example]]
+name = "t4_kto_phi"
+path = "examples/finetune/t4_kto_phi.rs"
+
+[[example]]
+name = "t4_kto_gemma"
+path = "examples/finetune/t4_kto_gemma.rs"
+
+# --- fine-tuning-cookbook Tier 4.4+4.5 — GRPO+PPO × 8 (PMAT-356) ---
+
+[[example]]
+name = "t4_grpo_math"
+path = "examples/finetune/t4_grpo_math.rs"
+
+[[example]]
+name = "t4_grpo_code_exec"
+path = "examples/finetune/t4_grpo_code_exec.rs"
+
+[[example]]
+name = "t4_grpo_format_match"
+path = "examples/finetune/t4_grpo_format_match.rs"
+
+[[example]]
+name = "t4_grpo_classification"
+path = "examples/finetune/t4_grpo_classification.rs"
+
+[[example]]
+name = "t4_grpo_length_budget"
+path = "examples/finetune/t4_grpo_length_budget.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_llama"
+path = "examples/finetune/t4_rlhf_ppo_llama.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_mistral"
+path = "examples/finetune/t4_rlhf_ppo_mistral.rs"
+
+[[example]]
+name = "t4_rlhf_ppo_qwen"
+path = "examples/finetune/t4_rlhf_ppo_qwen.rs"
+
+# --- fine-tuning-cookbook Tier 4.6+4.7 — RLAIF+reward × 6 (PMAT-357) ---
+
+[[example]]
+name = "t4_rlaif_judge"
+path = "examples/finetune/t4_rlaif_judge.rs"
+
+[[example]]
+name = "t4_rlaif_constitutional"
+path = "examples/finetune/t4_rlaif_constitutional.rs"
+
+[[example]]
+name = "t4_rlaif_self_critique"
+path = "examples/finetune/t4_rlaif_self_critique.rs"
+
+[[example]]
+name = "t4_reward_pairwise"
+path = "examples/finetune/t4_reward_pairwise.rs"
+
+[[example]]
+name = "t4_reward_scalar"
+path = "examples/finetune/t4_reward_scalar.rs"
+
+[[example]]
+name = "t4_reward_ensemble"
+path = "examples/finetune/t4_reward_ensemble.rs"
+
+# --- fine-tuning-cookbook Tier 4.8+4.9 — online+alternative × 7 (PMAT-358) ---
+
+[[example]]
+name = "t4_online_dpo"
+path = "examples/finetune/t4_online_dpo.rs"
+
+[[example]]
+name = "t4_xpo"
+path = "examples/finetune/t4_xpo.rs"
+
+[[example]]
+name = "t4_nash_md"
+path = "examples/finetune/t4_nash_md.rs"
+
+[[example]]
+name = "t4_rloo"
+path = "examples/finetune/t4_rloo.rs"
+
+[[example]]
+name = "t4_bco"
+path = "examples/finetune/t4_bco.rs"
+
+[[example]]
+name = "t4_cpo"
+path = "examples/finetune/t4_cpo.rs"
+
+[[example]]
+name = "t4_simpo"
+path = "examples/finetune/t4_simpo.rs"
+
+# --- fine-tuning-cookbook Tier 4 closeout × 5 (PMAT-359) ---
+
+[[example]]
+name = "t4_async_grpo"
+path = "examples/finetune/t4_async_grpo.rs"
+
+[[example]]
+name = "t4_prm"
+path = "examples/finetune/t4_prm.rs"
+
+[[example]]
+name = "t4_gkd"
+path = "examples/finetune/t4_gkd.rs"
+
+[[example]]
+name = "t4_gspo"
+path = "examples/finetune/t4_gspo.rs"
+
+[[example]]
+name = "t4_mpo"
+path = "examples/finetune/t4_mpo.rs"

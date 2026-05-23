@@ -1,0 +1,12 @@
+{
+  "architectures": ["RWKV7ForCausalLM"],
+  "model_type": "rwkv7",
+  "hidden_size": 64,
+  "num_hidden_layers": 2,
+  "vocab_size": 256,
+  "head_size": 16,
+  "time_mix_extra_dim": 32,
+  "decay_low_rank_dim": 16,
+  "wkv_dim": 64,
+  "torch_dtype": "float32"
+}

@@ -1,0 +1,105 @@
+# Recipe: pepita-sandbox — Kernel isolation sandbox
+#
+# Deploys pepita for io_uring-based kernel isolation:
+#   1. pepita binary (cargo install)
+#   2. Sandbox namespace configuration
+#   3. Overlay filesystem setup
+#
+# Inputs:
+#   sandbox_name (string, default: forjar-sandbox) — sandbox identifier
+#   memory_limit_mb (int, default: 1024) — memory limit in MB
+#   cpuset (string, default: 0-3) — CPU set for the sandbox
+#   network_isolated (bool, default: true) — network namespace isolation
+#   user (string, default: pepita) — service account
+
+recipe:
+  name: pepita-sandbox
+  version: "1.0"
+  description: "Pepita kernel sandbox — io_uring-based process isolation"
+  inputs:
+    sandbox_name:
+      type: string
+      default: forjar-sandbox
+    memory_limit_mb:
+      type: int
+      default: 1024
+      min: 128
+      max: 65536
+    cpuset:
+      type: string
+      default: "0-3"
+    network_isolated:
+      type: bool
+      default: true
+    user:
+      type: string
+      default: pepita
+
+resources:
+  service-user:
+    type: user
+    name: "{{inputs.user}}"
+    shell: /usr/sbin/nologin
+    home: /opt/pepita
+    system_user: true
+    depends_on: []
+    tags: [setup, users]
+
+  base-dir:
+    type: file
+    state: directory
+    path: /opt/pepita
+    owner: "{{inputs.user}}"
+    mode: "0755"
+    depends_on: [service-user]
+    tags: [setup, dirs]
+
+  pepita-pkg:
+    type: package
+    provider: cargo
+    packages: [pepita]
+    depends_on: []
+    tags: [packages]
+
+  sandbox:
+    type: pepita
+    name: "{{inputs.sandbox_name}}"
+    state: present
+    chroot_dir: /opt/pepita/rootfs
+    memory_limit: "{{inputs.memory_limit_mb}}"
+    cpuset: "{{inputs.cpuset}}"
+    netns: "{{inputs.network_isolated}}"
+    overlay_lower: /
+    overlay_upper: /opt/pepita/upper
+    overlay_work: /opt/pepita/work
+    overlay_merged: /opt/pepita/merged
+    seccomp: true
+    depends_on: [pepita-pkg, base-dir]
+    tags: [setup, isolation]
+
+  upper-dir:
+    type: file
+    state: directory
+    path: /opt/pepita/upper
+    owner: root
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  work-dir:
+    type: file
+    state: directory
+    path: /opt/pepita/work
+    owner: root
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]
+
+  merged-dir:
+    type: file
+    state: directory
+    path: /opt/pepita/merged
+    owner: root
+    mode: "0755"
+    depends_on: [base-dir]
+    tags: [setup, dirs]

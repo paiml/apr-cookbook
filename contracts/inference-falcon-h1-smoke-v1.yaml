@@ -1,0 +1,162 @@
+metadata:
+  version: "1.0.0"
+  created: "2026-05-07"
+  author: "PAIML Engineering"
+  description: "Falcon-H1 smoke inference invariants — config parse, hybrid SSM-transformer discriminator (mamba_d_state + mamba_d_conv + mamba_expand), deterministic forward simulation"
+  references:
+    - "TII (2025). Falcon-H1: Hybrid State-Space–Transformer LLM. (HF model card)"
+    - "docs/specifications/architecture-demos.md"
+  depends_on:
+    - "recipe-iiur-v1"
+  tags:
+    - architecture-demos
+    - inference
+    - smoke
+    - falcon_h1
+    - ssm
+
+kernel_structure:
+  phases:
+    - name: setup
+      description: "RecipeContext + fixture"
+      invariant: "context.temp_dir empty; fixture readable"
+    - name: load
+      description: "Extract Mamba SSM fields"
+      invariant: "mamba_d_state and mamba_expand parsed"
+    - name: forward
+      description: "LCG forward sim seeded with mamba_d_state"
+      invariant: "mamba_d_state participates in checksum"
+    - name: verify
+      description: "Determinism"
+      invariant: "Two consecutive smoke calls produce equal verdicts"
+    - name: teardown
+      description: "Drop RecipeContext"
+      invariant: "context.temp_dir cleaned up"
+
+equations:
+  loader_dispatch:
+    formula: "smoke(fixture, fmt) ↦ Ok | LoaderUnavailable | InvalidFixture"
+    domain: "fixture: Path; fmt: String"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Family on Ok arm always 'falcon_h1'"
+      - "Missing mamba_d_state surfaces LoaderUnavailable (SSM discriminator)"
+    preconditions:
+      - "fixture is a valid UTF-8 path string"
+      - "fmt ∈ {safetensors, apr, gguf}"
+    postconditions:
+      - "match Ok { family, .. } => family == 'falcon_h1'"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
+
+  ssm_discriminator:
+    formula: "config without mamba_d_state ↦ LoaderUnavailable"
+    domain: "fixture: Path"
+    codomain: "SmokeVerdict"
+    invariants:
+      - "Falcon-H1 declares Mamba SSM fields; pure transformers do not"
+    preconditions:
+      - "fixture is readable"
+    postconditions:
+      - "match Ok { mamba_d_state, .. } => mamba_d_state == config.mamba_d_state"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
+
+  forward_determinism:
+    formula: "forward_sim(seed, vocab, hidden, mamba_d_state) is deterministic and SSM-sensitive"
+    domain: "seed: u64; vocab,hidden,mamba_d_state: u32"
+    codomain: "u32"
+    invariants:
+      - "mamba_d_state seeds the accumulator"
+    preconditions:
+      - "seed | 1 != 0"
+    postconditions:
+      - "forward_sim(s, v, h, m) == forward_sim(s, v, h, m)"
+      - "forward_sim(42, 256, 64, 16) != forward_sim(42, 256, 64, 32)"
+    lean_theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
+    tolerance: 0
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
+      status: proved
+      module: "lean/ProvableContracts/ArchitectureDemos/FalconH1.lean"
+
+proof_obligations:
+  - type: invariant
+    property: "Loader dispatch is total"
+    formal: "for all fixture, fmt. smoke(fixture, fmt) ↦ SmokeVerdict"
+    tolerance: 0.0
+    applies_to: loader_dispatch
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.LoaderDispatch"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.FalconH1"
+  - type: invariant
+    property: "mamba_d_state required"
+    formal: "fixture without mamba_d_state ↦ LoaderUnavailable"
+    tolerance: 0.0
+    applies_to: ssm_discriminator
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.SsmDiscriminator"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.FalconH1"
+  - type: invariant
+    property: "Forward simulation is SSM-sensitive"
+    formal: "mamba_d_state participates in checksum"
+    tolerance: 0.0
+    applies_to: forward_determinism
+    lean:
+      theorem: "ProvableContracts.ArchitectureDemos.FalconH1.ForwardDeterminism"
+      status: proved
+      module: "ProvableContracts.ArchitectureDemos.FalconH1"
+
+falsification_tests:
+  - id: FALSIFY-FALCON_H1-001
+    rule: "Mamba fields are recognized"
+    prediction: "mamba_d_state=16, mamba_expand=2 for the bundled Falcon-H1 fixture"
+    test: "cargo test --example inference_falcon_h1_smoke -- happy_path_mamba_fields_present"
+    if_fails: "Mamba field detection broke"
+  - id: FALSIFY-FALCON_H1-002
+    rule: "Forward simulation is mamba_d_state-sensitive"
+    prediction: "forward_sim with mamba_d_state=16 != forward_sim with 32"
+    test: "cargo test --example inference_falcon_h1_smoke -- mamba_d_state_affects_checksum"
+    if_fails: "mamba_d_state dropped from accumulator"
+  - id: FALSIFY-FALCON_H1-003
+    rule: "Forward simulation is deterministic per seed"
+    prediction: "Same seed → same output"
+    test: "cargo test --example inference_falcon_h1_smoke -- forward_sim_deterministic_per_seed"
+    if_fails: "Non-determinism leaked"
+
+kani_harnesses:
+  - id: KANI-FALCON_H1-001
+    obligation: "Forward simulation is SSM-sensitive"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::falcon_h1_smoke_deterministic"
+  - id: KANI-FALCON_H1-002
+    obligation: "Loader dispatch is total"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::falcon_h1_smoke_invalid_fixture_total"
+  - id: KANI-FALCON_H1-003
+    obligation: "mamba_d_state required"
+    bound: 4
+    strategy: bounded_int
+    harness: "kani_harnesses::falcon_h1_ssm_fields_present"
+
+qa_gate:
+  id: F-FALCON_H1-001
+  name: "Falcon-H1 Smoke Inference Contract"
+  description: "Smoke load + SSM discriminator + deterministic forward simulation"
+  checks:
+    - "mamba_fields_present"
+    - "mamba_d_state_affects_checksum"
+    - "forward_determinism"
+  pass_criteria: "All three falsification tests pass"
