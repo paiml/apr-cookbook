@@ -1,0 +1,25 @@
+# pmat comply configuration (COMPLY-044)
+# See: pmat comply check — suppressions require a reason for the audit trail.
+comply:
+  checks:
+    # CB-1208 cross-references binding.yaml `function:` names against fns in
+    # src/ (and crates/*/src) only. This cookbook's bound kernels live by
+    # design in examples/<category>/*.rs, tests/*.rs (falsification/throughput
+    # witnesses), Makefile meta-targets (cookbook::make::<target>, accepted by
+    # pv), and upstream crates (trueno::Matrix::matmul) — none visible to that
+    # scanner, so the check bottoms out at 15% regardless of binding truth.
+    # Compile-time enforcement is provided instead by tests/contract_traits.rs
+    # (CB-1204 superseded, CB-1209 13/13 traits) and cargo test --test contracts.
+    cb-1208: { enabled: false }
+  suppressions:
+    - rules: ["CB-1050"]
+      files: ["lean/**", "./lean/**"]
+      reason: >-
+        The 16 `sorry` theorems in lean/ProvableContracts are deliberate
+        honest-status markers (PMAT-047 scaffold discipline): they state
+        runtime/hardware obligations (latency, throughput, WER, crypto
+        round-trip, FP equivalence) that are not derivable in core Lean 4
+        without Mathlib plus a cost-model or cipher semantics. Their YAML
+        contracts carry `lean.status: wip`. Completing them with vacuous
+        `exact h` proofs would game the check; the runtime claims are
+        instead falsified by benchmarks and tests/falsification.rs.

@@ -2668,3 +2668,19 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-146
+  github_issue: null
+  item_type: task
+  title: 'Fix pmat comply violations: contract trait enforcement, contract-first docs, cache refresh, CB-1050/1208 config'
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-07-05T11:46:03Z
+  updated: 2026-07-05T11:46:07.035628989+00:00
+  spec: null
+  acceptance_criteria: []
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

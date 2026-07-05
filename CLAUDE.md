@@ -42,6 +42,14 @@ cargo llvm-cov --min-coverage 95
 
 Minimum grade: **A**. Coverage target: **95%**.
 
+## Contract-First Discipline
+
+This repo follows contract-first (provable-contract) methodology: kernel behavior is
+specified in `contracts/*.yaml` before implementation, validated in-process via
+`cargo test --test contracts`, and enforced at the trait level in
+`tests/contract_traits.rs`. Run `pmat comply check` before completing any work item;
+it must report COMPLIANT.
+
 ## Code Search Policy
 
 **NEVER use grep/glob for code search. ALWAYS prefer `pmat query`.**
