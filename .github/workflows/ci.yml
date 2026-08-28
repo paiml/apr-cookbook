@@ -23,7 +23,15 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ci-${{ github.event.pull_request.number || github.ref }}
+  # The event name is part of the key on purpose. A `pull_request` run and a
+  # `pull_request_target` run are different workloads against the same PR
+  # number; with a shared key they cancel each other. That bites during the
+  # migration below — while `main` still defines this workflow on
+  # `pull_request_target`, opening a PR that switches it to `pull_request`
+  # starts both, and one kills the other ("Canceling since a higher priority
+  # waiting request for ci-<n> exists"), taking the `gate` job's upstream jobs
+  # down with it.
+  group: ci-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
