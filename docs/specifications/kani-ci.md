@@ -57,7 +57,10 @@ kani-gate:
       run: cargo kani
 ```
 
-The `ci-status` summary job lists `kani-gate` alongside `gate` and `lean-gate`; branch protection on `main` should require `CI Status` to be green.
+The `gate` aggregator job lists `kani-gate` alongside `quality-gate` and `lean-gate`, and
+fails unless all three succeeded. Two required contexts ride on it: the org ruleset
+"Green Main" (id 13878864) requires `gate`, and the repo's classic branch protection on
+`main` requires `CI Status`, which now mirrors `gate` so the two cannot disagree.
 
 ## Runtime
 

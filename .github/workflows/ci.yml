@@ -2,7 +2,21 @@
 name: CI
 
 on:
-  pull_request_target:
+  # `pull_request`, NOT `pull_request_target`. Two reasons:
+  #
+  # 1. Bootstrapping the required `gate` context. Under `pull_request_target`
+  #    GitHub runs the workflow definition from the BASE branch, so a PR that
+  #    ADDS a job can never emit that job's check on itself — the org ruleset
+  #    would keep blocking every PR, including the one that fixes the block.
+  #    Under `pull_request` the PR's own definition runs, so this PR emits its
+  #    own `gate`.
+  # 2. Security. This workflow checked out `pull_request.head.sha` and then ran
+  #    `cargo clippy`/`cargo test`/build scripts over it. Under
+  #    `pull_request_target` that is arbitrary fork code executing with the base
+  #    repo's token and secrets (the "pwn request" pattern). `pull_request` runs
+  #    the same code with a read-only, secret-less token, which is what these
+  #    jobs actually need — nothing here reads a secret.
+  pull_request:
     branches: [main, master]
   push:
     branches: [main, master]
@@ -13,7 +27,10 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  gate:
+  # Job id renamed `gate` -> `quality-gate` so the id `gate` is free for the
+  # aggregator below (the org ruleset requires a CONTEXT literally named
+  # `gate`). The check-run name is unchanged: `Quality Gate (stable)`.
+  quality-gate:
     name: Quality Gate
     runs-on: ubuntu-latest
     strategy:
@@ -38,10 +55,9 @@ jobs:
 
       - uses: actions/checkout@v4
         with:
-          # pull_request_target defaults to checking out the base branch (main),
-          # which means CI would lint/test the pre-PR code and pass/fail on bugs
-          # that have nothing to do with the PR. Pin to the PR head SHA so the
-          # gate actually evaluates the PR's changes.
+          # Pin to the PR head SHA so the gate evaluates the PR's own commit
+          # rather than the ephemeral merge commit — keeps the tested SHA and
+          # the reported SHA identical.
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
       - uses: dtolnay/rust-toolchain@stable
@@ -171,29 +187,80 @@ jobs:
         working-directory: kani
         run: cargo kani
 
+  # `gate` — the context the paiml org ruleset "Green Main" (id 13878864)
+  # requires on every PR:
+  #
+  #   $ gh api orgs/paiml/rulesets/13878864 --jq '.rules[]
+  #       | select(.type=="required_status_checks")
+  #       | .parameters.required_status_checks[].context'
+  #   gate
+  #
+  # No workflow in this repo emitted a check by that name, so every PR sat at
+  # mergeStateStatus BLOCKED with every visible check green and nothing a
+  # contributor could do about it — the missing check was one the repo could
+  # not produce.
+  #
+  # The job id AND the display name must both be the literal string `gate`:
+  # the ruleset matches the check-run CONTEXT, so a friendlier name silently
+  # re-breaks merging. Do not add a `strategy.matrix` here either — that would
+  # suffix the context (`gate (stable)`) and it would stop matching.
+  #
+  # It measures the repo's real CI: it fails whenever Quality Gate, Lean Gate
+  # or Kani Gate did not succeed, and it refuses to report green if it did not
+  # actually observe all three (a `gate` that measures nothing is worse than
+  # the block it replaces).
+  gate:
+    name: gate
+    runs-on: ubuntu-latest
+    needs: [quality-gate, lean-gate, kani-gate]
+    if: always()
+    steps:
+      - name: Aggregate upstream gate outcomes
+        run: |
+          set -euo pipefail
+          checked=0
+          failed=0
+          while IFS='=' read -r job result; do
+            [ -n "$job" ] || continue
+            checked=$((checked + 1))
+            if [ "$result" = "success" ]; then
+              echo "PASS  $job"
+            else
+              echo "FAIL  $job: ${result:-<no result reported>}"
+              failed=$((failed + 1))
+            fi
+          done <<EOF
+          quality-gate=${{ needs.quality-gate.result }}
+          lean-gate=${{ needs.lean-gate.result }}
+          kani-gate=${{ needs.kani-gate.result }}
+          EOF
+          echo "checked $checked upstream job(s), $failed failing"
+          # Denominator guard: if a future edit drops an entry from `needs:`,
+          # its result expression expands to the empty string and the pair is
+          # dropped here. Refuse to pass on a shrunken denominator rather than
+          # quietly guarding less.
+          if [ "$checked" -ne 3 ]; then
+            echo "gate observed $checked of the 3 jobs it declares in needs: — refusing to report green"
+            exit 1
+          fi
+          [ "$failed" -eq 0 ]
+
   # Summary job that reports GREEN if the local Quality Gate + Lean Gate +
   # Kani Gate passed, regardless of the self-hosted unified gate's health.
-  # Branch protection should require this job — not `unified`.
+  #
+  # Kept because the repo-level branch protection on `main` still requires the
+  # context `CI Status` (app_id 15368) — removing or renaming this job would
+  # trade the org-ruleset block for a branch-protection one. It now mirrors
+  # `gate` rather than duplicating its logic, so the two required contexts
+  # cannot disagree.
   ci-status:
     name: CI Status
     runs-on: ubuntu-latest
-    needs: [gate, lean-gate, kani-gate]
+    needs: [gate]
     if: always()
     steps:
-      - name: Report local quality + lean + kani gate outcomes
+      - name: Report the aggregate gate outcome
         run: |
-          failed=0
-          for result_name in gate lean-gate kani-gate; do
-            case "$result_name" in
-              gate)      r="${{ needs.gate.result }}" ;;
-              lean-gate) r="${{ needs.lean-gate.result }}" ;;
-              kani-gate) r="${{ needs.kani-gate.result }}" ;;
-            esac
-            if [ "$r" = "success" ]; then
-              echo "✅ $result_name: success"
-            else
-              echo "❌ $result_name: $r"
-              failed=1
-            fi
-          done
-          exit $failed
+          r="${{ needs.gate.result }}"
+          echo "gate: ${r:-<no result reported>}"
+          [ "$r" = "success" ]
