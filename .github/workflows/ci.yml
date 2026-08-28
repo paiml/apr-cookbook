@@ -61,7 +61,7 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # Pin to the PR head SHA so the gate evaluates the PR's own commit
           # rather than the ephemeral merge commit — keeps the tested SHA and
@@ -121,7 +121,7 @@ jobs:
     name: Lean Gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
@@ -169,7 +169,7 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
 
