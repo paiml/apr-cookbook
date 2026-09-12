@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- Documented aprender **0.67.0** (2026-09-12) for cookbook users: Q5_K decode fixed on all three readers (aprender#3110, #3113); Qwen3.5/3.8 hybrid GGUFs refused honestly (aprender#3099); aarch64 NEON LZ4 and ARM clippy fixes (aprender#3103, #3112); four `apr` binaries on every tag (aprender#3092); examples must build and run before a tag (aprender#3122). Recipes remain pinned to `aprender-core 0.31.2` until the 0.67.0 crates.io publish lands; the bump is its own change.
+
 ### Added
 - Upgraded sovereign stack: aprender 0.25, trueno 0.14, entrenar 0.5
 - Total recipe count increased from 9 to 121 across 20 categories
