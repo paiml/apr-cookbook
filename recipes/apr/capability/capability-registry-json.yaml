@@ -6,7 +6,7 @@ models: {}
 inputs: []
 expect:
   exit: 0
-  stdout_json_is_object: true
+  stdout_json: {"/source": "contracts/apr-model-capability-v1.yaml"}   # the registry names its own contract
 min_apr: "0.69.1"
 hosts: ["lambda", "gx10"]
 backends: ["cpu"]
