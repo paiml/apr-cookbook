@@ -1,0 +1,13 @@
+schema: cookbook-recipe/v1
+id: capability-registry-json
+title: Ask the binary which architectures and quant types it runs, and where
+argv: ["apr", "capability", "--json"]
+models: {}
+inputs: []
+expect:
+  exit: 0
+  stdout_json_is_object: true
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cpu"]
+receipt: "TODO-CELL:receipt"
