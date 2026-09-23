@@ -42,8 +42,9 @@ jobs:
   # sha as apex pins it (a moving `@main` is not auditable). It runs every job inside the
   # sovereign-ci image on the self-hosted clean-room pool, with the EACCES self-heal and
   # sccache. Its checks are prefixed `ci / ...`, so its own `gate` job cannot collide with the
-  # top-level `gate` below. Scope is unchanged: lib + tests, never the 1670 examples
-  # (`cargo test --lib --tests`, `cargo clippy --lib --tests`).
+  # top-level `gate` below. Scope: lib + tests, never the 1670 examples. NOTE: sovereign-ci's
+  # clippy adds `-A unused-variables` and falls back to `-p <repo>` at default features; that is
+  # inherited from the fleet workflow, not a local choice.
   ci:
     uses: paiml/.github/.github/workflows/sovereign-ci.yml@69482db7821ce792c2137077da24695bb7a0fbea # main @ 2026-09-21, as apex
     with:
@@ -156,6 +157,13 @@ jobs:
     needs: [ci, lean-gate, kani-gate]
     if: always()
     steps:
+      # The hosted-runner ratchet (#441) runs HERE, inside the required context, so a PR that
+      # adds a hosted job cannot merge on green required checks.
+      - uses: actions/checkout@v4
+      - name: No hosted runners (ratchet, #441)
+        run: |
+          bash scripts/check_no_hosted_runners.sh --self-test
+          bash scripts/check_no_hosted_runners.sh
       - name: Aggregate upstream gate outcomes
         run: |
           set -euo pipefail

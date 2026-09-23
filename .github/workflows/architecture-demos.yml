@@ -42,6 +42,9 @@ jobs:
       - name: Install pv (aprender-contracts-cli)
         # job-local install root: never into the shared runner's CARGO_HOME (#441)
         run: |
+          # --root moves only the BINARY; the registry fetch and the build still use CARGO_HOME,
+          # which on a bare-metal runner is the shared ~/.cargo. Both go job-local (advisory review).
+          export CARGO_HOME="$RUNNER_TEMP/cargo-home"
           cargo install --locked --root "$RUNNER_TEMP/pv" aprender-contracts-cli
           echo "$RUNNER_TEMP/pv/bin" >> "$GITHUB_PATH"
 

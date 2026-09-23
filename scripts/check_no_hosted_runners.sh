@@ -14,9 +14,14 @@
 # "Hosted" means a runs-on label naming a GitHub-hosted image: ubuntu-*, windows-*, macos-*.
 #
 # BLIND SPOT, by construction: a job that is a `uses:` call to another repo's reusable
-# workflow has no local runs-on, so its runner is decided in that repo. The two this repo
-# calls (paiml/.github pr-gate.yml, unified-gate.yml) were checked by hand on 2026-09-23:
-# both self-hosted. Re-check them when their pin moves.
+# workflow has no local runs-on, so its runner is decided in that repo. The FOUR this repo
+# calls, checked by hand on 2026-09-23/24:
+#   ci.yml         paiml/.github sovereign-ci.yml@69482db7   runs_on input default self-hosted clean-room
+#   pr-gate.yml    paiml/.github pr-gate.yml@main            [self-hosted, Linux, X64, clean-room, intel]
+#                  (branch-pinned: it can move under this note -- pin it by sha)
+#   unified-gate-advisory.yml  paiml/.github unified-gate.yml@b6c24635   self-hosted clean-room / gpu
+#   release.yml    paiml/infra clean-room-gate.yml@ba2f56a7   not readable from this repo's token
+# Re-check each when its pin moves.
 #
 # Usage: scripts/check_no_hosted_runners.sh [--self-test]
 # Exit: 0 clean | 1 violation | 2 usage/ENV
@@ -34,7 +39,15 @@ for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
     d = yaml.safe_load(f.read_text()) or {}
     for jid, j in (d.get("jobs") or {}).items():
         ro = j.get("runs-on")
-        labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
+        shape_ok = True
+        if isinstance(ro, dict):
+            # Mapping form {group: ..., labels: ...} is how GitHub-HOSTED larger runners are
+            # selected; read both keys, and refuse any other key as unverifiable.
+            shape_ok = set(ro) <= {"group", "labels"}
+            lab = ro.get("labels", [])
+            labels = (lab if isinstance(lab, list) else [lab]) + ([ro["group"]] if isinstance(ro.get("group"), str) else [])
+        else:
+            labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
         matrix = ((j.get("strategy") or {}).get("matrix") or {})
         expanded, unverifiable = [], False
         for l in labels:
@@ -51,7 +64,7 @@ for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
                     expanded.extend(v if isinstance(v, list) else [v])
             else:
                 unverifiable = True
-        if unverifiable or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
+        if unverifiable or not shape_ok or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
             print("%s %s" % (f.name, jid))
 PY
 }
@@ -107,6 +120,12 @@ self_test() {
     printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
+    printf 'jobs:\n  big:\n    runs-on:\n      group: larger-runners\n      labels: ubuntu-latest\n' > "$t/wf/x.yml"
+    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: mapping-form runs-on {group, labels: ubuntu-latest} (hosted larger runners)" 1 "$rc"
+    printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$t/wf/x.yml"
+    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$rc"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
