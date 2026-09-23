@@ -1,40 +1,47 @@
 #!/usr/bin/env bash
 # shellcheck shell=bash
-# Pre-push quality gate - prevents pushing failed lint/clippy/tests
+# Pre-push quality gate - prevents pushing failed lint/clippy/tests.
+#
+# #437: this hook runs INSIDE `git push`, after the connection to GitHub is open, and the full
+# `cargo test` outlived GitHub's SSH idle timeout. Run the gates BEFORE pushing instead:
+#
+#     scripts/prepush_gates.sh && git push
+#
+# That stamps the commit, and this hook then passes a stamped sha at once. An unstamped sha
+# still gets every gate here, exactly as before. A branch delete pushes no code, so it runs none.
 
 set -euo pipefail
+
+ROOT=$(git rev-parse --show-toplevel)
+GATES="$ROOT/scripts/prepush_gates.sh"
+ZERO=0000000000000000000000000000000000000000
 
 echo "🚀 Pre-push Quality Gates"
 echo "========================="
 
-# 1. Format check
-echo -n "  cargo fmt... "
-if cargo fmt --all -- --check > /dev/null 2>&1; then
-    echo "✅"
-else
-    echo "❌"
-    echo "   Run: cargo fmt --all"
-    exit 1
-fi
+need_gates=0
+# git feeds one line per pushed ref: <local ref> <local sha> <remote ref> <remote sha>
+while read -r _lref lsha _rref _rsha; do
+    if [ "$lsha" = "$ZERO" ]; then
+        echo "  delete of $_rref: no code pushed, no gates"
+        continue
+    fi
+    if [ -x "$GATES" ] && bash "$GATES" --check "$lsha"; then
+        echo "  ${lsha:0:9}: gates already passed before the push (scripts/prepush_gates.sh stamp)"
+    else
+        need_gates=1
+    fi
+done
 
-# 2. Clippy check
-echo -n "  cargo clippy... "
-if cargo clippy --all-targets --all-features -- -D warnings > /dev/null 2>&1; then
-    echo "✅"
-else
-    echo "❌"
-    echo "   Run: cargo clippy --all-targets --all-features -- -D warnings"
-    exit 1
-fi
-
-# 3. Test check
-echo -n "  cargo test... "
-if cargo test --all-features > /dev/null 2>&1; then
-    echo "✅"
-else
-    echo "❌"
-    echo "   Run: cargo test --all-features"
-    exit 1
+if [ "$need_gates" = 1 ]; then
+    echo "  (tip: run scripts/prepush_gates.sh first -- the full test can outlive GitHub's SSH timeout, #437)"
+    if [ -x "$GATES" ]; then
+        bash "$GATES" --run-gates || exit 1
+    else
+        cargo fmt --all -- --check > /dev/null 2>&1 || { echo "❌ cargo fmt --all"; exit 1; }
+        cargo clippy --all-targets --all-features -- -D warnings > /dev/null 2>&1 || { echo "❌ cargo clippy"; exit 1; }
+        cargo test --all-features > /dev/null 2>&1 || { echo "❌ cargo test --all-features"; exit 1; }
+    fi
 fi
 
 echo ""
