@@ -24,12 +24,29 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     python3 - "$WF_DIR" << 'PY'
 import pathlib, re, sys, yaml
 HOSTED = re.compile(r"^(ubuntu|windows|macos)-")
+EXPR = re.compile(r"\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}")
 for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
     d = yaml.safe_load(f.read_text()) or {}
     for jid, j in (d.get("jobs") or {}).items():
         ro = j.get("runs-on")
         labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
-        if any(isinstance(l, str) and HOSTED.match(l) for l in labels):
+        matrix = ((j.get("strategy") or {}).get("matrix") or {})
+        expanded, unverifiable = [], False
+        for l in labels:
+            if not isinstance(l, str) or "${{" not in l:
+                expanded.append(l)
+                continue
+            # An expression hides the label. `${{ matrix.<k> }}` is resolved against the job's
+            # own matrix values; anything else cannot be checked, so it is refused rather than
+            # passed (a hosted image behind an expression would otherwise read as clean).
+            m = EXPR.fullmatch(l.strip())
+            vals = matrix.get(m.group(1)) if m else None
+            if isinstance(vals, list) and all(isinstance(v, (str, list)) for v in vals):
+                for v in vals:
+                    expanded.extend(v if isinstance(v, list) else [v])
+            else:
+                unverifiable = True
+        if unverifiable or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
             print("%s %s" % (f.name, jid))
 PY
 }
@@ -75,6 +92,16 @@ self_test() {
     printf 'jobs:\n  m:\n    runs-on: macos-14\n' > "$t/wf/y.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: macos-14 counts as hosted too" 1 "$rc"
+    rm -f "$t/wf/y.yml"; : > "$t/base"
+    printf 'jobs:\n  mx:\n    strategy:\n      matrix:\n        os: [ubuntu-latest, self-hosted]\n    runs-on: ${{ matrix.os }}\n' > "$t/wf/x.yml"
+    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: a hosted image behind \${{ matrix.os }} is resolved and caught" 1 "$rc"
+    printf 'jobs:\n  ex:\n    runs-on: ${{ inputs.runner }}\n' > "$t/wf/x.yml"
+    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: an unresolvable runs-on expression is refused, not passed" 1 "$rc"
+    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
+    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
