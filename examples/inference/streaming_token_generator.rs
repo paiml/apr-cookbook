@@ -261,7 +261,7 @@ fn main() {
     let config = GenerationConfig::new(60).with_temperature(0.8);
     let (tokens, stats) = run_generation(42, prompt.clone(), config);
 
-    println!("   Prompt:    {:?}", &prompt);
+    println!("   Prompt:    {:?}", prompt);
     println!("   Generated: {} tokens", stats.total_tokens);
     println!("   TTFT:      {} us", stats.ttft_us);
     println!("   Total:     {} us", stats.total_time_us);
