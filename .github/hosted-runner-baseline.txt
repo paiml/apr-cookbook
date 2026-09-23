@@ -1,9 +1,2 @@
 # Jobs still on GitHub-hosted runners (#441). A RATCHET: rows may only be deleted, never added.
-# Enforced by scripts/check_no_hosted_runners.sh. Goal: empty.
-ci.yml quality-gate
-ci.yml lean-gate
-ci.yml kani-gate
-ci.yml gate
-ci.yml ci-status
-coverage.yml coverage
-examples-build.yml build-examples
+# Enforced by scripts/check_no_hosted_runners.sh. Goal reached: empty.

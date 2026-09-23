@@ -20,6 +20,9 @@ on:
     branches: [main, master]
   push:
     branches: [main, master]
+    # #441: coverage runs on a v* tag only (sovereign-ci coverage_on: tag; fleet ruling
+    # aprender#3676). The input alone would never fire: a branch-filtered push misses tags.
+    tags: ['v*']
   workflow_dispatch:
 
 concurrency:
@@ -35,192 +38,98 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # Job id renamed `gate` -> `quality-gate` so the id `gate` is free for the
-  # aggregator below (the org ruleset requires a CONTEXT literally named
-  # `gate`). The check-run name is unchanged: `Quality Gate (stable)`.
-  quality-gate:
-    name: Quality Gate
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        toolchain: [stable]
-    steps:
-      # Free ~30GB on the GH runner (Android SDK, .NET, Haskell, large preinstalled
-      # tarballs) before doing anything else. Without this, `cargo test --all-features`
-      # over a 12-crate workspace + 1670 examples runs out of disk during linking
-      # ("ld terminated with signal 7 [Bus error]" / "No space left on device").
-      # Tracked upstream at aprender#1020.
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
+  # #441: lint + test + security run in the fleet's reusable sovereign-ci workflow, pinned by
+  # sha as apex pins it (a moving `@main` is not auditable). It runs every job inside the
+  # sovereign-ci image on the self-hosted clean-room pool, with the EACCES self-heal and
+  # sccache. Its checks are prefixed `ci / ...`, so its own `gate` job cannot collide with the
+  # top-level `gate` below. Scope is unchanged: lib + tests, never the 1670 examples
+  # (`cargo test --lib --tests`, `cargo clippy --lib --tests`).
+  ci:
+    uses: paiml/.github/.github/workflows/sovereign-ci.yml@69482db7821ce792c2137077da24695bb7a0fbea # main @ 2026-09-21, as apex
+    with:
+      repo: apr-cookbook
+      clippy_args: '--lib --tests --all-features'
+      test_args: '--tests --all-features'
+      coverage_on: tag
+    secrets: inherit
 
-      - uses: actions/checkout@v4
-        with:
-          # Pin to the PR head SHA so the gate evaluates the PR's own commit
-          # rather than the ephemeral merge commit — keeps the tested SHA and
-          # the reported SHA identical.
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: clippy, rustfmt
-
-      - uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
-      - name: Lint (clippy on lib + tests, NOT examples)
-        # `--all-targets` would compile all 1670 examples in debug mode
-        # (~264MB each = >400GB needed). Scoped to lib + tests keeps
-        # disk pressure within the GH-hosted runner's 14GB. Examples
-        # are checked separately by the weekly examples-build workflow.
-        run: cargo clippy --lib --tests --all-features -- -D warnings
-
-      - name: Test (lib + tests, NOT examples)
-        # Same disk-pressure mitigation as clippy. `cargo test` without
-        # `--lib --tests` would compile all 1670 examples — too large.
-        # The dep-duplication tracked at aprender#1599 makes this even
-        # worse (aprender-core 0.29.3 + 0.31.2, trueno 0.19.1 + 0.31.2).
-        run: cargo test --lib --tests --all-features
-
-      - name: Security scan (cargo audit)
-        run: |
-          cargo install cargo-audit --locked || true
-          cargo audit
-        continue-on-error: true
-
-      # Coverage moved to .github/workflows/coverage.yml (cron schedule)
-      # because cargo llvm-cov re-instruments + recompiles, doubling target/
-      # size. Off the PR critical path keeps this gate fast.
-
-  # Note: the self-hosted `unified` gate lives in its own workflow file
-  # (`unified-gate-advisory.yml`) so its conclusion doesn't taint this
-  # workflow's badge. It is advisory — the required branch-protection
-  # check is `CI Status` (below).
-
-  # Lean gate — builds the ProvableContracts Lake project under `lean/`.
-  # Catches regressions in the PMAT-047 theorem scaffold (e.g. a theorem
-  # body stops compiling, or the lakefile/module graph drifts). Uses elan
-  # to install the toolchain pinned in `lean/lean-toolchain`.
-  #
-  # Note: `lake build` emits `declaration uses 'sorry'` warnings for the
-  # 16 unproven theorems — that's expected and honest. We don't fail on
-  # warnings here; the real regression signal is the build exit code.
+  # Lean gate: builds the ProvableContracts Lake project under `lean/` (toolchain pinned in
+  # lean/lean-toolchain). #441, cop ruling: Lean is NEVER installed on a shared runner. It runs
+  # INSIDE the sovereign-ci image, and elan installs into that ephemeral container, which is
+  # discarded after the job. The per-run install goes away when the image carries elan
+  # (paiml/infra#966). `lake build` warns `declaration uses 'sorry'` for the unproven theorems,
+  # which is expected; the regression signal is the exit code.
   lean-gate:
     name: Lean Gate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]
+    container:
+      image: localhost:5000/sovereign-ci:stable@sha256:70f2cdc9e537fe4447306d33c317fea33017f78f1ffa3b7af99095391419ef36
+      options: --cpus 8
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - name: Install elan (Lean toolchain manager)
+      - name: Pre-checkout ownership restore (EACCES self-heal, copied from sovereign-ci)
         run: |
-          curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | \
-            sh -s -- -y --default-toolchain none
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install elan inside the job container (never on the host, #441)
+        run: |
+          curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
           echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
-
       - name: Lean toolchain check
         working-directory: lean
         run: lean --version
-
       - uses: actions/cache@v4
         with:
           path: lean/.lake
-          key: lean-${{ runner.os }}-${{ hashFiles('lean/lean-toolchain', 'lean/lakefile.toml') }}
-
+          key: lean-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean/lean-toolchain', 'lean/lakefile.toml') }}
       - name: Build Lean theorem scaffold
         working-directory: lean
         run: lake build
 
-  # Kani gate — runs `cargo kani` against the standalone `kani/` crate which
-  # contains 108 #[kani::proof] harnesses (39 base + 69 architecture-demos).
-  # All 108 harnesses verify in ~14s locally on a stable laptop; first-run
-  # cold install of Kani adds ~3-5min to CI. Cached on toolchain version.
-  #
-  # This is the runtime witness for D3 Kani 1.0 — every contract obligation
-  # that ships a kani_harness pointer now has an actually-verified Rust
-  # symbol behind it. PMAT-324.
+  # Kani gate: X64 only, because the pool includes ARM64 (gx10) and this Kani release's
+  # aarch64-Linux support is unproven. Kani installs into the ephemeral job container, never
+  # the host (#441, paiml/infra#966).
   kani-gate:
     name: Kani Gate
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, clean-room]
+    container:
+      image: localhost:5000/sovereign-ci:stable@sha256:70f2cdc9e537fe4447306d33c317fea33017f78f1ffa3b7af99095391419ef36
+      options: --cpus 8
     steps:
-      # Same disk-pressure mitigation as the main gate — Kani install adds
-      # ~3GB of binaries and CBMC artifacts on top of cargo target dirs.
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
-        with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: false
-          docker-images: true
-          swap-storage: true
-
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.pull_request.head.sha || github.sha }}
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/bin/kani-verifier
-            ~/.cargo/bin/cargo-kani
-            ~/.kani
-          key: kani-${{ runner.os }}-0.67.0
-
-      - name: Install Kani
+      - name: Pre-checkout ownership restore (EACCES self-heal, copied from sovereign-ci)
         run: |
-          if ! command -v cargo-kani >/dev/null 2>&1; then
-            cargo install --locked kani-verifier --version 0.67.0
-            cargo kani setup
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
           fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install Kani 0.67.0 inside the job container (never on the host, #441)
+        run: |
+          cargo install --locked kani-verifier --version 0.67.0
+          cargo kani setup
           cargo kani --version
-
       - name: Run Kani harnesses
         working-directory: kani
         run: cargo kani
 
-  # `gate` — the context the paiml org ruleset "Green Main" (id 13878864)
-  # requires on every PR:
-  #
-  #   $ gh api orgs/paiml/rulesets/13878864 --jq '.rules[]
-  #       | select(.type=="required_status_checks")
-  #       | .parameters.required_status_checks[].context'
-  #   gate
-  #
-  # No workflow in this repo emitted a check by that name, so every PR sat at
-  # mergeStateStatus BLOCKED with every visible check green and nothing a
-  # contributor could do about it — the missing check was one the repo could
-  # not produce.
-  #
-  # The job id AND the display name must both be the literal string `gate`:
-  # the ruleset matches the check-run CONTEXT, so a friendlier name silently
-  # re-breaks merging. Do not add a `strategy.matrix` here either — that would
-  # suffix the context (`gate (stable)`) and it would stop matching.
-  #
-  # It measures the repo's real CI: it fails whenever Quality Gate, Lean Gate
-  # or Kani Gate did not succeed, and it refuses to report green if it did not
-  # actually observe all three (a `gate` that measures nothing is worse than
-  # the block it replaces).
+  # The org ruleset requires a context literally named `gate`; it aggregates the three gates
+  # and refuses to pass on a shrunken denominator.
   gate:
     name: gate
-    runs-on: ubuntu-latest
-    needs: [quality-gate, lean-gate, kani-gate]
+    runs-on: [self-hosted, Linux, clean-room]
+    needs: [ci, lean-gate, kani-gate]
     if: always()
     steps:
       - name: Aggregate upstream gate outcomes
@@ -238,32 +147,22 @@ jobs:
               failed=$((failed + 1))
             fi
           done <<EOF
-          quality-gate=${{ needs.quality-gate.result }}
+          ci=${{ needs.ci.result }}
           lean-gate=${{ needs.lean-gate.result }}
           kani-gate=${{ needs.kani-gate.result }}
           EOF
           echo "checked $checked upstream job(s), $failed failing"
-          # Denominator guard: if a future edit drops an entry from `needs:`,
-          # its result expression expands to the empty string and the pair is
-          # dropped here. Refuse to pass on a shrunken denominator rather than
-          # quietly guarding less.
           if [ "$checked" -ne 3 ]; then
-            echo "gate observed $checked of the 3 jobs it declares in needs: — refusing to report green"
+            echo "gate observed $checked of the 3 jobs it declares in needs: -- refusing to report green"
             exit 1
           fi
           [ "$failed" -eq 0 ]
 
-  # Summary job that reports GREEN if the local Quality Gate + Lean Gate +
-  # Kani Gate passed, regardless of the self-hosted unified gate's health.
-  #
-  # Kept because the repo-level branch protection on `main` still requires the
-  # context `CI Status` (app_id 15368) — removing or renaming this job would
-  # trade the org-ruleset block for a branch-protection one. It now mirrors
-  # `gate` rather than duplicating its logic, so the two required contexts
-  # cannot disagree.
+  # Branch protection on `main` requires the context `CI Status`. Its name must never change,
+  # or every PR blocks on a check nobody produces. It mirrors `gate`.
   ci-status:
     name: CI Status
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]
     needs: [gate]
     if: always()
     steps:
