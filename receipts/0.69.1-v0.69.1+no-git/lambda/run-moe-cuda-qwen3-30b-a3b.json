@@ -1,0 +1,36 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "run-moe-cuda-qwen3-30b-a3b",
+ "recipe_sha256": "12c551bbe47279f9c62069a0883f80b624808263b96ea7a26b138deadf09dee4",
+ "host": "lambda",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
+ "at": "2026-09-23T22:07:18+00:00",
+ "models": {
+  "main": {
+   "path": "/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
+   "sha256": "6c997b8af17debdfb01d890214400ccbab00db6acc0ba8da5de1cc906c4774d0"
+  }
+ },
+ "gpu_lock": "gpu-q",
+ "argv": [
+  "gpu-q",
+  "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",
+  "run",
+  "/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
+  "--gpu",
+  "--prompt",
+  "What is 2+2? Answer with the number only.",
+  "--max-tokens",
+  "16",
+  "--temperature",
+  "0",
+  "--json"
+ ],
+ "rc": 0,
+ "stdout_sha256": "ebe84303bfef025fa3b5d1ffc7476d4ef79314e56b47dd79917b6aa9be8099a6",
+ "stdout_head": "{\n  \"model\": \"/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf\",\n  \"text\": \"4\",\n  \"tokens\": [\n    19,\n    151645\n  ],\n  \"tokens_generated\": 2,\n  \"max_tokens\": 16,\n  \"tok_per_sec\": 3.6,\n  \"inference_time_ms\": 21171.98,\n  \"used_gpu\": true,\n  \"cached\": true,\n  \"prompt_tokens\": 21,\n  \"completion_tokens\": 2,\n  \"finish_reason\": \"stop\",\n  \"context_length\": 262144,\n  \"generation_ms\": 562,\n  \"setup_ms\": 4387,\n  \"backend\": {\n    \"requested\": \"gpu\",\n    \"ran\": \"gpu\",\n    \"fell_back\": false\n  }\n}\n",
+ "stderr_tail": "[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\n[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\nBackend: GPU (CUDA, NVIDIA GeForce RTX 4090, 24035 MB VRAM) [qwen3moe routed-expert forward, #3714; weights resident in 1130 ms]\nF2 guard: GPU matches the CPU forward on 22 positions (min cosine 1.0000) in 3258 ms\nqwen3moe CUDA: 21 prompt + 2 generated tokens in 257 ms (89.6 tok/s including the token-by-token prefill)\n",
+ "verdict": "PASS",
+ "reasons": []
+}

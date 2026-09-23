@@ -1,0 +1,21 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "capability-registry-json",
+ "recipe_sha256": "da528d00ba74fc81a7ecd57ded9a9955a813bf1f52c8b82312b247e9ef1749d2",
+ "host": "gx10",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "49afbc26f340e0b8bb9f1913524321cd60b4ef5e43e431251ede46e56c91fad8",
+ "at": "2026-09-23T22:01:25+00:00",
+ "models": {},
+ "argv": [
+  "/home/noah/eph-work/cb-rcpt/apr-v0.69.1-aarch64-unknown-linux-gnu-cuda/apr",
+  "capability",
+  "--json"
+ ],
+ "rc": 0,
+ "stdout_sha256": "43353e125b262b915a1f009c610c3070e3431b589d281e9cda0012ea5517e16a",
+ "stdout_head": "{\n  \"source\": \"contracts/apr-model-capability-v1.yaml\",\n  \"embedded_from\": \"crates/apr-cli/contracts/apr-model-capability-v1.yaml\",\n  \"ops\": [\n    {\n      \"op\": \"RoPE\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"GQA\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"MHA\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"SwiGLU\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"RMSNorm\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"BiasAdd\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"CausalMask\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": ",
+ "stderr_tail": "",
+ "verdict": "PASS",
+ "reasons": []
+}
