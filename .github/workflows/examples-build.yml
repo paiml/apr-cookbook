@@ -39,3 +39,15 @@ jobs:
           persist-credentials: false
       - name: Build all examples (release mode for smaller binaries)
         run: cargo build --examples --release --all-features
+      # Copied from sovereign-ci (paiml/.github#42): this container job runs as root, so give
+      # the runner's _work tree back on EVERY exit, or the next bare-metal job on this shared
+      # runner dies in checkout on root-owned files.
+      - name: Restore runner ownership of the runner _work tree
+        if: always()
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true

@@ -13,6 +13,11 @@
 #
 # "Hosted" means a runs-on label naming a GitHub-hosted image: ubuntu-*, windows-*, macos-*.
 #
+# BLIND SPOT, by construction: a job that is a `uses:` call to another repo's reusable
+# workflow has no local runs-on, so its runner is decided in that repo. The two this repo
+# calls (paiml/.github pr-gate.yml, unified-gate.yml) were checked by hand on 2026-09-23:
+# both self-hosted. Re-check them when their pin moves.
+#
 # Usage: scripts/check_no_hosted_runners.sh [--self-test]
 # Exit: 0 clean | 1 violation | 2 usage/ENV
 set -euo pipefail

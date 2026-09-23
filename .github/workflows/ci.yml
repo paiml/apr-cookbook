@@ -92,6 +92,18 @@ jobs:
       - name: Build Lean theorem scaffold
         working-directory: lean
         run: lake build
+      # Copied from sovereign-ci (paiml/.github#42): this container job runs as root, so give
+      # the runner's _work tree back on EVERY exit, or the next bare-metal job on this shared
+      # runner dies in checkout on root-owned files.
+      - name: Restore runner ownership of the runner _work tree
+        if: always()
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
 
   # Kani gate: X64 only, because the pool includes ARM64 (gx10) and this Kani release's
   # aarch64-Linux support is unproven. Kani installs into the ephemeral job container, never
@@ -123,6 +135,18 @@ jobs:
       - name: Run Kani harnesses
         working-directory: kani
         run: cargo kani
+      # Copied from sovereign-ci (paiml/.github#42): this container job runs as root, so give
+      # the runner's _work tree back on EVERY exit, or the next bare-metal job on this shared
+      # runner dies in checkout on root-owned files.
+      - name: Restore runner ownership of the runner _work tree
+        if: always()
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
 
   # The org ruleset requires a context literally named `gate`; it aggregates the three gates
   # and refuses to pass on a shrunken denominator.
