@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "code-json-envelope-qwen35-4b",
- "recipe_sha256": "121df8c5fcec704fdb9d1c1df978fcc76cb349c8f839aa1309deb5632f54e5d1",
+ "recipe_sha256": "156bef6186ddbfb8c76a47c5ad80ea880be84056ea16e525ccb5823e0e8abe96",
  "host": "gx10",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "49afbc26f340e0b8bb9f1913524321cd60b4ef5e43e431251ede46e56c91fad8",
- "at": "2026-09-23T22:01:25+00:00",
+ "at": "2026-09-23T23:53:07+00:00",
  "models": {
   "main": {
    "path": "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
@@ -30,9 +30,9 @@
   "Write a Python function add(a, b) that returns a + b. Reply with only the code."
  ],
  "rc": 0,
- "stdout_sha256": "d145838a66995e3b458b00fe0c6a911ea2c8f1f8fa3a46c13e4c65255b7d0d9d",
- "stdout_head": "{\"type\":\"result\",\"subtype\":\"success\",\"is_error\":false,\"status\":\"ok\",\"duration_ms\":1858,\"result\":\"def add(a, b):\\n    return a + b\",\"session_id\":\"00000000-0006-7000-5c2d-5c2da6b306f0\",\"num_turns\":1,\"tokens_in\":45,\"tokens_out\":12,\"total_cost_usd\":0}\n",
- "stderr_tail": "Launched apr serve on port 41501 (pid 3449029, --gpu)\napr serve ready (8.5s)\n",
+ "stdout_sha256": "7d2cc06ea8d76cec8f5704396c5c5c8f040cdb8cc86eb2e424d5ae546becfbcd",
+ "stdout_head": "{\"type\":\"result\",\"subtype\":\"success\",\"is_error\":false,\"status\":\"ok\",\"duration_ms\":2157,\"result\":\"def add(a, b):\\n    return a + b\",\"session_id\":\"00000000-0006-7000-5c2f-5c2f2ff65df3\",\"num_turns\":1,\"tokens_in\":45,\"tokens_out\":12,\"total_cost_usd\":0}\n",
+ "stderr_tail": "Launched apr serve on port 39031 (pid 4163455, --gpu)\napr serve ready (8.5s)\n",
  "verdict": "PASS",
  "reasons": []
 }

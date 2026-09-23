@@ -6,7 +6,7 @@ argv: ["apr", "run", "{model:main}", "--gpu", "--prompt", "What is 2+2? Answer w
 models:
   main:
     role: model
-    ref: "TODO-CELL:hf-ref"   # held on lambda and gx10 as Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf
+    ref: "hf://unsloth/Qwen3-30B-A3B-Instruct-2507-GGUF/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
     sha256: "6c997b8af17debdfb01d890214400ccbab00db6acc0ba8da5de1cc906c4774d0"
 inputs: []
 expect:
@@ -16,4 +16,3 @@ expect:
 min_apr: "0.69.1"
 hosts: ["lambda", "gx10"]
 backends: ["cuda"]
-receipt: "TODO-CELL:receipt"   # from apr 0.69.1 (d8a6df53a) on each host

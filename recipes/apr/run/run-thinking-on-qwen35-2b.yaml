@@ -6,7 +6,7 @@ argv: ["apr", "run", "{model:main}", "--gpu", "--thinking", "on", "--prompt", "W
 models:
   main:
     role: model
-    ref: "TODO-CELL:hf-ref"   # Qwen3.5-2B-Q4_K_M.gguf, CRUX-certified for 0.69.1. NOT the 0.8B (known issue #4030)
+    ref: "hf://unsloth/Qwen3.5-2B-GGUF/Qwen3.5-2B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
     sha256: "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223"
 inputs: []
 expect:
@@ -15,4 +15,3 @@ expect:
 min_apr: "0.69.1"
 hosts: ["lambda", "gx10"]
 backends: ["cuda"]
-receipt: "TODO-CELL:receipt"

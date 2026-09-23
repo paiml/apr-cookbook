@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "capability-registry-json",
- "recipe_sha256": "da528d00ba74fc81a7ecd57ded9a9955a813bf1f52c8b82312b247e9ef1749d2",
+ "recipe_sha256": "f54efd617f9676a689d7c59ea654c277d65bdc6cba517dbb1975e25909a5ad68",
  "host": "lambda",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
- "at": "2026-09-23T22:01:05+00:00",
+ "at": "2026-09-23T23:53:06+00:00",
  "models": {},
  "argv": [
   "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",

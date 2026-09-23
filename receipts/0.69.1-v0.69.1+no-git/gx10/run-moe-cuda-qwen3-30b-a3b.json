@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "run-moe-cuda-qwen3-30b-a3b",
- "recipe_sha256": "12c551bbe47279f9c62069a0883f80b624808263b96ea7a26b138deadf09dee4",
+ "recipe_sha256": "c15bff3f7e57925867d1972ff3e35ea27a1b4265aa2492bb31a20caa7f0fd071",
  "host": "gx10",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "49afbc26f340e0b8bb9f1913524321cd60b4ef5e43e431251ede46e56c91fad8",
- "at": "2026-09-23T22:03:21+00:00",
+ "at": "2026-09-23T23:53:18+00:00",
  "models": {
   "main": {
    "path": "/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
@@ -28,9 +28,9 @@
   "--json"
  ],
  "rc": 0,
- "stdout_sha256": "69b8e633a9ca606560454a7624a1f3832bd6029557fdca23728da91b15b9306e",
- "stdout_head": "{\n  \"model\": \"/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf\",\n  \"text\": \"4\",\n  \"tokens\": [\n    19,\n    151645\n  ],\n  \"tokens_generated\": 2,\n  \"max_tokens\": 16,\n  \"tok_per_sec\": 2.4,\n  \"inference_time_ms\": 23095.93,\n  \"used_gpu\": true,\n  \"cached\": true,\n  \"prompt_tokens\": 21,\n  \"completion_tokens\": 2,\n  \"finish_reason\": \"stop\",\n  \"context_length\": 262144,\n  \"generation_ms\": 834,\n  \"setup_ms\": 8445,\n  \"backend\": {\n    \"requested\": \"gpu\",\n    \"ran\": \"gpu\",\n    \"fell_back\": false\n  }\n}\n",
- "stderr_tail": "121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\nF2 guard: GPU matches the CPU forward on 22 positions (min cosine 1.0000) in 5121 ms\nqwen3moe CUDA: 21 prompt + 2 generated tokens in 598 ms (38.5 tok/s including the token-by-token prefill)\n",
+ "stdout_sha256": "74936ff7acc53a07749d3f79ab024f7380e16243e38bebf9d661d5cb47d602f2",
+ "stdout_head": "{\n  \"model\": \"/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf\",\n  \"text\": \"4\",\n  \"tokens\": [\n    19,\n    151645\n  ],\n  \"tokens_generated\": 2,\n  \"max_tokens\": 16,\n  \"tok_per_sec\": 2.0,\n  \"inference_time_ms\": 39816.82,\n  \"used_gpu\": true,\n  \"cached\": true,\n  \"prompt_tokens\": 21,\n  \"completion_tokens\": 2,\n  \"finish_reason\": \"stop\",\n  \"context_length\": 262144,\n  \"generation_ms\": 1011,\n  \"setup_ms\": 33881,\n  \"backend\": {\n    \"requested\": \"gpu\",\n    \"ran\": \"gpu\",\n    \"fell_back\": false\n  }\n}\n",
+ "stderr_tail": "21 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\nF2 guard: GPU matches the CPU forward on 22 positions (min cosine 1.0000) in 15217 ms\nqwen3moe CUDA: 21 prompt + 2 generated tokens in 657 ms (35.0 tok/s including the token-by-token prefill)\n",
  "verdict": "PASS",
  "reasons": []
 }

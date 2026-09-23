@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "run-moe-cuda-qwen3-30b-a3b",
- "recipe_sha256": "12c551bbe47279f9c62069a0883f80b624808263b96ea7a26b138deadf09dee4",
+ "recipe_sha256": "c15bff3f7e57925867d1972ff3e35ea27a1b4265aa2492bb31a20caa7f0fd071",
  "host": "lambda",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
- "at": "2026-09-23T22:07:18+00:00",
+ "at": "2026-09-23T23:53:13+00:00",
  "models": {
   "main": {
    "path": "/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf",
@@ -28,9 +28,9 @@
   "--json"
  ],
  "rc": 0,
- "stdout_sha256": "ebe84303bfef025fa3b5d1ffc7476d4ef79314e56b47dd79917b6aa9be8099a6",
- "stdout_head": "{\n  \"model\": \"/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf\",\n  \"text\": \"4\",\n  \"tokens\": [\n    19,\n    151645\n  ],\n  \"tokens_generated\": 2,\n  \"max_tokens\": 16,\n  \"tok_per_sec\": 3.6,\n  \"inference_time_ms\": 21171.98,\n  \"used_gpu\": true,\n  \"cached\": true,\n  \"prompt_tokens\": 21,\n  \"completion_tokens\": 2,\n  \"finish_reason\": \"stop\",\n  \"context_length\": 262144,\n  \"generation_ms\": 562,\n  \"setup_ms\": 4387,\n  \"backend\": {\n    \"requested\": \"gpu\",\n    \"ran\": \"gpu\",\n    \"fell_back\": false\n  }\n}\n",
- "stderr_tail": "[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\n[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\nBackend: GPU (CUDA, NVIDIA GeForce RTX 4090, 24035 MB VRAM) [qwen3moe routed-expert forward, #3714; weights resident in 1130 ms]\nF2 guard: GPU matches the CPU forward on 22 positions (min cosine 1.0000) in 3258 ms\nqwen3moe CUDA: 21 prompt + 2 generated tokens in 257 ms (89.6 tok/s including the token-by-token prefill)\n",
+ "stdout_sha256": "505b27a2ca6c972141f56aaf4174885e91665bac78074299f1423c6f22916567",
+ "stdout_head": "{\n  \"model\": \"/home/noah/models/Qwen3-30B-A3B-Instruct-2507-Q4_K_M.gguf\",\n  \"text\": \"4\",\n  \"tokens\": [\n    19,\n    151645\n  ],\n  \"tokens_generated\": 2,\n  \"max_tokens\": 16,\n  \"tok_per_sec\": 3.6,\n  \"inference_time_ms\": 10623.25,\n  \"used_gpu\": true,\n  \"cached\": true,\n  \"prompt_tokens\": 21,\n  \"completion_tokens\": 2,\n  \"finish_reason\": \"stop\",\n  \"context_length\": 262144,\n  \"generation_ms\": 563,\n  \"setup_ms\": 3496,\n  \"backend\": {\n    \"requested\": \"gpu\",\n    \"ran\": \"gpu\",\n    \"fell_back\": false\n  }\n}\n",
+ "stderr_tail": "[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\n[BOS-FALLBACK] No tokenizer.ggml.bos_token_id in GGUF — using architecture default for 'qwen3moe'\nBackend: GPU (CUDA, NVIDIA GeForce RTX 4090, 24035 MB VRAM) [qwen3moe routed-expert forward, #3714; weights resident in 1025 ms]\nF2 guard: GPU matches the CPU forward on 22 positions (min cosine 1.0000) in 2471 ms\nqwen3moe CUDA: 21 prompt + 2 generated tokens in 257 ms (89.6 tok/s including the token-by-token prefill)\n",
  "verdict": "PASS",
  "reasons": []
 }

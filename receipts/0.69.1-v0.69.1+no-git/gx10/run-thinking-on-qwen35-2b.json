@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "run-thinking-on-qwen35-2b",
- "recipe_sha256": "cde2d44093851bb8df164f7b4482d04b773d28e99b618ef09eee7ebb0d4ca54b",
+ "recipe_sha256": "2bfe9ac920d6065ae65a6ae851059df01db2b10cbfe23b7fbd4b16c90550b2d7",
  "host": "gx10",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "49afbc26f340e0b8bb9f1913524321cd60b4ef5e43e431251ede46e56c91fad8",
- "at": "2026-09-23T22:03:53+00:00",
+ "at": "2026-09-23T23:54:22+00:00",
  "models": {
   "main": {
    "path": "/home/noah/models/Qwen3.5-2B-Q4_K_M.gguf",
@@ -29,7 +29,7 @@
   "0"
  ],
  "rc": 0,
- "stdout_sha256": "47b825aba0df3d621f14d07a0795ab52e010aadb534dc88c6d3fd4b252613476",
+ "stdout_sha256": "a08b5b6156a1d49c613f6b5ba60ab63dc9f41f053444419133f95a3010dcda12",
  "stdout_head": "=== APR Run ===\n\nSource: /home/noah/models/Qwen3.5-2B-Q4_K_M.gguf\n\nOutput:\nThinking Process:\n\n1.  **Analyze the Request:** The user is asking \"What is 2+2?\" and explicitly requests the answer to be enclosed within `<answer></answer>` tags.\n\n2.  **Determine the Answer:** The mathematical operation $2 + 2$ equals $4$.\n\n3.  **Format the Output:** The user requested the answer inside `<answer></answer>`.\n\n4.  **Construct the Final String:** `<answer>4</answer>`.\n\n5.  **Final Review:** Does this meet all constraints? Yes.\n\n6.  **Output Generation:** <answer>4</answer>\n</think>\n\n<answer>4</answer>\n\n",
  "stderr_tail": "JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 2 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 2 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 5 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n",
  "verdict": "PASS",

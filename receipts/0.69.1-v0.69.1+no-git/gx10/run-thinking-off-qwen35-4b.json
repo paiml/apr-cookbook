@@ -1,11 +1,11 @@
 {
  "schema": "cookbook-receipt/v1",
  "recipe": "run-thinking-off-qwen35-4b",
- "recipe_sha256": "ded28db9ab064fb90e6ccc85e8ed869b8221fe39b9e3374dc04f4e3ccab412d6",
+ "recipe_sha256": "d364622e9d4f70c4671f63a9fcdd12d5cd42ff41b446edb22d8f943bc848e177",
  "host": "gx10",
  "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
  "apr_sha256": "49afbc26f340e0b8bb9f1913524321cd60b4ef5e43e431251ede46e56c91fad8",
- "at": "2026-09-23T22:03:44+00:00",
+ "at": "2026-09-23T23:54:00+00:00",
  "models": {
   "main": {
    "path": "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
@@ -29,8 +29,8 @@
   "0"
  ],
  "rc": 0,
- "stdout_sha256": "34f888d8644e90bad5d5a2a3691840a71ac424daa16f199621eaf532dcbe0789",
- "stdout_head": "=== APR Run ===\n\nSource: /home/noah/models/Qwen3.5-4B-Q4_K_M.gguf\n\nOutput:\n<answer>4</answer>\n\nCompleted in 8.80s (cached)\n",
+ "stdout_sha256": "db231e568e6a2b864143c61de518b71f44ac15d12fdc977bb90d09e54c98da44",
+ "stdout_head": "=== APR Run ===\n\nSource: /home/noah/models/Qwen3.5-4B-Q4_K_M.gguf\n\nOutput:\n<answer>4</answer>\n\nCompleted in 21.53s (cached)\n",
  "stderr_tail": "JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 2 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 2 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 5 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n[GH-480] Patched 1 backward branch(es) for sm_121 JIT workaround\n",
  "verdict": "PASS",
  "reasons": []
