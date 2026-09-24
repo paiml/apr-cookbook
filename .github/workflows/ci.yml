@@ -152,12 +152,69 @@ jobs:
           fi
           chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
 
+  # The recipes are SHACL-validated and receipted (#440, #442, aprender#3769's HARD REQ). This
+  # judges COMMITTED evidence only; it runs no model (CI holds none). The sovereign-ci image
+  # carries pv 0.3.1, which predates the shapes gate, so pv 0.69.1 comes from aprender's release
+  # asset (sha256-verified) and PyYAML from apt, both into this ephemeral container only.
+  recipes:
+    name: Recipes (SHACL shape + receipts)
+    runs-on: [self-hosted, Linux, clean-room]
+    container:
+      image: localhost:5000/sovereign-ci:stable@sha256:70f2cdc9e537fe4447306d33c317fea33017f78f1ffa3b7af99095391419ef36
+      options: --cpus 8
+    env:
+      PV_VERSION: "0.69.1"
+    steps:
+      - name: Pre-checkout ownership restore (EACCES self-heal, copied from sovereign-ci)
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Install PyYAML and pv (inside the job container, never on the host)
+        run: |
+          set -eu
+          apt-get -qq update > /dev/null && apt-get -qq install -y python3-yaml > /dev/null
+          case "$(uname -m)" in x86_64) a=x86_64 ;; aarch64|arm64) a=aarch64 ;; *) echo "unsupported arch $(uname -m)"; exit 1 ;; esac
+          t="pv-v${PV_VERSION}-${a}-unknown-linux-musl.tar.gz"
+          d="$RUNNER_TEMP/pv"; mkdir -p "$d"; cd "$d"
+          curl -fsSL -o "$t" "https://github.com/paiml/aprender/releases/download/v${PV_VERSION}/$t"
+          curl -fsSL -o "$t.sha256" "https://github.com/paiml/aprender/releases/download/v${PV_VERSION}/$t.sha256"
+          sha256sum -c "$t.sha256"
+          tar -xzf "$t"
+          echo "$d/${t%.tar.gz}" >> "$GITHUB_PATH"
+      - name: Case tables (each must be seen to go red)
+        run: |
+          pv --version | head -1
+          bash scripts/check_recipe_shape.sh --self-test
+          python3 scripts/check_recipe_receipts.py --self-test
+      - name: Recipes SHACL-valid, derived evidence in sync, every recipe receipted
+        run: |
+          bash scripts/check_recipe_shape.sh
+          python3 scripts/check_recipe_receipts.py
+      # Copied from sovereign-ci (paiml/.github#42): give the shared runner's _work tree back.
+      - name: Restore runner ownership of the runner _work tree
+        if: always()
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
+
   # The org ruleset requires a context literally named `gate`; it aggregates the three gates
   # and refuses to pass on a shrunken denominator.
   gate:
     name: gate
     runs-on: [self-hosted, Linux, clean-room]
-    needs: [ci, lean-gate, kani-gate]
+    needs: [ci, lean-gate, kani-gate, recipes]
     if: always()
     steps:
       # The hosted-runner ratchet (#441) runs HERE, inside the required context, so a PR that
@@ -185,10 +242,11 @@ jobs:
           ci=${{ needs.ci.result }}
           lean-gate=${{ needs.lean-gate.result }}
           kani-gate=${{ needs.kani-gate.result }}
+          recipes=${{ needs.recipes.result }}
           EOF
           echo "checked $checked upstream job(s), $failed failing"
-          if [ "$checked" -ne 3 ]; then
-            echo "gate observed $checked of the 3 jobs it declares in needs: -- refusing to report green"
+          if [ "$checked" -ne 4 ]; then
+            echo "gate observed $checked of the 4 jobs it declares in needs: -- refusing to report green"
             exit 1
           fi
           [ "$failed" -eq 0 ]
