@@ -50,6 +50,9 @@ jobs:
     with:
       repo: apr-cookbook
       clippy_args: '--lib --tests --all-features'
+      # sovereign-ci runs `cargo test $TEST_SCOPE $TEST_ARGS` with TEST_SCOPE='--lib' (sovereign-ci.yml
+      # line 345 at the pinned sha), so the command is `cargo test --lib --tests --all-features`: the lib
+      # unit tests are NOT dropped (quorum round 1 read only this file and assumed they were).
       test_args: '--tests --all-features'
       coverage_on: tag
     secrets: inherit

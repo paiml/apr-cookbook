@@ -70,8 +70,15 @@ PY
 }
 
 check() {
-    local actual base new stale
+    local actual base new stale nwf
     command -v python3 > /dev/null || { echo "ENV: python3 missing" >&2; return 2; }
+    # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
+    # jobs": refuse instead of printing PASS (quorum finding, #454).
+    nwf=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2> /dev/null | wc -l)
+    if [ "$nwf" -eq 0 ]; then
+        echo "REFUSED: no workflow files under $WF_DIR -- zero files is broken wiring, not a clean pool"
+        return 2
+    fi
     actual=$(hosted_jobs | sort)
     base=$( { grep -vE '^\s*(#|$)' "$BASELINE" 2> /dev/null || true; } | sort)
     new=$(comm -23 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
@@ -120,6 +127,9 @@ self_test() {
     printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
+    mkdir -p "$t/empty"
+    rc=0; WF_DIR="$t/empty" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$rc"
     printf 'jobs:\n  big:\n    runs-on:\n      group: larger-runners\n      labels: ubuntu-latest\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: mapping-form runs-on {group, labels: ubuntu-latest} (hosted larger runners)" 1 "$rc"
