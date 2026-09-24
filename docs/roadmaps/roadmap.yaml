@@ -2691,3 +2691,20 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-434
+  github_issue: 434
+  item_type: task
+  title: 'chore(deps): aprender-* 0.31.2 → 0.69.1 + arrow 57 → 59 after the crates.io publish'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T07:40:33Z
+  updated: 2026-09-24T07:40:33Z
+  spec: null
+  acceptance_criteria:
+  - 'Cargo.toml pins every aprender-* crate at 0.69.1 (the published release) and arrow at 59; the 34 compile errors from arrow 57 vs aprender''s arrow 59 are gone. Cargo.lock is re-resolved from the pins and COMMITTED (not left in the tree), keeps #454''s advisory patches (rand 0.8.8, fastrand 2.5.0). Four println! redundant-reference fixes current clippy requires. Evidence on gx10 in a private target, deleted after: cargo test --lib --tests rc 0, cargo test --doc rc 0, cargo clippy --all-targets -D warnings rc 0; fmt rc 0.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
