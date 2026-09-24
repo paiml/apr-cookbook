@@ -21,7 +21,7 @@
 # another 639G and filled the build RAID to 99%. So the gates now build:
 #   - fmt: the whole tree (it is cheap);
 #   - clippy + test: the lib, bins and tests (plus doctests), plus ONLY the examples that the pushed
-#     range (BASE..HEAD) touches.
+#     range (BASE..HEAD) touches. clippy also lints the benches (as --all-targets did); test never ran them.
 # CI still builds every example; this gate is the fast local net, not the release gate.
 # An example is "touched" when its own file changed, or, for a directory example (.../main.rs),
 # any file under its directory changed. A change to src/ or Cargo.toml builds no example here,
@@ -123,7 +123,7 @@ run_gates() {
     printf '  cargo fmt... '
     if "$CARGO" fmt --all -- --check > /dev/null 2>&1; then echo ok; else echo FAIL; echo "   Run: cargo fmt --all"; return 1; fi
     printf '  cargo clippy... '
-    if "$CARGO" clippy -j "$JOBS" --lib --bins --tests "${ex_args[@]}" --all-features -- -D warnings > /dev/null 2>&1; then echo ok; else echo FAIL; echo "   Run: cargo clippy --lib --bins --tests ${ex_args[*]} --all-features -- -D warnings"; return 1; fi
+    if "$CARGO" clippy -j "$JOBS" --lib --bins --tests --benches "${ex_args[@]}" --all-features -- -D warnings > /dev/null 2>&1; then echo ok; else echo FAIL; echo "   Run: cargo clippy --lib --bins --tests --benches ${ex_args[*]} --all-features -- -D warnings"; return 1; fi
     printf '  cargo test... '
     if "$CARGO" test --all-features -j "$JOBS" --lib --bins --tests "${ex_args[@]}" > /dev/null 2>&1; then echo ok; else echo FAIL; echo "   Run: cargo test --all-features --lib --bins --tests ${ex_args[*]}"; return 1; fi
     printf '  cargo test --doc... '
@@ -231,7 +231,7 @@ STUB
     chmod +x "$t/slog"
     local s="$t/scope" b0 log="$t/scope.log" tl
     git init -q "$s"; mkdir -p "$s/src" "$s/examples/dirx"
-    for f in src/lib.rs examples/foo.rs examples/bar.rs examples/dirx/main.rs examples/dirx/util.rs; do printf '// %s\n' "$f" > "$s/$f"; done
+    for f in Cargo.toml Cargo.lock src/lib.rs examples/foo.rs examples/bar.rs examples/dirx/main.rs examples/dirx/util.rs; do printf '// %s\n' "$f" > "$s/$f"; done
     git -C "$s" add -A; git -C "$s" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t commit -q -m base
     b0=$(git -C "$s" rev-parse HEAD)
     printf '// edit\n' >> "$s/examples/foo.rs"; printf '// edit\n' >> "$s/examples/dirx/util.rs"
@@ -244,12 +244,18 @@ STUB
     row "MUST-RED: an UNCHANGED example is not built (no --example bar)" 0 "$(has "$tl" "--example bar")"
     row "MUST-RED: a per-session CARGO_TARGET_DIR is ignored; every call uses the shared target" 0 "$(grep -vc "^$t/target|" "$log" || true)"
     row "scope: cargo is capped at -j$JOBS" 1 "$(has "$tl" "-j $JOBS ")"
+    row "scope: clippy still lints the benches (--all-targets covered them)" 1 "$(has "$(grep -- '|clippy ' "$log" || true)" "--benches")"
     b0=$(git -C "$s" rev-parse HEAD)
     printf '// edit\n' >> "$s/src/lib.rs"
     git -C "$s" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t commit -q -am lib
     : > "$log"; rc=0; ( cd "$s" && SCOPE_LOG="$log" CARGO="$t/slog" run_gates "$b0" > /dev/null 2>&1 ) || rc=$?
     row "scope: a src/-only change builds NO example (rc $rc)" 0 "$(grep -c -- '--example' "$log" || true)"
     row "  ...and still runs lib/bins/tests and the doctests" 2 "$(grep -cE -- '\|test .*(--lib|--doc)' "$log" || true)"
+    b0=$(git -C "$s" rev-parse HEAD)
+    printf '# bump\n' >> "$s/Cargo.toml"; printf '# bump\n' >> "$s/Cargo.lock"
+    git -C "$s" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t commit -q -am deps
+    : > "$log"; rc=0; ( cd "$s" && SCOPE_LOG="$log" CARGO="$t/slog" run_gates "$b0" > /dev/null 2>&1 ) || rc=$?
+    row "scope: a deps bump (Cargo.toml + Cargo.lock) builds lib/tests and NO example (rc $rc)" "0/0/2" "$rc/$(grep -c -- '--example' "$log" || true)/$(grep -cE -- '\|test .*(--lib|--doc)' "$log" || true)"
     : > "$log"; rc=0; ( cd "$s" && MIN_FREE_GB=999999999 SCOPE_LOG="$log" CARGO="$t/slog" run_gates "$b0" > /dev/null 2>&1 ) || rc=$?
     row "MUST-RED: free space below the floor -> refused (rc 2) before any cargo call (ran $(grep -c . "$log" || true))" "2/0" "$rc/$(grep -c . "$log" || true)"
     # END TO END through the REAL hook: a throwaway clone of HEAD's hook + this script, a bare
