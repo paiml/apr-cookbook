@@ -2668,3 +2668,20 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-436
+  github_issue: 436
+  item_type: task
+  title: 'aprender 0.69.1: README banner + first apr-binary recipes (cookbook-recipe/v1, aprender#3769)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T07:31:58Z
+  updated: 2026-09-24T07:31:58Z
+  spec: null
+  acceptance_criteria:
+  - 'README banner states what 0.69.1 changes for cookbook users, each claim linked to its aprender issue. recipes/apr/** carries the first cookbook-recipe/v1 recipes (5), argv checked by scripts/check_recipe_argv_surface.py against an apr 0.69.1 binary with a negative control (misspelt flag fails). recipes/README.md states which checks exist at THIS merge point and which land later in the stack (shape #440, receipts #439/#442); it claims nothing not yet merged.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
