@@ -29,15 +29,18 @@ on:
 jobs:
   check-manifest:
     name: Verify fine-tuning-cookbook manifest is in sync
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]   # fleet clean-room pool, arch-neutral (#441)
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install yq
+      - name: Install yq (job-local, arch-aware; no sudo on a shared runner, #441)
         run: |
-          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
-          sudo chmod +x /usr/local/bin/yq
-          yq --version
+          case "$(uname -m)" in x86_64) a=amd64 ;; aarch64|arm64) a=arm64 ;; *) echo "unsupported arch $(uname -m)"; exit 1 ;; esac
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL -o "$RUNNER_TEMP/bin/yq" "https://github.com/mikefarah/yq/releases/latest/download/yq_linux_${a}"
+          chmod +x "$RUNNER_TEMP/bin/yq"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/bin/yq" --version
 
       - name: Run finetune-gen --check
         run: bash scripts/finetune-gen.sh --check

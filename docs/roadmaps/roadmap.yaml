@@ -2685,3 +2685,26 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-441
+  github_issue: 441
+  item_type: task
+  title: 'CI: every workflow off hosted ubuntu-latest to the fleet self-hosted pool (fleet no-hosted-runners rule)'
+  status: inprogress
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T01:50:44Z
+  updated: 2026-09-24T01:50:44Z
+  spec: null
+  acceptance_criteria:
+  - 'All 12 GitHub-hosted jobs run on the fleet self-hosted pool [self-hosted, Linux, clean-room]. Simple jobs install tools job-local and arch-aware (the pool includes ARM64); nothing is written to or deleted from the shared host (no sudo, no free-disk-space steps, job-local CARGO_HOME).'
+  - 'ci.yml calls the sha-pinned paiml/.github sovereign-ci reusable workflow (cop ruling). Its inherited clippy behaviour (-A unused-variables, default-features fallback) is ACCEPTED as the fleet workflow''s, documented in ci.yml, and raised upstream -- not re-implemented locally.'
+  - 'Lean and Kani gates run INSIDE the sovereign-ci container (installed per run until paiml/infra#968 bakes them in). EXCEPTION: kani-gate is pinned X64 until the gx10 (ARM64) build of that image is measured (infra-8d).'
+  - 'Coverage runs on v* tags through sovereign-ci (coverage_on: tag), per the fleet ruling aprender#3676 (coverage on tagged releases only); the weekly cron coverage.yml is retired, not migrated.'
+  - 'IN SCOPE, as a direct consequence: sovereign-ci makes cargo deny/audit BLOCKING (the old gate ran audit continue-on-error), so the advisories it surfaces are fixed per the paiml/infra deny template policy -- vulnerabilities by semver-compatible cargo update (Cargo.lock), unmaintained-with-no-fix by the template''s ignore list (RUSTSEC-2026-0173 is already in the template; RUSTSEC-2024-0370 requested in paiml/infra#986).'
+  - 'Required contexts gate (org ruleset) and CI Status (branch protection) keep their exact names; gate aggregates ci/lean/kani with its denominator guard AND runs the shrink-only hosted-runner guard as steps, so a PR adding a hosted job cannot merge. The guard refuses zero workflow files.'
+  - 'Workflow edits merge only with the operator''s standing workflow approval, exercised by the cop at arming (process gate, not a file in the diff).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
