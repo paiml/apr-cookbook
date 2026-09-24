@@ -32,16 +32,18 @@ concurrency:
 jobs:
   build:
     name: Build book
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]   # fleet clean-room pool, arch-neutral (#441)
     steps:
       - uses: actions/checkout@v4
 
       - name: Install mdBook
         run: |
-          mkdir -p ~/bin
-          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.36/mdbook-v0.4.36-x86_64-unknown-linux-gnu.tar.gz \
-            | tar -xz -C ~/bin
-          echo "$HOME/bin" >> "$GITHUB_PATH"
+          # job-local and arch-aware: the clean-room pool includes ARM64 (gx10), and ~/bin is shared (#441)
+          case "$(uname -m)" in x86_64) t=x86_64-unknown-linux-gnu ;; aarch64|arm64) t=aarch64-unknown-linux-musl ;; *) echo "unsupported arch $(uname -m)"; exit 1 ;; esac
+          mkdir -p "$RUNNER_TEMP/bin"
+          curl -fsSL "https://github.com/rust-lang/mdBook/releases/download/v0.4.36/mdbook-v0.4.36-${t}.tar.gz" \
+            | tar -xz -C "$RUNNER_TEMP/bin"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
 
       - name: Build book
         run: |
@@ -63,7 +65,7 @@ jobs:
     name: Deploy to GitHub Pages
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     needs: build
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]   # fleet clean-room pool, arch-neutral (#441)
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
