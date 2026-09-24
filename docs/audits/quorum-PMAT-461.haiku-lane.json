@@ -1,0 +1,17 @@
+{
+ "lane": "claude-code",
+ "model": "claude-haiku-4-5",
+ "head": "fb2beb700031ccf722d5b8631b7647c3153979a5",
+ "base": "origin/main",
+ "diff_sha256": "8e1acb4461df12b2695eea9acfeff78b0c36a6c81c88ba73f52316b3ca5ec7fd",
+ "brief_sha256": "3ec2059ef018841529c77d490795575e4aa74d6f39d454aaa7e4597394c521bf",
+ "brief_bytes": 70334,
+ "brief_provenance": "quorum-review.sh --base origin/main --ticket PMAT-461 --width 1 --brief-only at the head above (a scratch copy whose only change saves $PROMPT_FILE before exit). Byte count equals the agy artifact's prompt_bytes (70334) and judged_diff_sha256 equals its diff_sha256; byte identity with the agy brief is inferred from those checks, not recorded.",
+ "ticket": "PMAT-461",
+ "pr": 451,
+ "family": "claude",
+ "role": "claude seat (operator 2026-09-24 default quorum: sonnet-5 + 1 agy + haiku-4-5; same family as the author; this receipt claims no lint override)",
+ "verdict": "PASS",
+ "findings": [],
+ "agy_artifact": "docs/audits/quorum-PMAT-461.json (gemini-3.1-pro-high measured, PASS, 4 confirmatory findings, agreed:true, same head and diff_sha256)"
+}
