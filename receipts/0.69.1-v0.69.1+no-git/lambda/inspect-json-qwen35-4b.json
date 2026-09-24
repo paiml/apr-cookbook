@@ -1,0 +1,27 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "inspect-json-qwen35-4b",
+ "recipe_sha256": "eb82528cf44a90e3909407a403e0d49e4ce72e1e92d83f9897044782526af25c",
+ "host": "lambda",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
+ "at": "2026-09-24T01:52:47+00:00",
+ "models": {
+  "main": {
+   "path": "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
+   "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+  }
+ },
+ "argv": [
+  "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",
+  "inspect",
+  "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
+  "--json"
+ ],
+ "rc": 0,
+ "stdout_sha256": "ea5990b6cd0a9f7e8090c2b843991c1b8c3fcc12cfc79c8458edb0621011bd93",
+ "stdout_head": "{\n  \"file\": \"/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf\",\n  \"format\": \"GGUF\",\n  \"file_size\": 2740937888,\n  \"total_params\": 4205751296,\n  \"architecture\": \"qwen35\",\n  \"quantization\": \"Q4_K\",\n  \"tensor_count\": 426,\n  \"metadata\": {\n    \"general.architecture\": \"qwen35\",\n    \"general.base_model.0.name\": \"Qwen3.5 4B\",\n    \"general.base_model.0.organization\": \"Qwen\",\n    \"general.base_model.0.repo_url\": \"https://huggingface.co/Qwen/Qwen3.5-4B\",\n    \"general.base_model.count\": \"1\",\n    \"general.basename\": \"Qwen3.5-4B\",\n    \"general.file_type\": \"15\",\n    \"general.license\": \"apache-2.0\",\n    \"general.licen",
+ "stderr_tail": "",
+ "verdict": "PASS",
+ "reasons": []
+}

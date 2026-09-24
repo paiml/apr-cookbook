@@ -2668,6 +2668,23 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-436
+  github_issue: 436
+  item_type: task
+  title: 'aprender 0.69.1: README banner + first apr-binary recipes (cookbook-recipe/v1, aprender#3769)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T07:31:58Z
+  updated: 2026-09-24T07:31:58Z
+  spec: null
+  acceptance_criteria:
+  - 'README banner states what 0.69.1 changes for cookbook users, each claim linked to its aprender issue. recipes/apr/** carries the first cookbook-recipe/v1 recipes (5), argv checked by scripts/check_recipe_argv_surface.py against an apr 0.69.1 binary with a negative control (misspelt flag fails). recipes/README.md states which checks exist at THIS merge point and which land later in the stack (shape #440, receipts #439/#442); it claims nothing not yet merged.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
 - id: PMAT-441
   github_issue: 441
   item_type: task
@@ -2703,6 +2720,57 @@ roadmap:
   spec: null
   acceptance_criteria:
   - 'The pre-push hook ran the full cargo test inside git push; GitHub''s SSH idle timeout killed the connection first, so a green branch could not be pushed without --no-verify. scripts/prepush_gates.sh runs the SAME fmt/clippy/test gates with no connection open on a tree equal to HEAD, and stamps that sha; the hook passes a stamped sha at once, runs every gate for an unstamped one, and none for a branch delete. No gate removed. Also carries #438''s 4-line clippy fix (main was clippy-red).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-439
+  github_issue: 439
+  item_type: task
+  title: 'recipe runner: execute every recipes/apr/**.yaml against a DOWNLOADED apr release binary and write a receipt per recipe'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T08:16:12Z
+  updated: 2026-09-24T08:16:12Z
+  spec: null
+  acceptance_criteria:
+  - 'done_when: the 5 recipes have receipts from the published apr 0.69.1 on lambda AND gx10. `--self-test` runs a stub apr and a recipe whose expected answer is wrong, and both must go RED. A GPU recipe runs under the fleet GPU lock (gpu-q).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-440
+  github_issue: 440
+  item_type: task
+  title: 'cookbook-recipe/v1: validate recipes/ against aprender''s SHACL shape in CI (argv on the apr surface, pinned models, receipt present)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T08:16:14Z
+  updated: 2026-09-24T08:16:14Z
+  spec: null
+  acceptance_criteria:
+  - 'done_when: a CI job validates every `recipes/apr/.yaml` with `pv` against `cookbook-recipe-v1` (fleet-pinned pv). Mutants must go RED: a flag absent from the release surface, a recipe with no receipt, an unpinned model (no sha256), a missing `expect`. The interim script is then deleted or kept only as the shape''s own witness. Depends on aprender#3769 done_when 1.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
+- id: PMAT-442
+  github_issue: 442
+  item_type: task
+  title: 'receipts are a REQUIRED check: a recipe without a receipt from the current apr release (or with a failing one) fails CI'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T08:16:15Z
+  updated: 2026-09-24T08:16:15Z
+  spec: null
+  acceptance_criteria:
+  - 'done_when: a required check `recipes-receipts` fails when any recipe lacks a PASS receipt from the newest apr release on BOTH declared hosts, or when a receipt''s apr sha is not that release''s. Positive controls: delete one receipt → RED; flip one receipt''s verdict → RED; a receipt from the previous release → RED. The check reads committed receipts; it never runs models on CI.'
   phases: []
   subtasks: []
   estimated_effort: null

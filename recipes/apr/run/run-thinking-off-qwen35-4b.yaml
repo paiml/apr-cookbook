@@ -1,0 +1,17 @@
+schema: cookbook-recipe/v1
+id: run-thinking-off-qwen35-4b
+title: Answer without a think block (--thinking off) on Qwen3.5-4B
+argv: ["apr", "run", "{model:main}", "--gpu", "--thinking", "off", "--prompt", "What is 2+2? Reply inside <answer></answer>.",
+       "--max-tokens", "64", "--temperature", "0"]
+models:
+  main:
+    role: model
+    ref: "hf://unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
+    sha256: "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+inputs: []
+expect:
+  exit: 0
+  stdout_contains: ["<answer>4</answer>"]
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cuda"]

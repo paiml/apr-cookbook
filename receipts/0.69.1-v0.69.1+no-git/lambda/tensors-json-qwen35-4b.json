@@ -1,0 +1,29 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "tensors-json-qwen35-4b",
+ "recipe_sha256": "a7735a86168ec604c8958c4cfabf6616b3828a76a5a88c557457a9c86441fbd2",
+ "host": "lambda",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
+ "at": "2026-09-24T01:52:53+00:00",
+ "models": {
+  "main": {
+   "path": "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
+   "sha256": "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+  }
+ },
+ "argv": [
+  "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",
+  "tensors",
+  "/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf",
+  "--json",
+  "--limit",
+  "2"
+ ],
+ "rc": 0,
+ "stdout_sha256": "8eb899dd4226527a55de14382b400daf4d2a5ba81408c2ae6082e9ff4780fa8d",
+ "stdout_head": "{\n  \"file\": \"/home/noah/models/Qwen3.5-4B-Q4_K_M.gguf\",\n  \"format_version\": \"GGUF v3\",\n  \"tensor_count\": 426,\n  \"total_size_bytes\": 2729969664,\n  \"tensors\": [\n    {\n      \"name\": \"output_norm.weight\",\n      \"shape\": [\n        2560\n      ],\n      \"dtype\": \"F32\",\n      \"size_bytes\": 10240\n    },\n    {\n      \"name\": \"token_embd.weight\",\n      \"shape\": [\n        2560,\n        248320\n      ],\n      \"dtype\": \"Q6_K\",\n      \"size_bytes\": 521472000\n    }\n  ]\n}\n",
+ "stderr_tail": "",
+ "verdict": "PASS",
+ "reasons": []
+}

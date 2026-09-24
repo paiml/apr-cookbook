@@ -1,0 +1,12 @@
+schema: cookbook-recipe/v1
+id: capability-registry-json
+title: Ask the binary which architectures and quant types it runs, and where
+argv: ["apr", "capability", "--json"]
+models: {}
+inputs: []
+expect:
+  exit: 0
+  stdout_json: {"/source": "contracts/apr-model-capability-v1.yaml"}   # the registry names its own contract
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cpu"]
