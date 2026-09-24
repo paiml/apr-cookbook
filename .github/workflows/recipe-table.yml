@@ -20,7 +20,7 @@ on:
 jobs:
   check-recipe-table:
     name: Verify recipe table is deterministic
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, clean-room]   # fleet clean-room pool, arch-neutral (#441)
     steps:
       - uses: actions/checkout@v4
 

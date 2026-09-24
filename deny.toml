@@ -17,6 +17,13 @@ ignore = [
     { id = "RUSTSEC-2025-0141", reason = "bincode: transitive, widely used, no drop-in replacement" },
     { id = "RUSTSEC-2025-0134", reason = "rustls-pemfile: transitive, no safe upgrade available" },
     { id = "RUSTSEC-2026-0002", reason = "lru 0.12.5: transitive via ratatui, fixed in 0.16 but ratatui pins 0.12" },
+    # Reviewed 2026-09-24 (#441). BOTH are unmaintained with no fix, arriving through aprender
+    # (tabled 0.16 in apr-cli; validator 0.20 in aprender-train; upstream fix aprender#4127).
+    # 0173 is ALREADY a fleet ignore in paiml/infra machines/clean-room/templates/deny.toml (this
+    # copy was stale against it); 0370 is requested for that template in paiml/infra#986. Both rows
+    # go when this file is redeployed from the template.
+    { id = "RUSTSEC-2024-0370", reason = "proc-macro-error: via apr-cli 0.31.2 -> tabled 0.16 (tabled_derive); goes with the #434 aprender bump" },
+    { id = "RUSTSEC-2026-0173", reason = "proc-macro-error2: via aprender-train 0.31.2 -> validator 0.20 (validator_derive); goes with the #434 aprender bump" },
 ]
 
 [licenses]

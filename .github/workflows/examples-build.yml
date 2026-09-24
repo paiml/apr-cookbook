@@ -18,32 +18,36 @@ on:
 jobs:
   build-examples:
     name: cargo build --examples (weekly)
-    runs-on: ubuntu-latest
+    # #441: off hosted ubuntu-latest. Inside the sovereign-ci image on the fleet pool, so no
+    # free-disk-space step (it deletes host toolchains on a shared runner) and no host
+    # toolchain; the target dir lives in the ephemeral container. Same command as before.
+    runs-on: [self-hosted, Linux, clean-room]
+    container:
+      image: localhost:5000/sovereign-ci:stable@sha256:70f2cdc9e537fe4447306d33c317fea33017f78f1ffa3b7af99095391419ef36
+      options: --cpus 8
     steps:
-      - name: Free disk space
-        uses: jlumbroso/free-disk-space@main
+      - name: Pre-checkout ownership restore (EACCES self-heal, copied from sovereign-ci)
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          tool-cache: true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
-
-      - uses: actions/checkout@v4
-
-      - uses: dtolnay/rust-toolchain@stable
-
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            target
-          key: examples-${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-
+          persist-credentials: false
       - name: Build all examples (release mode for smaller binaries)
-        # release mode strips debuginfo; binaries shrink ~4-10x vs debug.
-        # Even so this can OOM-on-disk depending on aprender#1599 state.
         run: cargo build --examples --release --all-features
+      # Copied from sovereign-ci (paiml/.github#42): this container job runs as root, so give
+      # the runner's _work tree back on EVERY exit, or the next bare-metal job on this shared
+      # runner dies in checkout on root-owned files.
+      - name: Restore runner ownership of the runner _work tree
+        if: always()
+        run: |
+          set -u
+          WORK_ROOT="$(dirname "${RUNNER_WORKSPACE:-$GITHUB_WORKSPACE}")"
+          if [ "$WORK_ROOT" != "$(dirname "${RUNNER_TEMP:-/dev/null}")" ] || [ ! -d "$WORK_ROOT" ]; then
+            WORK_ROOT="$(dirname "$GITHUB_WORKSPACE")"
+          fi
+          chown -R 1000:1000 "$WORK_ROOT" 2>/dev/null || true
