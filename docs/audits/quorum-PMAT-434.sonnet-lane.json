@@ -1,0 +1,19 @@
+{
+ "lane": "claude-code",
+ "model": "claude-sonnet-5",
+ "head": "540ab895f9e1acea3202af96e008a612779e9a07",
+ "base": "origin/main",
+ "diff_sha256": "e4040696cf242780bcf65518e5acaa6f9f9e6936440e8e11f532fa4de441e205",
+ "brief_sha256": "d96166a11468c478132c0f468d26a261c4f32bb85722fb0e90642b2fa75ca64d",
+ "brief_bytes": 100224,
+ "brief_provenance": "quorum-review.sh --base origin/main --ticket PMAT-434 --width 1 --brief-only at the head above (a scratch copy whose only change saves $PROMPT_FILE before exit). Byte count equals the agy artifact's prompt_bytes (100224, mode file) and judged_diff_sha256 equals its diff_sha256; the agy artifact records no prompt sha, so byte identity is inferred from those checks, not recorded.",
+ "ticket": "PMAT-434",
+ "pr": 457,
+ "round": 2,
+ "family": "claude",
+ "role": "claude seat (operator 2026-09-24 default quorum: sonnet-5 + 1 agy + haiku-4-5; same family as the author; this receipt claims no lint override)",
+ "verdict": "PASS",
+ "findings": [],
+ "agy_artifact": "docs/audits/quorum-PMAT-434.json (gemini-3.1-pro-high measured, PASS, 0 findings, agreed:true, same head and diff_sha256)",
+ "round1": "docs/audits/quorum-rounds/quorum-PMAT-434.round1*.json (FAILs on the AC's rand wording; AC corrected in 540ab895, not re-rolled)"
+}
