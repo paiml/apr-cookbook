@@ -2,12 +2,19 @@
  "lane": "claude-code (operator rule 2026-09-24: 2 agy + 1 claude-haiku-4-5)",
  "model": "claude-haiku-4-5",
  "family": "claude",
- "role": "cheap-claude-seat (same family as the author: cop overrides the lint on this seat)",
- "head": "98e32c0d1",
+ "role": "cheap-claude-seat (same family as the author; this receipt claims no lint override)",
+ "head": "98e32c0d161f17f24c1f07eb31efd7ea04c9c424",
+ "base": "origin/main",
+ "merge_base": "c4068b196",
+ "diff_sha256": "88a2bb639743e5571c4be72661481276deaf09148e0e01b9fad1f60577006539",
+ "brief_sha256": "25561e787169fa16839213eafed57a63f356b9018657d6dac8235407fc21f36f",
+ "brief_bytes": 67280,
+ "brief_provenance": "quorum-review.sh --base origin/main --ticket PMAT-437 --width 2 --brief-only at the head above (a scratch copy whose only change saves $PROMPT_FILE before exit). Two runs were byte-identical; the byte count equals the agy artifact's prompt_bytes (67280, mode inline); judged_diff_sha256 at the head equals the agy artifact's diff_sha256. The agy artifact records no prompt_sha256, so byte identity with the agy brief is inferred from these three checks, not recorded.",
+ "brief_sha256_reported_by_lane": "25561e787169fa16839213eafed57a63f356b9018657d6dac8235407fc21f36f",
  "ticket": "PMAT-437",
  "pr": 453,
  "verdict": "PASS",
  "findings": [],
- "summary": "All ticket requirements met. Hook correctly stamps HEAD and passes stamped commits immediately; gates skip only for stamps and deletes, never removed. Self-tests comprehensively exercise real hook with git remotes, measuring gate invocations via stub cargo.",
- "agy_artifact": "docs/audits/quorum-PMAT-437.json (gemini-3.1-pro-high PASS, gemini-3.7-flash-high PASS, agreed:true, same head)"
+ "summary": "The diff correctly implements PMAT-437's requirements. The pre-push gates now run before the SSH connection opens, commits are stamped when gates pass, the hook passes stamped commits immediately without re-running tests, unstamped commits run all gates, branch deletes skip gates, and no gates were removed. The only dissent (Lane 1, Round 5) claiming tree_is_head() ignores non-.rs files is incorrect—git status --porcelain --untracked-files=normal detects all untracked files regardless of type, as confirmed by the self-test cases and independent verification.",
+ "agy_artifact": "docs/audits/quorum-PMAT-437.json (gemini-3.1-pro-high PASS, gemini-3.7-flash-high PASS, agreed:true, same head and diff_sha256)"
 }
