@@ -19,3 +19,18 @@ above says so instead of implying otherwise.
 ```bash
 python3 scripts/check_recipe_argv_surface.py /path/to/apr
 ```
+
+## Running them: `scripts/run_recipes.py` (#439)
+
+```bash
+python3 scripts/run_recipes.py --apr /path/to/apr --host lambda --expect-version <sha>
+python3 scripts/run_recipes.py --self-test
+```
+
+- Each `{model:<slot>}` is resolved **by sha256** from `~/models`, `~/.apr/models` and `~/.cache/apr/models`. A file with the right name and different bytes is not the model.
+- `--expect-version` refuses a binary whose `--version` line lacks that sha, before any recipe runs.
+- GPU recipes run under `gpu-q` (the fleet GPU lock) when it is on PATH.
+- Each run writes `receipts/<version>-<sha>/<host>/<id>.json`, holding the version line, binary sha256, model sha256s, resolved argv, rc, stdout digest and verdict.
+- The verdict is `PASS`, `FAIL` or `NOT_RUN`. `NOT_RUN` means a pinned model is not on the host, and it is not a pass: any non-PASS makes the exit code non-zero.
+- The self-test is an 11-row case table against a stub `apr`. Its CRUX row is the known answer `<answer>4</answer>` judged PASS; its positive control is the same answer expected as `5`, judged FAIL. A planted mutant that ignores `stdout_contains` turns the self-test red.
+

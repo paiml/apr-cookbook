@@ -1,0 +1,21 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "capability-registry-json",
+ "recipe_sha256": "f54efd617f9676a689d7c59ea654c277d65bdc6cba517dbb1975e25909a5ad68",
+ "host": "lambda",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
+ "at": "2026-09-23T23:53:06+00:00",
+ "models": {},
+ "argv": [
+  "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",
+  "capability",
+  "--json"
+ ],
+ "rc": 0,
+ "stdout_sha256": "43353e125b262b915a1f009c610c3070e3431b589d281e9cda0012ea5517e16a",
+ "stdout_head": "{\n  \"source\": \"contracts/apr-model-capability-v1.yaml\",\n  \"embedded_from\": \"crates/apr-cli/contracts/apr-model-capability-v1.yaml\",\n  \"ops\": [\n    {\n      \"op\": \"RoPE\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"GQA\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"MHA\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"SwiGLU\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"RMSNorm\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"BiasAdd\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": \"CausalMask\",\n      \"gpu_supported\": true\n    },\n    {\n      \"op\": ",
+ "stderr_tail": "",
+ "verdict": "PASS",
+ "reasons": []
+}

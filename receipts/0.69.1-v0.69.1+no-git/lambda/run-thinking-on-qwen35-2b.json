@@ -1,0 +1,37 @@
+{
+ "schema": "cookbook-receipt/v1",
+ "recipe": "run-thinking-on-qwen35-2b",
+ "recipe_sha256": "2bfe9ac920d6065ae65a6ae851059df01db2b10cbfe23b7fbd4b16c90550b2d7",
+ "host": "lambda",
+ "apr_version": "apr 0.69.1 (v0.69.1+no-git)",
+ "apr_sha256": "c4bbd7aedb13216658b5b93a1f4ae9c882d72b9cb364f145b260caa8e5715d21",
+ "at": "2026-09-23T23:53:31+00:00",
+ "models": {
+  "main": {
+   "path": "/home/noah/models/Qwen3.5-2B-Q4_K_M.gguf",
+   "sha256": "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223"
+  }
+ },
+ "gpu_lock": "gpu-q",
+ "argv": [
+  "gpu-q",
+  "/tmp/claude-1000/-home-noah-src-aprender/ae16b7a2-de56-4676-a431-ab4e53e4b449/scratchpad/relbin/apr-v0.69.1-x86_64-unknown-linux-gnu-cuda/apr",
+  "run",
+  "/home/noah/models/Qwen3.5-2B-Q4_K_M.gguf",
+  "--gpu",
+  "--thinking",
+  "on",
+  "--prompt",
+  "What is 2+2? Reply inside <answer></answer>.",
+  "--max-tokens",
+  "4096",
+  "--temperature",
+  "0"
+ ],
+ "rc": 0,
+ "stdout_sha256": "721388016657f415eb383abdb974846c960724a0617033c030c6764c2393b0ea",
+ "stdout_head": "=== APR Run ===\n\nSource: /home/noah/models/Qwen3.5-2B-Q4_K_M.gguf\n\nOutput:\nThinking Process:\n\n1.  **Analyze the Request:** The user is asking \"What is 2+2?\" and explicitly requests the answer to be enclosed within `<answer></answer>` tags.\n\n2.  **Determine the Answer:** The mathematical operation $2 + 2$ equals $4$.\n\n3.  **Format the Output:** The user requested the answer inside `<answer></answer>`.\n\n4.  **Construct the Final String:** `<answer>4</answer>`.\n\n5.  **Final Review:** Does this meet all constraints? Yes.\n\n6.  **Output Generation:** <answer>4</answer>\n</think>\n\n<answer>4</answer>\n\n",
+ "stderr_tail": "Backend: GPU (CUDA, NVIDIA GeForce RTX 4090, 24035 MB VRAM) [qwen35 hybrid forward, #3090]\nF2 guard: receipt matches (model sha256 aaf42c8b7c3c…, apr 0.69.1, NVIDIA GeForce RTX 4090) — validated 132743s ago on 20 positions; CPU reference forward skipped [source=receipt, sha256 552 ms]. `apr run --revalidate` forces a fresh run.\n",
+ "verdict": "PASS",
+ "reasons": []
+}
