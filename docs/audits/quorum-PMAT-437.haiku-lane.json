@@ -1,0 +1,13 @@
+{
+ "lane": "claude-code (operator rule 2026-09-24: 2 agy + 1 claude-haiku-4-5)",
+ "model": "claude-haiku-4-5",
+ "family": "claude",
+ "role": "cheap-claude-seat (same family as the author: cop overrides the lint on this seat)",
+ "head": "98e32c0d1",
+ "ticket": "PMAT-437",
+ "pr": 453,
+ "verdict": "PASS",
+ "findings": [],
+ "summary": "All ticket requirements met. Hook correctly stamps HEAD and passes stamped commits immediately; gates skip only for stamps and deletes, never removed. Self-tests comprehensively exercise real hook with git remotes, measuring gate invocations via stub cargo.",
+ "agy_artifact": "docs/audits/quorum-PMAT-437.json (gemini-3.1-pro-high PASS, gemini-3.7-flash-high PASS, agreed:true, same head)"
+}
