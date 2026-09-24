@@ -10,10 +10,10 @@ version. The format is the one decided in
 | Check | Status |
 |---|---|
 | Every `--flag` in a recipe's argv is listed by `apr <verb> --help` on the release binary | **Checked** by `scripts/check_recipe_argv_surface.py`: 5/5 against `apr 0.69.1 (d8a6df53a)`. A misspelt flag fails, and that negative control was run |
-| The `cookbook-recipe-v1` SHACL shape (argv[0] is `apr`, every `{model:slot}` resolves, models pinned by sha256 + `hf://` ref, `expect` judges output, a PASS receipt from the CURRENT release on every host) | **Enforced** by `scripts/check_recipe_shape.sh`: `pv lint contracts --gate shapes --shape cookbook-recipe-v1` over the derived `evidence/recipes/recipes.jsonl`; 5/5 recipes conform. Self-test: 12 rows, 11 must-RED, each required to name its own property (#440) |
-| A receipt from the release binary on lambda and gx10 showing `expect` passed | **Done for 0.69.1**: all 5 recipes PASS on the published binaries on both hosts, found by convention at `receipts/<CURRENT>/<host>/<id>.json` (#439, #452) |
+| The `cookbook-recipe-v1` SHACL shape (argv[0] is `apr`, every `{model:slot}` resolves, models pinned by sha256 + `hf://` ref, `expect` judges output, a PASS receipt from the CURRENT release on every host) | **Enforced** by `scripts/check_recipe_shape.sh`: `pv lint contracts --gate shapes --shape cookbook-recipe-v1` over the derived `evidence/recipes/recipes.jsonl`; 8/8 recipes conform. Self-test: 12 rows, 11 must-RED, each required to name its own property (#440) |
+| A receipt from the release binary on lambda and gx10 showing `expect` passed | **Done for 0.69.1**: all 8 recipes PASS on the published binaries on both hosts, found by convention at `receipts/<CURRENT>/<host>/<id>.json` (#439, #452) |
 
-The 0.69.1 recipes are SHACL-validated: the shape above passes on all 5, and the shape itself is
+The 0.69.1 recipes are SHACL-validated: the shape above passes on all 8, and the shape itself is
 seen to go red on each defect it names.
 
 ```bash
