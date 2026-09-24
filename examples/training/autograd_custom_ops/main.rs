@@ -128,8 +128,8 @@ fn main() -> Result<()> {
     let targets = Array1::from_vec(targets_data.clone());
 
     let (_loss_tensor, loss_val) = custom_huber_loss(&predictions, &targets, HUBER_DELTA);
-    println!("   Predictions: {:?}", &preds_data);
-    println!("   Targets:     {:?}", &targets_data);
+    println!("   Predictions: {:?}", preds_data);
+    println!("   Targets:     {:?}", targets_data);
     println!("   Huber loss (delta={}): {:.6}", HUBER_DELTA, loss_val);
 
     // Compare with different delta values
@@ -157,7 +157,7 @@ fn main() -> Result<()> {
     let activated = custom_gelu(&x);
     let (mut loss, loss_scalar) = custom_huber_loss(&activated, &t_arr, HUBER_DELTA);
 
-    println!("   Input:     {:?}", &x_data);
+    println!("   Input:     {:?}", x_data);
     println!(
         "   After GELU:{:?}",
         activated.data().as_slice().unwrap_or(&[])
