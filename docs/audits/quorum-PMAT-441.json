@@ -1,0 +1,180 @@
+{
+  "ticket": "PMAT-441",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "87952a548b7811f355e07ed0a9cba24fe52e4a6e",
+  "diff_sha256": "23355ad0fcd244acc3d34a701ee5a81395d00e7c44b319a3d7518d57c6804c82",
+  "width": 3,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 79916,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": true,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff faithfully implements all acceptance criteria of PMAT-441. The previous quorum reviewers' objections were incorrect and explicitly contradicted by the ticket description: Cargo.lock updates are in-scope to satisfy the blocking cargo audit; the coverage cron was requested to be retired, not migrated; kani-gate is explicitly allowed to be pinned to X64; the shrink-only guard is correctly implemented as a script step inside the gate job, not as a standalone workflow, and correctly enforces anti-vacuity; deny.toml exemptions are explicitly listed in the AC; and sovereign-ci clippy defaults and test_args are properly applied. No unauthorized modifications were found.",
+      "findings": [],
+      "raw_bytes": 3378,
+      "err_bytes": 62,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 2,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff fully satisfies all acceptance criteria of ticket PMAT-441:\n\n1. **Fleet Runner Migration**: All 12 GitHub-hosted jobs are migrated off hosted `ubuntu-latest` to the self-hosted clean-room pool `[self-hosted, Linux, clean-room]` (with `kani-gate` pinned to `X64` per explicit acceptance criteria until ARM64 image testing is completed).\n2. **Ratchet Guard & Anti-Vacuity**: `scripts/check_no_hosted_runners.sh` validates that 0 hosted jobs remain against an empty baseline (`.github/hosted-runner-baseline.txt`). The script enforces anti-vacuity by refusing empty workflow directories with exit code 2, verified across 13 passing test cases in `--self-test`.\n3. **Required Contexts & Aggregation**: The required contexts `gate` (org ruleset) and `CI Status` (branch protection) keep their exact names. The `gate` job aggregates `ci`, `lean-gate`, and `kani-gate` with a strict denominator guard (`checked == 3`) and executes the hosted-runner ratchet check inline. Redundant standalone workflow `runner-guard.yml` from Round 1 has been removed.\n4. **Supply Chain & Security**: In-scope `Cargo.lock` semver-compatible updates and `deny.toml` unmaintained crate ignore entries satisfy blocking `cargo deny` and `cargo audit` checks introduced by `sovereign-ci`. `RUSTSEC-2026-0173` is already part of the fleet clean-room template, and `RUSTSEC-2024-0370` is requested in `paiml/infra#986`.\n5. **Reusable CI & Test Scope**: `ci.yml` integrates sha-pinned `sovereign-ci.yml@69482db7821ce792c2137077da24695bb7a0fbea`. Verification confirmed library unit tests are executed under `--lib` (`TEST_SCOPE`). Tag-triggered coverage on `v*` tags replaces the weekly cron workflow per fleet policy (aprender#3676).\n6. **Shared-Runner Hygiene**: All containerized jobs (`lean-gate`, `kani-gate`, `examples-build`) execute container ownership restoration on exit (`if: always()`), and non-container jobs install dependencies job-locally under `$RUNNER_TEMP` with architecture awareness and zero sudo usage.",
+      "findings": [],
+      "raw_bytes": 5344,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.8-flash-high",
+      "model_measured": "gemini-3.8-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.8-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.8-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 3,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff fully satisfies all acceptance criteria of ticket PMAT-441:\n1. All 12 GitHub-hosted jobs are migrated off ubuntu-latest to the fleet self-hosted pool [self-hosted, Linux, clean-room] (or containerized within it, with kani-gate pinned to X64 as explicitly permitted).\n2. ci.yml calls the sha-pinned sovereign-ci reusable workflow (@69482db7821ce792c2137077da24695bb7a0fbea), with clippy configuration documented and lib unit tests preserved.\n3. Lean Gate and Kani Gate run inside ephemeral sovereign-ci containers with pre- and post-checkout ownership restoration to prevent workspace contamination.\n4. Coverage is migrated to tagged releases (v*) via sovereign-ci, retiring the weekly cron coverage.yml per fleet policy.\n5. In-scope Cargo.lock semver updates and deny.toml unmaintained advisory ignores align with blocking supply-chain security checks.\n6. The required contexts 'gate' and 'CI Status' are preserved, and 'gate' enforces the shrink-only hosted runner ratchet (scripts/check_no_hosted_runners.sh) with a self-testing anti-vacuity guard.\n7. Tool installations across workflows are arch-aware, job-local, and shared-host safe (no sudo, isolated CARGO_HOME).",
+      "findings": [],
+      "raw_bytes": 3650,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.7-flash-high",
+      "model_measured": "gemini-3.7-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.7-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.7-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [],
+  "dedup": [],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": true,
+  "partial_reasons": [
+    "lane 1: non-empty .err (62 bytes, 1 line(s) beyond agy-lane's workspace narration)"
+  ],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.8-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.7-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=3 author=claude-opus-5-5/claude"
+  }
+}
