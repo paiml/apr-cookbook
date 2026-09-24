@@ -1,0 +1,171 @@
+{
+  "ticket": "PMAT-461",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "fb2beb700031ccf722d5b8631b7647c3153979a5",
+  "diff_sha256": "8e1acb4461df12b2695eea9acfeff78b0c36a6c81c88ba73f52316b3ca5ec7fd",
+  "width": 1,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 70334,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": true,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff successfully implements PMAT-461 by removing `lcov.info` from git tracking and ignoring it as a root-anchored path in `.gitignore`. The `make coverage` command executes successfully and the generated `lcov.info` file is correctly hidden by git, satisfying the acceptance criteria.",
+      "findings": [
+        {
+          "claim": "Adds root-anchored /lcov.info to gitignore to satisfy the ticket's title and acceptance criteria.",
+          "file": ".gitignore",
+          "grounding": "cited",
+          "line": 52
+        },
+        {
+          "claim": "Deletes lcov.info from the git repository to untrack it, which will make git ls-files lcov.info empty as required.",
+          "file": "lcov.info",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "Adds the task PMAT-461 to the roadmap and sets its status to planned, which does not violate the ticket requirements.",
+          "file": "docs/roadmaps/roadmap.yaml",
+          "grounding": "cited",
+          "line": 2694
+        },
+        {
+          "claim": "Running 'make coverage' succeeds and 'git status --porcelain' does not show 'lcov.info' untracked files afterwards.",
+          "file": "lcov.info",
+          "grounding": "measured",
+          "line": 1
+        }
+      ],
+      "raw_bytes": 5308,
+      "err_bytes": 62,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "unpairable",
+      "grounding_coerced": [],
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [],
+  "dedup": [
+    {
+      "file": ".gitignore",
+      "line": 52,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "Adds root-anchored /lcov.info to gitignore to satisfy the ticket's title and acceptance criteria."
+      ]
+    },
+    {
+      "file": "docs/roadmaps/roadmap.yaml",
+      "line": 2694,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "Adds the task PMAT-461 to the roadmap and sets its status to planned, which does not violate the ticket requirements."
+      ]
+    },
+    {
+      "file": "lcov.info",
+      "line": 1,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "Deletes lcov.info from the git repository to untrack it, which will make git ls-files lcov.info empty as required.",
+        "Running 'make coverage' succeeds and 'git status --porcelain' does not show 'lcov.info' untracked files afterwards."
+      ]
+    }
+  ],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": true,
+  "partial_reasons": [
+    "lane 1: non-empty .err (62 bytes, 1 line(s) beyond agy-lane's workspace narration)",
+    "lane 1: grounding UNPAIRABLE — .response and structured_output do not line up: they hold different numbers of findings (3 vs 4); no coercion can be judged either way (PMAT-082)"
+  ],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=1 author=claude-opus-5-5/claude"
+  }
+}
