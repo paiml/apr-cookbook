@@ -65,7 +65,7 @@ codegen-units = 1
 strip = "symbols"
 
 [dependencies]
-# APR-MONO v0.31.2 — canonical crate names from crates.io.
+# APR-MONO v0.69.1 — canonical crate names from crates.io.
 # Root `aprender` facade doesn't forward features, so depend on aprender-core
 # (whose lib name is "aprender") with a package rename. Same trick the monorepo uses.
 # For local co-development with ../aprender, uncomment [patch.crates-io] below.

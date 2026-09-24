@@ -1,0 +1,144 @@
+{
+  "ticket": "PMAT-434",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "d451696eebb65f9036075f992931599a50a4c715",
+  "diff_sha256": "4f69db1b519ce91691fc3cfd5817d5eee7d6b702c9dfe095bf52079ed262ece8",
+  "width": 1,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 92995,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": false,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "FAIL",
+      "summary": "The diff fails to satisfy the ticket's acceptance criteria which explicitly requires keeping the advisory patch for `rand 0.8.8`. The diff updates multiple `rand 0.8.8` entries to `rand 0.9.5` in `Cargo.lock`.",
+      "findings": [
+        {
+          "claim": "The ticket explicitly requires keeping the #454 advisory patch for `rand 0.8.8`, but the diff replaces `rand 0.8.8` with `rand 0.9.5` in multiple places across the lockfile.",
+          "file": "Cargo.lock",
+          "fix": "Retain the advisory patch for `rand 0.8.8` in the `Cargo.lock` dependencies instead of allowing it to upgrade to `rand 0.9.5`.",
+          "grounding": "cited",
+          "line": 475
+        }
+      ],
+      "raw_bytes": 2426,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [
+    {
+      "lane": 1,
+      "verdict": "FAIL",
+      "summary": "The diff fails to satisfy the ticket's acceptance criteria which explicitly requires keeping the advisory patch for `rand 0.8.8`. The diff updates multiple `rand 0.8.8` entries to `rand 0.9.5` in `Cargo.lock`.",
+      "findings": [
+        {
+          "claim": "The ticket explicitly requires keeping the #454 advisory patch for `rand 0.8.8`, but the diff replaces `rand 0.8.8` with `rand 0.9.5` in multiple places across the lockfile.",
+          "file": "Cargo.lock",
+          "fix": "Retain the advisory patch for `rand 0.8.8` in the `Cargo.lock` dependencies instead of allowing it to upgrade to `rand 0.9.5`.",
+          "grounding": "cited",
+          "line": 475
+        }
+      ]
+    }
+  ],
+  "dedup": [
+    {
+      "file": "Cargo.lock",
+      "line": 475,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "The ticket explicitly requires keeping the #454 advisory patch for `rand 0.8.8`, but the diff replaces `rand 0.8.8` with `rand 0.9.5` in multiple places across the lockfile."
+      ]
+    }
+  ],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": false,
+  "partial_reasons": [],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=1 author=claude-opus-5-5/claude"
+  }
+}
