@@ -10,11 +10,11 @@ version. The format is the one decided in
 | Check | Status |
 |---|---|
 | Every `--flag` in a recipe's argv is listed by `apr <verb> --help` on the release binary | **Checked** by `scripts/check_recipe_argv_surface.py`: 5/5 against the published `apr 0.69.1` release asset (x86_64-cuda, sha256 `c4bbd7ae…`, prints `v0.69.1+no-git`). A misspelt flag fails (exit 1), and that negative control was run |
-| The `cookbook-recipe-v1` SHACL shape (argv against the CLI surface JSON, receipt present, a recipe for every model-taking verb) | **Not built yet**: aprender#3769 done_when 1 |
-| A receipt from the release binary on lambda and gx10 showing `expect` passed | **Not in this change**: the recipe runner that writes receipts to `receipts/<CURRENT>/<host>/<id>.json` lands next (#439, PR #452), and the check that requires one per recipe after it (#442) |
+| The `cookbook-recipe-v1` SHACL shape (argv[0] is `apr`, every `{model:slot}` resolves, models pinned by sha256 + `hf://` ref, `expect` judges output, a PASS receipt from the CURRENT release on every host) | **Enforced** by `scripts/check_recipe_shape.sh`: `pv lint contracts --gate shapes --shape cookbook-recipe-v1` over the derived `evidence/recipes/recipes.jsonl`; 5/5 recipes conform. Self-test: 12 rows, 11 must-RED, each required to name its own property (#440) |
+| A receipt from the release binary on lambda and gx10 showing `expect` passed | **Done for 0.69.1**: all 5 recipes PASS on the published binaries on both hosts, found by convention at `receipts/<CURRENT>/<host>/<id>.json` (#439, #452) |
 
-So these recipes are a draft. They are not SHACL-validated or receipted yet, and the table
-above says so instead of implying otherwise.
+The 0.69.1 recipes are SHACL-validated: the shape above passes on all 5, and the shape itself is
+seen to go red on each defect it names.
 
 ```bash
 python3 scripts/check_recipe_argv_surface.py /path/to/apr
