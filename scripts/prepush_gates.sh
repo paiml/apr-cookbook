@@ -12,9 +12,9 @@
 # skipped, only moved in front of the connection. A branch DELETE pushes no code and runs no
 # gates.
 #
-# A stamp describes a COMMIT, so the tree must equal HEAD: a tracked change, or an untracked
-# .rs file, refuses to stamp (rc 2), because the gates would have measured code that is not
-# the commit being pushed.
+# A stamp describes a COMMIT, so the tree must equal HEAD: a tracked change, or ANY untracked
+# non-ignored file, refuses to stamp (rc 2), because the gates would have measured inputs that
+# are not the commit being pushed.
 #
 # Usage:
 #   scripts/prepush_gates.sh             run the gates on HEAD, stamp it on success
@@ -42,9 +42,12 @@ run_gates() {
     if "$CARGO" test --all-features > /dev/null 2>&1; then echo ok; else echo FAIL; echo "   Run: cargo test --all-features"; return 1; fi
 }
 
+# The tree must equal HEAD: no tracked change AND no untracked, non-ignored file of ANY kind.
+# Builds and tests read more than .rs (include_str!/include_bytes! of .json/.yaml, fixtures read
+# at run time), so an untracked data file would let the gates measure inputs the stamped commit
+# does not contain (quorum finding, #453). Ignored files (target/) are fine: git status omits them.
 tree_is_head() {
-    [ -z "$(git status --porcelain --untracked-files=no)" ] || return 1
-    [ -z "$(git ls-files --others --exclude-standard -- '*.rs')" ] || return 1
+    [ -z "$(git status --porcelain --untracked-files=normal)" ]
 }
 
 stamp_head() {
@@ -106,6 +109,16 @@ STUB
     rc=0; ( cd "$t/repo" && CARGO="$t/cargo" stamp_head > /dev/null 2>&1 ) || rc=$?
     row "MUST-RED: an untracked .rs file -> refused (rc 2): the gates would measure other code" 2 "$rc"
     rm -f "$t/repo/new.rs"
+    printf '{"k": 1}\n' > "$t/repo/data.json"
+    rc=0; ( cd "$t/repo" && CARGO="$t/cargo" stamp_head > /dev/null 2>&1 ) || rc=$?
+    row "MUST-RED: an untracked NON-.rs file (data.json, readable by include_str!/tests) -> refused (rc 2)" 2 "$rc"
+    rm -f "$t/repo/data.json"
+    printf 'target/\n' > "$t/repo/.gitignore"; git -C "$t/repo" add .gitignore
+    git -C "$t/repo" -c core.hooksPath=/dev/null -c user.name=t -c user.email=t@t commit -q -m ignore
+    mkdir -p "$t/repo/target"; printf 'x' > "$t/repo/target/build.o"
+    rc=0; ( cd "$t/repo" && CARGO="$t/cargo" stamp_head > /dev/null 2>&1 ) || rc=$?
+    row "an IGNORED build artifact (target/) does not block a stamp" 0 "$rc"
+    rm -f "$t/repo/target/build.o"; rmdir "$t/repo/target"
     printf 'x\n' > "$t/repo/f"; git -C "$t/repo" add f
     rc=0; ( cd "$t/repo" && CARGO="$t/cargo" stamp_head > /dev/null 2>&1 ) || rc=$?
     row "MUST-RED: a staged change -> refused (rc 2)" 2 "$rc"
