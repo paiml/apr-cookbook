@@ -2668,3 +2668,20 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-441
+  github_issue: 441
+  item_type: task
+  title: 'CI: every workflow off hosted ubuntu-latest to the fleet self-hosted pool (fleet no-hosted-runners rule)'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T01:50:44Z
+  updated: 2026-09-24T01:50:44Z
+  spec: null
+  acceptance_criteria:
+  - 'Move all 12 GitHub-hosted jobs to [self-hosted, Linux, clean-room]: simple jobs job-local and arch-aware; ci.yml via the sha-pinned sovereign-ci reusable workflow; Lean/Kani inside the sovereign-ci container; no free-disk-space steps; required contexts gate and CI Status keep their names; a shrink-only hosted-runner guard inside gate. Operator OK required for workflow edits.'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null
