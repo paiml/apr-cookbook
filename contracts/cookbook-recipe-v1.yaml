@@ -1,0 +1,96 @@
+# ──────────────────────────────────────────────
+# cookbook-recipe-v1 — an `apr` recipe, under contract (apr-cookbook #440, aprender#3769 done_when 1, PMAT-3769)
+#
+# THE REQUIREMENT. The operator, verbatim, 2026-09-21: "ensure our post-release always updated README.md
+# and apr-cookbook with SHACL validated recipes". Until this contract, the recipes were argv-checked
+# against `apr <verb> --help` and receipted, and NOT SHACL-validated; recipes/README.md said so.
+#
+# HOW. pv's shapes gate validates RDF built by the generic `json` extractor, one node per JSONL line,
+# scalar properties only. SHACL (pv's subset) cannot see list positions or join two fields, so
+# scripts/recipes_to_jsonl.py DERIVES evidence/recipes/recipes.jsonl from recipes/apr/**.yaml, computing
+# those facts as explicit fields (argv0_is_apr, placeholders_resolve, receipt_current_pass), and this shape
+# REQUIRES them. The JSONL is never hand-edited: `recipes_to_jsonl.py --check` fails on any drift.
+# ──────────────────────────────────────────────
+name: cookbook-recipe-v1
+version: 1.0.0
+scope: apr-cookbook recipes/apr/**.yaml (via evidence/recipes/recipes.jsonl)
+status: active
+metadata:
+  author: PAIML Engineering
+  created: '2026-09-24'
+  last_modified: '2026-09-24'
+  version: 1.0.0
+  kind: pattern
+  description: >
+    A cookbook recipe is a command someone will run against a released apr. It must name apr, pin every
+    model it needs by sha256, say what a correct run prints, and carry a PASS receipt from the CURRENT
+    release on every host it declares. A recipe that cannot be checked is not a recipe.
+  references:
+    - 'apr-cookbook#440 (this row), aprender#3769 (post-release HARD REQ, done_when 1), PMAT-3769'
+    - 'apr-cookbook#439 run_recipes.py (writes the receipts), #442 check_recipe_receipts.py (the same receipt rule)'
+    - 'scripts/recipes_to_jsonl.py — the derivation; recipes/README.md — the format'
+
+entity:
+  type: json
+  ref: evidence/recipes/recipes.jsonl
+
+vocabulary:
+  prefix: recipe
+  root_class: recipe:Recipe
+
+shape:
+  targetClass: recipe:Recipe
+  closed: true
+  properties:
+    - {path: recipe:id, minCount: 1, maxCount: 1, datatype: xsd:string, pattern: "^[a-z0-9][a-z0-9-]*$"}
+    - {path: recipe:schema, minCount: 1, maxCount: 1, in: ["cookbook-recipe/v1"]}
+    - {path: recipe:verb, minCount: 1, maxCount: 1, datatype: xsd:string, minLength: 2}
+    - {path: recipe:recipe_sha256, minCount: 1, maxCount: 1, pattern: "^[0-9a-f]{64}$"}
+    # argv[0] must be `apr`: a recipe is a command against the released binary, not a Rust example.
+    - {path: recipe:argv0_is_apr, minCount: 1, maxCount: 1, in: [true]}
+    # Every {model:<slot>} names a pinned model and every pinned model is used.
+    - {path: recipe:placeholders_resolve, minCount: 1, maxCount: 1, in: [true]}
+    # Pinned by bytes, not by name; the ref is where the bytes come from.
+    - {path: recipe:model_sha256, pattern: "^[0-9a-f]{64}$"}
+    - {path: recipe:model_ref, pattern: "^hf://[^/]+/[^/]+/.+\\.(gguf|apr|safetensors)$"}
+    - {path: recipe:expect_exit, minCount: 1, maxCount: 1, datatype: xsd:integer}
+    # An exit code alone cannot tell a right answer from a wrong one (aprender: "an exit code is not a
+    # verdict about output").
+    - {path: recipe:has_output_check, minCount: 1, maxCount: 1, in: [true]}
+    - {path: recipe:min_apr, minCount: 1, maxCount: 1, pattern: "^[0-9]+\\.[0-9]+\\.[0-9]+$"}
+    - {path: recipe:host, minCount: 1, in: ["lambda", "gx10"]}
+    - {path: recipe:backend, minCount: 1, in: ["cpu", "cuda"]}
+    # THE FIELD the HARD REQ turns on: a PASS receipt from the CURRENT release binary, on every declared
+    # host, bound to this recipe's current bytes.
+    - {path: recipe:receipt_current_pass, minCount: 1, maxCount: 1, in: [true]}
+
+equations:
+  recipe_valid:
+    formula: "∀ r ∈ Recipe: argv0(r)=apr ∧ slots(r)=models(r) ∧ pinned(r) ∧ output_check(r) ∧ ∀ h ∈ hosts(r): PASS(receipt(CURRENT, h, r))"
+    domain: "every recipe under recipes/apr/, derived into evidence/recipes/recipes.jsonl"
+    codomain: "conforms, or a violation naming the focus node and the failing property"
+    invariants:
+      - "the derived JSONL equals what the recipes derive (recipes_to_jsonl.py --check)"
+
+invariants:
+  - id: CRV-INV-001
+    description: Every recipe row conforms to the shape; a violation names the recipe.
+  - id: CRV-INV-002
+    description: evidence/recipes/recipes.jsonl is derived, never hand-edited; any drift fails --check.
+  - id: CRV-INV-003
+    description: Zero recipes is refused by the derivation, so the gate cannot decline on an empty corpus.
+
+falsification_tests:
+  - id: FALSIFY-CRV-001
+    rule: every must-RED row of the fixture table is refused by the shapes gate
+    prediction: >
+      a recipe whose argv[0] is not apr, whose placeholder names no model, whose model has no sha256, whose
+      expect judges only the exit code, or whose receipt is missing, FAILed or stale is refused naming the
+      focus node; the real 5 recipes conform
+    test: bash scripts/check_recipe_shape.sh --self-test
+    if_fails: the shape accepts a recipe that could not be run or checked, and "SHACL-validated" means nothing
+  - id: FALSIFY-CRV-002
+    rule: the derived evidence cannot drift from the recipes
+    prediction: editing a recipe without regenerating evidence/recipes/recipes.jsonl fails recipes_to_jsonl.py --check
+    test: python3 scripts/recipes_to_jsonl.py --check
+    if_fails: the shape judges a stale copy of the recipes
