@@ -2708,3 +2708,20 @@ roadmap:
   estimated_effort: null
   labels: []
   notes: null
+- id: PMAT-437
+  github_issue: 437
+  item_type: task
+  title: 'pre-push hook: run the gates before git push opens the connection; the hook passes a stamped commit'
+  status: planned
+  priority: high
+  assigned_to: null
+  created: 2026-09-24T04:57:57Z
+  updated: 2026-09-24T04:57:57Z
+  spec: null
+  acceptance_criteria:
+  - 'The pre-push hook ran the full cargo test inside git push; GitHub''s SSH idle timeout killed the connection first, so a green branch could not be pushed without --no-verify. scripts/prepush_gates.sh runs the SAME fmt/clippy/test gates with no connection open on a tree equal to HEAD, and stamps that sha; the hook passes a stamped sha at once, runs every gate for an unstamped one, and none for a branch delete. No gate removed. Also carries #438''s 4-line clippy fix (main was clippy-red).'
+  phases: []
+  subtasks: []
+  estimated_effort: null
+  labels: []
+  notes: null

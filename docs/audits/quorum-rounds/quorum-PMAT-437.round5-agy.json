@@ -1,0 +1,178 @@
+{
+  "ticket": "PMAT-437",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "4a4a0bcc53b63dd42117df9b408bfe52cb7671b2",
+  "diff_sha256": "583c05bb26b877a7cfea08af8f2241437c1377e1690b3cd82e4b701cb41b8add",
+  "width": 2,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 14877,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": false,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "FAIL",
+      "summary": "The diff successfully moves the quality gates out of the `git push` connection to avoid timeouts and implements the stamping mechanism. However, it fails the strict requirement that `scripts/prepush_gates.sh` must run \"on a tree equal to HEAD\". The validation function `tree_is_head()` explicitly checks for untracked `.rs` files but ignores other untracked files (such as `.json` or `.toml` files). Because cargo tests or builds can `include_str!()` or read these untracked files, the gates can measure and stamp a working tree that functionally differs from the HEAD commit being pushed. This allows tests that depend on untracked files to pass locally and stamp a commit that will fail in CI when pushed, violating the ticket's requirement.",
+      "findings": [
+        {
+          "claim": "The `tree_is_head` validation explicitly allows untracked non-`.rs` files (such as `.json` or `.csv` data files) to be present while stamping. Since Cargo builds and tests can depend on these untracked files (e.g., via `include_str!()` or runtime file reads), the gates can measure and stamp a working tree that functionally differs from the HEAD commit being pushed. This violates the ticket's purity requirement that the gates must run \"on a tree equal to HEAD\".",
+          "file": "scripts/prepush_gates.sh",
+          "fix": "Reject all untracked files by checking `[ -z \"$(git status --porcelain)\" ]`, or at least all untracked files not in `.gitignore`.",
+          "grounding": "cited",
+          "line": 47
+        }
+      ],
+      "raw_bytes": 4161,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 2,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff for PMAT-437 fully satisfies all requirements and acceptance criteria without weakening any quality gates or introducing forbidden changes:\n\n1. `.githooks/pre-push`: Reads pushed refs and checks if each non-zero sha has been stamped by `scripts/prepush_gates.sh`. If stamped, it passes immediately without opening long cargo test runs during the git push connection. If unstamped, it executes all quality gates (cargo fmt, clippy, test --all-features). If deleting a branch, no gates are executed.\n2. `scripts/prepush_gates.sh`: Executes the exact pre-push quality gates (`cargo fmt --all -- --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-features`) on a clean working tree equal to HEAD before push, and records the stamp under the git common directory (`.git/prepush-gates/<sha>`). Refuses to stamp if working tree is dirty or has untracked Rust files. Includes a comprehensive `--self-test` suite covering all 12 edge cases and failure modes (clean tree, dirty tree, unstamped commits, failing test refusal, e2e push hook verification).\n3. Clippy fixes: Carries the 4-line redundant reference cleanup across `examples/inference/streaming_token_generator.rs` and `examples/training/autograd_custom_ops/main.rs` as specified.\n4. Validation: `bash -n`, `shellcheck -S error`, `cargo fmt`, `cargo clippy`, and `scripts/prepush_gates.sh --self-test` all pass cleanly.",
+      "findings": [],
+      "raw_bytes": 4143,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.7-flash-high",
+      "model_measured": "gemini-3.7-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.7-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.7-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [
+    {
+      "lane": 1,
+      "verdict": "FAIL",
+      "summary": "The diff successfully moves the quality gates out of the `git push` connection to avoid timeouts and implements the stamping mechanism. However, it fails the strict requirement that `scripts/prepush_gates.sh` must run \"on a tree equal to HEAD\". The validation function `tree_is_head()` explicitly checks for untracked `.rs` files but ignores other untracked files (such as `.json` or `.toml` files). Because cargo tests or builds can `include_str!()` or read these untracked files, the gates can measure and stamp a working tree that functionally differs from the HEAD commit being pushed. This allows tests that depend on untracked files to pass locally and stamp a commit that will fail in CI when pushed, violating the ticket's requirement.",
+      "findings": [
+        {
+          "claim": "The `tree_is_head` validation explicitly allows untracked non-`.rs` files (such as `.json` or `.csv` data files) to be present while stamping. Since Cargo builds and tests can depend on these untracked files (e.g., via `include_str!()` or runtime file reads), the gates can measure and stamp a working tree that functionally differs from the HEAD commit being pushed. This violates the ticket's purity requirement that the gates must run \"on a tree equal to HEAD\".",
+          "file": "scripts/prepush_gates.sh",
+          "fix": "Reject all untracked files by checking `[ -z \"$(git status --porcelain)\" ]`, or at least all untracked files not in `.gitignore`.",
+          "grounding": "cited",
+          "line": 47
+        }
+      ]
+    }
+  ],
+  "dedup": [
+    {
+      "file": "scripts/prepush_gates.sh",
+      "line": 47,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "The `tree_is_head` validation explicitly allows untracked non-`.rs` files (such as `.json` or `.csv` data files) to be present while stamping. Since Cargo builds and tests can depend on these untracked files (e.g., via `include_str!()` or runtime file reads), the gates can measure and stamp a working tree that functionally differs from the HEAD commit being pushed. This violates the ticket's purity requirement that the gates must run \"on a tree equal to HEAD\"."
+      ]
+    }
+  ],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": false,
+  "partial_reasons": [],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.7-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=2 author=claude-opus-5-5/claude"
+  }
+}
