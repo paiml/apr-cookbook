@@ -1,0 +1,2 @@
+# Jobs still on GitHub-hosted runners (#441). A RATCHET: rows may only be deleted, never added.
+# Enforced by scripts/check_no_hosted_runners.sh. Goal reached: empty.

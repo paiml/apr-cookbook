@@ -1,0 +1,542 @@
+{
+  "ticket": "PMAT-441",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "25918ff85d1d7131a64fc7ef0ccbb3b20969fd32",
+  "diff_sha256": "75711bf8178e6db5885b673e21973b0195b10153424265f5642f284a3a975bbc",
+  "width": 3,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 49763,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": false,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "FAIL",
+      "summary": "The diff fails to meet several acceptance criteria and introduces changes not requested in the ticket. It updates `Cargo.lock` dependencies, alters the coverage schedule, adds an unrequested standalone runner guard workflow, applies an incorrect runs-on label to `kani-gate`, and lacks any mechanism to enforce the 'Operator OK' requirement for workflow edits.",
+      "findings": [
+        {
+          "claim": "The diff modifies Cargo.lock by bumping dependencies (e.g., rand from 0.8.5 to 0.8.8) and adding new ones, which the ticket does not ask for.",
+          "file": "Cargo.lock",
+          "fix": "Revert the changes to Cargo.lock, or create a separate ticket for dependency updates.",
+          "grounding": "cited",
+          "line": 88
+        },
+        {
+          "claim": "The ticket does not ask to change the execution schedule for coverage. The diff deletes the weekly cron job entirely and adds a tag-based trigger in ci.yml instead.",
+          "file": ".github/workflows/coverage.yml",
+          "fix": "Maintain the weekly cron schedule for coverage, migrating its job to the self-hosted pool as requested.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The acceptance criteria requires moving jobs exactly to `[self-hosted, Linux, clean-room]`. The `kani-gate` job adds the `X64` label, violating the requested pool specification.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Change the runs-on label for kani-gate to strictly match `[self-hosted, Linux, clean-room]`.",
+          "grounding": "cited",
+          "line": 110
+        },
+        {
+          "claim": "The ticket requests a shrink-only hosted-runner guard 'inside gate', but the diff additionally creates a standalone workflow file for it, which was not asked for.",
+          "file": ".github/workflows/runner-guard.yml",
+          "fix": "Delete the standalone `.github/workflows/runner-guard.yml` workflow, as the guard is already properly implemented inside the gate job.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The acceptance criteria states 'Operator OK required for workflow edits', but the diff provides no mechanism (such as a .github/CODEOWNERS addition) to enforce this requirement.",
+          "file": "docs/roadmaps/roadmap.yaml",
+          "fix": "Add a .github/CODEOWNERS entry (or similar mechanism) requiring operator approval for edits to .github/workflows/**.",
+          "grounding": "asserted",
+          "line": 2682
+        }
+      ],
+      "raw_bytes": 5642,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 2,
+      "status": "SUCCESS",
+      "verdict": "FAIL",
+      "summary": "Verdict: FAIL. While the diff successfully migrates all 12 GitHub-hosted jobs to the self-hosted clean-room pool and establishes the ratchet check, the submission is refuted on multiple grounds: (1) scripts/check_no_hosted_runners.sh violates the mandatory CI anti-vacuity policy by exiting 0 with PASS when zero workflow files are found; (2) Cargo.lock was modified with unrequested dependency upgrades not specified in ticket PMAT-441; (3) deny.toml was manually modified despite an explicit header prohibition ('Deployed from paiml/infra — do not edit manually') to ignore two security advisories, weakening the security gate; and (4) delegating clippy to sovereign-ci weakens the lint gate by injecting '-A unused-variables' and allowing a fallback to default features.",
+      "findings": [
+        {
+          "claim": "`scripts/check_no_hosted_runners.sh` violates the anti-vacuity rule for CI verification scripts: when run against an empty directory or when zero workflow files are found, it outputs `PASS 0 hosted job(s) remain, all in the shrinking baseline` and exits with code 0 instead of failing.",
+          "file": "scripts/check_no_hosted_runners.sh",
+          "fix": "Enforce anti-vacuity by asserting that at least one `.yml`/`.yaml` workflow file was scanned before reporting success.",
+          "grounding": "measured",
+          "line": 88
+        },
+        {
+          "claim": "The diff modifies `Cargo.lock` (updating rand, fastrand, h2, crossbeam-epoch, quinn-proto, memmap2, rustls, and adding chacha20, rand_core, rand_pcg) which was not requested or described in ticket PMAT-441 (scope creep).",
+          "file": "Cargo.lock",
+          "fix": "Revert Cargo.lock modifications or separate dependency updates into their own dedicated tracking issue (#434).",
+          "grounding": "cited",
+          "line": 91
+        },
+        {
+          "claim": "`deny.toml` is marked `# Deployed from paiml/infra — do not edit manually.`. Modifying it directly in this repo violates that deployment contract and weakens the supply-chain security gate by ignoring two unmaintained advisories (RUSTSEC-2024-0370 and RUSTSEC-2026-0173).",
+          "file": "deny.toml",
+          "fix": "Revert manual edits to deny.toml and update the upstream source in paiml/infra, or resolve the underlying outdated dependencies.",
+          "grounding": "cited",
+          "line": 2
+        },
+        {
+          "claim": "Replacing the local clippy check (`cargo clippy --lib --tests --all-features -- -D warnings`) with `sovereign-ci.yml` weakens the lint gate: sovereign-ci unconditionally adds `-A unused-variables` (masking warnings previously rejected by -D warnings) and falls back to running `cargo clippy -p <repo>` with default features if the full workspace clippy check fails.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Preserve strict clippy enforcement with `-D warnings` without suppressing unused-variables or falling back to default features.",
+          "grounding": "cited",
+          "line": 50
+        }
+      ],
+      "raw_bytes": 7090,
+      "err_bytes": 62,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.8-flash-high",
+      "model_measured": "gemini-3.8-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.8-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.8-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 3,
+      "status": "SUCCESS",
+      "verdict": "FAIL",
+      "summary": "The diff fails review against PMAT-441. It introduces out-of-scope dependency modifications in Cargo.lock and advisory suppressions in deny.toml, weakens the CI test gate by omitting library unit tests (--lib) in test_args, deletes the scheduled weekly coverage workflow rather than migrating its runner, creates an unrequested standalone runner-guard workflow, and deviates from runner label specifications in kani-gate.",
+      "findings": [
+        {
+          "claim": "The diff modifies Cargo.lock by upgrading, downgrading, and adding multiple dependencies (e.g. rand, rustls, windows-sys, crossbeam-epoch, fastrand, h2, memmap2, quinn-proto, chacha20), which is out of scope and not requested by ticket PMAT-441.",
+          "file": "Cargo.lock",
+          "fix": "Revert all Cargo.lock changes to keep the PR scoped strictly to the CI runner migration.",
+          "grounding": "cited",
+          "line": 88
+        },
+        {
+          "claim": "The diff adds security advisory ignores in deny.toml for RUSTSEC-2024-0370 and RUSTSEC-2026-0173, weakening security auditing gates without authorization from ticket PMAT-441.",
+          "file": "deny.toml",
+          "fix": "Remove the advisory ignore entries from deny.toml and resolve dependency vulnerabilities via separate dedicated dependency upgrade tickets.",
+          "grounding": "cited",
+          "line": 20
+        },
+        {
+          "claim": "In .github/workflows/ci.yml, test_args is set to '--tests --all-features', dropping '--lib' from the previous test suite execution ('cargo test --lib --tests --all-features'). This weakens the test gate by omitting all library unit tests.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Change test_args to '--lib --tests --all-features' in the sovereign-ci workflow call.",
+          "grounding": "cited",
+          "line": 214
+        },
+        {
+          "claim": "The diff completely deletes .github/workflows/coverage.yml and removes the weekly scheduled coverage run rather than migrating its runner to the self-hosted clean-room pool as requested by the ticket.",
+          "file": ".github/workflows/coverage.yml",
+          "fix": "Restore the scheduled coverage workflow and migrate its runner configuration to [self-hosted, Linux, clean-room].",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The diff introduces a new standalone workflow .github/workflows/runner-guard.yml, whereas the ticket acceptance criteria specifies a shrink-only hosted-runner guard inside gate.",
+          "file": ".github/workflows/runner-guard.yml",
+          "fix": "Remove .github/workflows/runner-guard.yml since the ratchet check is already executed inside the gate job in ci.yml.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The kani-gate job specifies runs-on: [self-hosted, Linux, X64, clean-room], adding the extra X64 label contrary to the acceptance criteria requirement to move all jobs to [self-hosted, Linux, clean-room].",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Update kani-gate runs-on labels to match [self-hosted, Linux, clean-room] or update ticket acceptance criteria.",
+          "grounding": "cited",
+          "line": 294
+        }
+      ],
+      "raw_bytes": 6997,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.7-flash-high",
+      "model_measured": "gemini-3.7-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.7-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.7-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [
+    {
+      "lane": 1,
+      "verdict": "FAIL",
+      "summary": "The diff fails to meet several acceptance criteria and introduces changes not requested in the ticket. It updates `Cargo.lock` dependencies, alters the coverage schedule, adds an unrequested standalone runner guard workflow, applies an incorrect runs-on label to `kani-gate`, and lacks any mechanism to enforce the 'Operator OK' requirement for workflow edits.",
+      "findings": [
+        {
+          "claim": "The diff modifies Cargo.lock by bumping dependencies (e.g., rand from 0.8.5 to 0.8.8) and adding new ones, which the ticket does not ask for.",
+          "file": "Cargo.lock",
+          "fix": "Revert the changes to Cargo.lock, or create a separate ticket for dependency updates.",
+          "grounding": "cited",
+          "line": 88
+        },
+        {
+          "claim": "The ticket does not ask to change the execution schedule for coverage. The diff deletes the weekly cron job entirely and adds a tag-based trigger in ci.yml instead.",
+          "file": ".github/workflows/coverage.yml",
+          "fix": "Maintain the weekly cron schedule for coverage, migrating its job to the self-hosted pool as requested.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The acceptance criteria requires moving jobs exactly to `[self-hosted, Linux, clean-room]`. The `kani-gate` job adds the `X64` label, violating the requested pool specification.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Change the runs-on label for kani-gate to strictly match `[self-hosted, Linux, clean-room]`.",
+          "grounding": "cited",
+          "line": 110
+        },
+        {
+          "claim": "The ticket requests a shrink-only hosted-runner guard 'inside gate', but the diff additionally creates a standalone workflow file for it, which was not asked for.",
+          "file": ".github/workflows/runner-guard.yml",
+          "fix": "Delete the standalone `.github/workflows/runner-guard.yml` workflow, as the guard is already properly implemented inside the gate job.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The acceptance criteria states 'Operator OK required for workflow edits', but the diff provides no mechanism (such as a .github/CODEOWNERS addition) to enforce this requirement.",
+          "file": "docs/roadmaps/roadmap.yaml",
+          "fix": "Add a .github/CODEOWNERS entry (or similar mechanism) requiring operator approval for edits to .github/workflows/**.",
+          "grounding": "asserted",
+          "line": 2682
+        }
+      ]
+    },
+    {
+      "lane": 2,
+      "verdict": "FAIL",
+      "summary": "Verdict: FAIL. While the diff successfully migrates all 12 GitHub-hosted jobs to the self-hosted clean-room pool and establishes the ratchet check, the submission is refuted on multiple grounds: (1) scripts/check_no_hosted_runners.sh violates the mandatory CI anti-vacuity policy by exiting 0 with PASS when zero workflow files are found; (2) Cargo.lock was modified with unrequested dependency upgrades not specified in ticket PMAT-441; (3) deny.toml was manually modified despite an explicit header prohibition ('Deployed from paiml/infra — do not edit manually') to ignore two security advisories, weakening the security gate; and (4) delegating clippy to sovereign-ci weakens the lint gate by injecting '-A unused-variables' and allowing a fallback to default features.",
+      "findings": [
+        {
+          "claim": "`scripts/check_no_hosted_runners.sh` violates the anti-vacuity rule for CI verification scripts: when run against an empty directory or when zero workflow files are found, it outputs `PASS 0 hosted job(s) remain, all in the shrinking baseline` and exits with code 0 instead of failing.",
+          "file": "scripts/check_no_hosted_runners.sh",
+          "fix": "Enforce anti-vacuity by asserting that at least one `.yml`/`.yaml` workflow file was scanned before reporting success.",
+          "grounding": "measured",
+          "line": 88
+        },
+        {
+          "claim": "The diff modifies `Cargo.lock` (updating rand, fastrand, h2, crossbeam-epoch, quinn-proto, memmap2, rustls, and adding chacha20, rand_core, rand_pcg) which was not requested or described in ticket PMAT-441 (scope creep).",
+          "file": "Cargo.lock",
+          "fix": "Revert Cargo.lock modifications or separate dependency updates into their own dedicated tracking issue (#434).",
+          "grounding": "cited",
+          "line": 91
+        },
+        {
+          "claim": "`deny.toml` is marked `# Deployed from paiml/infra — do not edit manually.`. Modifying it directly in this repo violates that deployment contract and weakens the supply-chain security gate by ignoring two unmaintained advisories (RUSTSEC-2024-0370 and RUSTSEC-2026-0173).",
+          "file": "deny.toml",
+          "fix": "Revert manual edits to deny.toml and update the upstream source in paiml/infra, or resolve the underlying outdated dependencies.",
+          "grounding": "cited",
+          "line": 2
+        },
+        {
+          "claim": "Replacing the local clippy check (`cargo clippy --lib --tests --all-features -- -D warnings`) with `sovereign-ci.yml` weakens the lint gate: sovereign-ci unconditionally adds `-A unused-variables` (masking warnings previously rejected by -D warnings) and falls back to running `cargo clippy -p <repo>` with default features if the full workspace clippy check fails.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Preserve strict clippy enforcement with `-D warnings` without suppressing unused-variables or falling back to default features.",
+          "grounding": "cited",
+          "line": 50
+        }
+      ]
+    },
+    {
+      "lane": 3,
+      "verdict": "FAIL",
+      "summary": "The diff fails review against PMAT-441. It introduces out-of-scope dependency modifications in Cargo.lock and advisory suppressions in deny.toml, weakens the CI test gate by omitting library unit tests (--lib) in test_args, deletes the scheduled weekly coverage workflow rather than migrating its runner, creates an unrequested standalone runner-guard workflow, and deviates from runner label specifications in kani-gate.",
+      "findings": [
+        {
+          "claim": "The diff modifies Cargo.lock by upgrading, downgrading, and adding multiple dependencies (e.g. rand, rustls, windows-sys, crossbeam-epoch, fastrand, h2, memmap2, quinn-proto, chacha20), which is out of scope and not requested by ticket PMAT-441.",
+          "file": "Cargo.lock",
+          "fix": "Revert all Cargo.lock changes to keep the PR scoped strictly to the CI runner migration.",
+          "grounding": "cited",
+          "line": 88
+        },
+        {
+          "claim": "The diff adds security advisory ignores in deny.toml for RUSTSEC-2024-0370 and RUSTSEC-2026-0173, weakening security auditing gates without authorization from ticket PMAT-441.",
+          "file": "deny.toml",
+          "fix": "Remove the advisory ignore entries from deny.toml and resolve dependency vulnerabilities via separate dedicated dependency upgrade tickets.",
+          "grounding": "cited",
+          "line": 20
+        },
+        {
+          "claim": "In .github/workflows/ci.yml, test_args is set to '--tests --all-features', dropping '--lib' from the previous test suite execution ('cargo test --lib --tests --all-features'). This weakens the test gate by omitting all library unit tests.",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Change test_args to '--lib --tests --all-features' in the sovereign-ci workflow call.",
+          "grounding": "cited",
+          "line": 214
+        },
+        {
+          "claim": "The diff completely deletes .github/workflows/coverage.yml and removes the weekly scheduled coverage run rather than migrating its runner to the self-hosted clean-room pool as requested by the ticket.",
+          "file": ".github/workflows/coverage.yml",
+          "fix": "Restore the scheduled coverage workflow and migrate its runner configuration to [self-hosted, Linux, clean-room].",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The diff introduces a new standalone workflow .github/workflows/runner-guard.yml, whereas the ticket acceptance criteria specifies a shrink-only hosted-runner guard inside gate.",
+          "file": ".github/workflows/runner-guard.yml",
+          "fix": "Remove .github/workflows/runner-guard.yml since the ratchet check is already executed inside the gate job in ci.yml.",
+          "grounding": "cited",
+          "line": 1
+        },
+        {
+          "claim": "The kani-gate job specifies runs-on: [self-hosted, Linux, X64, clean-room], adding the extra X64 label contrary to the acceptance criteria requirement to move all jobs to [self-hosted, Linux, clean-room].",
+          "file": ".github/workflows/ci.yml",
+          "fix": "Update kani-gate runs-on labels to match [self-hosted, Linux, clean-room] or update ticket acceptance criteria.",
+          "grounding": "cited",
+          "line": 294
+        }
+      ]
+    }
+  ],
+  "dedup": [
+    {
+      "file": ".github/workflows/ci.yml",
+      "line": 50,
+      "lanes_agreeing": [
+        2
+      ],
+      "claims": [
+        "Replacing the local clippy check (`cargo clippy --lib --tests --all-features -- -D warnings`) with `sovereign-ci.yml` weakens the lint gate: sovereign-ci unconditionally adds `-A unused-variables` (masking warnings previously rejected by -D warnings) and falls back to running `cargo clippy -p <repo>` with default features if the full workspace clippy check fails."
+      ]
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "line": 110,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "The acceptance criteria requires moving jobs exactly to `[self-hosted, Linux, clean-room]`. The `kani-gate` job adds the `X64` label, violating the requested pool specification."
+      ]
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "line": 214,
+      "lanes_agreeing": [
+        3
+      ],
+      "claims": [
+        "In .github/workflows/ci.yml, test_args is set to '--tests --all-features', dropping '--lib' from the previous test suite execution ('cargo test --lib --tests --all-features'). This weakens the test gate by omitting all library unit tests."
+      ]
+    },
+    {
+      "file": ".github/workflows/ci.yml",
+      "line": 294,
+      "lanes_agreeing": [
+        3
+      ],
+      "claims": [
+        "The kani-gate job specifies runs-on: [self-hosted, Linux, X64, clean-room], adding the extra X64 label contrary to the acceptance criteria requirement to move all jobs to [self-hosted, Linux, clean-room]."
+      ]
+    },
+    {
+      "file": ".github/workflows/coverage.yml",
+      "line": 1,
+      "lanes_agreeing": [
+        1,
+        3
+      ],
+      "claims": [
+        "The diff completely deletes .github/workflows/coverage.yml and removes the weekly scheduled coverage run rather than migrating its runner to the self-hosted clean-room pool as requested by the ticket.",
+        "The ticket does not ask to change the execution schedule for coverage. The diff deletes the weekly cron job entirely and adds a tag-based trigger in ci.yml instead."
+      ]
+    },
+    {
+      "file": ".github/workflows/runner-guard.yml",
+      "line": 1,
+      "lanes_agreeing": [
+        1,
+        3
+      ],
+      "claims": [
+        "The diff introduces a new standalone workflow .github/workflows/runner-guard.yml, whereas the ticket acceptance criteria specifies a shrink-only hosted-runner guard inside gate.",
+        "The ticket requests a shrink-only hosted-runner guard 'inside gate', but the diff additionally creates a standalone workflow file for it, which was not asked for."
+      ]
+    },
+    {
+      "file": "Cargo.lock",
+      "line": 88,
+      "lanes_agreeing": [
+        1,
+        3
+      ],
+      "claims": [
+        "The diff modifies Cargo.lock by bumping dependencies (e.g., rand from 0.8.5 to 0.8.8) and adding new ones, which the ticket does not ask for.",
+        "The diff modifies Cargo.lock by upgrading, downgrading, and adding multiple dependencies (e.g. rand, rustls, windows-sys, crossbeam-epoch, fastrand, h2, memmap2, quinn-proto, chacha20), which is out of scope and not requested by ticket PMAT-441."
+      ]
+    },
+    {
+      "file": "Cargo.lock",
+      "line": 91,
+      "lanes_agreeing": [
+        2
+      ],
+      "claims": [
+        "The diff modifies `Cargo.lock` (updating rand, fastrand, h2, crossbeam-epoch, quinn-proto, memmap2, rustls, and adding chacha20, rand_core, rand_pcg) which was not requested or described in ticket PMAT-441 (scope creep)."
+      ]
+    },
+    {
+      "file": "deny.toml",
+      "line": 2,
+      "lanes_agreeing": [
+        2
+      ],
+      "claims": [
+        "`deny.toml` is marked `# Deployed from paiml/infra — do not edit manually.`. Modifying it directly in this repo violates that deployment contract and weakens the supply-chain security gate by ignoring two unmaintained advisories (RUSTSEC-2024-0370 and RUSTSEC-2026-0173)."
+      ]
+    },
+    {
+      "file": "deny.toml",
+      "line": 20,
+      "lanes_agreeing": [
+        3
+      ],
+      "claims": [
+        "The diff adds security advisory ignores in deny.toml for RUSTSEC-2024-0370 and RUSTSEC-2026-0173, weakening security auditing gates without authorization from ticket PMAT-441."
+      ]
+    },
+    {
+      "file": "docs/roadmaps/roadmap.yaml",
+      "line": 2682,
+      "lanes_agreeing": [
+        1
+      ],
+      "claims": [
+        "The acceptance criteria states 'Operator OK required for workflow edits', but the diff provides no mechanism (such as a .github/CODEOWNERS addition) to enforce this requirement."
+      ]
+    },
+    {
+      "file": "scripts/check_no_hosted_runners.sh",
+      "line": 88,
+      "lanes_agreeing": [
+        2
+      ],
+      "claims": [
+        "`scripts/check_no_hosted_runners.sh` violates the anti-vacuity rule for CI verification scripts: when run against an empty directory or when zero workflow files are found, it outputs `PASS 0 hosted job(s) remain, all in the shrinking baseline` and exits with code 0 instead of failing."
+      ]
+    }
+  ],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": true,
+  "partial_reasons": [
+    "lane 2: non-empty .err (62 bytes, 1 line(s) beyond agy-lane's workspace narration)"
+  ],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.8-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.7-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=3 author=claude-opus-5-5/claude"
+  }
+}
