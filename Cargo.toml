@@ -59,6 +59,14 @@ cast_lossless = "allow"
 float_cmp = "allow"
 for_kv_map = "allow"
 
+# CKB-SIZE-001: no debuginfo in dev/test builds. Every one of the ~1825 examples statically
+# links the whole aprender stack, and with the default `debug = 2` each binary carried ~360 MB
+# of that stack's DWARF (368 MB total, 5 MB stripped), so one `cargo test` wrote ~656 GB.
+# `[profile.test]` inherits this. Opt back in for a debugging session with
+# CARGO_PROFILE_DEV_DEBUG=2 (or line-tables-only for backtraces with line numbers).
+[profile.dev]
+debug = 0
+
 [profile.release]
 lto = "thin"
 codegen-units = 1
