@@ -46,7 +46,7 @@ jobs:
   # clippy adds `-A unused-variables` and falls back to `-p <repo>` at default features; that is
   # inherited from the fleet workflow, not a local choice.
   ci:
-    uses: paiml/.github/.github/workflows/sovereign-ci.yml@69482db7821ce792c2137077da24695bb7a0fbea # main @ 2026-09-21, as apex
+    uses: paiml/.github/.github/workflows/sovereign-ci.yml@46a08b84f61bab52d207dd35f574508e2009712d # main @ 2026-09-21, as apex
     with:
       repo: apr-cookbook
       clippy_args: '--lib --tests --all-features'
