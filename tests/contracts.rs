@@ -27,6 +27,8 @@ const CONTRACT_FILES: &[&str] = &[
     "apr-format-roundtrip-v1.yaml",
     "avx512-matmul-v1.yaml",
     "cli-parity-v1.yaml",
+    // #440: the recipes/apr/** SHACL shape (pv shapes gate over evidence/recipes/recipes.jsonl).
+    "cookbook-recipe-v1.yaml",
     "docs-schema-v1.yaml",
     "flash-attention-v1.yaml",
     // architecture-demos (PMAT-300+): one per family + cross-family detector (PMAT-309).

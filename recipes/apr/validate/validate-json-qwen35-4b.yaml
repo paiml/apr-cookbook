@@ -1,0 +1,16 @@
+schema: cookbook-recipe/v1
+id: validate-json-qwen35-4b
+title: Check every tensor for NaN/Inf and structural integrity
+argv: ["apr", "validate", "{model:main}", "--json"]
+models:
+  main:
+    role: model
+    ref: "hf://unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
+    sha256: "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+inputs: []
+expect:
+  exit: 0
+  stdout_json: {"/total_tensors": 426, "/failed_tensors": 0, "/total_nan": 0, "/total_inf": 0}
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cpu"]

@@ -1,0 +1,16 @@
+schema: cookbook-recipe/v1
+id: inspect-json-qwen35-4b
+title: Read a GGUF's architecture, format and tensor count without loading it
+argv: ["apr", "inspect", "{model:main}", "--json"]
+models:
+  main:
+    role: model
+    ref: "hf://unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
+    sha256: "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+inputs: []
+expect:
+  exit: 0
+  stdout_json: {"/architecture": "qwen35", "/format": "GGUF", "/tensor_count": 426}
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cpu"]

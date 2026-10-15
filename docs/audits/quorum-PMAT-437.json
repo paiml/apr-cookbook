@@ -1,0 +1,144 @@
+{
+  "ticket": "PMAT-437",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "98e32c0d161f17f24c1f07eb31efd7ea04c9c424",
+  "diff_sha256": "88a2bb639743e5571c4be72661481276deaf09148e0e01b9fad1f60577006539",
+  "width": 2,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 67280,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": true,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff implements the pre-push stamping mechanism correctly, fulfilling all requirements of PMAT-437. It successfully shifts the quality gates out of the SSH connection window to prevent timeouts. The `scripts/prepush_gates.sh` script correctly asserts a clean working tree using `git status --porcelain --untracked-files=normal`, comprehensively addressing the flaw highlighted in Round 5 by ensuring no uncommitted tracked changes or untracked files of any type (which could influence the build/tests) are present before stamping. The `.githooks/pre-push` hook accurately consumes standard input to read pushed SHAs, bypasses gates for branch deletions, skips gates for stamped commits, and falls back to running gates in-line for unstamped commits. The 4-line clippy fix from #438 is also included precisely as requested.",
+      "findings": [],
+      "raw_bytes": 2908,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 2,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff for PMAT-437 satisfies all requirements and acceptance criteria without weakening any gates or introducing forbidden changes:\n\n1. **`scripts/prepush_gates.sh` (Pre-push Quality Gates & Stamping)**:\n   - Executes identical pre-push quality gates (`cargo fmt --all -- --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-features`) disconnected from SSH before pushing.\n   - Strictly enforces clean working tree equal to HEAD via `tree_is_head()` checking `[ -z \"$(git status --porcelain --untracked-files=normal)\" ]`, refusing to stamp (rc 2) on tracked modifications or any untracked, non-ignored files.\n   - On gate success, stamps the commit SHA in `$(git rev-parse --git-common-dir)/prepush-gates/<sha>`.\n   - Implements `--check <sha>` (rc 0 if stamped, rc 1 if not), `--run-gates`, and `--self-test`.\n   - `--self-test` comprehensive suite (13 test cases covering clean trees, unstamped commits, failing test refusal, untracked .rs / non-.rs files, ignored build artifacts, and full e2e git push hook integration with stubbed cargo calls) verified to pass cleanly (`measured`).\n\n2. **`.githooks/pre-push` (Hook Ref Inspection)**:\n   - Reads pushed refs from stdin (`<local ref> <local sha> <remote ref> <remote sha>`).\n   - Correctly skips quality gates on branch deletion (`0000000000000000000000000000000000000000`).\n   - Uses `scripts/prepush_gates.sh --check \"$lsha\"` to immediately pass stamped commits without long cargo runs inside the open SSH connection.\n   - For unstamped commits, falls back to executing all three gates (`--run-gates` or inline fallback). No gates are removed or weakened.\n\n3. **Carried Clippy Fixes (#438)**:\n   - The 4-line redundant borrow cleanup across `examples/inference/streaming_token_generator.rs` and `examples/training/autograd_custom_ops/main.rs` is included and cargo clippy passes with 0 warnings/errors (`measured`).\n\n4. **Script Quality & Linting**:\n   - `bash -n` and `shellcheck -S error` pass with zero diagnostics (`measured`).",
+      "findings": [],
+      "raw_bytes": 5554,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.7-flash-high",
+      "model_measured": "gemini-3.7-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.7-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.7-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [],
+  "dedup": [],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": false,
+  "partial_reasons": [],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.7-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=2 author=claude-opus-5-5/claude"
+  }
+}

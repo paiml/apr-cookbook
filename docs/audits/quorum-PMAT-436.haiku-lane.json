@@ -1,0 +1,20 @@
+{
+ "lane": "claude-code (Agent tool, read-only)",
+ "model": "claude-haiku-4-5",
+ "role": "quorum seat 3 (haiku-4-5); this receipt claims no lint override",
+ "head": "d598ca4de514e8bb480385ea20f3ee2bca0b0198",
+ "base": "origin/main",
+ "diff_sha256": "977449e005b238f22888ea3ca0726f506d63c7e3dfc09faf7649f030231b7764",
+ "brief_sha256": "0091838ea89b786a1ce0b76076b163d9ce1af7fe6846b643fd2e08e60ce0a285",
+ "brief_bytes": 102164,
+ "brief_provenance": "quorum-review.sh --base origin/main --ticket PMAT-436,PMAT-439,PMAT-440,PMAT-442 --pr 438 --width 1 --brief-only at the head above (scratch copy that saves $PROMPT_FILE). Byte count equals the agy artifact's prompt_bytes (102164); judged_diff_sha256 at the head equals the agy artifact's diff_sha256.",
+ "ticket": "PMAT-436,PMAT-439,PMAT-440,PMAT-442",
+ "pr": 438,
+ "family": "claude",
+ "degraded": "same-family: agy gemini-3.1-pro-high returned 429 (Individual quota reached, resets in ~3h; fallback chain exhausted, NO-VERDICT). Operator fallback 2026-09-24: sonnet + haiku + opus5.5; the author is claude-opus-5-5, so the opus seat is a second claude-sonnet-5 sample.",
+ "agy_artifact": "NOT committed (NO-VERDICT is archived, never committed): gemini-3.1-pro-high NO-VERDICT on 429, same head and diff_sha256, prompt_bytes 102164",
+ "brief_sha256_reported_by_lane": "0091838ea89b786a1ce0b76076b163d9ce1af7fe6846b643fd2e08e60ce0a285",
+ "verdict": "PASS",
+ "summary": "PR #438 delivers PMAT-436, PMAT-439, PMAT-440, PMAT-442 correctly with honest scope split. All hand-run checks pass: 8 recipes, 16/16 receipt cells (8 recipes × 2 hosts) from 0.69.1 release on both lambda and gx10. recipes/README.md accurately documents which checks run by hand (argv surface, shape validation, receipt checking) and which defer to PR #459 for CI wiring via 'gate' job. No workflow changes in .github/workflows/, no false claims about CI enforcement. The scope split (hand-run scripts in #438, CI wiring in #459) is honest and clearly cited in docs/audits and recipes/README.md.",
+ "findings": []
+}

@@ -1,0 +1,19 @@
+schema: cookbook-recipe/v1
+id: code-json-envelope-qwen35-4b
+title: One-shot `apr code` with a machine-readable JSON envelope
+argv: ["apr", "code", "--model", "{model:main}", "--print", "--output-format", "json", "--gpu",
+       "--thinking", "off", "--max-tokens", "256",
+       "Write a Python function add(a, b) that returns a + b. Reply with only the code."]
+models:
+  main:
+    role: model
+    ref: "hf://unsloth/Qwen3.5-4B-GGUF/Qwen3.5-4B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
+    sha256: "00fe7986ff5f6b463e62455821146049db6f9313603938a70800d1fb69ef11a4"
+inputs: []
+expect:
+  exit: 0
+  stdout_json: {"/is_error": false}
+  stdout_contains: ["def add"]
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cuda"]

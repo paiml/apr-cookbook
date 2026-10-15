@@ -1,0 +1,193 @@
+{
+  "ticket": "PMAT-437",
+  "base": "origin/main",
+  "base_resolved": "origin/main",
+  "base_note": "no origin/origin/main exists; judged against the local ref",
+  "head": "4a4a0bcc53b63dd42117df9b408bfe52cb7671b2",
+  "diff_sha256": "583c05bb26b877a7cfea08af8f2241437c1377e1690b3cd82e4b701cb41b8add",
+  "width": 3,
+  "executor": "agy",
+  "prompt_mode": "inline",
+  "prompt_bytes": 14877,
+  "author": {
+    "model": "claude-opus-5-5",
+    "family": "claude",
+    "source": "flag"
+  },
+  "agreed": false,
+  "lanes": [
+    {
+      "lane": 1,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff perfectly meets PMAT-437. It introduces `scripts/prepush_gates.sh` (with executable permissions) to run gates disconnected from the SSH connection and stamps the commit SHA. The `.githooks/pre-push` hook is correctly updated to parse stdin for pushed refs: skipping branch deletes (zero SHA), bypassing tests for already stamped commits, and falling back to running the full test suite for unstamped commits. The 4-line clippy fix from #438 is also properly included across the two specified Rust files. No gates were removed and the AC is fully satisfied.",
+      "findings": [],
+      "raw_bytes": 2512,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.1-pro-high",
+      "model_measured": "gemini-3.1-pro-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.1-pro-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.1-pro-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 2,
+      "status": "NO-VERDICT",
+      "verdict": "NO-VERDICT",
+      "summary": "",
+      "findings": [],
+      "raw_bytes": 1567,
+      "err_bytes": 201,
+      "envelope_status": "ERROR",
+      "transport_status": "ERROR",
+      "transport_error": "Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 1h18m21s.",
+      "salvageable": "/home/noah/.gemini/antigravity-cli/brain/3806187a-53ec-4841-aacd-8071963e0957 (996396 bytes)",
+      "carried_verdict": "",
+      "blind_reason": "",
+      "agy_exit": "",
+      "model": "gemini-3.8-flash-high",
+      "model_measured": "gemini-3.8-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": null,
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.8-flash-high",
+            "family": "gemini",
+            "outcome": "other",
+            "reason": "Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 1h18m21s."
+          }
+        ],
+        "skipped": []
+      }
+    },
+    {
+      "lane": 3,
+      "status": "SUCCESS",
+      "verdict": "PASS",
+      "summary": "The diff satisfies all acceptance criteria for PMAT-437 (#437) and includes nothing forbidden or out of scope.\n\nKey verifications:\n1. `scripts/prepush_gates.sh` runs the pre-push quality gates (`cargo fmt --all -- --check`, `cargo clippy --all-targets --all-features -- -D warnings`, `cargo test --all-features`) disconnected from SSH before pushing, stamping the commit SHA in `$(git rev-parse --git-common-dir)/prepush-gates/<SHA>`. Stamping requires a clean tree matching HEAD.\n2. `.githooks/pre-push` checks stdin for pushed refs:\n   - Branch deletes (SHA `0000000000000000000000000000000000000000`) skip quality gates.\n   - Stamped commits pass immediately without re-running tests inside the open SSH connection.\n   - Unstamped commits run all three quality gates as before (using `scripts/prepush_gates.sh --run-gates` or inline fallback).\n3. `scripts/prepush_gates.sh --self-test` provides a comprehensive 12-case test suite covering clean trees, unstamped refs, failing tests, dirty/untracked trees, and end-to-end hook integration with stubbed cargo calls.\n4. The 4-line clippy fix (#438) for unnecessary borrows in `println!` macros across `streaming_token_generator.rs` and `autograd_custom_ops/main.rs` is properly included.\n5. Shell scripts pass `bash -n` and `shellcheck -S error`.",
+      "findings": [],
+      "raw_bytes": 4044,
+      "err_bytes": 0,
+      "envelope_status": "SUCCESS",
+      "verdict_source": "structured_output",
+      "grounding_check": "parity",
+      "model": "gemini-3.7-flash-high",
+      "model_measured": "gemini-3.7-flash-high",
+      "model_source": "measured",
+      "family": "gemini",
+      "role": "independent",
+      "fallback": {
+        "judged_by": "gemini-3.7-flash-high",
+        "exhausted": false,
+        "attempts": [
+          {
+            "model": "gemini-3.7-flash-high",
+            "family": "gemini",
+            "outcome": "answered"
+          }
+        ],
+        "skipped": []
+      }
+    }
+  ],
+  "dissent": [
+    {
+      "lane": 2,
+      "verdict": "NO-VERDICT",
+      "summary": "",
+      "findings": []
+    }
+  ],
+  "dedup": [],
+  "uncovered": [],
+  "coverage_source": "lanes",
+  "partial": true,
+  "partial_reasons": [
+    "lane 2: non-empty .err (201 bytes, 2 line(s) beyond agy-lane's workspace narration)",
+    "lane 2: lane envelope status=ERROR transport_error=Individual quota reached. Please upgrade your subscription to increase your limits. Resets in 1h18m21s. salvageable=/home/noah/.gemini/antigravity-cli/brain/3806187a-53ec-4841-aacd-8071963e0957 (996396 bytes) [UNREVIEWED CLAIM MATERIAL — never a PASS]"
+  ],
+  "fallback": {
+    "same_family_width": 1,
+    "chain": [
+      {
+        "model": "gemini-3.1-pro-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.8-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gemini-3.7-flash-high",
+        "family": "gemini",
+        "disposition": "configured"
+      },
+      {
+        "model": "gpt-oss-120b-medium",
+        "family": "openai",
+        "disposition": "fallback"
+      },
+      {
+        "model": "qwen3.5",
+        "family": "qwen",
+        "disposition": "not-run",
+        "why": "no quorum.local_lane in the config — the aprender lane has no model to load"
+      },
+      {
+        "model": "claude-opus-4-6-thinking",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      },
+      {
+        "model": "claude-sonnet-4-6",
+        "family": "claude",
+        "disposition": "width",
+        "why": "same family as the author: at most 1 lane, recorded role width, counted toward no floor (R-15a)"
+      }
+    ],
+    "precheck": [
+      {
+        "family": "gemini",
+        "model": "gemini-3.1-pro-high",
+        "probe": 1,
+        "outcome": "live"
+      }
+    ],
+    "prah": {
+      "source": "install-receipt",
+      "path": "/home/noah/.claude/skills/paiml-implement/bin/prah"
+    }
+  },
+  "auto_merge": {
+    "checked": true,
+    "was_armed": false,
+    "disarmed": false,
+    "note": "auto-merge not armed"
+  },
+  "lint": {
+    "ok": true,
+    "output": "receipt complete: kind=artifact lanes=3 author=claude-opus-5-5/claude"
+  }
+}
