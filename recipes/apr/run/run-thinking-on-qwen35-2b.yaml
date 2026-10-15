@@ -1,0 +1,17 @@
+schema: cookbook-recipe/v1
+id: run-thinking-on-qwen35-2b
+title: Let the model reason first (--thinking on) on Qwen3.5-2B
+argv: ["apr", "run", "{model:main}", "--gpu", "--thinking", "on", "--prompt", "What is 2+2? Reply inside <answer></answer>.",
+       "--max-tokens", "4096", "--temperature", "0"]
+models:
+  main:
+    role: model
+    ref: "hf://unsloth/Qwen3.5-2B-GGUF/Qwen3.5-2B-Q4_K_M.gguf"   # sha256 == this file's Hugging Face LFS oid (checked 2026-09-24)
+    sha256: "aaf42c8b7c3cab2bf3d69c355048d4a0ee9973d48f16c731c0520ee914699223"
+inputs: []
+expect:
+  exit: 0
+  stdout_contains: ["</think>", "<answer>4</answer>"]
+min_apr: "0.69.1"
+hosts: ["lambda", "gx10"]
+backends: ["cuda"]

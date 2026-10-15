@@ -1,0 +1,28 @@
+{
+ "lane": "claude-code (Agent tool, read-only)",
+ "model": "claude-sonnet-5",
+ "role": "quorum seat 2 (opus seat; author is opus-5-5, so a second, independent sonnet-5 sample); this receipt claims no lint override",
+ "head": "d598ca4de514e8bb480385ea20f3ee2bca0b0198",
+ "base": "origin/main",
+ "diff_sha256": "977449e005b238f22888ea3ca0726f506d63c7e3dfc09faf7649f030231b7764",
+ "brief_sha256": "0091838ea89b786a1ce0b76076b163d9ce1af7fe6846b643fd2e08e60ce0a285",
+ "brief_bytes": 102164,
+ "brief_provenance": "quorum-review.sh --base origin/main --ticket PMAT-436,PMAT-439,PMAT-440,PMAT-442 --pr 438 --width 1 --brief-only at the head above (scratch copy that saves $PROMPT_FILE). Byte count equals the agy artifact's prompt_bytes (102164); judged_diff_sha256 at the head equals the agy artifact's diff_sha256.",
+ "ticket": "PMAT-436,PMAT-439,PMAT-440,PMAT-442",
+ "pr": 438,
+ "family": "claude",
+ "degraded": "same-family: agy gemini-3.1-pro-high returned 429 (Individual quota reached, resets in ~3h; fallback chain exhausted, NO-VERDICT). Operator fallback 2026-09-24: sonnet + haiku + opus5.5; the author is claude-opus-5-5, so the opus seat is a second claude-sonnet-5 sample.",
+ "agy_artifact": "NOT committed (NO-VERDICT is archived, never committed): gemini-3.1-pro-high NO-VERDICT on 429, same head and diff_sha256, prompt_bytes 102164",
+ "brief_sha256_reported_by_lane": "0091838ea89b786a1ce0b76076b163d9ce1af7fe6846b643fd2e08e60ce0a285",
+ "verdict": "PASS",
+ "summary": "Worktree HEAD d598ca4 matches the brief; `git diff origin/main...HEAD --stat` reproduces exactly the 38 files/1622 insertions the brief's diff shows. Every check the receipt cites was re-run here and matched its claimed result: `check_recipe_receipts.py` (rc0, 16/16 cells) and `--self-test` (rc0, 8/8 rows), `run_recipes.py --self-test` (rc0), `recipes_to_jsonl.py --check` (rc0, matches 8 recipes), `check_recipe_shape.sh` (rc0, 8/8 SHACL-validated) and its `--self-test` (rc0, all 12 rows incl. the 11 must-RED fixtures and the end-to-end argv0 mutant, using the real `pv` binary, not a stub). `pv validate contracts/cookbook-recipe-v1.yaml` is clean. receipts/CURRENT, ASSETS, and all 16 committed receipt JSONs are internally consistent (apr_sha256 per host, apr_version, recipe_sha256, PASS verdicts) and each recipe's `expect` block is satisfied by its receipt's stdout_head. No gate is weakened, no test asserts the opposite of its ticket, and all four roadmap rows (PMAT-436/439/440/442) remain `status: planned` with none closed — matching the receipt's explicit claim that this PR 'closes none of them' since CI wiring is deferred to PR #459. One stale-documentation item found (not a defect in the diff): PMAT-436 and PMAT-439's acceptance-criteria text still says '(5)'/'the 5 recipes' while the delivered, fully-receipted set is 8 — the extra 3 (inspect/tensors/validate) came from the folded #458, which the receipt/README disclose in prose but the roadmap.yaml acceptance-criteria strings were never updated to match.",
+ "findings": [
+  {
+   "file": "docs/roadmaps/roadmap.yaml",
+   "line": 2682,
+   "claim": "PMAT-436's acceptance criteria says 'recipes/apr/** carries the first cookbook-recipe/v1 recipes (5)', and PMAT-439 (line 2739) says 'the 5 recipes have receipts'; the diff actually ships 8 recipes.",
+   "grounding": "measured",
+   "fix": "Update the two acceptance-criteria strings (lines 2682, 2739) from '(5)'/'the 5 recipes' to 8, or add a note that the count grew via the #458 fold."
+  }
+ ]
+}
