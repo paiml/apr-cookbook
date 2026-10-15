@@ -1,0 +1,36 @@
+{
+ "round": 1,
+ "head": "d451696eebb65f9036075f992931599a50a4c715",
+ "diff_sha256": "4f69db1b519ce91691fc3cfd5817d5eee7d6b702c9dfe095bf52079ed262ece8",
+ "brief_sha256": "6db1e7303f6950f0b6ea0d441cccfca1c4ec24465783cdbda259be382db380e2",
+ "brief_bytes": 92995,
+ "composition": "operator 2026-09-24: claude-sonnet-5 + 1 agy gemini-3.1-pro-high + claude-haiku-4-5, one brief",
+ "agreed": false,
+ "seats": [
+  {
+   "model": "claude-sonnet-5",
+   "verdict": "PASS",
+   "findings": [
+    "Cargo.toml:68 comment still says v0.31.2 (cited; fixed for round 2)"
+   ]
+  },
+  {
+   "model": "gemini-3.1-pro-high",
+   "verdict": "FAIL",
+   "artifact": "quorum-PMAT-434.round1.agy.json",
+   "findings": [
+    "The ticket explicitly requires keeping the #454 advisory patch for `rand 0.8.8`, but the diff replaces `rand 0.8.8` with `rand 0.9.5` in multiple places across the lockfile."
+   ]
+  },
+  {
+   "model": "claude-haiku-4-5",
+   "verdict": "FAIL",
+   "findings": [
+    "rand 0.9.5 replaces 0.8.8 (Cargo.lock:445)",
+    "fastrand 2.5.0 absent",
+    "no test evidence in the diff (asserted)"
+   ]
+  }
+ ],
+ "orchestrator_reread": "At the head: Cargo.lock holds rand 0.8.8, 0.9.5, 0.10.3 (same set as origin/main) and fastrand 2.5.0. RUSTSEC-2026-0097 patched ranges include >=0.9.3,<0.10 and >=0.8.6,<0.9; cargo deny check advisories rc 0. The rand findings are refuted; their cause is the AC wording 'keeps rand 0.8.8', which reads as a pin. Round 2 fixes the AC wording; the round-1 verdicts stand as history."
+}
