@@ -2141,10 +2141,8 @@ its stated entrypoints are claims the shape verifies, not prose.
 - **Falsified, not just asserted**: `tests/readme-shape-falsifier.sh` proves
   `pv-readme --check` can fail — an unrun claim is refused by name, a `kind:`-less
   README is refused, a wrong entrypoint is refused, a wrong contract count is refused.
-- **`.github/workflows/readme-shape-lab.yml` is LAB, not GATE** (C324): nightly +
-  `workflow_dispatch` only, on `main`, never wired into `pr-gate.yml` or `ci.yml`'s
-  `gate` job. Promotion to the PR path needs three green nights, an operator yes,
-  and a gate named for retirement.
+- **No CI job runs this check yet**: `pv-readme` is not on the runners. Run
+  `pv-readme --check` and the falsifier by hand.
 
 Part of paiml/apr-cookbook#477.
 
