@@ -34,7 +34,14 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # Allow-list parser (awk): only a small canonical YAML subset is positively recognised;
     # every line it cannot classify in the regions that matter (top level, job ids, job keys,
     # runs-on, strategy.matrix) is reported UNVERIFIABLE, so unreadable fails closed.
-    local f
+    local f ft fe frc=0
+    # find's own status and stderr are part of the answer: a symlink loop or an unreadable
+    # directory makes find drop an entry silently, so list first, then check how it went
+    ft=$(mktemp) && fe=$(mktemp) || { printf 'UNVERIFIABLE %s:0: mktemp failed\n' "$(basename -- "${WF_DIR%/}")"; return 0; }
+    find -L "$WF_DIR" -maxdepth 1 -name '*.y*ml' -print0 > "$ft" 2> "$fe" || frc=$?
+    if [ "$frc" -ne 0 ] || [ -s "$fe" ]; then
+        printf 'UNVERIFIABLE %s:0: find failed (rc %s): %s\n' "$(basename -- "${WF_DIR%/}")" "$frc" "$(head -c 300 "$fe" | tr '\n\r' '  ')"
+    fi
     while IFS= read -r -d "" f; do
         if [ ! -f "$f" ] || [ ! -r "$f" ]; then
             printf 'UNVERIFIABLE %s:0: not a readable regular file\n' "${f##*/}"; continue
@@ -42,7 +49,12 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         if ! iconv -f UTF-8 -t UTF-8 < "$f" > /dev/null 2>&1; then
             printf 'UNVERIFIABLE %s:0: not valid UTF-8\n' "${f##*/}"; continue
         fi
-        awk -v sq="'" -v fname="${f##*/}" '
+        # a NUL byte: PyYAML's reader refuses it, and awk cannot hold one
+        if ! tr -d '\000' < "$f" | cmp -s - "$f"; then
+            printf 'UNVERIFIABLE %s:0: NUL byte\n' "${f##*/}"; continue
+        fi
+        # LC_ALL=C: awk sees bytes, so gawk and mawk classify every line the same way
+        LC_ALL=C awk -v sq="'" -v fname="${f##*/}" '
         function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
         # fail closed: report file:line and why, once per file
         function unv(why) { if (!ub) print "UNVERIFIABLE " fname ":" FNR ": " why; ub = 1 }
@@ -204,7 +216,8 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                     x = trim(l)
                     if (x ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) {
                         key = x; sub(/^\$\{\{[ \t]*matrix\./, "", key); sub(/[ \t]*\}\}$/, "", key)
-                        if (!(key in mcnt) || mbad[key]) { unv("job " jid ": matrix." key " is absent or not a list of scalars"); continue }
+                        if (!(key in mcnt) || mbad[key] || mcnt[key] < 1) { unv("job " jid ": matrix." key " is absent, empty or not a list of scalars"); continue }
+                        if (minc) { unv("job " jid ": matrix has include:, which can add labels matrix." key " does not list"); continue }
                         for (j = 1; j <= mcnt[key]; j++) if (tolower(mval[key, j]) ~ /^(ubuntu|windows|macos)-/) host = 1
                     } else unv("job " jid ": runs-on expression other than matrix.<key>")
                 }
@@ -227,11 +240,19 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             if (v ~ /^\[.*\]$/) { n = flow_split(substr(v, 2, length(v) - 2), R); for (k = 1; k <= n; k++) mat_add(key, R[k]) }
             else mbad[key] = 1
         }
-        FNR == 1 { jid = ""; injobs = 0; ub = 0; first = 1; seenjobs = 0; bsind = -1; bsc = 0; sp = 0; pplain = 0; popen = 0; pind = 0 }
+        FNR == 1 { delete seenj; jid = "";injobs = 0; ub = 0; first = 1; seenjobs = 0; bsind = -1; bsc = 0; sp = 0; pplain = 0; popen = 0; pind = 0 }
         {
             if (index($0, "\357\273\277")) unv("byte order mark")
             if (index($0, "\r")) unv("carriage return (CRLF)")
             if ($0 ~ /[\001-\010\013\014\016-\037\177]/) unv("control character")
+            # bytes >= 0x80: PyYAML breaks lines on U+2028, U+2029 and NEL and refuses C1 controls and
+            # U+FFFE/U+FFFF, which awk (LF only) would not see; refuse those anywhere, and allow any other
+            # non-ASCII only on a comment-only line (the repo comments use dashes and arrows)
+            if ($0 ~ /[^\001-\177]/) {
+                if (index($0, "\342\200\250") || index($0, "\342\200\251") || index($0, "\302\205") || index($0, "\357\277\276") || index($0, "\357\277\277")) unv("Unicode line separator or noncharacter")
+                else if ($0 ~ /\302[\200-\237]/) unv("C1 control character")
+                else if ($0 !~ /^ *#/) unv("non-ASCII byte outside a comment-only line")
+            }
             if (bsind >= 0 && $0 ~ /[^ \t]/) { match($0, /^ */); if (RLENGTH > bsind && (bsc == 0 || RLENGTH >= bsc)) { if (bsc == 0) bsc = RLENGTH; next } bsind = -1 }
             if (bsind >= 0) next
             line = strip_comment($0); sub(/[ \t]+$/, "", line); raw = $0; sub(/[ \t]+$/, "", raw)
@@ -259,7 +280,10 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 flush_job()
                 if (!skey(t)) { unv("job entry is not a plain or quoted \"id:\" key"); next }
                 if (V != "") unv("job value is not a block mapping (flow, alias or anchor)")
+                if (K in seenj) unv("duplicate job id " K " (YAML keeps the last; not emulated)")
+                seenj[K] = 1
                 jid = K; nb = 0; ki = 0; mode = ""; lastempty = 0; rov = ""; rdeep = 0; robuf_n = 0; rmin = 0
+                seenro = 0; seenst = 0; minc = 0
                 for (k in mcnt) { delete mcnt[k]; delete mbad[k] }
                 delete mval; si = 0; mi = 0; mpend = ""; inmat = 0; seenmat = 0
                 next
@@ -271,8 +295,8 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 mode = ""; inmat = 0
                 if (!skey(t)) { unv("job " jid ": key is not plain or quoted (complex key, anchor, flow or merge)"); next }
                 lastempty = (V == "")
-                if (K == "runs-on") { mode = "ro"; rov = V; rdeep = 0; robuf_n = 0; rmin = 0 }
-                else if (K == "strategy") { mode = "st"; si = 0; seenmat = 0; if (V != "") unv("job " jid ": strategy is not a block mapping") }
+                if (K == "runs-on") { if (seenro++) unv("job " jid ": duplicate runs-on (YAML keeps the last; not emulated)"); mode = "ro"; rov = V; rdeep = 0; robuf_n = 0; rmin = 0 }
+                else if (K == "strategy") { if (seenst++) unv("job " jid ": duplicate strategy (YAML keeps the last; not emulated)"); mode = "st"; si = 0; seenmat = 0; if (V != "") unv("job " jid ": strategy is not a block mapping") }
                 next
             }
             if (ind == ki) {
@@ -309,13 +333,16 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 if (t ~ /^-([ \t]|$)/ && mpend != "") { mat_add(mpend, substr(t, 2)); next }
                 if (ind == mi) {
                     if (!skey(t)) { unv("job " jid ": matrix key is not plain or quoted"); next }
+                    if (K in mcnt) unv("job " jid ": duplicate matrix key " K)
+                    if (K == "include") minc = 1
                     mat_set(K, V)
                 }
             }
         }
         END { flush_job() }
         ' "$f" || printf 'UNVERIFIABLE %s:0: awk failed\n' "${f##*/}"
-    done < <(find -L "$WF_DIR" -maxdepth 1 -name '*.y*ml' -print0)
+    done < "$ft"
+    rm -f -- "${ft:?}" "${fe:?}"
 }
 
 check() {
@@ -328,8 +355,8 @@ check() {
         return 2
     fi
     actual=$(hosted_jobs | sort)
-    unv=$(printf '%s\n' "$actual" | grep '^UNVERIFIABLE ' || true)
-    actual=$(printf '%s\n' "$actual" | { grep -v '^UNVERIFIABLE ' || true; })
+    unv=$(printf '%s\n' "$actual" | sed -n '/^UNVERIFIABLE /p')
+    actual=$(printf '%s\n' "$actual" | sed '/^UNVERIFIABLE /d')
     base=$( { grep -vE '^\s*(#|$)' "$BASELINE" 2> /dev/null || true; } | sort)
     new=$(comm -23 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
     stale=$(comm -13 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
@@ -418,6 +445,26 @@ self_test() {
     adv 'job keys at inconsistent indent' w.yml 'jobs:\n  a:\n        name: x\n    runs-on: ubuntu-latest\n'
     adv 'top-level list "- jobs"' w.yml '- jobs\n'
     adv 'bare "-" block item under runs-on' w.yml 'jobs:\n  a:\n    runs-on:\n      -\n        ubuntu-latest\n'
+    # round 3: line breaks only PyYAML sees, empty or doubled keys, and a find that failed
+    adv 'U+2028 line separator hides a key from awk' w.yml 'jobs:\n  a:\n    name: x\342\200\250    runs-on: ubuntu-latest\n'
+    adv 'U+2029 inside a comment' w.yml 'jobs:\n  a:\n    # x\342\200\251    runs-on: ubuntu-latest\n'
+    adv 'NEL (U+0085) line break' w.yml 'jobs:\n  a:\n    name: x\302\205    runs-on: ubuntu-latest\n'
+    adv 'C1 control U+0080 in a comment' w.yml '# \302\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'noncharacter U+FFFE in a comment' w.yml '# \357\277\276\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'NUL byte in a comment' w.yml 'jobs:\n  a:\n    runs-on: self-hosted\n# a\000b\n'
+    adv 'non-ASCII outside a comment-only line' w.yml 'jobs:\n  a:\n    runs-on: ubuntu-latest # \342\200\224\n'
+    adv 'matrix key with no value' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os:\n    runs-on: ${{ matrix.os }}\n'
+    adv 'matrix key with only a comment' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: # c\n    runs-on: ${{ matrix.os }}\n'
+    adv 'matrix key holding a nested mapping' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os:\n          x: y\n    runs-on: ${{ matrix.os }}\n'
+    adv 'empty matrix list' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: []\n    runs-on: ${{ matrix.os }}\n'
+    adv 'duplicate strategy, stale matrix from the first' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: [self-hosted]\n    strategy:\n      fail-fast: false\n    runs-on: ${{ matrix.os }}\n'
+    adv 'duplicate runs-on' w.yml 'jobs:\n  a:\n    runs-on: ubuntu-latest\n    runs-on: self-hosted\n'
+    adv 'duplicate job id' w.yml 'jobs:\n  a:\n    runs-on: self-hosted\n  a:\n    runs-on: self-hosted\n'
+    adv 'matrix include: can add a label the key does not list' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: [self-hosted]\n        include:\n          - os: ubuntu-latest\n    runs-on: ${{ matrix.os }}\n'
+    rm -rf "${t:?}/adv"; mkdir -p "$t/adv"
+    printf 'jobs:\n  ok:\n    runs-on: self-hosted\n' > "$t/adv/ok.yml"; ln -s loop.yml "$t/adv/loop.yml"
+    rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: a symlink loop among the workflow files (find fails)" 1 "$rc"
     rm -rf "${t:?}/adv"; mkdir -p "$t/adv" "$t/tgt"
     printf 'jobs:\n  h:\n    runs-on: ubuntu-latest\n' > "$t/tgt/h.yml"; ln -s "$t/tgt/h.yml" "$t/adv/h.yml"
     printf 'jobs:\n  ok:\n    runs-on: self-hosted\n' > "$t/adv/ok.yml"
