@@ -35,12 +35,25 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # Plain awk reading the block/flow YAML subset the workflows use (no Python, no yq).
     # Anything it cannot read (aliases, anchors, block scalars, flow mappings) is reported
     # as unverifiable, so an unreadable runs-on fails closed instead of passing.
-    for f in "$WF_DIR"/*.y*ml; do
-        [ -f "$f" ] || continue
+    while IFS= read -r -d "" f; do
         awk -v sq="'" -v fname="${f##*/}" '
         function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
         function quoted(s,   a, z) { a = substr(s, 1, 1); z = substr(s, length(s)); return (length(s) >= 2 && (a == "\"" || a == sq) && z == a) }
-        function unq(s) { s = trim(s); if (length(s) >= 2 && quoted(s)) s = substr(s, 2, length(s) - 2); return s }
+        # a double-quoted scalar with a backslash may hold an escape (\x75 = u): unreadable, flag the job
+        function unq(s) { s = trim(s); if (substr(s, 1, 1) == "\"" && index(s, "\\")) esc = 1; if (length(s) >= 2 && quoted(s)) s = substr(s, 2, length(s) - 2); return s }
+        # fail closed: report file:line and why, once per file
+        function unv(why) { if (!ub) print "UNVERIFIABLE " fname ":" FNR ": " why; ub = 1 }
+        # parse "key: value" (plain, "dq" or sq key, space before colon ok) into K, V; 0 if not that shape
+        function parsekey(t,   a, m, k) {
+            a = substr(t, 1, 1)
+            if (a == "\"") m = match(t, /^"([^"\\]|\\.)*"[ \t]*:([ \t]|$)/)
+            else if (a == sq) m = match(t, /^\047([^\047]|\047\047)*\047[ \t]*:([ \t]|$)/)
+            else if (a ~ /[?\[{*&!|>%@`#,-]/) return 0
+            else m = match(t, /^[^:]*:([ \t]|$)/)
+            K = ""; V = ""; if (!m) return 0
+            k = substr(t, 1, RLENGTH); sub(/:[ \t]?$/, "", k); K = unq(k); V = trim(substr(t, RLENGTH + 1))
+            return 1
+        }
         function nonstr(s) { s = trim(s); return (!quoted(s) && s ~ /^(-?[0-9][0-9._]*|true|false|True|False|TRUE|FALSE|null|Null|NULL|~)$/) }
         function strip_comment(s,   i, c, q, out) {
             q = ""; out = ""
@@ -112,7 +125,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                     for (j = 1; j <= mcnt[key]; j++) if (mval[key, j] ~ /^(ubuntu|windows|macos)-/) host = 1
                 } else bad = 1
             }
-            if (bad || host) print fname " " jid
+            if (bad || host || esc) print fname " " jid
         }
         # register one matrix element (scalar or flow list) of key
         function mat_add(key, e,   n, R, k) {
@@ -130,17 +143,25 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             if (v ~ /^\[.*\]$/) { n = flow_split(flow_body(v), R); for (k = 1; k <= n; k++) mat_add(key, R[k]) }
             else mbad[key] = 1
         }
-        FNR == 1 { flush_job(); jid = ""; injobs = 0; ji = 0 }
+        FNR == 1 { flush_job(); jid = ""; injobs = 0; ji = 0; ub = 0; esc = 0 }
         {
             line = strip_comment($0); sub(/[ \t\r]+$/, "", line)
             if (trim(line) == "") next
+            if (line ~ /^ *\t/) { unv("tab in indentation (not valid YAML)"); next }
             match(line, /^ */); ind = RLENGTH; t = substr(line, ind + 1)
-            if (ind == 0) { flush_job(); jid = ""; injobs = (t ~ /^jobs:[ \t]*$/); ji = 0; next }
+            if (ind == 0) {
+                flush_job(); jid = ""; injobs = (t ~ /^jobs:[ \t]*$/); ji = 0
+                if (t ~ /^(\?|\{|\[|---[ \t]+[^ \t#])/) unv("complex key, flow or inline document at top level")
+                else if (!injobs && parsekey(t) && K == "jobs") unv("jobs key not in plain block form (quoted, spaced or flow value)")
+                next
+            }
             if (!injobs) next
             if (ji == 0) ji = ind
-            if (ind == ji && t ~ /^[^-][^:]*:/) {
+            if (ind == ji) {
+                if (!parsekey(t)) { unv("job entry is not a plain or quoted \"id:\" key"); next }
+                if (V != "") unv("job value is not a block mapping (flow, alias or anchor)")
                 flush_job()
-                jid = unq(substr(t, 1, index(t, ":") - 1))
+                jid = K; esc = 0
                 ki = 0; mode = ""; rov = ""; robuf_n = 0; rmin = 0
                 for (k in mcnt) { delete mcnt[k]; delete mbad[k] }
                 delete mval; si = 0; mi = 0; mpend = ""; inmat = 0
@@ -148,10 +169,12 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             }
             if (jid == "") next
             if (ki == 0 && ind > ji) ki = ind
-            if (ind == ki && t !~ /^-[ \t]/) {
+            if (ind == ki && t !~ /^-([ \t]|$)/) {
                 mode = ""; inmat = 0
-                if (t ~ /^runs-on:/) { mode = "ro"; rov = trim(substr(t, 9)); robuf_n = 0; rmin = 0 }
-                else if (t ~ /^strategy:/) { mode = "st"; si = 0 }
+                if (!parsekey(t)) unv("job key is not a plain or quoted key (complex key, anchor or flow)")
+                else if (K == "<<") unv("merge key in a job")
+                if (K == "runs-on") { mode = "ro"; rov = V; robuf_n = 0; rmin = 0 }
+                else if (K == "strategy") { mode = "st"; si = 0 }
                 next
             }
             if (mode == "ro" && rov == "") {
@@ -173,11 +196,11 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         }
         END { flush_job() }
         ' "$f"
-    done
+    done < <(find "$WF_DIR" -maxdepth 1 -type f -name '*.y*ml' -print0)
 }
 
 check() {
-    local actual base new stale nwf
+    local actual base new stale nwf unv
     # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
     # jobs": refuse instead of printing PASS (quorum finding, #454).
     nwf=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2> /dev/null | wc -l)
@@ -186,6 +209,8 @@ check() {
         return 2
     fi
     actual=$(hosted_jobs | sort)
+    unv=$(printf '%s\n' "$actual" | grep '^UNVERIFIABLE ' || true)
+    actual=$(printf '%s\n' "$actual" | { grep -v '^UNVERIFIABLE ' || true; })
     base=$( { grep -vE '^\s*(#|$)' "$BASELINE" 2> /dev/null || true; } | sort)
     new=$(comm -23 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
     stale=$(comm -13 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
@@ -197,7 +222,11 @@ check() {
         printf 'FAIL  stale baseline row(s), those jobs are no longer hosted -- delete them so the list only shrinks:\n'
         printf '        %s\n' "$stale"
     fi
-    [ -z "$new" ] && [ -z "$stale" ] || return 1
+    if [ -n "$unv" ]; then
+        printf 'FAIL  workflow file(s) outside the supported YAML subset, cannot be verified (fail closed):\n'
+        printf '        %s\n' "$unv"
+    fi
+    [ -z "$new" ] && [ -z "$stale" ] && [ -z "$unv" ] || return 1
     printf 'PASS  %s hosted job(s) remain, all in the shrinking baseline\n' "$(printf '%s\n' "$actual" | sed '/^$/d' | wc -l | tr -d ' ')"
 }
 
@@ -242,6 +271,24 @@ self_test() {
     printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$rc"
+    # adversarial forms (review of #484): each valid YAML spelling of a hosted job must be RED,
+    # either caught (hosted) or refused as unverifiable; none may pass.
+    adv() { # adv <label> <file name> <printf format>
+        rm -rf "${t:?}/adv"; mkdir -p "$t/adv"; printf "$3" > "$t/adv/$2"
+        rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
+        row "MUST-RED: $1" 1 "$rc"
+    }
+    J='jobs:\n  a:\n    runs-on: '
+    adv 'quoted key "runs-on":' w.yml "${J//runs-on: /\"runs-on\": }ubuntu-latest\n"
+    adv "runs-on : (space before colon)" w.yml "${J//runs-on:/runs-on :} macos-14\n"
+    adv 'explicit ? runs-on key' w.yml 'jobs:\n  a:\n    ? runs-on\n    : ubuntu-latest\n'
+    adv 'quoted "jobs" key' w.yml '"jobs":\n  a:\n    runs-on: ubuntu-latest\n'
+    adv 'jobs as a flow mapping' w.yml 'jobs: {a: {runs-on: ubuntu-latest}}\n'
+    adv 'a job as a flow mapping' w.yml 'jobs:\n  a: {runs-on: ubuntu-latest}\n'
+    adv 'escaped double-quoted label "\\x75buntu-latest"' w.yml "${J}\"\\\\x75buntu-latest\"\n"
+    adv 'dotfile workflow .hidden.yml' .hidden.yml "${J}ubuntu-latest\n"
+    adv 'tab-indented runs-on' w.yml 'jobs:\n  a:\n\truns-on: ubuntu-latest\n'
+    adv 'merge key <<: *base in a job' w.yml 'jobs:\n  a:\n    <<: *base\n    runs-on: self-hosted\n'
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
