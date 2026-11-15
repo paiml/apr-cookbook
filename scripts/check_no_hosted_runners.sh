@@ -31,47 +31,153 @@ BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
 WF_DIR=${WF_DIR:-.github/workflows}
 
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
-    python3 - "$WF_DIR" << 'PY'
-import pathlib, re, sys, yaml
-HOSTED = re.compile(r"^(ubuntu|windows|macos)-")
-EXPR = re.compile(r"\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}")
-for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
-    d = yaml.safe_load(f.read_text()) or {}
-    for jid, j in (d.get("jobs") or {}).items():
-        ro = j.get("runs-on")
-        shape_ok = True
-        if isinstance(ro, dict):
-            # Mapping form {group: ..., labels: ...} is how GitHub-HOSTED larger runners are
-            # selected; read both keys, and refuse any other key as unverifiable.
-            shape_ok = set(ro) <= {"group", "labels"}
-            lab = ro.get("labels", [])
-            labels = (lab if isinstance(lab, list) else [lab]) + ([ro["group"]] if isinstance(ro.get("group"), str) else [])
-        else:
-            labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
-        matrix = ((j.get("strategy") or {}).get("matrix") or {})
-        expanded, unverifiable = [], False
-        for l in labels:
-            if not isinstance(l, str) or "${{" not in l:
-                expanded.append(l)
-                continue
-            # An expression hides the label. `${{ matrix.<k> }}` is resolved against the job's
-            # own matrix values; anything else cannot be checked, so it is refused rather than
-            # passed (a hosted image behind an expression would otherwise read as clean).
-            m = EXPR.fullmatch(l.strip())
-            vals = matrix.get(m.group(1)) if m else None
-            if isinstance(vals, list) and all(isinstance(v, (str, list)) for v in vals):
-                for v in vals:
-                    expanded.extend(v if isinstance(v, list) else [v])
-            else:
-                unverifiable = True
-        if unverifiable or not shape_ok or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
-            print("%s %s" % (f.name, jid))
-PY
+    local f
+    # Plain awk reading the block/flow YAML subset the workflows use (no Python, no yq).
+    # Anything it cannot read (aliases, anchors, block scalars, flow mappings) is reported
+    # as unverifiable, so an unreadable runs-on fails closed instead of passing.
+    for f in "$WF_DIR"/*.y*ml; do
+        [ -f "$f" ] || continue
+        awk -v sq="'" -v fname="${f##*/}" '
+        function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+        function quoted(s,   a, z) { a = substr(s, 1, 1); z = substr(s, length(s)); return (length(s) >= 2 && (a == "\"" || a == sq) && z == a) }
+        function unq(s) { s = trim(s); if (length(s) >= 2 && quoted(s)) s = substr(s, 2, length(s) - 2); return s }
+        function nonstr(s) { s = trim(s); return (!quoted(s) && s ~ /^(-?[0-9][0-9._]*|true|false|True|False|TRUE|FALSE|null|Null|NULL|~)$/) }
+        function strip_comment(s,   i, c, q, out) {
+            q = ""; out = ""
+            for (i = 1; i <= length(s); i++) {
+                c = substr(s, i, 1)
+                if (q == "") {
+                    if (c == "\"" || c == sq) q = c
+                    else if (c == "#" && (i == 1 || substr(s, i - 1, 1) ~ /[ \t]/)) break
+                } else if (c == q) q = ""
+                out = out c
+            }
+            return out
+        }
+        # split a flow-list body (text between the outer brackets) on top-level commas into R[1..n]
+        function flow_split(s, R,   i, c, q, d, n, cur) {
+            n = 0; cur = ""; q = ""; d = 0
+            for (i = 1; i <= length(s); i++) {
+                c = substr(s, i, 1)
+                if (q != "") { if (c == q) q = ""; cur = cur c; continue }
+                if (c == "\"" || c == sq) { q = c; cur = cur c; continue }
+                if (c == "[" || c == "{") d++
+                if (c == "]" || c == "}") d--
+                if (c == "," && d == 0) { R[++n] = trim(cur); cur = ""; continue }
+                cur = cur c
+            }
+            if (trim(cur) != "") R[++n] = trim(cur)
+            return n
+        }
+        function flow_body(v) { v = trim(v); if (v ~ /^\[.*\]$/) return substr(v, 2, length(v) - 2); return "\001" }
+        function unreadable(v) { return (v ~ /^[*&|>!{]/ || (v ~ /^\[/ && v !~ /\]$/)) }
+        # add the labels of one runs-on value (scalar or flow list) to the label list L[1..nl]
+        function add_labels(v,   b, k, n, R) {
+            v = trim(v)
+            if (v == "" || v == "~" || v == "null") return
+            if (unreadable(v)) { bad = 1; return }
+            if (v ~ /^\[/) {
+                n = flow_split(flow_body(v), R)
+                for (k = 1; k <= n; k++) if (!nonstr(R[k]) && R[k] !~ /^\[/) L[++nl] = unq(R[k])
+            } else if (!nonstr(v)) L[++nl] = unq(v)
+        }
+        function flush_job(   i, k, n, R, R2, j, l, key, m, ok, nmx, vals, x, host) {
+            if (jid == "") return
+            nl = 0; bad = 0
+            if (robuf_n > 0 || rov != "") {
+                if (rov != "") add_labels(rov)
+                else if (robuf[1] ~ /^-/) {
+                    for (i = 1; i <= robuf_n; i++) if (robuf[i] ~ /^-[ \t]/ || robuf[i] == "-") add_labels(substr(robuf[i], 2))
+                } else {
+                    for (i = 1; i <= robuf_n; i++) {
+                        l = robuf[i]
+                        if (rind[i] != rmin) continue
+                        key = unq(substr(l, 1, index(l, ":") - 1)); x = trim(substr(l, index(l, ":") + 1))
+                        if (key != "group" && key != "labels") { bad = 1; continue }
+                        if (key == "group") { if (x != "" && x !~ /^[\[{]/ && !nonstr(x)) L[++nl] = unq(x); continue }
+                        if (x != "") add_labels(x)
+                        else for (j = i + 1; j <= robuf_n && rind[j] > rmin; j++)
+                            if (robuf[j] ~ /^-[ \t]/) add_labels(substr(robuf[j], 2))
+                    }
+                }
+            }
+            host = 0
+            for (i = 1; i <= nl; i++) {
+                l = L[i]
+                if (index(l, "${{") == 0) { if (l ~ /^(ubuntu|windows|macos)-/) host = 1; continue }
+                x = trim(l)
+                if (x ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) {
+                    key = x; sub(/^\$\{\{[ \t]*matrix\./, "", key); sub(/[ \t]*\}\}$/, "", key)
+                    if (!(key in mcnt) || mbad[key]) { bad = 1; continue }
+                    for (j = 1; j <= mcnt[key]; j++) if (mval[key, j] ~ /^(ubuntu|windows|macos)-/) host = 1
+                } else bad = 1
+            }
+            if (bad || host) print fname " " jid
+        }
+        # register one matrix element (scalar or flow list) of key
+        function mat_add(key, e,   n, R, k) {
+            e = trim(e)
+            if (e ~ /^\[/ && e ~ /\]$/) {
+                n = flow_split(flow_body(e), R)
+                for (k = 1; k <= n; k++) mval[key, ++mcnt[key]] = unq(R[k])
+            } else if (e == "" || e ~ /^[*&|>!{\[]/ || nonstr(e)) mbad[key] = 1
+            else mval[key, ++mcnt[key]] = unq(e)
+        }
+        function mat_set(key, v,   n, R, k) {
+            v = trim(v); mcnt[key] = 0; mbad[key] = 0
+            if (v == "") { mpend = key; return }
+            mpend = ""
+            if (v ~ /^\[.*\]$/) { n = flow_split(flow_body(v), R); for (k = 1; k <= n; k++) mat_add(key, R[k]) }
+            else mbad[key] = 1
+        }
+        FNR == 1 { flush_job(); jid = ""; injobs = 0; ji = 0 }
+        {
+            line = strip_comment($0); sub(/[ \t\r]+$/, "", line)
+            if (trim(line) == "") next
+            match(line, /^ */); ind = RLENGTH; t = substr(line, ind + 1)
+            if (ind == 0) { flush_job(); jid = ""; injobs = (t ~ /^jobs:[ \t]*$/); ji = 0; next }
+            if (!injobs) next
+            if (ji == 0) ji = ind
+            if (ind == ji && t ~ /^[^-][^:]*:/) {
+                flush_job()
+                jid = unq(substr(t, 1, index(t, ":") - 1))
+                ki = 0; mode = ""; rov = ""; robuf_n = 0; rmin = 0
+                for (k in mcnt) { delete mcnt[k]; delete mbad[k] }
+                delete mval; si = 0; mi = 0; mpend = ""; inmat = 0
+                next
+            }
+            if (jid == "") next
+            if (ki == 0 && ind > ji) ki = ind
+            if (ind == ki && t !~ /^-[ \t]/) {
+                mode = ""; inmat = 0
+                if (t ~ /^runs-on:/) { mode = "ro"; rov = trim(substr(t, 9)); robuf_n = 0; rmin = 0 }
+                else if (t ~ /^strategy:/) { mode = "st"; si = 0 }
+                next
+            }
+            if (mode == "ro" && rov == "") {
+                robuf[++robuf_n] = t; rind[robuf_n] = ind
+                if (rmin == 0 || ind < rmin) rmin = ind
+                next
+            }
+            if (mode == "st") {
+                if (!inmat) {
+                    if (si == 0) si = ind
+                    if (ind == si && t ~ /^matrix:/) { inmat = 1; mi = 0; mpend = ""; x = trim(substr(t, 8)); if (x != "") inmat = 0 }
+                    next
+                }
+                if (ind <= si) { inmat = 0; next }
+                if (mi == 0) mi = ind
+                if (t ~ /^-[ \t]/ && mpend != "") { mat_add(mpend, substr(t, 2)); next }
+                if (ind == mi && t ~ /^[^-][^:]*:/) mat_set(unq(substr(t, 1, index(t, ":") - 1)), substr(t, index(t, ":") + 1))
+            }
+        }
+        END { flush_job() }
+        ' "$f"
+    done
 }
 
 check() {
     local actual base new stale nwf
-    command -v python3 > /dev/null || { echo "ENV: python3 missing" >&2; return 2; }
     # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
     # jobs": refuse instead of printing PASS (quorum finding, #454).
     nwf=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2> /dev/null | wc -l)
