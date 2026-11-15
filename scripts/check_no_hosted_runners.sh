@@ -58,15 +58,30 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
         # fail closed: report file:line and why, once per file
         function unv(why) { if (!ub) print "UNVERIFIABLE " fname ":" FNR ": " why; ub = 1 }
-        # a scalar on one line: plain, "dq" (no escape) or sq (no doubled quote); sets SV
-        function scalar_ok(v,   a) {
-            v = trim(v); if (v == "") return 0
-            a = substr(v, 1, 1)
-            if (a == "\"") { if (v ~ /^"[^"\\]*"$/) { SV = substr(v, 2, length(v) - 2); return 1 } return 0 }
-            if (a == sq) { if (v ~ /^\047[^\047]*\047$/) { SV = substr(v, 2, length(v) - 2); return 1 } return 0 }
-            if (index("[]{}*&!|>%@`#,?:-", a)) return 0
-            if (v ~ /: / || v ~ /:$/ || v ~ /["\047]/) return 0
-            SV = v; return 1
+        # THE label grammar (one positive pattern, used wherever a label is read): an unquoted label
+        # is ^[A-Za-z][A-Za-z0-9._-]*$ and not a YAML 1.1 non-string word (a leading letter already
+        # excludes numbers, dates, sexagesimals, .inf, ~ and =); a quoted label is "..." or ... closed
+        # on the line, content ^[A-Za-z0-9._-]+$ (no escapes); sets SV
+        function lab_ok(v) {
+            v = trim(v)
+            if (v ~ /^"[A-Za-z0-9._-]+"$/ || v ~ /^\047[A-Za-z0-9._-]+\047$/) { SV = substr(v, 2, length(v) - 2); return 1 }
+            if (v ~ /^[A-Za-z][A-Za-z0-9._-]*$/ && tolower(v) !~ /^(y|yes|n|no|on|off|true|false|null|nan|inf)$/) { SV = v; return 1 }
+            return 0
+        }
+        # a bare ${{ matrix.NAME }}, alone
+        function expr_ok(v) { return (v ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) }
+        # THE value shape (runs-on / labels / matrix key, same line): empty, label, matrix expression
+        # alone, or ONE flow list [label, label] of labels with nothing after the "]"; else refused
+        function item_ok(v) { v = trim(v); if (lab_ok(v)) return 1; if (expr_ok(v)) { SV = v; return 1 } return 0 }
+        function flow_ok(v,   inner, k) {
+            FN = 0; v = trim(v)
+            if (substr(v, 1, 1) != "[" || substr(v, length(v), 1) != "]") return 0
+            inner = trim(substr(v, 2, length(v) - 2))
+            if (index(inner, "[") || index(inner, "]") || index(inner, "{") || index(inner, "}")) return 0
+            if (inner == "") return 1
+            FN = split(inner, FR, ",")
+            for (k = 1; k <= FN; k++) { if (!lab_ok(FR[k])) return 0; FL[k] = SV }
+            return 1
         }
         # a key line "key:" (plain [A-Za-z0-9_-]+ or quoted likewise, space before colon ok): sets K, V
         function skey(t,   m, k) {
@@ -79,7 +94,6 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             if (k ~ /^["\047]/) k = substr(k, 2, length(k) - 2)
             K = k; V = trim(substr(t, RLENGTH + 1)); return 1
         }
-        function nonstr(s) { return (s ~ /^(-?[0-9][0-9._]*|true|false|True|False|TRUE|FALSE|null|Null|NULL|~)$/) }
         function strip_comment(s,   i, c, q, out) {
             q = ""; out = ""
             for (i = 1; i <= length(s); i++) {
@@ -92,32 +106,20 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             }
             return out
         }
-        # split a flow-list body on top-level commas into R[1..n]
-        function flow_split(s, R,   i, c, q, n, cur, d) {
-            n = 0; cur = ""; q = ""; d = 0
-            for (i = 1; i <= length(s); i++) {
-                c = substr(s, i, 1)
-                if (q != "") { if (c == q) q = ""; cur = cur c; continue }
-                if (c == "\"" || c == sq) { q = c; cur = cur c; continue }
-                if (c == "[" || c == "{") d++
-                if (c == "]" || c == "}") d--
-                if (c == "," && d == 0) { R[++n] = trim(cur); cur = ""; continue }
-                cur = cur c
-            }
-            if (trim(cur) != "") R[++n] = trim(cur)
-            return n
-        }
         # lines outside the classified regions still get a cheap well-formedness check: a quoted
         # scalar or flow collection that starts a value must close on its own line (block-scalar
         # content is opaque); a miss is UNVERIFIABLE, never "not hosted"
-        function balanced(v,   i, c, q, d) {
-            q = ""; d = 0
+        # also refused: content after the collection closes ("[a] [b]", "[a], [b]"), and a bracket
+        # that opens inside a plain flow scalar ("[a, ${{ x }}]"): both are YAML parse errors
+        function balanced(v,   i, c, q, d, pc) {
+            q = ""; d = 0; pc = ""
             for (i = 1; i <= length(v); i++) {
                 c = substr(v, i, 1)
-                if (q != "") { if (c == "\\" && q == "\"") i++; else if (c == q) q = ""; continue }
+                if (q != "") { if (c == "\\" && q == "\"") i++; else if (c == q) { q = ""; pc = c }; continue }
                 if (c == "\"" || c == sq) q = c
-                else if (c == "[" || c == "{") d++
-                else if (c == "]" || c == "}") { if (--d < 0) return 0 }
+                else if (c == "[" || c == "{") { if (d > 0 && pc !~ /[\[{,:]/) return 0; d++ }
+                else if (c == "]" || c == "}") { if (--d < 0) return 0; if (d == 0 && trim(substr(v, i + 1)) != "") return 0 }
+                if (c != " " && c != "\t") pc = c
             }
             return (q == "" && d == 0)
         }
@@ -160,19 +162,17 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             pind = (dash && isk ? col : ind); popen = (t2 == "" || (isk && v == ""))
             pplain = (v != "" && v !~ /^[\[{"\047|>]/)
         }
-        # one runs-on label: nonstr scalars never name an image; anything not a closed scalar is refused
+        # one runs-on item (scalar / block list item): a label or a bare matrix expression, else refused
         function add_label(v) {
-            v = trim(v)
-            if (nonstr(v)) return 1
-            if (!scalar_ok(v)) return 0
+            if (!item_ok(v)) return 0
             L[++nl] = SV; return 1
         }
-        # the value after "runs-on:" / "labels:" on the same line: scalar or one-line flow list of scalars
-        function add_value(v,   n, k, R) {
+        # the value after "runs-on:" / "labels:" on the same line: item, or one flow list of labels
+        function add_value(v,   k) {
             v = trim(v)
-            if (v ~ /^\[.*\]$/) {
-                n = flow_split(substr(v, 2, length(v) - 2), R)
-                for (k = 1; k <= n; k++) if (!add_label(R[k])) return 0
+            if (substr(v, 1, 1) == "[") {
+                if (!flow_ok(v)) return 0
+                for (k = 1; k <= FN; k++) L[++nl] = FL[k]
                 return 1
             }
             return add_label(v)
@@ -217,6 +217,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                     if (x ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) {
                         key = x; sub(/^\$\{\{[ \t]*matrix\./, "", key); sub(/[ \t]*\}\}$/, "", key)
                         if (!(key in mcnt) || mbad[key] || mcnt[key] < 1) { unv("job " jid ": matrix." key " is absent, empty or not a list of scalars"); continue }
+                        if (mjunk) { unv("job " jid ": matrix has a line that is not \"key: label-list\" or \"- label\" (nested mapping, include/exclude, ragged indent)"); continue }
                         if (minc) { unv("job " jid ": matrix has include:, which can add labels matrix." key " does not list"); continue }
                         for (j = 1; j <= mcnt[key]; j++) if (tolower(mval[key, j]) ~ /^(ubuntu|windows|macos)-/) host = 1
                     } else unv("job " jid ": runs-on expression other than matrix.<key>")
@@ -225,19 +226,13 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             }
             jid = ""
         }
-        function mat_add(key, e,   n, R, k) {
-            e = trim(e)
-            if (e ~ /^\[.*\]$/) {
-                n = flow_split(substr(e, 2, length(e) - 2), R)
-                for (k = 1; k <= n; k++) { if (nonstr(R[k]) || !scalar_ok(R[k])) mbad[key] = 1; else mval[key, ++mcnt[key]] = SV }
-            } else if (nonstr(e) || !scalar_ok(e)) mbad[key] = 1
-            else mval[key, ++mcnt[key]] = SV
-        }
-        function mat_set(key, v,   n, R, k) {
+        # a matrix value is a label, nothing else
+        function mat_add(key, e) { if (lab_ok(e)) mval[key, ++mcnt[key]] = SV; else mbad[key] = 1 }
+        function mat_set(key, v,   k) {
             v = trim(v); mcnt[key] = 0; mbad[key] = 0
             if (v == "") { mpend = key; return }
             mpend = ""
-            if (v ~ /^\[.*\]$/) { n = flow_split(substr(v, 2, length(v) - 2), R); for (k = 1; k <= n; k++) mat_add(key, R[k]) }
+            if (flow_ok(v)) { for (k = 1; k <= FN; k++) mval[key, ++mcnt[key]] = FL[k] }
             else mbad[key] = 1
         }
         FNR == 1 { delete seenj; jid = "";injobs = 0; ub = 0; first = 1; seenjobs = 0; bsind = -1; bsc = 0; sp = 0; pplain = 0; popen = 0; pind = 0 }
@@ -252,6 +247,13 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 if (index($0, "\342\200\250") || index($0, "\342\200\251") || index($0, "\302\205") || index($0, "\357\277\276") || index($0, "\357\277\277")) unv("Unicode line separator or noncharacter")
                 else if ($0 ~ /\302[\200-\237]/) unv("C1 control character")
                 else if ($0 !~ /^ *#/) unv("non-ASCII byte outside a comment-only line")
+                else {
+                    # positive: after removing ASCII and every well-formed UTF-8 sequence (no overlong,
+                    # no surrogate, nothing above U+10FFFF) nothing may remain; iconv is not trusted
+                    u8 = $0
+                    gsub(/[\302-\337][\200-\277]|\340[\240-\277][\200-\277]|[\341-\354\356\357][\200-\277][\200-\277]|\355[\200-\237][\200-\277]|\360[\220-\277][\200-\277][\200-\277]|[\361-\363][\200-\277][\200-\277][\200-\277]|\364[\200-\217][\200-\277][\200-\277]|[\001-\177]/, "", u8)
+                    if (u8 != "") unv("not well-formed UTF-8 (overlong, surrogate, above U+10FFFF or stray byte)")
+                }
             }
             if (bsind >= 0 && $0 ~ /[^ \t]/) { match($0, /^ */); if (RLENGTH > bsind && (bsc == 0 || RLENGTH >= bsc)) { if (bsc == 0) bsc = RLENGTH; next } bsind = -1 }
             if (bsind >= 0) next
@@ -285,7 +287,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 jid = K; nb = 0; ki = 0; mode = ""; lastempty = 0; rov = ""; rdeep = 0; robuf_n = 0; rmin = 0
                 seenro = 0; seenst = 0; minc = 0
                 for (k in mcnt) { delete mcnt[k]; delete mbad[k] }
-                delete mval; si = 0; mi = 0; mpend = ""; inmat = 0; seenmat = 0
+                delete mval; si = 0; mi = 0; mpend = ""; inmat = 0; seenmat = 0; mjunk = 0; mind = 0
                 next
             }
             nb++
@@ -330,13 +332,19 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
                 }
                 if (mi == 0) mi = ind
                 if (ind < mi) { unv("job " jid ": matrix indentation is inconsistent"); next }
-                if (t ~ /^-([ \t]|$)/ && mpend != "") { mat_add(mpend, substr(t, 2)); next }
-                if (ind == mi) {
+                # every matrix line is positively one of: "key: shape" at the key indent, or a "- label"
+                # item directly under the pending key at ONE indent; anything else (nested mapping,
+                # deeper or ragged indent, stray item) is junk, and junk is refused if runs-on uses a matrix
+                isitem = (t ~ /^-([ \t]|$)/)
+                if (isitem && mpend != "" && ind >= mi && (mind == 0 || ind == mind)) { mind = ind; mat_add(mpend, substr(t, 2)); next }
+                if (ind == mi && !isitem) {
                     if (!skey(t)) { unv("job " jid ": matrix key is not plain or quoted"); next }
                     if (K in mcnt) unv("job " jid ": duplicate matrix key " K)
                     if (K == "include") minc = 1
-                    mat_set(K, V)
+                    mind = 0; mat_set(K, V); next
                 }
+                mjunk = 1; if (mpend != "") mbad[mpend] = 1
+                mpend = ""
             }
         }
         END { flush_job() }
@@ -405,9 +413,9 @@ self_test() {
     printf 'jobs:\n  ex:\n    runs-on: ${{ inputs.runner }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: an unresolvable runs-on expression is refused, not passed" 1 "$rc"
-    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
+    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [self-hosted, Linux, clean-room]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
+    row "a matrix of plain self-hosted labels resolves and passes" 0 "$rc"
     mkdir -p "$t/empty"
     rc=0; WF_DIR="$t/empty" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$rc"
@@ -461,6 +469,30 @@ self_test() {
     adv 'duplicate runs-on' w.yml 'jobs:\n  a:\n    runs-on: ubuntu-latest\n    runs-on: self-hosted\n'
     adv 'duplicate job id' w.yml 'jobs:\n  a:\n    runs-on: self-hosted\n  a:\n    runs-on: self-hosted\n'
     adv 'matrix include: can add a label the key does not list' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: [self-hosted]\n        include:\n          - os: ubuntu-latest\n    runs-on: ${{ matrix.os }}\n'
+    # round 5: by construction -- one label grammar, one value shape, a positively classified matrix, well-formed UTF-8
+    M='jobs:\n  a:\n    strategy:\n      matrix:\n        os: '
+    R='\n    runs-on: ${{ matrix.os }}\n'
+    adv 'cause 1: YAML-typed matrix value `on` (bool) is no label' w.yml "${M}[self-hosted, on]${R}"
+    adv 'cause 1: matrix value +1 (int)' w.yml "${M}[self-hosted, +1]${R}"
+    adv 'cause 1: matrix value 2001-12-14 (date)' w.yml "${M}[self-hosted, 2001-12-14]${R}"
+    adv 'cause 1: matrix value 0x1F (hex int)' w.yml "${M}[self-hosted, 0x1F]${R}"
+    adv 'cause 1: block matrix item "- yes" (bool)' w.yml "${M}\n          - yes${R}"
+    adv 'cause 1: matrix value .inf (float)' w.yml "${M}[self-hosted, .inf]${R}"
+    adv 'cause 1: matrix value = (value tag)' w.yml "${M}[self-hosted, =]${R}"
+    adv 'cause 1: matrix value 1:20 (sexagesimal)' w.yml "${M}[self-hosted, 1:20]${R}"
+    adv 'cause 1: block matrix item "- Off" (bool)' w.yml "${M}\n          - Off${R}"
+    adv 'cause 1: runs-on: on (bool)' w.yml 'jobs:\n  a:\n    runs-on: on\n'
+    adv 'cause 2: two flow lists in runs-on' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted] [x]\n'
+    adv 'cause 2: runs-on flow list, comma, second flow list' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted], [ubuntu-latest]\n'
+    adv 'cause 2: two flow lists in a matrix value' w.yml "${M}[self-hosted] [ubuntu-latest]${R}"
+    adv 'cause 2: bare expression inside a runs-on flow list' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted, ${{ matrix.os }}]\n'
+    adv 'cause 2: two flow lists on an unrelated key' w.yml 'on:\n  push:\n    branches: [a] [b]\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 3: list under a nested mapping read as the matrix key list' w.yml "${M}\n          x:\n            - self-hosted${R}"
+    adv 'cause 3: ragged item indent under a matrix key' w.yml "${M}\n          - self-hosted\n            - x${R}"
+    adv 'cause 4: comment with bytes above U+10FFFF (F4 90 80 80)' w.yml '# \364\220\200\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with a 0xF5 byte' w.yml '# \365\200\200\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with an overlong C0 80' w.yml '# \300\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with a surrogate ED A0 80' w.yml '# \355\240\200\njobs:\n  a:\n    runs-on: self-hosted\n'
     rm -rf "${t:?}/adv"; mkdir -p "$t/adv"
     printf 'jobs:\n  ok:\n    runs-on: self-hosted\n' > "$t/adv/ok.yml"; ln -s loop.yml "$t/adv/loop.yml"
     rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
