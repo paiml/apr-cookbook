@@ -31,47 +31,330 @@ BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
 WF_DIR=${WF_DIR:-.github/workflows}
 
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
-    python3 - "$WF_DIR" << 'PY'
-import pathlib, re, sys, yaml
-HOSTED = re.compile(r"^(ubuntu|windows|macos)-")
-EXPR = re.compile(r"\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}")
-for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
-    d = yaml.safe_load(f.read_text()) or {}
-    for jid, j in (d.get("jobs") or {}).items():
-        ro = j.get("runs-on")
-        shape_ok = True
-        if isinstance(ro, dict):
-            # Mapping form {group: ..., labels: ...} is how GitHub-HOSTED larger runners are
-            # selected; read both keys, and refuse any other key as unverifiable.
-            shape_ok = set(ro) <= {"group", "labels"}
-            lab = ro.get("labels", [])
-            labels = (lab if isinstance(lab, list) else [lab]) + ([ro["group"]] if isinstance(ro.get("group"), str) else [])
-        else:
-            labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
-        matrix = ((j.get("strategy") or {}).get("matrix") or {})
-        expanded, unverifiable = [], False
-        for l in labels:
-            if not isinstance(l, str) or "${{" not in l:
-                expanded.append(l)
-                continue
-            # An expression hides the label. `${{ matrix.<k> }}` is resolved against the job's
-            # own matrix values; anything else cannot be checked, so it is refused rather than
-            # passed (a hosted image behind an expression would otherwise read as clean).
-            m = EXPR.fullmatch(l.strip())
-            vals = matrix.get(m.group(1)) if m else None
-            if isinstance(vals, list) and all(isinstance(v, (str, list)) for v in vals):
-                for v in vals:
-                    expanded.extend(v if isinstance(v, list) else [v])
-            else:
-                unverifiable = True
-        if unverifiable or not shape_ok or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
-            print("%s %s" % (f.name, jid))
-PY
+    # Allow-list parser (awk): only a small canonical YAML subset is positively recognised;
+    # every line it cannot classify in the regions that matter (top level, job ids, job keys,
+    # runs-on, strategy.matrix) is reported UNVERIFIABLE, so unreadable fails closed.
+    local f ft fe frc=0
+    # find's own status and stderr are part of the answer: a symlink loop or an unreadable
+    # directory makes find drop an entry silently, so list first, then check how it went
+    ft=$(mktemp) && fe=$(mktemp) || { printf 'UNVERIFIABLE %s:0: mktemp failed\n' "$(basename -- "${WF_DIR%/}")"; return 0; }
+    find -L "$WF_DIR" -maxdepth 1 -name '*.y*ml' -print0 > "$ft" 2> "$fe" || frc=$?
+    if [ "$frc" -ne 0 ] || [ -s "$fe" ]; then
+        printf 'UNVERIFIABLE %s:0: find failed (rc %s): %s\n' "$(basename -- "${WF_DIR%/}")" "$frc" "$(head -c 300 "$fe" | tr '\n\r' '  ')"
+    fi
+    while IFS= read -r -d "" f; do
+        if [ ! -f "$f" ] || [ ! -r "$f" ]; then
+            printf 'UNVERIFIABLE %s:0: not a readable regular file\n' "${f##*/}"; continue
+        fi
+        if ! iconv -f UTF-8 -t UTF-8 < "$f" > /dev/null 2>&1; then
+            printf 'UNVERIFIABLE %s:0: not valid UTF-8\n' "${f##*/}"; continue
+        fi
+        # a NUL byte: PyYAML's reader refuses it, and awk cannot hold one
+        if ! tr -d '\000' < "$f" | cmp -s - "$f"; then
+            printf 'UNVERIFIABLE %s:0: NUL byte\n' "${f##*/}"; continue
+        fi
+        # LC_ALL=C: awk sees bytes, so gawk and mawk classify every line the same way
+        LC_ALL=C awk -v sq="'" -v fname="${f##*/}" '
+        function trim(s) { sub(/^[ \t]+/, "", s); sub(/[ \t]+$/, "", s); return s }
+        # fail closed: report file:line and why, once per file
+        function unv(why) { if (!ub) print "UNVERIFIABLE " fname ":" FNR ": " why; ub = 1 }
+        # THE label grammar (one positive pattern, used wherever a label is read): an unquoted label
+        # is ^[A-Za-z][A-Za-z0-9._-]*$ and not a YAML 1.1 non-string word (a leading letter already
+        # excludes numbers, dates, sexagesimals, .inf, ~ and =); a quoted label is "..." or ... closed
+        # on the line, content ^[A-Za-z0-9._-]+$ (no escapes); sets SV
+        function lab_ok(v) {
+            v = trim(v)
+            if (v ~ /^"[A-Za-z0-9._-]+"$/ || v ~ /^\047[A-Za-z0-9._-]+\047$/) { SV = substr(v, 2, length(v) - 2); return 1 }
+            if (v ~ /^[A-Za-z][A-Za-z0-9._-]*$/ && tolower(v) !~ /^(y|yes|n|no|on|off|true|false|null|nan|inf)$/) { SV = v; return 1 }
+            return 0
+        }
+        # a bare ${{ matrix.NAME }}, alone
+        function expr_ok(v) { return (v ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) }
+        # THE value shape (runs-on / labels / matrix key, same line): empty, label, matrix expression
+        # alone, or ONE flow list [label, label] of labels with nothing after the "]"; else refused
+        function item_ok(v) { v = trim(v); if (lab_ok(v)) return 1; if (expr_ok(v)) { SV = v; return 1 } return 0 }
+        function flow_ok(v,   inner, k) {
+            FN = 0; v = trim(v)
+            if (substr(v, 1, 1) != "[" || substr(v, length(v), 1) != "]") return 0
+            inner = trim(substr(v, 2, length(v) - 2))
+            if (index(inner, "[") || index(inner, "]") || index(inner, "{") || index(inner, "}")) return 0
+            if (inner == "") return 1
+            FN = split(inner, FR, ",")
+            for (k = 1; k <= FN; k++) { if (!lab_ok(FR[k])) return 0; FL[k] = SV }
+            return 1
+        }
+        # a key line "key:" (plain [A-Za-z0-9_-]+ or quoted likewise, space before colon ok): sets K, V
+        function skey(t,   m, k) {
+            K = ""; V = ""
+            if (substr(t, 1, 1) == "\"") m = match(t, /^"[A-Za-z0-9_-]*"[ \t]*:([ \t]|$)/)
+            else if (substr(t, 1, 1) == sq) m = match(t, /^\047[A-Za-z0-9_-]*\047[ \t]*:([ \t]|$)/)
+            else m = match(t, /^[A-Za-z0-9_-]+[ \t]*:([ \t]|$)/)
+            if (!m) return 0
+            k = substr(t, 1, RLENGTH); sub(/[ \t]*:[ \t]?$/, "", k)
+            if (k ~ /^["\047]/) k = substr(k, 2, length(k) - 2)
+            K = k; V = trim(substr(t, RLENGTH + 1)); return 1
+        }
+        function strip_comment(s,   i, c, q, out) {
+            q = ""; out = ""
+            for (i = 1; i <= length(s); i++) {
+                c = substr(s, i, 1)
+                if (q == "") {
+                    if (c == "\"" || c == sq) q = c
+                    else if (c == "#" && (i == 1 || substr(s, i - 1, 1) ~ /[ \t]/)) break
+                } else if (c == q) q = ""
+                out = out c
+            }
+            return out
+        }
+        # lines outside the classified regions still get a cheap well-formedness check: a quoted
+        # scalar or flow collection that starts a value must close on its own line (block-scalar
+        # content is opaque); a miss is UNVERIFIABLE, never "not hosted"
+        # also refused: content after the collection closes ("[a] [b]", "[a], [b]"), and a bracket
+        # that opens inside a plain flow scalar ("[a, ${{ x }}]"): both are YAML parse errors
+        function balanced(v,   i, c, q, d, pc) {
+            q = ""; d = 0; pc = ""
+            for (i = 1; i <= length(v); i++) {
+                c = substr(v, i, 1)
+                if (q != "") { if (c == "\\" && q == "\"") i++; else if (c == q) { q = ""; pc = c }; continue }
+                if (c == "\"" || c == sq) q = c
+                else if (c == "[" || c == "{") { if (d > 0 && pc !~ /[\[{,:]/) return 0; d++ }
+                else if (c == "]" || c == "}") { if (--d < 0) return 0; if (d == 0 && trim(substr(v, i + 1)) != "") return 0 }
+                if (c != " " && c != "\t") pc = c
+            }
+            return (q == "" && d == 0)
+        }
+        function chk_value(t, ind,   col, v, a) {
+            col = ind
+            while (t ~ /^-[ \t]+/) { match(t, /^-[ \t]+/); col += RLENGTH; t = substr(t, RLENGTH + 1) }
+            if (match(t, /^[A-Za-z0-9_.\/-]+:[ \t]+/)) { v = trim(substr(t, RLENGTH + 1)) } else v = trim(t)
+            if (v ~ /^[|>][-+0-9]*$/) { bsind = (col > ind ? col : ind); bsc = 0; return }
+            a = substr(v, 1, 1)
+            if (a == "\"" && v !~ /^"([^"\\]|\\.)*"$/) unv("double-quoted scalar does not close on its line")
+            else if (a == sq && v !~ /^\047([^\047]|\047\047)*\047$/) unv("single-quoted scalar does not close on its line")
+            else if ((a == "[" || a == "{") && !balanced(v)) unv("flow collection does not close on its line")
+        }
+        # indentation must nest, as block YAML does: a dedent lands on an open level, a deeper line
+        # follows a key with an empty value (or continues a plain scalar that is not itself "k: v"),
+        # a list item sits only in a list level or directly under its own key; else not valid YAML
+        function chk_indent(t, ind,   col, t2, v, isk, dash) {
+            col = ind; t2 = t; dash = (t2 ~ /^-([ \t]|$)/)
+            while (t2 ~ /^-([ \t]+|$)/) { match(t2, /^-([ \t]+|$)/); col += RLENGTH; t2 = substr(t2, RLENGTH + 1) }
+            isk = match(t2, /^[^ \t][^:]*:([ \t]+|$)/)
+            v = isk ? trim(substr(t2, RLENGTH + 1)) : t2
+            if (sp > 0 && pplain && ind > pind && !isk) return
+            if (sp == 0) { stk[sp = 1] = ind; knd[1] = (dash ? "s" : "m"); lk[1] = "" }
+            else {
+                while (sp > 0 && stk[sp] > ind) sp--
+                if (sp == 0 || stk[sp] != ind) {
+                    if (!(popen && ind > pind)) unv("indentation does not nest")
+                    stk[++sp] = ind; knd[sp] = (dash ? "s" : "m"); lk[sp] = ""
+                }
+            }
+            if (dash) {
+                if (knd[sp] == "m" && !(lk[sp] == "d" || (popen && pind == ind))) unv("list item among mapping keys")
+                lk[sp] = "d"
+            } else {
+                if (!isk) unv("line is neither a key nor a list item")
+                if (knd[sp] == "s") unv("mapping key at a list level")
+                lk[sp] = (v == "" ? "o" : "k")
+            }
+            if (dash && isk && t2 != "") { stk[++sp] = col; knd[sp] = "m"; lk[sp] = (v == "" ? "o" : "k") }
+            pind = (dash && isk ? col : ind); popen = (t2 == "" || (isk && v == ""))
+            pplain = (v != "" && v !~ /^[\[{"\047|>]/)
+        }
+        # one runs-on item (scalar / block list item): a label or a bare matrix expression, else refused
+        function add_label(v) {
+            if (!item_ok(v)) return 0
+            L[++nl] = SV; return 1
+        }
+        # the value after "runs-on:" / "labels:" on the same line: item, or one flow list of labels
+        function add_value(v,   k) {
+            v = trim(v)
+            if (substr(v, 1, 1) == "[") {
+                if (!flow_ok(v)) return 0
+                for (k = 1; k <= FN; k++) L[++nl] = FL[k]
+                return 1
+            }
+            return add_label(v)
+        }
+        function bad_ro(why) { unv("job " jid ": runs-on " why); return 0 }
+        # runs-on of the job: scalar, flow list, block list or {group, labels}; else refuse
+        function read_runs_on(   i, k, cur, curv, itemind, x) {
+            if (rov != "") { if (rdeep) return bad_ro("scalar continues on another line"); return add_value(rov) || bad_ro("value is not a plain/closed-quoted scalar or one-line list") }
+            if (robuf_n == 0) return 1
+            if (robuf[1] ~ /^-([ \t]|$)/) {
+                for (i = 1; i <= robuf_n; i++) {
+                    if (robuf[i] !~ /^-[ \t]+[^ \t]/ || rind[i] != rind[1]) return bad_ro("block list item is bare, nested or ragged")
+                    if (!add_label(substr(robuf[i], 2))) return bad_ro("block list item is not a closed scalar")
+                }
+                return 1
+            }
+            cur = ""; curv = "x"; itemind = 0
+            for (i = 1; i <= robuf_n; i++) {
+                if (rind[i] == rmin) {
+                    if (!skey(robuf[i]) || (K != "group" && K != "labels")) return bad_ro("mapping has a key other than group/labels")
+                    cur = K; curv = V; itemind = 0
+                    if (K == "group") { if (!add_label(V) || V == "") return bad_ro("group is not a scalar"); continue }
+                    if (V != "" && !add_value(V)) return bad_ro("labels value is not a scalar or one-line list")
+                } else {
+                    if (cur != "labels" || curv != "" || robuf[i] !~ /^-[ \t]+[^ \t]/) return bad_ro("mapping content is not a labels block list")
+                    if (itemind == 0) itemind = rind[i]
+                    if (rind[i] != itemind || !add_label(substr(robuf[i], 2))) return bad_ro("labels item is not a closed scalar")
+                }
+            }
+            return 1
+        }
+        function flush_job(   i, j, l, x, key, host) {
+            if (jid == "") return
+            if (nb == 0) unv("job " jid " has no mapping body")
+            nl = 0
+            if (read_runs_on()) {
+                host = 0
+                for (i = 1; i <= nl; i++) {
+                    l = L[i]
+                    if (index(l, "${{") == 0) { if (tolower(l) ~ /^(ubuntu|windows|macos)-/) host = 1; continue }
+                    x = trim(l)
+                    if (x ~ /^\$\{\{[ \t]*matrix\.[A-Za-z0-9_-]+[ \t]*\}\}$/) {
+                        key = x; sub(/^\$\{\{[ \t]*matrix\./, "", key); sub(/[ \t]*\}\}$/, "", key)
+                        if (!(key in mcnt) || mbad[key] || mcnt[key] < 1) { unv("job " jid ": matrix." key " is absent, empty or not a list of scalars"); continue }
+                        if (mjunk) { unv("job " jid ": matrix has a line that is not \"key: label-list\" or \"- label\" (nested mapping, include/exclude, ragged indent)"); continue }
+                        if (minc) { unv("job " jid ": matrix has include:, which can add labels matrix." key " does not list"); continue }
+                        for (j = 1; j <= mcnt[key]; j++) if (tolower(mval[key, j]) ~ /^(ubuntu|windows|macos)-/) host = 1
+                    } else unv("job " jid ": runs-on expression other than matrix.<key>")
+                }
+                if (host) print fname " " jid
+            }
+            jid = ""
+        }
+        # a matrix value is a label, nothing else
+        function mat_add(key, e) { if (lab_ok(e)) mval[key, ++mcnt[key]] = SV; else mbad[key] = 1 }
+        function mat_set(key, v,   k) {
+            v = trim(v); mcnt[key] = 0; mbad[key] = 0
+            if (v == "") { mpend = key; return }
+            mpend = ""
+            if (flow_ok(v)) { for (k = 1; k <= FN; k++) mval[key, ++mcnt[key]] = FL[k] }
+            else mbad[key] = 1
+        }
+        FNR == 1 { delete seenj; jid = "";injobs = 0; ub = 0; first = 1; seenjobs = 0; bsind = -1; bsc = 0; sp = 0; pplain = 0; popen = 0; pind = 0 }
+        {
+            if (index($0, "\357\273\277")) unv("byte order mark")
+            if (index($0, "\r")) unv("carriage return (CRLF)")
+            if ($0 ~ /[\001-\010\013\014\016-\037\177]/) unv("control character")
+            # bytes >= 0x80: PyYAML breaks lines on U+2028, U+2029 and NEL and refuses C1 controls and
+            # U+FFFE/U+FFFF, which awk (LF only) would not see; refuse those anywhere, and allow any other
+            # non-ASCII only on a comment-only line (the repo comments use dashes and arrows)
+            if ($0 ~ /[^\001-\177]/) {
+                if (index($0, "\342\200\250") || index($0, "\342\200\251") || index($0, "\302\205") || index($0, "\357\277\276") || index($0, "\357\277\277")) unv("Unicode line separator or noncharacter")
+                else if ($0 ~ /\302[\200-\237]/) unv("C1 control character")
+                else if ($0 !~ /^ *#/) unv("non-ASCII byte outside a comment-only line")
+                else {
+                    # positive: after removing ASCII and every well-formed UTF-8 sequence (no overlong,
+                    # no surrogate, nothing above U+10FFFF) nothing may remain; iconv is not trusted
+                    u8 = $0
+                    gsub(/[\302-\337][\200-\277]|\340[\240-\277][\200-\277]|[\341-\354\356\357][\200-\277][\200-\277]|\355[\200-\237][\200-\277]|\360[\220-\277][\200-\277][\200-\277]|[\361-\363][\200-\277][\200-\277][\200-\277]|\364[\200-\217][\200-\277][\200-\277]|[\001-\177]/, "", u8)
+                    if (u8 != "") unv("not well-formed UTF-8 (overlong, surrogate, above U+10FFFF or stray byte)")
+                }
+            }
+            if (bsind >= 0 && $0 ~ /[^ \t]/) { match($0, /^ */); if (RLENGTH > bsind && (bsc == 0 || RLENGTH >= bsc)) { if (bsc == 0) bsc = RLENGTH; next } bsind = -1 }
+            if (bsind >= 0) next
+            line = strip_comment($0); sub(/[ \t]+$/, "", line); raw = $0; sub(/[ \t]+$/, "", raw)
+            if (trim(line) == "") { if (trim(raw) != "") pplain = 0; next }
+            if (line ~ /^ *\t/) { unv("tab in indentation (not valid YAML)"); next }
+            match(line, /^ */); ind = RLENGTH; t = substr(line, ind + 1)
+            chk_value(t, ind)
+            chk_indent(t, ind)
+            if (length(line) != length(raw)) pplain = 0
+            if (first) { first = 0; if (ind != 0) unv("top-level mapping is not at column 0") }
+            if (ind == 0) {
+                flush_job(); injobs = 0; ji = 0
+                if (!skey(t) || t ~ /^["\047]/) unv("top-level line is not a plain key (document marker, list, quoted or complex key)")
+                else if (K == "jobs") {
+                    if (seenjobs++) unv("second top-level jobs key")
+                    if (V != "") unv("jobs value is not a block mapping (flow, alias or anchor)")
+                    injobs = 1
+                }
+                next
+            }
+            if (!injobs) next
+            if (ji == 0) ji = ind
+            if (ind < ji) { unv("indentation under jobs is inconsistent"); next }
+            if (ind == ji) {
+                flush_job()
+                if (!skey(t)) { unv("job entry is not a plain or quoted \"id:\" key"); next }
+                if (V != "") unv("job value is not a block mapping (flow, alias or anchor)")
+                if (K in seenj) unv("duplicate job id " K " (YAML keeps the last; not emulated)")
+                seenj[K] = 1
+                jid = K; nb = 0; ki = 0; mode = ""; lastempty = 0; rov = ""; rdeep = 0; robuf_n = 0; rmin = 0
+                seenro = 0; seenst = 0; minc = 0
+                for (k in mcnt) { delete mcnt[k]; delete mbad[k] }
+                delete mval; si = 0; mi = 0; mpend = ""; inmat = 0; seenmat = 0; mjunk = 0; mind = 0
+                next
+            }
+            nb++
+            if (ki == 0) ki = ind
+            if (ind < ki) { unv("job " jid ": key indentation is inconsistent"); next }
+            if (ind == ki && t !~ /^-([ \t]|$)/) {
+                mode = ""; inmat = 0
+                if (!skey(t)) { unv("job " jid ": key is not plain or quoted (complex key, anchor, flow or merge)"); next }
+                lastempty = (V == "")
+                if (K == "runs-on") { if (seenro++) unv("job " jid ": duplicate runs-on (YAML keeps the last; not emulated)"); mode = "ro"; rov = V; rdeep = 0; robuf_n = 0; rmin = 0 }
+                else if (K == "strategy") { if (seenst++) unv("job " jid ": duplicate strategy (YAML keeps the last; not emulated)"); mode = "st"; si = 0; seenmat = 0; if (V != "") unv("job " jid ": strategy is not a block mapping") }
+                next
+            }
+            if (ind == ki) {
+                if (!lastempty || mode == "st") unv("job " jid ": list item at key indent after a non-block key")
+            }
+            if (mode == "ro") {
+                if (rov != "") { rdeep = 1; next }
+                robuf[++robuf_n] = t; rind[robuf_n] = ind
+                if (rmin == 0 || ind < rmin) rmin = ind
+                next
+            }
+            if (mode == "st") {
+                if (ind == ki) next
+                if (si == 0) si = ind
+                if (ind < si) { unv("job " jid ": strategy indentation is inconsistent"); next }
+                if (!inmat) {
+                    if (ind == si) {
+                        if (!skey(t)) { unv("job " jid ": strategy key is not plain"); next }
+                        if (K == "matrix") {
+                            if (seenmat++) unv("job " jid ": second matrix key")
+                            if (V == "") { inmat = 1; mi = 0; mpend = "" }
+                        }
+                    }
+                    next
+                }
+                if (ind <= si) {
+                    inmat = 0
+                    if (!skey(t)) { unv("job " jid ": strategy key is not plain"); next }
+                    if (K == "matrix") unv("job " jid ": second matrix key")
+                    next
+                }
+                if (mi == 0) mi = ind
+                if (ind < mi) { unv("job " jid ": matrix indentation is inconsistent"); next }
+                # every matrix line is positively one of: "key: shape" at the key indent, or a "- label"
+                # item directly under the pending key at ONE indent; anything else (nested mapping,
+                # deeper or ragged indent, stray item) is junk, and junk is refused if runs-on uses a matrix
+                isitem = (t ~ /^-([ \t]|$)/)
+                if (isitem && mpend != "" && ind >= mi && (mind == 0 || ind == mind)) { mind = ind; mat_add(mpend, substr(t, 2)); next }
+                if (ind == mi && !isitem) {
+                    if (!skey(t)) { unv("job " jid ": matrix key is not plain or quoted"); next }
+                    if (K in mcnt) unv("job " jid ": duplicate matrix key " K)
+                    if (K == "include") minc = 1
+                    mind = 0; mat_set(K, V); next
+                }
+                mjunk = 1; if (mpend != "") mbad[mpend] = 1
+                mpend = ""
+            }
+        }
+        END { flush_job() }
+        ' "$f" || printf 'UNVERIFIABLE %s:0: awk failed\n' "${f##*/}"
+    done < "$ft"
+    rm -f -- "${ft:?}" "${fe:?}"
 }
 
 check() {
-    local actual base new stale nwf
-    command -v python3 > /dev/null || { echo "ENV: python3 missing" >&2; return 2; }
+    local actual base new stale nwf unv
     # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
     # jobs": refuse instead of printing PASS (quorum finding, #454).
     nwf=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2> /dev/null | wc -l)
@@ -80,6 +363,8 @@ check() {
         return 2
     fi
     actual=$(hosted_jobs | sort)
+    unv=$(printf '%s\n' "$actual" | sed -n '/^UNVERIFIABLE /p')
+    actual=$(printf '%s\n' "$actual" | sed '/^UNVERIFIABLE /d')
     base=$( { grep -vE '^\s*(#|$)' "$BASELINE" 2> /dev/null || true; } | sort)
     new=$(comm -23 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
     stale=$(comm -13 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
@@ -91,7 +376,11 @@ check() {
         printf 'FAIL  stale baseline row(s), those jobs are no longer hosted -- delete them so the list only shrinks:\n'
         printf '        %s\n' "$stale"
     fi
-    [ -z "$new" ] && [ -z "$stale" ] || return 1
+    if [ -n "$unv" ]; then
+        printf 'FAIL  workflow file(s) outside the supported YAML subset, cannot be verified (fail closed):\n'
+        printf '        %s\n' "$unv"
+    fi
+    [ -z "$new" ] && [ -z "$stale" ] && [ -z "$unv" ] || return 1
     printf 'PASS  %s hosted job(s) remain, all in the shrinking baseline\n' "$(printf '%s\n' "$actual" | sed '/^$/d' | wc -l | tr -d ' ')"
 }
 
@@ -124,9 +413,9 @@ self_test() {
     printf 'jobs:\n  ex:\n    runs-on: ${{ inputs.runner }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: an unresolvable runs-on expression is refused, not passed" 1 "$rc"
-    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
+    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [self-hosted, Linux, clean-room]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
+    row "a matrix of plain self-hosted labels resolves and passes" 0 "$rc"
     mkdir -p "$t/empty"
     rc=0; WF_DIR="$t/empty" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$rc"
@@ -136,6 +425,83 @@ self_test() {
     printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$t/wf/x.yml"
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$rc"
+    # adversarial forms (review of #484): each valid YAML spelling of a hosted job must be RED,
+    # either caught (hosted) or refused as unverifiable; none may pass.
+    adv() { # adv <label> <file name> <printf format>
+        rm -rf "${t:?}/adv"; mkdir -p "$t/adv"; printf -- "$3" > "$t/adv/$2"
+        rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
+        row "MUST-RED: $1" 1 "$rc"
+    }
+    J='jobs:\n  a:\n    runs-on: '
+    adv 'quoted key "runs-on":' w.yml "${J//runs-on: /\"runs-on\": }ubuntu-latest\n"
+    adv "runs-on : (space before colon)" w.yml "${J//runs-on:/runs-on :} macos-14\n"
+    adv 'explicit ? runs-on key' w.yml 'jobs:\n  a:\n    ? runs-on\n    : ubuntu-latest\n'
+    adv 'quoted "jobs" key' w.yml '"jobs":\n  a:\n    runs-on: ubuntu-latest\n'
+    adv 'jobs as a flow mapping' w.yml 'jobs: {a: {runs-on: ubuntu-latest}}\n'
+    adv 'a job as a flow mapping' w.yml 'jobs:\n  a: {runs-on: ubuntu-latest}\n'
+    adv 'escaped double-quoted label "\\x75buntu-latest"' w.yml "${J}\"\\\\x75buntu-latest\"\n"
+    adv 'dotfile workflow .hidden.yml' .hidden.yml "${J}ubuntu-latest\n"
+    adv 'tab-indented runs-on' w.yml 'jobs:\n  a:\n\truns-on: ubuntu-latest\n'
+    adv 'merge key <<: *base in a job' w.yml 'jobs:\n  a:\n    <<: *base\n    runs-on: self-hosted\n'
+    # round 2 (allow-list): the construct is refused or caught, never read as "not hosted"
+    adv 'top-level mapping indented by 2' w.yml '  on: push\n  jobs:\n    a:\n      runs-on: ubuntu-latest\n'
+    adv 'UTF-8 BOM before jobs:' w.yml '\357\273\277jobs:\n  a:\n    runs-on: ubuntu-latest\n'
+    adv 'double-quoted label that continues on the next line' w.yml "${J}\"ubuntu-latest\n      \"\n"
+    adv 'single-quoted label that continues on the next line' w.yml "${J}'ubuntu-\n      latest'\n"
+    adv 'two documents, the second one clean' w.yml 'jobs:\n  ok:\n    runs-on: self-hosted\n---\nfoo: 1\n'
+    adv 'second document indented, hosted job in it' w.yml 'jobs:\n  ok:\n    runs-on: self-hosted\n--- \n  jobs:\n    a:\n      runs-on: ubuntu-latest\n'
+    adv 'job keys at inconsistent indent' w.yml 'jobs:\n  a:\n        name: x\n    runs-on: ubuntu-latest\n'
+    adv 'top-level list "- jobs"' w.yml '- jobs\n'
+    adv 'bare "-" block item under runs-on' w.yml 'jobs:\n  a:\n    runs-on:\n      -\n        ubuntu-latest\n'
+    # round 3: line breaks only PyYAML sees, empty or doubled keys, and a find that failed
+    adv 'U+2028 line separator hides a key from awk' w.yml 'jobs:\n  a:\n    name: x\342\200\250    runs-on: ubuntu-latest\n'
+    adv 'U+2029 inside a comment' w.yml 'jobs:\n  a:\n    # x\342\200\251    runs-on: ubuntu-latest\n'
+    adv 'NEL (U+0085) line break' w.yml 'jobs:\n  a:\n    name: x\302\205    runs-on: ubuntu-latest\n'
+    adv 'C1 control U+0080 in a comment' w.yml '# \302\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'noncharacter U+FFFE in a comment' w.yml '# \357\277\276\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'NUL byte in a comment' w.yml 'jobs:\n  a:\n    runs-on: self-hosted\n# a\000b\n'
+    adv 'non-ASCII outside a comment-only line' w.yml 'jobs:\n  a:\n    runs-on: ubuntu-latest # \342\200\224\n'
+    adv 'matrix key with no value' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os:\n    runs-on: ${{ matrix.os }}\n'
+    adv 'matrix key with only a comment' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: # c\n    runs-on: ${{ matrix.os }}\n'
+    adv 'matrix key holding a nested mapping' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os:\n          x: y\n    runs-on: ${{ matrix.os }}\n'
+    adv 'empty matrix list' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: []\n    runs-on: ${{ matrix.os }}\n'
+    adv 'duplicate strategy, stale matrix from the first' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: [self-hosted]\n    strategy:\n      fail-fast: false\n    runs-on: ${{ matrix.os }}\n'
+    adv 'duplicate runs-on' w.yml 'jobs:\n  a:\n    runs-on: ubuntu-latest\n    runs-on: self-hosted\n'
+    adv 'duplicate job id' w.yml 'jobs:\n  a:\n    runs-on: self-hosted\n  a:\n    runs-on: self-hosted\n'
+    adv 'matrix include: can add a label the key does not list' w.yml 'jobs:\n  a:\n    strategy:\n      matrix:\n        os: [self-hosted]\n        include:\n          - os: ubuntu-latest\n    runs-on: ${{ matrix.os }}\n'
+    # round 5: by construction -- one label grammar, one value shape, a positively classified matrix, well-formed UTF-8
+    M='jobs:\n  a:\n    strategy:\n      matrix:\n        os: '
+    R='\n    runs-on: ${{ matrix.os }}\n'
+    adv 'cause 1: YAML-typed matrix value `on` (bool) is no label' w.yml "${M}[self-hosted, on]${R}"
+    adv 'cause 1: matrix value +1 (int)' w.yml "${M}[self-hosted, +1]${R}"
+    adv 'cause 1: matrix value 2001-12-14 (date)' w.yml "${M}[self-hosted, 2001-12-14]${R}"
+    adv 'cause 1: matrix value 0x1F (hex int)' w.yml "${M}[self-hosted, 0x1F]${R}"
+    adv 'cause 1: block matrix item "- yes" (bool)' w.yml "${M}\n          - yes${R}"
+    adv 'cause 1: matrix value .inf (float)' w.yml "${M}[self-hosted, .inf]${R}"
+    adv 'cause 1: matrix value = (value tag)' w.yml "${M}[self-hosted, =]${R}"
+    adv 'cause 1: matrix value 1:20 (sexagesimal)' w.yml "${M}[self-hosted, 1:20]${R}"
+    adv 'cause 1: block matrix item "- Off" (bool)' w.yml "${M}\n          - Off${R}"
+    adv 'cause 1: runs-on: on (bool)' w.yml 'jobs:\n  a:\n    runs-on: on\n'
+    adv 'cause 2: two flow lists in runs-on' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted] [x]\n'
+    adv 'cause 2: runs-on flow list, comma, second flow list' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted], [ubuntu-latest]\n'
+    adv 'cause 2: two flow lists in a matrix value' w.yml "${M}[self-hosted] [ubuntu-latest]${R}"
+    adv 'cause 2: bare expression inside a runs-on flow list' w.yml 'jobs:\n  a:\n    runs-on: [self-hosted, ${{ matrix.os }}]\n'
+    adv 'cause 2: two flow lists on an unrelated key' w.yml 'on:\n  push:\n    branches: [a] [b]\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 3: list under a nested mapping read as the matrix key list' w.yml "${M}\n          x:\n            - self-hosted${R}"
+    adv 'cause 3: ragged item indent under a matrix key' w.yml "${M}\n          - self-hosted\n            - x${R}"
+    adv 'cause 4: comment with bytes above U+10FFFF (F4 90 80 80)' w.yml '# \364\220\200\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with a 0xF5 byte' w.yml '# \365\200\200\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with an overlong C0 80' w.yml '# \300\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    adv 'cause 4: comment with a surrogate ED A0 80' w.yml '# \355\240\200\njobs:\n  a:\n    runs-on: self-hosted\n'
+    rm -rf "${t:?}/adv"; mkdir -p "$t/adv"
+    printf 'jobs:\n  ok:\n    runs-on: self-hosted\n' > "$t/adv/ok.yml"; ln -s loop.yml "$t/adv/loop.yml"
+    rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: a symlink loop among the workflow files (find fails)" 1 "$rc"
+    rm -rf "${t:?}/adv"; mkdir -p "$t/adv" "$t/tgt"
+    printf 'jobs:\n  h:\n    runs-on: ubuntu-latest\n' > "$t/tgt/h.yml"; ln -s "$t/tgt/h.yml" "$t/adv/h.yml"
+    printf 'jobs:\n  ok:\n    runs-on: self-hosted\n' > "$t/adv/ok.yml"
+    rc=0; WF_DIR="$t/adv" BASELINE="$t/base" check > /dev/null || rc=$?
+    row "MUST-RED: a hosted job in a symlinked workflow file" 1 "$rc"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
