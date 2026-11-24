@@ -11,18 +11,25 @@ SHELL := /bin/bash
 # - make test:      comprehensive (500 property test cases)
 # Override with: PROPTEST_CASES=n make <target>
 
-.PHONY: all validate quick-validate release clean help
-.PHONY: format format-check lint lint-check check test test-fast test-quick test-doc test-property
-.PHONY: quality-gate audit docs build install examples
-.PHONY: docs-validate cli-parity variant-coverage contracts-lint contract-grade format-coverage citation-check lean-build
+# Every .PHONY name below has a rule, and every rule is listed here. A .PHONY name with no
+# rule is not an error to make: `make release` printed "Nothing to be done" and exited 0.
+# scripts/check_makefile.sh (`make makefile-check`) keeps the two lists equal.
+.PHONY: all validate quick-validate clean help makefile-check
+.PHONY: format format-check lint lint-check check
+.PHONY: test test-fast test-quick test-ci test-doc test-property test-property-comprehensive test-all
+.PHONY: quality-gate audit docs build examples examples-encryption
+.PHONY: docs-validate cli-parity variant-depth variant-coverage contracts-lint contract-grade format-coverage citation-check
+.PHONY: lean-build install-pv architecture-demos-coverage fine-tuning-coverage
 .PHONY: update-deps update-deps-check
-.PHONY: coverage coverage-ci coverage-clean clean-coverage coverage-open
-.PHONY: sub-test sub-lint sub-check
+.PHONY: coverage coverage-summary coverage-ci coverage-clean clean-coverage coverage-open
 
-# Parallel job execution
-MAKEFLAGS += -j$(shell nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+# One recipe at a time. The prerequisite lists below are ORDERED pipelines
+# (`validate: format lint check test quality-gate audit`), and this file used to force
+# `-j$(nproc)` on them: `cargo fmt` and `clippy --fix` rewrote the sources while `cargo check`
+# and `cargo test` compiled them, and up to six cargo processes queued on one target-dir lock,
+# each sized for every core. cargo parallelises inside each recipe; make must not.
+.NOTPARALLEL:
 
-# Sub-projects (disabled - using crates.io dependencies)
 # Sovereign stack now consolidated in ../aprender monorepo (APR-MONO v0.31.2).
 # The `pv` binary ships from aprender-contracts-cli; prefer the installed binary
 # for speed, fall back to `cargo run` so CI works without a prior install step.
@@ -94,6 +101,12 @@ test-fast: ## Run fast tests (target: <5 min, 50 prop cases)
 
 test-quick: test-fast ## Alias for test-fast
 	@echo "✅ Quick tests completed!"
+
+test-ci: ## The exact test command the required `ci / test` job runs (.github/workflows/ci.yml)
+	@cargo test --lib --tests --all-features
+
+makefile-check: ## Check this Makefile: .PHONY list = rules, no undefined variables, no forced -j
+	@bash scripts/check_makefile.sh
 
 test: test-fast test-doc test-property ## Run core test suite
 	@echo "✅ Core test suite completed!"
@@ -364,13 +377,8 @@ clean-coverage: coverage-clean ## Alias for coverage-clean
 quality-gate: docs-validate contracts-lint cli-parity ## Run quality checks (includes docs + CLI parity gates)
 	@echo "🔍 Running quality gate checks..."
 	@echo "  📊 Checking test count..."
-	@TEST_COUNT=$$(cargo test --workspace 2>&1 | grep -E "^test result:" | grep -oE "[0-9]+ passed" | grep -oE "[0-9]+"); \
-	echo "  Tests: $$TEST_COUNT"; \
-	if [ "$$TEST_COUNT" -lt 50 ]; then \
-		echo "  ⚠️  Warning: Test count below target (50+)"; \
-	else \
-		echo "  ✓ Test count acceptable"; \
-	fi
+	@OUT=$$(cargo test --workspace 2>&1) || { echo "$$OUT" | tail -n 40; echo "❌ cargo test --workspace failed"; exit 1; }; \
+	echo "$$OUT" | bash scripts/check_makefile.sh --test-count 50
 	@echo "✅ Quality gates passed (docs F-DOCS-001, CLI parity F-CLIPARITY-001, contracts, tests)!"
 
 # =============================================================================
@@ -400,40 +408,6 @@ audit: ## Run security audit
 		echo "📦 Installing cargo-audit..."; \
 		cargo install cargo-audit && cargo audit; \
 	fi
-
-# =============================================================================
-# SUB-PROJECTS (Sovereign Stack)
-# =============================================================================
-
-sub-check: ## Type check all sub-projects
-	@echo "🔍 Type checking sub-projects..."
-	@for proj in $(SUB_PROJECTS); do \
-		if [ -d "$$proj" ]; then \
-			echo "  Checking $$proj..."; \
-			(cd "$$proj" && cargo check --all-targets) || exit 1; \
-		fi; \
-	done
-	@echo "✅ All sub-projects type check passed!"
-
-sub-lint: ## Lint all sub-projects
-	@echo "🔍 Linting sub-projects..."
-	@for proj in $(SUB_PROJECTS); do \
-		if [ -d "$$proj" ]; then \
-			echo "  Linting $$proj..."; \
-			(cd "$$proj" && cargo clippy --all-targets -- -D warnings) || exit 1; \
-		fi; \
-	done
-	@echo "✅ All sub-projects lint passed!"
-
-sub-test: ## Test all sub-projects
-	@echo "🧪 Testing sub-projects..."
-	@for proj in $(SUB_PROJECTS); do \
-		if [ -d "$$proj" ]; then \
-			echo "  Testing $$proj..."; \
-			(cd "$$proj" && cargo test) || exit 1; \
-		fi; \
-	done
-	@echo "✅ All sub-projects tests passed!"
 
 # =============================================================================
 # DEPENDENCY MANAGEMENT
@@ -510,11 +484,6 @@ help: ## Show this help
 	@echo "Examples:"
 	@echo "  make examples     - Run all examples"
 	@echo "  make examples-encryption - Run encryption example"
-	@echo ""
-	@echo "Sub-Projects (Sovereign Stack):"
-	@echo "  make sub-check    - Type check sub-projects"
-	@echo "  make sub-lint     - Lint sub-projects"
-	@echo "  make sub-test     - Test sub-projects"
 	@echo ""
 	@echo "Other:"
 	@echo "  make quality-gate - Run quality checks"
