@@ -98,7 +98,7 @@ check() {
 self_test() {
     local t bad=0 rc
     t=$(mktemp -d)
-    case "$t" in /tmp/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
+    case "$t" in "${TMPDIR:-/tmp}"/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
     mkdir -p "$t/wf"
     printf 'jobs:\n  a:\n    runs-on: [self-hosted, Linux, clean-room]\n  b:\n    runs-on: ubuntu-latest\n' > "$t/wf/x.yml"
     printf 'x.yml b\n' > "$t/base"
@@ -137,7 +137,7 @@ self_test() {
     rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
     row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$rc"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
-        case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
+        case "$t" in "${TMPDIR:-/tmp}"/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
     echo "check_no_hosted_runners self-test: $([ "$bad" = 0 ] && echo PASS || echo FAIL) ($bad failed)"
     [ "$bad" = 0 ]
