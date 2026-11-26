@@ -9,21 +9,21 @@ no-default-features = false
 
 [advisories]
 ignore = [
-    # Unmaintained transitive deps with no available fix.
-    # Reviewed 2026-03-26 — all are deep transitive, no direct usage.
-    { id = "RUSTSEC-2024-0384", reason = "instant: transitive via web-time, no replacement available" },
-    { id = "RUSTSEC-2024-0436", reason = "paste: transitive via simba/nalgebra/parquet, use pastey when upstream migrates" },
-    { id = "RUSTSEC-2025-0119", reason = "number_prefix: transitive via indicatif, no replacement available" },
-    { id = "RUSTSEC-2025-0141", reason = "bincode: transitive, widely used, no drop-in replacement" },
-    { id = "RUSTSEC-2025-0134", reason = "rustls-pemfile: transitive, no safe upgrade available" },
-    { id = "RUSTSEC-2026-0002", reason = "lru 0.12.5: transitive via ratatui, fixed in 0.16 but ratatui pins 0.12" },
-    # Reviewed 2026-09-24 (#441). BOTH are unmaintained with no fix, arriving through aprender
-    # (tabled 0.16 in apr-cli; validator 0.20 in aprender-train; upstream fix aprender#4127).
-    # 0173 is ALREADY a fleet ignore in paiml/infra machines/clean-room/templates/deny.toml (this
-    # copy was stale against it); 0370 is requested for that template in paiml/infra#986. Both rows
-    # go when this file is redeployed from the template.
-    { id = "RUSTSEC-2024-0370", reason = "proc-macro-error: via apr-cli 0.31.2 -> tabled 0.16 (tabled_derive); goes with the #434 aprender bump" },
-    { id = "RUSTSEC-2026-0173", reason = "proc-macro-error2: via aprender-train 0.31.2 -> validator 0.20 (validator_derive); goes with the #434 aprender bump" },
+    # Rows are UNMAINTAINED notices only (informational, no patched release, no code fix).
+    # Vulnerabilities are never ignored here: they are fixed by a lockfile or pin bump.
+    # Every row names a crate that IS in Cargo.lock; a row whose crate has left the tree is
+    # deleted in the same change (reviewed 2026-11-24 against the aprender 0.74.0 lock:
+    # instant, number_prefix, bincode, rustls-pemfile, lru and proc-macro-error are gone).
+    { id = "RUSTSEC-2024-0436", reason = "paste: unmaintained; transitive via simba/nalgebra/parquet, use pastey when upstream migrates" },
+    # Same rows as the fleet template (paiml/infra machines/clean-room/templates/deny.toml).
+    { id = "RUSTSEC-2026-0173", reason = "proc-macro-error2: unmaintained; transitive via validator_derive across the aprender stack; no drop-in replacement adopted upstream" },
+    { id = "RUSTSEC-2026-0543", reason = "chrono: unmaintained (patched=[], no patched release); carried by the published aprender crates; replacement tracked in aprender#7191" },
+    # Not in the fleet template yet. unsafe-libyaml arrives only through serde_yaml 0.9, which this
+    # crate uses (validate_recipe) and which
+    # aprender-contracts, aprender-simulate and aprender-train still declare in their newest
+    # published version (0.75.3, read from crates.io 2026-11-24). No change in this repo can
+    # remove it; this row goes when those three crates publish without serde_yaml (aprender#7103).
+    { id = "RUSTSEC-2024-0449", reason = "unsafe-libyaml: unmaintained (archived, no safe upgrade); via serde_yaml 0.9 in published aprender-contracts/-simulate/-train <= 0.75.3; upstream aprender#7103" },
 ]
 
 [licenses]
