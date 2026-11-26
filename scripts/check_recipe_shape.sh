@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # check_recipe_shape.sh -- SHACL-validate the cookbook recipes (cookbook-recipe-v1, #440, aprender#3769).
 #
-#   1. evidence/recipes/recipes.jsonl must equal what the recipes derive (recipes_to_jsonl.py --check),
+#   1. evidence/recipes/recipes.jsonl must equal what the recipes derive (recipes_to_jsonl.sh --check),
 #      so the shape never judges a stale copy.
 #   2. `pv lint contracts --gate shapes --shape cookbook-recipe-v1` must pass with EXACTLY as many focus
 #      nodes as there are recipes (a gate that saw fewer nodes judged less than it claims).
@@ -31,7 +31,7 @@ print(next((int(x.split("=")[1]) for x in d.get("by_shape") or [] if x.startswit
 
 check() {
     local out rc n want
-    python3 scripts/recipes_to_jsonl.py --check || return 1
+    bash scripts/recipes_to_jsonl.sh --check || return 1
     rc=0; out=$(gate contracts) || rc=$?
     n=$(printf '%s' "$out" | focus_count)
     want=$(grep -c . evidence/recipes/recipes.jsonl)
@@ -97,7 +97,7 @@ PY
 p = sys.argv[1]; s = open(p).read()
 assert "[\"apr\", \"capability\"" in s
 open(p, "w").write(s.replace("[\"apr\", \"capability\"", "[\"cargo\", \"capability\"", 1))' "$e/recipes/apr/capability/capability-registry-json.yaml"
-    python3 scripts/recipes_to_jsonl.py --recipes "$e/recipes/apr" --receipts "$e/receipts" --out "$e/evidence/recipes/recipes.jsonl" > /dev/null
+    bash scripts/recipes_to_jsonl.sh --recipes "$e/recipes/apr" --receipts "$e/receipts" --out "$e/evidence/recipes/recipes.jsonl" > /dev/null
     local eout; eout=$(gate "$e/contracts") || rc2=$?
     # Editing the recipe also invalidates its receipt, so rc 1 alone could come from
     # receipt_current_pass; the row requires argv0_is_apr ITSELF to be named.
