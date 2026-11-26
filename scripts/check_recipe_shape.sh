@@ -11,7 +11,7 @@
 # rows to pass. A shape that cannot go red validates nothing.
 #
 # Usage: scripts/check_recipe_shape.sh [--self-test]
-# Exit: 0 conforms | 1 violation / drift / count mismatch | 2 ENV (no pv, no python3)
+# Exit: 0 conforms | 1 violation / drift / count mismatch | 2 ENV (no pv, no jq)
 set -euo pipefail
 
 SHAPE=cookbook-recipe-v1
@@ -24,9 +24,9 @@ gate() { # gate <contracts dir> -> prints the pv JSON, returns pv's rc
 }
 
 focus_count() { # focus_count <pv json> -> the number of cookbook-recipe-v1 focus nodes judged
-    python3 -c 'import json,sys
-d = json.loads(sys.stdin.read() or "{}")
-print(next((int(x.split("=")[1]) for x in d.get("by_shape") or [] if x.startswith(sys.argv[1] + "=")), 0))' "$SHAPE"
+    local n
+    n=$(grep -o "\"$SHAPE=[0-9][0-9]*\"" | head -n 1 | sed 's/^.*=\([0-9][0-9]*\)"$/\1/' || true)
+    printf '%s' "${n:-0}"
 }
 
 check() {
@@ -37,7 +37,7 @@ check() {
     want=$(grep -c . evidence/recipes/recipes.jsonl)
     if [ "$rc" != 0 ]; then
         echo "FAIL  $SHAPE: pv shapes gate rc $rc"
-        printf '%s\n' "$out" | python3 -c 'import json,sys; d=json.load(sys.stdin); [print("        " + json.dumps(v)[:240]) for v in (d.get("results") or d.get("violations_detail") or [])[:10]]' 2> /dev/null || true
+        printf '%s\n' "$out" | grep -E '"(message|shape|path|property)"' | head -n 10 | cut -c1-240 || true
         return 1
     fi
     if [ "$n" != "$want" ]; then
@@ -52,19 +52,13 @@ self_test() {
     t=$(mktemp -d)
     case "$t" in /tmp/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
     row() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1 (got $3, wanted $2)"; bad=$((bad + 1)); fi; }
-    # fixture <name> <python expression editing `r` (the FIRST real row)>: a tiny repo holding the
-    # contract and the real rows with ONE defect planted in the first row. Echoes "<rc> <focus>".
+    # fixture <name> <jq filter editing the FIRST real row> [<property>]: a tiny repo holding the
+    # contract and the real rows with ONE defect planted in the first row. Echoes "<rc> <focus> <named>".
     fixture() {
         local d="$t/$1" rc out
         mkdir -p "$d/contracts" "$d/evidence/recipes"
         cp contracts/$SHAPE.yaml "$d/contracts/"
-        python3 - evidence/recipes/recipes.jsonl "$d/evidence/recipes/recipes.jsonl" "$2" << 'PY'
-import json, sys
-rows = [json.loads(l) for l in open(sys.argv[1]) if l.strip()]
-r = rows[0]
-exec(sys.argv[3])
-open(sys.argv[2], "w").write("".join(json.dumps(x, sort_keys=True) + "\n" for x in rows))
-PY
+        { head -n 1 evidence/recipes/recipes.jsonl | jq -cS "$2"; tail -n +2 evidence/recipes/recipes.jsonl; } > "$d/evidence/recipes/recipes.jsonl"
         rc=0; out=$(gate "$d/contracts") || rc=$?
         # A must-RED row passes only if the violation names ITS property: rc 1 for some other reason
         # (an orthogonal failure) would pass either way and prove nothing about this property.
@@ -75,28 +69,27 @@ PY
         printf '%s %s %s' "$rc" "$(printf '%s' "$out" | focus_count)" "$named"
     }
     local n; n=$(grep -c . evidence/recipes/recipes.jsonl)
-    row "the real rows conform: rc 0 and every recipe is a focus node" "0 $n -" "$(fixture ok 'pass')"
-    row "MUST-RED: argv[0] is not apr" "1 named" "$(fixture argv0 'r["argv0_is_apr"] = False' argv0_is_apr | cut -d' ' -f1,3)"
-    row "MUST-RED: a {model:slot} that names no pinned model" "1 named" "$(fixture slots 'r["placeholders_resolve"] = False' placeholders_resolve | cut -d' ' -f1,3)"
-    row "MUST-RED: a model pinned by a non-sha256" "1 named" "$(fixture sha 'r["model_sha256"] = ["latest"]' model_sha256 | cut -d' ' -f1,3)"
-    row "MUST-RED: a model ref that is not an hf:// file path" "1 named" "$(fixture ref 'r["model_ref"] = ["Qwen3.5-4B"]' model_ref | cut -d' ' -f1,3)"
-    row "MUST-RED: expect judges only the exit code" "1 named" "$(fixture outchk 'r["has_output_check"] = False' has_output_check | cut -d' ' -f1,3)"
-    row "MUST-RED: no PASS receipt from the CURRENT release" "1 named" "$(fixture rcpt 'r["receipt_current_pass"] = False' receipt_current_pass | cut -d' ' -f1,3)"
-    row "MUST-RED: the receipt field missing altogether (minCount)" "1 named" "$(fixture rcptmiss 'del r["receipt_current_pass"]' receipt_current_pass | cut -d' ' -f1,3)"
-    row "MUST-RED: an undeclared host" "1 named" "$(fixture host 'r["host"] = ["laptop"]' host | cut -d' ' -f1,3)"
-    row "MUST-RED: an undeclared field (the shape is closed)" "1 named" "$(fixture closed 'r["sneaky"] = "x"' sneaky | cut -d' ' -f1,3)"
-    row "MUST-RED: a schema other than cookbook-recipe/v1" "1 named" "$(fixture schema 'r["schema"] = "cookbook-recipe/v0"' schema | cut -d' ' -f1,3)"
+    row "the real rows conform: rc 0 and every recipe is a focus node" "0 $n -" "$(fixture ok '.')"
+    row "MUST-RED: argv[0] is not apr" "1 named" "$(fixture argv0 '.argv0_is_apr = false' argv0_is_apr | cut -d' ' -f1,3)"
+    row "MUST-RED: a {model:slot} that names no pinned model" "1 named" "$(fixture slots '.placeholders_resolve = false' placeholders_resolve | cut -d' ' -f1,3)"
+    row "MUST-RED: a model pinned by a non-sha256" "1 named" "$(fixture sha '.model_sha256 = ["latest"]' model_sha256 | cut -d' ' -f1,3)"
+    row "MUST-RED: a model ref that is not an hf:// file path" "1 named" "$(fixture ref '.model_ref = ["Qwen3.5-4B"]' model_ref | cut -d' ' -f1,3)"
+    row "MUST-RED: expect judges only the exit code" "1 named" "$(fixture outchk '.has_output_check = false' has_output_check | cut -d' ' -f1,3)"
+    row "MUST-RED: no PASS receipt from the CURRENT release" "1 named" "$(fixture rcpt '.receipt_current_pass = false' receipt_current_pass | cut -d' ' -f1,3)"
+    row "MUST-RED: the receipt field missing altogether (minCount)" "1 named" "$(fixture rcptmiss 'del(.receipt_current_pass)' receipt_current_pass | cut -d' ' -f1,3)"
+    row "MUST-RED: an undeclared host" "1 named" "$(fixture host '.host = ["laptop"]' host | cut -d' ' -f1,3)"
+    row "MUST-RED: an undeclared field (the shape is closed)" "1 named" "$(fixture closed '.sneaky = "x"' sneaky | cut -d' ' -f1,3)"
+    row "MUST-RED: a schema other than cookbook-recipe/v1" "1 named" "$(fixture schema '.schema = "cookbook-recipe/v0"' schema | cut -d' ' -f1,3)"
     # END TO END through the DERIVATION: the defect is planted in a recipe YAML, not in the rows, so
     # a derivation that computed argv0_is_apr=true regardless would turn this row green.
-    local e="$t/e2e" rc2=0
+    local e="$t/e2e" rc2=0 yaml
     mkdir -p "$e/contracts" "$e/evidence/recipes"
     cp contracts/$SHAPE.yaml "$e/contracts/"
     cp -r recipes "$e/recipes"
     cp -r receipts "$e/receipts" 2> /dev/null || true
-    python3 -c 'import sys
-p = sys.argv[1]; s = open(p).read()
-assert "[\"apr\", \"capability\"" in s
-open(p, "w").write(s.replace("[\"apr\", \"capability\"", "[\"cargo\", \"capability\"", 1))' "$e/recipes/apr/capability/capability-registry-json.yaml"
+    yaml="$e/recipes/apr/capability/capability-registry-json.yaml"
+    grep -q '\["apr", "capability"' "$yaml" || { echo "ENV: e2e anchor missing in $yaml" >&2; return 2; }
+    sed -i '0,/\["apr", "capability"/s//["cargo", "capability"/' "$yaml"
     bash scripts/recipes_to_jsonl.sh --recipes "$e/recipes/apr" --receipts "$e/receipts" --out "$e/evidence/recipes/recipes.jsonl" > /dev/null
     local eout; eout=$(gate "$e/contracts") || rc2=$?
     # Editing the recipe also invalidates its receipt, so rc 1 alone could come from
@@ -110,7 +103,7 @@ open(p, "w").write(s.replace("[\"apr\", \"capability\"", "[\"cargo\", \"capabili
     [ "$bad" = 0 ]
 }
 
-need python3
+need jq
 need "$PV"
 case "${1:-}" in
     "") check ;;
