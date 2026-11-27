@@ -102,6 +102,36 @@ self_test() {
     # receipt_current_pass; the row requires argv0_is_apr ITSELF to be named.
     printf '%s' "$eout" | grep -q "recipe/argv0_is_apr" && rc2="$rc2 named" || rc2="$rc2 NOT-named"
     row "MUST-RED end to end: a recipe YAML whose argv[0] is 'cargo', derived then gated, names argv0_is_apr" "1 named" "$rc2"
+    # #494 lane B findings: the DERIVATION must match the deleted Python derivation on odd inputs.
+    # rj <name> <yaml text> [<CURRENT text>]: derive one recipe into $t/<name>; echoes "<rc>|<row>".
+    rj() {
+        local d="$t/rj-$1" rc=0 sha
+        mkdir -p "$d/recipes" "$d/receipts"
+        printf '%b' "$2" > "$d/recipes/r.yaml"
+        if [ -n "${3:-}" ]; then
+            sha=$(sha256sum "$d/recipes/r.yaml" | cut -d' ' -f1)
+            printf '%b' "$3" > "$d/receipts/CURRENT"
+            mkdir -p "$d/receipts/0.2.0-abc/h1"
+            printf '{"verdict":"PASS","apr_version":"0.2.0-abc","recipe_sha256":"%s"}' "$sha" > "$d/receipts/0.2.0-abc/h1/a.json"
+        fi
+        bash scripts/recipes_to_jsonl.sh --recipes "$d/recipes" --receipts "$d/receipts" --out "$d/out.jsonl" > /dev/null 2>&1 || rc=$?
+        printf '%s|%s' "$rc" "$(cat "$d/out.jsonl" 2> /dev/null || true)"
+    }
+    local base='id: a\nargv: [apr, run]\nexpect: {exit: 0}\n'
+    row "F2 empty .yaml is rc 1 (Python AttributeError)" "1" "$(rj empty '' | cut -d'|' -f1)"
+    row "F2 comment-only .yaml is rc 1" "1" "$(rj comment '# nothing\n' | cut -d'|' -f1)"
+    row "F2 null .yaml is rc 1" "1" "$(rj null 'null\n' | cut -d'|' -f1)"
+    row "F2 list .yaml is rc 1" "1" "$(rj list '- a\n- b\n' | cut -d'|' -f1)"
+    row "F3 multi-document .yaml is rc 1 (Python ComposerError)" "1" "$(rj multi "${base}---\nid: b\nargv: [apr, run]\n" | head -n 1 | cut -d'|' -f1)"
+    row "F4 CURRENT with CRLF still counts (Python .strip())" "true" "$(rj crlf "${base}hosts: [h1]\n" '0.2.0-abc\r\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
+    row "F4 CURRENT with leading blank lines still counts" "true" "$(rj blank "${base}hosts: [h1]\n" '\n\n0.2.0-abc\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
+    row "F5a non-ASCII is escaped \\uXXXX (ensure_ascii)" "ok" "$(rj uni "${base}min_apr: \"0.2.0\xe2\x80\x94beta\"\n" | grep -qF '0.2.0\u2014beta' && echo ok || echo no)"
+    row "F5b whole-number float keeps its point (1.0)" "ok" "$(rj flt "${base}min_apr: 1.0\n" | grep -qF '"min_apr": 1.0' && echo ok || echo no)"
+    row "F5c falsy models: \"\" and expect: \"\" succeed (Python or {})" "0" "$(rj falsy 'id: a\nargv: [apr, run]\nmodels: ""\nexpect: ""\n' | cut -d'|' -f1)"
+    local bl=skipped
+    if command -v bashrs > /dev/null 2>&1; then bl=0; bashrs lint scripts/recipes_to_jsonl.sh > /dev/null 2>&1 || bl=$?; fi
+    row "F1 bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
+    row "F6 header exit-code line names the no-yq case" "ok" "$(grep -E '^# Exit:' scripts/check_recipe_shape.sh | grep -q 'no yq' && echo ok || echo no)"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
