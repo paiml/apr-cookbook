@@ -25,6 +25,16 @@
 # Needs: yq (v4, YAML to JSON), jq, sha256sum, sed, sort, find.
 set -euo pipefail
 
+# a missing tool must be an environment failure (rc 2), not a recipe failure (rc 1)
+need() {
+    if ! command -v "$1" > /dev/null 2>&1; then
+        printf 'ENV: %s is missing\n' "$1" >&2
+        exit 2
+    fi
+}
+need yq
+need jq
+
 RECIPES=recipes/apr
 RECEIPTS=receipts
 OUT=evidence/recipes/recipes.jsonl

@@ -147,7 +147,7 @@ self_test() {
     row "derive: multi-doc, CRLF twin of the comment-leading case is rc 1" "1" "$(rj mdD '---\r\n# c\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
     # RED (cop fail-open): a tab after '---' is still a document marker; the guard counted only '--- ' and '---' at EOL.
     row "derive: multi-doc, empty leading document with a TAB-marked '---' is rc 1" "1" "$(rj mdF '---\t\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
-    row "derive: multi-doc, TAB-marked second '---' is rc 1" "1" "$(rj mdG "${base}---\tid: b\nargv: [apr, run]\n" | cut -d'|' -f1)"
+    row "derive: multi-doc, TAB-marked second '---' is rc 1" "1" "$(rj mdG '---\n---\tid: b\nargv: [apr, run]\nexpect: {exit: 0}\n' | cut -d'|' -f1)"
     row "derive: single document with ONE leading '---' still derives (rc 0)" "0" "$(rj mdE '---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
     row "derive: models: [{}] (non-mapping) is rc 1 (Python AttributeError)" "1" "$(rj nmod 'id: a\nargv: [apr, run]\nmodels: [{}]\n' | cut -d'|' -f1)"
     row "derive: expect: [1] (non-mapping) is rc 1" "1" "$(rj nexp 'id: a\nargv: [apr, run]\nexpect: [1]\n' | cut -d'|' -f1)"
