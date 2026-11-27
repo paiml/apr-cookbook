@@ -7,9 +7,9 @@
 #
 # HOW. pv's shapes gate validates RDF built by the generic `json` extractor, one node per JSONL line,
 # scalar properties only. SHACL (pv's subset) cannot see list positions or join two fields, so
-# scripts/recipes_to_jsonl.py DERIVES evidence/recipes/recipes.jsonl from recipes/apr/**.yaml, computing
+# scripts/recipes_to_jsonl.sh DERIVES evidence/recipes/recipes.jsonl from recipes/apr/**.yaml, computing
 # those facts as explicit fields (argv0_is_apr, placeholders_resolve, receipt_current_pass), and this shape
-# REQUIRES them. The JSONL is never hand-edited: `recipes_to_jsonl.py --check` fails on any drift.
+# REQUIRES them. The JSONL is never hand-edited: `recipes_to_jsonl.sh --check` fails on any drift.
 # ──────────────────────────────────────────────
 name: cookbook-recipe-v1
 version: 1.0.0
@@ -28,7 +28,7 @@ metadata:
   references:
     - 'apr-cookbook#440 (this row), aprender#3769 (post-release HARD REQ, done_when 1), PMAT-3769'
     - 'apr-cookbook#439 run_recipes.py (writes the receipts), #442 check_recipe_receipts.py (the same receipt rule)'
-    - 'scripts/recipes_to_jsonl.py — the derivation; recipes/README.md — the format'
+    - 'scripts/recipes_to_jsonl.sh — the derivation; recipes/README.md — the format'
 
 entity:
   type: json
@@ -70,7 +70,7 @@ equations:
     domain: "every recipe under recipes/apr/, derived into evidence/recipes/recipes.jsonl"
     codomain: "conforms, or a violation naming the focus node and the failing property"
     invariants:
-      - "the derived JSONL equals what the recipes derive (recipes_to_jsonl.py --check)"
+      - "the derived JSONL equals what the recipes derive (recipes_to_jsonl.sh --check)"
 
 invariants:
   - id: CRV-INV-001
@@ -91,6 +91,6 @@ falsification_tests:
     if_fails: the shape accepts a recipe that could not be run or checked, and "SHACL-validated" means nothing
   - id: FALSIFY-CRV-002
     rule: the derived evidence cannot drift from the recipes
-    prediction: editing a recipe without regenerating evidence/recipes/recipes.jsonl fails recipes_to_jsonl.py --check
-    test: python3 scripts/recipes_to_jsonl.py --check
+    prediction: editing a recipe without regenerating evidence/recipes/recipes.jsonl fails recipes_to_jsonl.sh --check
+    test: bash scripts/recipes_to_jsonl.sh --check
     if_fails: the shape judges a stale copy of the recipes
