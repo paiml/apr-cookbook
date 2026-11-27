@@ -72,6 +72,32 @@ skip_ws() {
   done
 }
 
+# True for a character that may follow a block `-` indicator: space, tab or line end.
+is_blank_or_eol() {
+  case $1 in
+    '' | ' ' | $'\t' | $'\n' | $'\r') return 0 ;;
+  esac
+  return 1
+}
+
+# Decode a `\x`, `\u` or `\U` escape of $1 hex digits at POS into `out` (the caller's
+# local). ASCII is decoded; anything else (and NUL) becomes U+FFFD, which no flag matches.
+decode_hex() {
+  local n=$1 h cp
+  h=${S:POS:n}
+  if [ "${#h}" -ne "$n" ] || [[ ! $h =~ ^[0-9a-fA-F]+$ ]]; then
+    return 1
+  fi
+  POS=$((POS + n))
+  cp=$((16#$h))
+  if [ "$cp" -ge 1 ] && [ "$cp" -lt 128 ]; then
+    printf -v h '%b' "$(printf '\\x%02x' "$cp")"
+    out+=$h
+  else
+    out+=$'\357\277\275'
+  fi
+}
+
 # Parse one scalar at POS into SCALAR. $1 is `flow` or `block`.
 parse_scalar() {
   local c out="" esc prev=" "
@@ -87,16 +113,28 @@ parse_scalar() {
       if [ "$c" = '"' ]; then
         break
       fi
+      if [ "$c" = $'\n' ]; then
+        # A line break inside a quoted scalar folds in YAML; not supported: fail closed.
+        return 1
+      fi
       if [ "$c" = '\' ]; then
         esc=${S:POS:1}
         POS=$((POS + 1))
         case $esc in
           n) out+=$'\n' ;;
-          t) out+=$'\t' ;;
+          t | $'\t') out+=$'\t' ;;
           r) out+=$'\r' ;;
-          0) ;;
-          x) POS=$((POS + 2)) ;;
-          *) out+=$esc ;;
+          a) out+=$'\a' ;;
+          b) out+=$'\b' ;;
+          e) out+=$'\e' ;;
+          f) out+=$'\f' ;;
+          v) out+=$'\v' ;;
+          ' ' | '"' | '/' | '\') out+=$esc ;;
+          0 | N | _ | L | P) out+=$'\357\277\275' ;;
+          x) decode_hex 2 || return 1 ;;
+          u) decode_hex 4 || return 1 ;;
+          U) decode_hex 8 || return 1 ;;
+          *) return 1 ;;
         esac
       else
         out+=$c
@@ -106,7 +144,7 @@ parse_scalar() {
     POS=$((POS + 1))
     while :; do
       c=${S:POS:1}
-      if [ -z "$c" ]; then
+      if [ -z "$c" ] || [ "$c" = $'\n' ]; then
         return 1
       fi
       POS=$((POS + 1))
@@ -149,7 +187,7 @@ parse_scalar() {
 
 # Parse the argv sequence at POS into ITEMS. Flow `[a, b]` or block `- a` lines.
 parse_argv() {
-  local c
+  local c skipped start
   ITEMS=()
   skip_ws
   c=${S:POS:1}
@@ -165,27 +203,53 @@ parse_argv() {
           return 0
           ;;
         ',') POS=$((POS + 1)) ;;
-        '[' | '{') return 1 ;;
+        '[' | '{' | '}') return 1 ;;
         *)
+          start=$POS
           parse_scalar flow || return 1
+          # A scalar that consumed nothing would loop forever: fail closed.
+          [ "$POS" -gt "$start" ] || return 1
           ITEMS+=("$SCALAR")
           ;;
       esac
     done
-  elif [ "$c" = '-' ] && [ "${S:POS+1:1}" = ' ' ]; then
+  elif [ "$c" = '-' ] && is_blank_or_eol "${S:POS+1:1}"; then
     while :; do
       skip_ws
       c=${S:POS:1}
-      if [ "$c" != '-' ] || [ "${S:POS+1:1}" != ' ' ]; then
+      if [ "$c" != '-' ] || ! is_blank_or_eol "${S:POS+1:1}"; then
         break
       fi
-      POS=$((POS + 2))
+      POS=$((POS + 1))
       while [ "${S:POS:1}" = ' ' ] || [ "${S:POS:1}" = $'\t' ]; do
         POS=$((POS + 1))
       done
+      c=${S:POS:1}
+      # A null item (`-` then a line break), a block scalar (`|`, `>`) or a comment-only
+      # item is a form this scanner does not read: fail closed rather than skip it.
+      case $c in
+        '' | $'\n' | $'\r' | '#' | '|' | '>') return 1 ;;
+      esac
       parse_scalar block || return 1
       ITEMS+=("$SCALAR")
+      # Nothing but a comment may follow the item on its line (no wrapped scalars).
+      skipped=0
+      while [ "${S:POS:1}" = ' ' ] || [ "${S:POS:1}" = $'\t' ]; do
+        POS=$((POS + 1))
+        skipped=1
+      done
+      c=${S:POS:1}
+      case $c in
+        '' | $'\n' | $'\r') ;;
+        '#') [ "$skipped" -eq 1 ] || return 1 ;;
+        *) return 1 ;;
+      esac
     done
+    # The sequence must end at the end of the text or at a new top-level key (column 0);
+    # an indented line here is a continuation this scanner did not consume.
+    if [ -n "$c" ] && [ "${S:POS-1:1}" != $'\n' ]; then
+      return 1
+    fi
     [ "${#ITEMS[@]}" -gt 0 ]
   else
     return 1
@@ -257,7 +321,7 @@ for f in "${files[@]}"; do
     echo "check_recipe_argv_surface.sh: $f: argv holds a non-string item (the former checker crashed on it)" >&2
     exit 1
   fi
-  if [ "${ITEMS[0]}" != apr ]; then
+  if [ "${#ITEMS[@]}" -lt 1 ] || [ "${ITEMS[0]}" != apr ]; then
     echo "check_recipe_argv_surface.sh: $f: argv[0] is not apr" >&2
     exit 1
   fi
