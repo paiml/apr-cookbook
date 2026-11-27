@@ -23,9 +23,9 @@ gate() { # gate <contracts dir> -> prints the pv JSON, returns pv's rc
     "$PV" lint "$1" --gate shapes --shape "$SHAPE" --format json 2> /dev/null
 }
 
-focus_count() { # focus_count <pv json> -> the number of cookbook-recipe-v1 focus nodes judged
+focus_count() { # focus_count <pv json> -> the number of cookbook-recipe-v1 focus nodes judged (by_shape only)
     local n
-    n=$(grep -o "\"$SHAPE=[0-9][0-9]*\"" | head -n 1 | sed 's/^.*=\([0-9][0-9]*\)"$/\1/' || true)
+    n=$(jq -r --arg s "$SHAPE" '[.by_shape[]? | select(startswith($s + "=")) | split("=")[1] | tonumber] | .[0] // 0' 2> /dev/null || true)
     printf '%s' "${n:-0}"
 }
 
@@ -110,6 +110,7 @@ self_test() {
 }
 
 need jq
+need yq
 need "$PV"
 case "${1:-}" in
     "") check ;;
