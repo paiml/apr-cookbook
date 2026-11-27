@@ -1,0 +1,4 @@
+jobs:
+  a:
+    if: ${{ !cancelled() }}
+    runs-on: [self-hosted]

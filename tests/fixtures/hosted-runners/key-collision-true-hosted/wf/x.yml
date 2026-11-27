@@ -1,0 +1,5 @@
+jobs:
+  "true":
+    runs-on: ubuntu-latest
+  true:
+    runs-on: self-hosted

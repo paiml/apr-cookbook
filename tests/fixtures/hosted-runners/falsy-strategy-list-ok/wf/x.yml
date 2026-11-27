@@ -1,0 +1,4 @@
+jobs:
+  a:
+    strategy: []
+    runs-on: [self-hosted]
