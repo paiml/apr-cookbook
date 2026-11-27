@@ -89,7 +89,7 @@ jobs:
       - name: Lean toolchain check
         working-directory: lean
         run: lean --version
-      - uses: actions/cache@v4
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: lean/.lake
           key: lean-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('lean/lean-toolchain', 'lean/lakefile.toml') }}
@@ -162,7 +162,9 @@ jobs:
     steps:
       # The hosted-runner ratchet (#441) runs HERE, inside the required context, so a PR that
       # adds a hosted job cannot merge on green required checks.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - name: No hosted runners (ratchet, #441)
         run: |
           bash scripts/check_no_hosted_runners.sh --self-test
