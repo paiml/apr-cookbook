@@ -622,9 +622,17 @@ check_document() {
       return 1
     fi
     if [[ -n ${line//[[:space:]]/} ]]; then
+      # A "- " line only counts as a block-sequence item when anchored: no open
+      # flow, and it follows a "key:" line or a sibling item at the same indent.
+      # Otherwise it is a plain-scalar continuation and must not arm the
+      # flow-continuation exemption (round 11).
+      local new_dash=-1
+      if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*-[[:space:]] ]] &&
+        { [[ $prev_end =~ :$ ]] || [[ $prev_dash_ind == "${#pre}" ]]; }; then
+        new_dash=${#pre}
+      fi
       prev_end=$line
-      prev_dash_ind=-1
-      if [[ $line =~ ^[[:space:]]*-[[:space:]] ]]; then prev_dash_ind=${#pre}; fi
+      prev_dash_ind=$new_dash
       while [[ $prev_end == *[[:space:]] ]]; do prev_end=${prev_end%?}; done
     fi
     if [[ $line == *$'\t'* ]]; then

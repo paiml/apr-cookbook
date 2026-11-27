@@ -1,0 +1,7 @@
+id: fx
+argv: [apr, run, --input, x]
+items:
+  - hello
+    - a
+    - [
+  a, 'b: !!int "notanint" # ' ]
