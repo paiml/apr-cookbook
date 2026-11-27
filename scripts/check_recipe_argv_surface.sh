@@ -93,8 +93,8 @@ decode_hex() {
   fi
   POS=$((POS + n))
   cp=$((16#$h))
-  if [ "$cp" -gt 1114111 ]; then
-    unsupported "escape beyond U+10FFFF"
+  if [ "$cp" -gt 1114111 ] || { [ "$cp" -ge 55296 ] && [ "$cp" -le 57343 ]; }; then
+    unsupported "escape beyond U+10FFFF or a UTF-16 surrogate"
     return 1
   fi
   if [ "$cp" -ge 1 ] && [ "$cp" -lt 128 ]; then
@@ -382,6 +382,13 @@ read_id() {
     WHY="text after the id value"
     return 1
   fi
+  rest=${S:POS}
+  if [[ $rest == *$'\n'* ]]; then rest=${rest#*$'\n'}; else rest=""; fi
+  while [[ $rest =~ ^[[:space:]]*(#[^$'\n']*)?$'\n' ]]; do rest=${rest#*$'\n'}; done
+  if [[ $rest =~ ^[[:space:]] ]]; then
+    WHY="id value continues on the next line"
+    return 1
+  fi
   [ -n "$RID" ]
 }
 
@@ -447,7 +454,7 @@ QS=$'\001' # blanked quoted scalar; control chars are refused, so it never occur
 # open at line end (a multi-line quoted scalar), an invalid double-quote escape and text
 # glued to a closing quote are refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=0
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=$DEPTH
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
@@ -528,6 +535,7 @@ strip_line() {
     i=$((i + 1))
   done
   STRIPPED=$out
+  DEPTH=$depth
 }
 
 # Refuse (return 1, WHY set) a whole document that holds a construct this checker does
@@ -548,14 +556,26 @@ check_document() {
     WHY="unsupported YAML construct: invalid UTF-8"
     return 1
   fi
-  if LC_ALL=C grep -qF -e $'\xc2\x85' -e $'\xe2\x80\xa8' -e $'\xe2\x80\xa9' -e $'\xef\xbf\xbe' -e $'\xef\xbf\xbf' -- "$f" ||
+  if LC_ALL=C grep -qF -e $'\xc2\x85' -e $'\xe2\x80\xa8' -e $'\xe2\x80\xa9' -e $'\xef\xbf\xbe' -e $'\xef\xbf\xbf' -e $'\xef\xbb\xbf' -- "$f" ||
     LC_ALL=C grep -q $'\xc2[\x80-\x9f]' -- "$f"; then
     WHY="unsupported YAML construct: C1 control, Unicode line break or noncharacter"
     return 1
   fi
+  DEPTH=0
+  local prev_end="" had_depth
   while IFS= read -r line || [ -n "$line" ]; do
+    had_depth=$DEPTH
     strip_line "$line" || return 1
     line=$STRIPPED
+    if [ "$had_depth" -gt 0 ] && [[ -n $line && ! $line =~ ^[[:space:]]*[\]\}] ]] &&
+      [[ -n $prev_end && ! $prev_end =~ [\[\{,:]$ ]]; then
+      WHY="unsupported YAML construct: multiline plain scalar inside a flow collection"
+      return 1
+    fi
+    if [[ -n ${line//[[:space:]]/} ]]; then
+      prev_end=$line
+      while [[ $prev_end == *[[:space:]] ]]; do prev_end=${prev_end%?}; done
+    fi
     if [[ $line == *$'\t'* ]]; then
       WHY="unsupported YAML construct: tab outside a quoted scalar"
       return 1
@@ -572,7 +592,7 @@ check_document() {
       WHY="unsupported YAML construct: reserved indicator (@ \` %) at a value start"
       return 1
     fi
-    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*: || $line =~ [\{,][[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) || $line =~ ${QS}[[:space:]]*:[[:space:]]*[?:] ]]; then
+    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*: || $line =~ [\{,][[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) || $line =~ ${QS}[[:space:]]*:[[:space:]]*[?:] || $line =~ [\[\{,][[:space:]]*\? ]]; then
       WHY="unsupported YAML construct: flow collection, empty or explicit (?) mapping key"
       return 1
     fi
