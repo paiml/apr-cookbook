@@ -60,7 +60,9 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     local nl_re='\xC2\x85|\xE2\x80[\xA8\xA9]|\r(?!$)'
     # A document marker with content after it (--- # c, --- key: v): yq glues the first key into the
     # comment. A control byte other than TAB, LF or CR is not valid YAML 1.2 and PyYAML refuses it.
-    local docline_re='^---(?:[ \t]+[^ \t\r]|[^ \t\r-])'
+    # Leading blanks count too: yq drops them before it reads a marker, so " --- # c" glues the next key.
+    local docline_re='^[ \t]*---(?:[ \t]+[^ \t\r]|[^ \t\r-])'
+    local mark_re='^[ \t]*---'
     local ctrl_re='[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]'
     local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
@@ -97,7 +99,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             fail=1
             continue
         fi
-        grep -c '^---' "$f" > "$tmp/ndoc" 2> /dev/null || true
+        LC_ALL=C grep -c -P "$mark_re" "$f" > "$tmp/ndoc" 2> /dev/null || true
         read -r ndoc < "$tmp/ndoc" || ndoc=0
         if [ "${ndoc:-0}" -gt 1 ]; then
             echo "FAIL  ${f##*/}: more than one YAML document: refused, not read" >&2
