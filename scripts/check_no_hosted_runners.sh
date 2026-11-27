@@ -35,6 +35,8 @@
 set -euo pipefail
 
 BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
+# A YAML tag naming merge (!!merge, !<...:merge>, !e!merge) or a %TAG directive: refused from raw text.
+MERGE_TAG_RE='![^ ]*merge|%TAG'
 WF_DIR=${WF_DIR:-.github/workflows}
 
 # One JSON document per workflow file in, "<file> <job>" lines out, for every job that is hosted,
@@ -48,6 +50,13 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     while IFS= read -r f; do
         # Two parses. spec: a <<: merge never overwrites an explicit key (yq defaults to false).
         # plain: yq's default. Where they disagree, merge order decides the job: refuse, never pick one.
+        # A merge TAG (!!merge, !<tag:yaml.org,2002:merge>, !e!merge via %TAG) is a merge to PyYAML
+        # whatever the key is called, and yq does not see it as one. Refuse it from the raw text.
+        if grep -q -E "$MERGE_TAG_RE" "$f"; then
+            echo "FAIL  ${f##*/}: a YAML merge tag or %TAG directive: refused, not read" >&2
+            fail=1
+            continue
+        fi
         readable=1
         if ! yq --yaml-fix-merge-anchor-to-spec=true -o json '.' "$f" > "$tmp/spec" 2> /dev/null; then readable=0; fi
         if ! yq -o json '.' "$f" > "$tmp/plain" 2> /dev/null; then readable=0; fi
