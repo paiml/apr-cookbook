@@ -66,7 +66,8 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     local ctrl_re='[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]'
     local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
-    local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
+    # Digit-led and dotted names too (&1, &x.1): a duplicate of either is refused, not missed.
+    local anchor_re='[&][A-Za-z0-9_.-]+'
     tmp=$(mktemp -d)
     while IFS= read -r f; do
         # Two parses. spec: a <<: merge never overwrites an explicit key (yq defaults to false).
@@ -106,7 +107,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             fail=1
             continue
         fi
-        grep -oE "$anchor_re" "$f" > "$tmp/anchors" || true
+        LC_ALL=C grep -oE "$anchor_re" "$f" > "$tmp/anchors" || true
         sort -o "$tmp/anchors" "$tmp/anchors"
         uniq -d "$tmp/anchors" > "$tmp/dups" || true
         if [ -s "$tmp/dups" ]; then
