@@ -1,0 +1,6 @@
+x-base: &base
+  runs-on: self-hosted
+jobs:
+  a:
+    runs-on: ubuntu-latest
+    <<: *base
