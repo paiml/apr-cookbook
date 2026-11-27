@@ -1,0 +1,4 @@
+id: fx
+argv: [apr, run, --input, x]
+x: {a: b - |
+  , <<: {k: 1}, <<: {k: 2}}

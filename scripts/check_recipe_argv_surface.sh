@@ -49,12 +49,12 @@ is_nonstr_scalar() {
   esac
   [[ $v =~ ^[-+]?[0-9][0-9_]*$ ]] && return 0
   [[ $v =~ ^0x[0-9a-fA-F_]+$ || $v =~ ^0o[0-7_]+$ || $v =~ ^0b[01_]+$ ]] && return 0
-  [[ $v =~ ^[-+]?[0-9_]*\.[0-9_]*([eE][-+]?[0-9]+)?$ ]] && [[ $v =~ [0-9] ]] && return 0
+  [[ $v =~ ^[-+]?[0-9_]*\.[0-9_]*([eE][-+]?[0-9]+)?$ ]] && [[ $v =~ [0-9_] ]] && return 0
   [[ $v =~ ^[-+]?[0-9][0-9_]*[eE][-+]?[0-9]+$ ]] && return 0
   [[ $v =~ ^[-+]?\.(inf|Inf|INF)$ || $v == .nan || $v == .NaN || $v == .NAN ]] && return 0
   [[ $v =~ ^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}($|[Tt\ \t]) ]] && return 0
   [[ $v =~ ^[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+(\.[0-9_]*)?$ ]] && return 0
-  [[ $v =~ ^[-+]0x ]] && return 0
+  [[ $v =~ ^[-+]?0[xXoObB] ]] && return 0
   return 1
 }
 
@@ -599,6 +599,10 @@ check_document() {
       WHY="unsupported YAML construct: multiline plain scalar inside a flow collection"
       return 1
     fi
+    if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]] && [[ -z $prev_end || ! $prev_end =~ [:-]$ ]]; then
+      WHY="unsupported YAML construct: flow collection continuing a plain scalar"
+      return 1
+    fi
     if [[ -n ${line//[[:space:]]/} ]]; then
       prev_end=$line
       while [[ $prev_end == *[[:space:]] ]]; do prev_end=${prev_end%?}; done
@@ -637,7 +641,7 @@ check_document() {
       WHY="unsupported YAML construct: invalid block scalar header"
       return 1
     fi
-    if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
+    if [ "$DEPTH" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*([A-Za-z0-9_-]+:[[:space:]]+)?[\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
       pre=${raw%%[^ -]*}
       blk=${#pre}
     fi
@@ -662,6 +666,10 @@ check_document() {
       fi
     done <<<"$rest"
   done <"$f"
+  if [ "$DEPTH" -ne 0 ]; then
+    WHY="unsupported YAML construct: unterminated flow collection"
+    return 1
+  fi
   return 0
 }
 
