@@ -414,52 +414,60 @@ is_risky_scalar() {
 }
 
 # Blank one document line for the pre-scan: each quoted scalar becomes `Q` and a comment
-# is dropped. One left-to-right pass, so a quote inside the other quote kind is text. A
-# quote only opens at a token start. A quote still open at line end (a multi-line quoted
-# scalar) cannot be judged line by line: refuse. Result in STRIPPED.
+# is dropped. One left-to-right pass. A quote opens only at a token start: line start,
+# after `[`, `{` or `,`, after `: ` or a closed quoted key (`Q:`), or after block `-`
+# indicators. Any other quote is plain text (YAML reads it the same way).
+# A quote still open at line end (a multi-line quoted scalar) is refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c prev=" " q out=""
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
     case $c in
+      ' ' | $'\t') ws=1; out+=$c; i=$((i + 1)); continue ;;
+      '#')
+        if [ "$ws" -eq 1 ]; then break; fi
+        ;;
       '"' | "'")
-        case $prev in
-          ' ' | $'\t' | '[' | '{' | ',' | ':' | '-')
-            q=$c
-            i=$((i + 1))
-            while :; do
-              if [ "$i" -ge "$n" ]; then
-                WHY="unsupported YAML construct: quoted scalar not closed on its line"
-                return 1
-              fi
-              c=${s:i:1}
-              if [ "$q" = '"' ] && [ "$c" = '\' ]; then
+        opens=0
+        case $sig in
+          '' | '[' | '{' | ',') opens=1 ;;
+          ':') if [ "$ws" -eq 1 ] || [[ $out == *Q: ]]; then opens=1; fi ;;
+          '-') if [[ ${out//[ -]/} == "" ]] && [ "$ws" -eq 1 ]; then opens=1; fi ;;
+        esac
+        if [ "$opens" -eq 1 ]; then
+          q=$c
+          i=$((i + 1))
+          while :; do
+            if [ "$i" -ge "$n" ]; then
+              WHY="unsupported YAML construct: quoted scalar not closed on its line"
+              return 1
+            fi
+            c=${s:i:1}
+            if [ "$q" = '"' ] && [ "$c" = '\' ]; then
+              i=$((i + 2))
+              continue
+            fi
+            if [ "$c" = "$q" ]; then
+              if [ "$q" = "'" ] && [ "${s:i+1:1}" = "'" ]; then
                 i=$((i + 2))
                 continue
               fi
-              if [ "$c" = "$q" ]; then
-                if [ "$q" = "'" ] && [ "${s:i+1:1}" = "'" ]; then
-                  i=$((i + 2))
-                  continue
-                fi
-                break
-              fi
-              i=$((i + 1))
-            done
+              break
+            fi
             i=$((i + 1))
-            out+=Q
-            prev=Q
-            continue
-            ;;
-        esac
-        ;;
-      '#')
-        case $prev in ' ' | $'\t') break ;; esac
+          done
+          i=$((i + 1))
+          out+=Q
+          sig=Q
+          ws=0
+          continue
+        fi
         ;;
     esac
     out+=$c
-    prev=$c
+    sig=$c
+    ws=0
     i=$((i + 1))
   done
   STRIPPED=$out
@@ -475,8 +483,12 @@ check_document() {
     WHY="unsupported YAML construct: NUL byte"
     return 1
   fi
-  if [ "$(tr -d '\r' <"$f" | wc -c)" -ne "$(wc -c <"$f")" ]; then
-    WHY="unsupported YAML construct: carriage return (bare CR or CRLF line ending)"
+  if tr -d '\t' <"$f" | LC_ALL=C grep -q '[[:cntrl:]]'; then
+    WHY="unsupported YAML construct: control character (CR, VT, FF, ESC, ...)"
+    return 1
+  fi
+  if LC_ALL=C grep -qF -e $'\xc2\x85' -e $'\xe2\x80\xa8' -e $'\xe2\x80\xa9' -- "$f"; then
+    WHY="unsupported YAML construct: Unicode line break (NEL, LS, PS)"
     return 1
   fi
   while IFS= read -r line || [ -n "$line" ]; do
@@ -486,25 +498,27 @@ check_document() {
       WHY="unsupported YAML construct: tab outside a quoted scalar"
       return 1
     fi
-    if [[ $line =~ (^|[[:space:][{,])\<\<([[:space:]]*:|$) ]]; then
+    if [[ $line =~ (^|[[:space:][{,]|Q:)\<\<([[:space:]]*:|$) ]]; then
       WHY="unsupported YAML construct: merge key (<<)"
       return 1
     fi
-    if [[ $line =~ (^|[[:space:][{,])[\!\&\*] ]]; then
+    if [[ $line =~ (^|[[:space:][{,]|Q:)[\!\&\*] ]]; then
       WHY="unsupported YAML construct: tag (!), anchor (&) or alias (*)"
       return 1
     fi
-    if [[ $line =~ [\]\}][[:space:]]*:([[:space:]]|$) || $line =~ ^[[:space:]-]*\?([[:space:]]|$) ]]; then
+    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) ]]; then
       WHY="unsupported YAML construct: flow collection or explicit (?) mapping key"
       return 1
     fi
     rest=${line//$flow_sep/$'\n'}
     rest=${rest//: /$'\n'}
+    rest=${rest//Q:/Q$'\n'}
     rest=${rest#"${rest%%[![:space:]-]*}"}
     while IFS= read -r tok; do
       tok=${tok#"${tok%%[![:space:]]*}"}
       tok=${tok%"${tok##*[![:space:]]}"}
       tok=${tok%:}
+      tok=${tok%"${tok##*[![:space:]]}"}
       if [ -n "$tok" ] && is_risky_scalar "$tok"; then
         WHY="unsupported YAML construct: plain scalar '$tok' matches a YAML 1.1 implicit type (quote it)"
         return 1
