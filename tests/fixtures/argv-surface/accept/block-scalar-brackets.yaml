@@ -1,0 +1,6 @@
+id: fx
+argv: [apr, run, --input, x]
+note: |
+  [ free text, with {braces} and #hash
+  second line [x
+after: ok

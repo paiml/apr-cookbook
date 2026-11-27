@@ -255,6 +255,10 @@ parse_argv() {
   skip_ws
   c=${S:POS:1}
   if [ "$c" = '[' ]; then
+    if col_of && [ "$COL" -eq 0 ]; then
+      unsupported "flow argv sequence at column 0"
+      return 1
+    fi
     POS=$((POS + 1))
     while :; do
       skip_ws
@@ -462,8 +466,14 @@ strip_line() {
       ' ' | $'\t') ws=1; out+=$c; i=$((i + 1)); continue ;;
       '#')
         if [ "$ws" -eq 1 ]; then break; fi
+        case $sig in
+          '[' | '{' | ',' | ']' | '}')
+            WHY="unsupported YAML construct: comment glued to a flow delimiter"
+            return 1
+            ;;
+        esac
         ;;
-      '"' | "'")
+      '"' | "'" | '[' | '{')
         opens=0
         case $sig in
           '' | '[' | '{') opens=1 ;;
@@ -471,6 +481,18 @@ strip_line() {
           ':') if [ "$ws" -eq 1 ] || [[ $out =~ ${QS}[[:space:]]*:$ ]]; then opens=1; fi ;;
           '-') if [[ $out =~ ^([[:space:]]*-[[:space:]]+)+$ ]]; then opens=1; fi ;;
         esac
+        if [ "$c" = '[' ] || [ "$c" = '{' ]; then
+          if [ "$opens" -eq 1 ]; then
+            depth=$((depth + 1))
+            sig=$c
+          else
+            sig=x
+          fi
+          out+=$c
+          ws=0
+          i=$((i + 1))
+          continue
+        fi
         if [ "$opens" -eq 1 ]; then
           q=$c
           i=$((i + 1))
@@ -526,7 +548,6 @@ strip_line() {
         ;;
     esac
     case $c in
-      '[' | '{') depth=$((depth + 1)) ;;
       ']' | '}') if [ "$depth" -gt 0 ]; then depth=$((depth - 1)); fi ;;
     esac
     out+=$c
@@ -562,8 +583,14 @@ check_document() {
     return 1
   fi
   DEPTH=0
-  local prev_end="" had_depth
+  local prev_end="" had_depth raw pre blk=-1
   while IFS= read -r line || [ -n "$line" ]; do
+    raw=$line
+    if [ "$blk" -ge 0 ]; then
+      pre=${raw%%[! ]*}
+      if [[ -z ${raw//[[:space:]]/} ]] || [ "${#pre}" -gt "$blk" ]; then continue; fi
+      blk=-1
+    fi
     had_depth=$DEPTH
     strip_line "$line" || return 1
     line=$STRIPPED
@@ -609,6 +636,10 @@ check_document() {
       [[ ! $line =~ [\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
       WHY="unsupported YAML construct: invalid block scalar header"
       return 1
+    fi
+    if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
+      pre=${raw%%[^ -]*}
+      blk=${#pre}
     fi
     if [[ $line == "$QS"* ]]; then
       WHY="unsupported YAML construct: quoted top-level key"
