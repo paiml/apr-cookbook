@@ -338,10 +338,16 @@ single_key_line() {
     WHY="unsupported YAML construct: document marker (multi-document file)"
     return 1
   fi
-  lines=$({ grep -En "^$key:" -- "$f" || true; } | cut -d: -f1)
+  # Count every column-0 spelling of the key (plain, quoted, space before the colon): a
+  # second spelling is a duplicate key that overwrites the first in a real loader.
+  lines=$({ grep -En "^[\"']?$key[\"']?[[:space:]]*:" -- "$f" || true; } | cut -d: -f1)
   count=$(printf '%s' "$lines" | grep -c . || true)
   if [ "$count" -ne 1 ]; then
     WHY="expected exactly one top-level $key: key, found $count"
+    return 1
+  fi
+  if ! sed -n "${lines}p" -- "$f" | grep -Eq "^$key:([[:space:]]|\$)"; then
+    WHY="unsupported YAML construct: top-level $key key is quoted, spaced before the colon or glued to its value"
     return 1
   fi
   printf '%s\n' "$lines"
@@ -349,14 +355,32 @@ single_key_line() {
 
 # Read the top-level `id:` scalar of FILE into RID.
 read_id() {
-  local f=$1 ln
+  local f=$1 ln first rest
   ln=$(single_key_line "$f" id) || return 1
   S=$(tail -n +"$ln" -- "$f")
   S=${S#id:}
   POS=0
+  first=${S%%$'\n'*}
+  if [[ $first =~ ^[[:space:]]*(#.*)?$ ]]; then
+    WHY="id has no value on its own line"
+    return 1
+  fi
+  NONSTR=0
   skip_ws
+  first=${S:POS:1}
   parse_scalar block || return 1
   RID=$SCALAR
+  case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1 ;; esac
+  if [ "$NONSTR" -ne 0 ]; then
+    WHY="id is not a string scalar"
+    return 1
+  fi
+  rest=${S:POS}
+  rest=${rest%%$'\n'*}
+  if [[ ! $rest =~ ^[[:space:]]*(#.*)?$ ]]; then
+    WHY="text after the id value"
+    return 1
+  fi
   [ -n "$RID" ]
 }
 
@@ -413,13 +437,16 @@ is_risky_scalar() {
   return 1
 }
 
-# Blank one document line for the pre-scan: each quoted scalar becomes `Q` and a comment
+QS=$'\001' # blanked quoted scalar; control chars are refused, so it never occurs in input
+
+# Blank one document line for the pre-scan: each quoted scalar becomes QS and a comment
 # is dropped. One left-to-right pass. A quote opens only at a token start: line start,
-# after `[`, `{` or `,`, after `: ` or a closed quoted key (`Q:`), or after block `-`
-# indicators. Any other quote is plain text (YAML reads it the same way).
-# A quote still open at line end (a multi-line quoted scalar) is refused. Result in STRIPPED.
+# after `[`, `{` or `,`, after `: ` or a closed quoted key (`"k":`), or after block `-`
+# indicators. Any other quote is plain text (YAML reads it the same way). A quote still
+# open at line end (a multi-line quoted scalar), an invalid double-quote escape and text
+# glued to a closing quote are refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c sig="" ws=1 q out="" opens
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
@@ -432,8 +459,8 @@ strip_line() {
         opens=0
         case $sig in
           '' | '[' | '{' | ',') opens=1 ;;
-          ':') if [ "$ws" -eq 1 ] || [[ $out == *Q: ]]; then opens=1; fi ;;
-          '-') if [[ ${out//[ -]/} == "" ]] && [ "$ws" -eq 1 ]; then opens=1; fi ;;
+          ':') if [ "$ws" -eq 1 ] || [[ $out =~ ${QS}[[:space:]]*:$ ]]; then opens=1; fi ;;
+          '-') if [[ $out =~ ^([[:space:]]*-[[:space:]]+)+$ ]]; then opens=1; fi ;;
         esac
         if [ "$opens" -eq 1 ]; then
           q=$c
@@ -445,7 +472,21 @@ strip_line() {
             fi
             c=${s:i:1}
             if [ "$q" = '"' ] && [ "$c" = '\' ]; then
-              i=$((i + 2))
+              hexn=0
+              case ${s:i+1:1} in
+                0 | a | b | t | n | v | f | r | e | ' ' | $'\t' | '"' | '/' | '\' | N | _ | L | P) i=$((i + 2)) ;;
+                x) hexn=2; i=$((i + 2)) ;;
+                u) hexn=4; i=$((i + 2)) ;;
+                U) hexn=8; i=$((i + 2)) ;;
+                *) WHY="unsupported YAML construct: invalid escape in a double-quoted scalar"; return 1 ;;
+              esac
+              if [ "$hexn" -gt 0 ]; then
+                if [ "${#s}" -lt $((i + hexn)) ] || [[ ! ${s:i:hexn} =~ ^[0-9a-fA-F]+$ ]]; then
+                  WHY="unsupported YAML construct: invalid hex escape in a double-quoted scalar"
+                  return 1
+                fi
+                i=$((i + hexn))
+              fi
               continue
             fi
             if [ "$c" = "$q" ]; then
@@ -458,8 +499,13 @@ strip_line() {
             i=$((i + 1))
           done
           i=$((i + 1))
-          out+=Q
-          sig=Q
+          nx=${s:i:1}
+          case $nx in
+            '' | ' ' | $'\t' | ',' | ']' | '}' | ':') ;;
+            *) WHY="unsupported YAML construct: text glued to a closing quote"; return 1 ;;
+          esac
+          out+=$QS
+          sig=$QS
           ws=0
           continue
         fi
@@ -474,10 +520,10 @@ strip_line() {
 }
 
 # Refuse (return 1, WHY set) a whole document that holds a construct this checker does
-# not model: NUL byte, CR, tab, merge key, tag, anchor, alias, complex key, or a risky
-# plain scalar anywhere (keys, values, flow items).
+# not model: NUL byte, control char, invalid UTF-8, line-break lookalike, tab, merge key,
+# tag, anchor, alias, complex key, reserved indicator, or a risky plain scalar anywhere.
 check_document() {
-  local f=$1 line tok rest
+  local f=$1 line tok rest sep
   local flow_sep='[][{},]'
   if [ "$(tr -d '\000' <"$f" | wc -c)" -ne "$(wc -c <"$f")" ]; then
     WHY="unsupported YAML construct: NUL byte"
@@ -487,8 +533,13 @@ check_document() {
     WHY="unsupported YAML construct: control character (CR, VT, FF, ESC, ...)"
     return 1
   fi
-  if LC_ALL=C grep -qF -e $'\xc2\x85' -e $'\xe2\x80\xa8' -e $'\xe2\x80\xa9' -- "$f"; then
-    WHY="unsupported YAML construct: Unicode line break (NEL, LS, PS)"
+  if ! iconv -f UTF-8 -t UTF-8 <"$f" >/dev/null 2>&1; then
+    WHY="unsupported YAML construct: invalid UTF-8"
+    return 1
+  fi
+  if LC_ALL=C grep -qF -e $'\xc2\x85' -e $'\xe2\x80\xa8' -e $'\xe2\x80\xa9' -e $'\xef\xbf\xbe' -e $'\xef\xbf\xbf' -- "$f" ||
+    LC_ALL=C grep -q $'\xc2[\x80-\x9f]' -- "$f"; then
+    WHY="unsupported YAML construct: C1 control, Unicode line break or noncharacter"
     return 1
   fi
   while IFS= read -r line || [ -n "$line" ]; do
@@ -498,21 +549,36 @@ check_document() {
       WHY="unsupported YAML construct: tab outside a quoted scalar"
       return 1
     fi
-    if [[ $line =~ (^|[[:space:][{,]|Q:)\<\<([[:space:]]*:|$) ]]; then
+    if [[ $line =~ (^|[[:space:][{,]|${QS}[[:space:]]*:)\<\<([[:space:]]*:|$) ]]; then
       WHY="unsupported YAML construct: merge key (<<)"
       return 1
     fi
-    if [[ $line =~ (^|[[:space:][{,]|Q:)[\!\&\*] ]]; then
+    if [[ $line =~ (^|[[:space:][{,]|${QS}[[:space:]]*:)[\!\&\*] ]]; then
       WHY="unsupported YAML construct: tag (!), anchor (&) or alias (*)"
       return 1
     fi
-    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) ]]; then
-      WHY="unsupported YAML construct: flow collection or explicit (?) mapping key"
+    if [[ $line =~ (^[[:space:]]*(-[[:space:]]+)*|:[[:space:]]+|[\[\{,][[:space:]]*)[@\`%] ]]; then
+      WHY="unsupported YAML construct: reserved indicator (@ \` %) at a value start"
+      return 1
+    fi
+    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*: || $line =~ [\{,][[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) ]]; then
+      WHY="unsupported YAML construct: flow collection, empty or explicit (?) mapping key"
+      return 1
+    fi
+    sep=${line//[!:]/}
+    if [[ $line != *[\[\{]* && ${#sep} -ge 2 && $line == *": "*": "* ]]; then
+      WHY="unsupported YAML construct: unquoted ': ' inside a plain value"
+      return 1
+    fi
+    if [[ $line =~ [|\>][0-9+-]*[[:space:]]*$ && $line =~ [|\>][+-]?0 ]]; then
+      WHY="unsupported YAML construct: invalid block scalar header"
       return 1
     fi
     rest=${line//$flow_sep/$'\n'}
     rest=${rest//: /$'\n'}
-    rest=${rest//Q:/Q$'\n'}
+    while [[ $rest == *"$QS "* ]]; do rest=${rest//"$QS "/$QS}; done
+    rest=${rest//"$QS:"/$'\n'}
+    rest=${rest//"$QS"/$'\n'}
     rest=${rest#"${rest%%[![:space:]-]*}"}
     while IFS= read -r tok; do
       tok=${tok#"${tok%%[![:space:]]*}"}
