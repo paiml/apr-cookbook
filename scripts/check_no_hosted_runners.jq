@@ -7,6 +7,8 @@ def exprre: "^\\s*\\$\\{\\{\\s*matrix\\.(?<k>[A-Za-z0-9_-]+)\\s*\\}\\}\\s*$";
 # number to the reader this gate replaces, so it cannot be checked: UNVERIFIABLE.
 def ambiguous: test("^(y|yes|n|no|on|off|true|false|null|~|\\.nan|[-+]?\\.inf|[-+]?[0-9._]+|0[xob][0-9a-f_]+|[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}.*|[0-9]+(:[0-9]+)+)$"; "i");
 # One runs-on label -> {u: unverifiable, items: the labels it can take}.
+# Main coerces falsy values (null, false, [], "", 0) to {} (Python `or {}`): match it.
+def orempty: if . == null or . == false or . == [] or . == "" or . == 0 then {} else . end;
 def expand($mx):
   if type != "string" or (contains("${{") | not) then {u: false, items: [.]}
   elif test(exprre) then
@@ -19,15 +21,15 @@ def expand($mx):
       else {u: true, items: []} end
   else {u: true, items: []} end;
 (if length != 1 then error("one YAML document per workflow file") else .[0] end)
-| . as $root
-| (if $root == null then {} elif ($root | type) == "object" then $root else error("workflow is not a mapping") end)
-| (.jobs) as $jobs
-| (if $jobs == null then {} elif ($jobs | type) == "object" then $jobs else error("jobs is not a mapping") end)
+| (. | orempty) as $root
+| (if ($root | type) == "object" then $root else error("workflow is not a mapping") end)
+| (.jobs | orempty) as $jobs
+| (if ($jobs | type) == "object" then $jobs else error("jobs is not a mapping") end)
 | to_entries[]
 | . as $e
 | $e.value as $j
 | (if ($j | type) != "object" then error("job \($e.key) is not a mapping") else . end)
-| ($j.strategy) as $strat
+| ($j.strategy | orempty) as $strat
 | (if $strat != null and ($strat | type) != "object" then error("job \($e.key) strategy is not a mapping") else . end)
 | (if ($strat.matrix | type) == "object" then $strat.matrix else {} end) as $mx
 | ($j["runs-on"]) as $ro

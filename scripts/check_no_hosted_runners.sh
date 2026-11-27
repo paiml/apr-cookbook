@@ -35,8 +35,6 @@
 set -euo pipefail
 
 BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
-# A YAML tag naming merge (!!merge, !<...:merge>, !e!merge) or a %TAG directive: refused from raw text.
-MERGE_TAG_RE='![^ =]|%TAG'
 WF_DIR=${WF_DIR:-.github/workflows}
 
 # One JSON document per workflow file in, "<file> <job>" lines out, for every job that is hosted,
@@ -45,15 +43,36 @@ here=$(dirname "${BASH_SOURCE[0]}")
 readonly JQ_HOSTED_RULES="$here/check_no_hosted_runners.jq"
 
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
-    local f fail=0 tmp readable
+    local f fail=0 tmp readable ndoc odd nonstr
+    # yq's own view: a tag outside the core set, and a mapping key that is not a string.
+    local tag_q='[.. | tag | select(. != "!!map" and . != "!!str" and . != "!!seq" and . != "!!bool" and . != "!!int" and . != "!!float" and . != "!!null")] | length'
+    local key_q='[.. | select(tag == "!!map") | keys | .[] | select(tag != "!!str")] | length'
+    # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
+    local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
     tmp=$(mktemp -d)
     while IFS= read -r f; do
         # Two parses. spec: a <<: merge never overwrites an explicit key (yq defaults to false).
         # plain: yq's default. Where they disagree, merge order decides the job: refuse, never pick one.
-        # A merge TAG (!!merge, !<tag:yaml.org,2002:merge>, !e!merge via %TAG) is a merge to PyYAML
-        # whatever the key is called, and yq does not see it as one. Refuse it from the raw text.
-        if grep -q -E "$MERGE_TAG_RE" "$f"; then
-            echo "FAIL  ${f##*/}: a YAML merge tag or %TAG directive: refused, not read" >&2
+        # Raw-text refusals, for what yq hides or resolves silently: a %TAG directive (tag handles),
+        # more than one document marker (yq drops an empty leading document; PyYAML refuses the file),
+        # and a repeated anchor (yq takes the last; PyYAML refuses the file).
+        if grep -q -F '%TAG' "$f"; then
+            echo "FAIL  ${f##*/}: a %TAG directive: refused, not read" >&2
+            fail=1
+            continue
+        fi
+        grep -c '^---' "$f" > "$tmp/ndoc" 2> /dev/null || true
+        read -r ndoc < "$tmp/ndoc" || ndoc=0
+        if [ "${ndoc:-0}" -gt 1 ]; then
+            echo "FAIL  ${f##*/}: more than one YAML document: refused, not read" >&2
+            fail=1
+            continue
+        fi
+        grep -oE "$anchor_re" "$f" > "$tmp/anchors" || true
+        sort -o "$tmp/anchors" "$tmp/anchors"
+        uniq -d "$tmp/anchors" > "$tmp/dups" || true
+        if [ -s "$tmp/dups" ]; then
+            echo "FAIL  ${f##*/}: a YAML anchor is defined twice: refused, not read" >&2
             fail=1
             continue
         fi
@@ -62,6 +81,18 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         if ! yq -o json '.' "$f" > "$tmp/plain" 2> /dev/null; then readable=0; fi
         if [ "$readable" = 0 ]; then
             echo "FAIL  ${f##*/}: not readable (yq refused it, more than one YAML document, or a job outside the shape the gate reads)" >&2
+            fail=1
+            continue
+        fi
+        # yq's own view of tags and keys. A tag outside the core set (a merge tag, !e!x, a custom tag)
+        # and a mapping key that is not a string ("true" vs true) are both invisible to the JSON
+        # parse, which collapses them. Refuse. An empty answer (yq error) also refuses.
+        yq "$tag_q" "$f" > "$tmp/odd" 2> /dev/null || true
+        yq "$key_q" "$f" > "$tmp/nonstr" 2> /dev/null || true
+        read -r odd < "$tmp/odd" || odd=""
+        read -r nonstr < "$tmp/nonstr" || nonstr=""
+        if [ "$odd" != 0 ] || [ "$nonstr" != 0 ]; then
+            echo "FAIL  ${f##*/}: a YAML tag outside the core set, or a non-string mapping key: refused, not read" >&2
             fail=1
             continue
         fi
