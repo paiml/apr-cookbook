@@ -1,0 +1,3 @@
+id: fx
+argv: [apr, run, --input, x]
+x: +0b_

@@ -44,7 +44,7 @@ NONSTR=0  # 1 when an argv item is an unquoted YAML non-string (int, bool, null,
 is_nonstr_scalar() {
   local v=$1
   case $v in
-    '' | '~' | null | Null | NULL | true | True | TRUE | false | False | FALSE) return 0 ;;
+    '=' | '<<' | '' | '~' | null | Null | NULL | true | True | TRUE | false | False | FALSE) return 0 ;;
     yes | Yes | YES | no | No | NO | on | On | ON | off | Off | OFF) return 0 ;;
   esac
   [[ $v =~ ^[-+]?[0-9][0-9_]*$ ]] && return 0
@@ -185,6 +185,9 @@ parse_scalar() {
       POS=$((POS + 1))
     done
     out="${out%"${out##*[![:space:]]}"}"
+    if [[ $out == *$'\t'* ]]; then
+      NONSTR=1
+    fi
     if is_nonstr_scalar "$out"; then
       NONSTR=1
     fi
@@ -383,6 +386,84 @@ quote_repr() {
   printf '%s%s%s' "$q" "$s" "$q"
 }
 
+# ---- document-wide fail-closed pre-scan (Refs apr-cookbook#495) ----------------------
+# The recipe reader only parses `id:` and `argv:`. Everything else in the document used
+# to be skipped, so a construct that makes a real YAML loader crash or mis-type a value
+# anywhere in the file went unseen. This pre-scan is deliberately conservative: it does
+# not reproduce a loader, it refuses on doubt. Quote a value to make it a plain string.
+
+# True for an unquoted scalar that matches a YAML 1.1 implicit-resolver shape which is
+# NOT a plain int, plain float, true/false or null: the shapes a loader mis-types or
+# rejects (merge, `=`, yes/no/on/off, prefixed or underscored numbers, leading zeros,
+# huge ints, exponent floats, .inf/.nan, sexagesimals, timestamps).
+is_risky_scalar() {
+  local v=$1
+  case $v in
+    yes | Yes | YES | no | No | NO | on | On | ON | off | Off | OFF | '=' | '<<') return 0 ;;
+  esac
+  [[ $v =~ ^[-+]?0[xXoObB] ]] && return 0
+  [[ $v =~ ^[-+]?0[0-9] ]] && return 0
+  [[ $v =~ ^[-+]?[0-9]{19,}$ ]] && return 0
+  [[ $v =~ ^[-+]?[0-9.][0-9a-fA-F_.:eE+-]*$ && $v == *_* ]] && return 0
+  [[ $v =~ ^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)[eE][-+]?[0-9]+$ ]] && return 0
+  [[ $v =~ ^[-+]?\.(inf|Inf|INF|nan|NaN|NAN)$ ]] && return 0
+  [[ $v =~ ^[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+(\.[0-9_]*)?$ ]] && return 0
+  [[ $v =~ ^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2} ]] && return 0
+  return 1
+}
+
+# Refuse (return 1, WHY set) a whole document that holds a construct this checker does
+# not model: NUL byte, CR, tab, merge key, tag, anchor, alias, complex key, or a risky
+# plain scalar anywhere (keys, values, flow items).
+check_document() {
+  local f=$1 text line tok rest
+  local flow_sep='[][{},]'
+  if [ "$(tr -d '\000' <"$f" | wc -c)" -ne "$(wc -c <"$f")" ]; then
+    WHY="unsupported YAML construct: NUL byte"
+    return 1
+  fi
+  if [ "$(tr -d '\r' <"$f" | wc -c)" -ne "$(wc -c <"$f")" ]; then
+    WHY="unsupported YAML construct: carriage return (bare CR or CRLF line ending)"
+    return 1
+  fi
+  # Blank out quoted scalars (token -> Q) and comments, line by line.
+  text=$(sed -E \
+    -e "s/(^|[[:space:][{,:-])\"([^\"\\\\]|\\\\.)*\"/\1Q/g" \
+    -e "s/(^|[[:space:][{,:-])'([^']|'')*'/\1Q/g" \
+    -e 's/(^|[[:space:]])#.*$/\1/' -- "$f")
+  while IFS= read -r line || [ -n "$line" ]; do
+    if [[ $line == *$'\t'* ]]; then
+      WHY="unsupported YAML construct: tab outside a quoted scalar"
+      return 1
+    fi
+    if [[ $line =~ (^|[[:space:][{,])\<\<([[:space:]]*:|$) ]]; then
+      WHY="unsupported YAML construct: merge key (<<)"
+      return 1
+    fi
+    if [[ $line =~ (^|[[:space:][{,])[\!\&\*] ]]; then
+      WHY="unsupported YAML construct: tag (!), anchor (&) or alias (*)"
+      return 1
+    fi
+    if [[ $line =~ [\]\}][[:space:]]*:([[:space:]]|$) || $line =~ ^[[:space:]-]*\?([[:space:]]|$) ]]; then
+      WHY="unsupported YAML construct: flow collection or explicit (?) mapping key"
+      return 1
+    fi
+    rest=${line//$flow_sep/$'\n'}
+    rest=${rest//: /$'\n'}
+    rest=${rest//-[[:space:]]/$'\n'}
+    while IFS= read -r tok; do
+      tok=${tok#"${tok%%[![:space:]]*}"}
+      tok=${tok%"${tok##*[![:space:]]}"}
+      tok=${tok%:}
+      if [ -n "$tok" ] && is_risky_scalar "$tok"; then
+        WHY="unsupported YAML construct: plain scalar '$tok' matches a YAML 1.1 implicit type (quote it)"
+        return 1
+      fi
+    done <<<"$rest"
+  done <<<"$text"
+  return 0
+}
+
 # ---- main -----------------------------------------------------------------------
 mapfile -t files < <(find "$root" -name '*.yaml' 2>/dev/null | tr '/' '\001' | sort | tr '\001' '/')
 
@@ -390,6 +471,11 @@ bad=0
 n=0
 declare -A listed_set=()
 for f in "${files[@]}"; do
+  WHY=""
+  if ! check_document "$f"; then
+    echo "check_recipe_argv_surface.sh: $f: $WHY" >&2
+    exit 1
+  fi
   if ! read_id "$f"; then
     echo "check_recipe_argv_surface.sh: $f: ${WHY:-no top-level id}" >&2
     exit 1
