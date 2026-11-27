@@ -592,7 +592,7 @@ check_document() {
   fi
   DEPTH=0
   FSTK=""
-  local prev_end="" had_depth raw pre blk=-1
+  local prev_end="" had_depth raw pre blk=-1 prev_dash_ind=-1
   while IFS= read -r line || [ -n "$line" ]; do
     raw=$line
     if [ "$blk" -ge 0 ]; then
@@ -601,6 +601,10 @@ check_document() {
       blk=-1
     fi
     had_depth=$DEPTH
+    if [ "$had_depth" -gt 0 ] && [[ $raw =~ ^[^[:space:]#] ]]; then
+      WHY="unsupported YAML construct: column-0 line inside a flow collection"
+      return 1
+    fi
     if [ "${FSTK: -1}" = "{" ] && [[ $raw =~ ^[[:space:]]*[\[\{] && $prev_end =~ [\{,]$ ]]; then
       WHY="unsupported YAML construct: flow collection as a mapping key"
       return 1
@@ -612,12 +616,15 @@ check_document() {
       WHY="unsupported YAML construct: multiline plain scalar inside a flow collection"
       return 1
     fi
-    if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]] && [[ -z $prev_end || ! ( $prev_end =~ :$ || $prev_end =~ ^[[:space:]]*-([[:space:]]+-)*$ ) ]]; then
+    pre=${raw%%[! ]*}
+    if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]] && [[ -z $prev_end || ! ( $prev_end =~ :$ || ( $line =~ ^[[:space:]]*-[[:space:]] && $prev_dash_ind == "${#pre}" ) ) ]]; then
       WHY="unsupported YAML construct: flow collection continuing a plain scalar"
       return 1
     fi
     if [[ -n ${line//[[:space:]]/} ]]; then
       prev_end=$line
+      prev_dash_ind=-1
+      if [[ $line =~ ^[[:space:]]*-[[:space:]] ]]; then prev_dash_ind=${#pre}; fi
       while [[ $prev_end == *[[:space:]] ]]; do prev_end=${prev_end%?}; done
     fi
     if [[ $line == *$'\t'* ]]; then

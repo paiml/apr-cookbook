@@ -1,0 +1,8 @@
+id: fx
+argv: [apr, run, --input, x]
+items:
+  - [a, b]
+  - [c, d]
+m:
+  k:
+    [e, f]

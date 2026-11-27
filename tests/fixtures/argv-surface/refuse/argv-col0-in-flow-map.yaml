@@ -1,0 +1,4 @@
+id: fx
+x: {
+argv: [apr, run, --input, x]
+}
