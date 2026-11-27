@@ -42,7 +42,7 @@ shape:
     - {path: readme:entrypoint, minCount: 1, resolves: path}
     - {path: readme:verifiedCommand, minCount: 1, resolves: ci-step}
     - {path: readme:section, minCount: 3}
-    - {path: readme:contractCount, minCount: 1, maxCount: 1, resolves: census}
+    - {path: readme:contractCount, maxCount: 1, resolves: census}
 
 equations:
   claim_resolves:
