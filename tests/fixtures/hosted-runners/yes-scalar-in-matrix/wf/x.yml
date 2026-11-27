@@ -1,0 +1,6 @@
+jobs:
+  y:
+    strategy:
+      matrix:
+        os: [yes, self-hosted]
+    runs-on: ${{ matrix.os }}

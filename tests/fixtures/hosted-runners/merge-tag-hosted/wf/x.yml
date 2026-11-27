@@ -1,0 +1,3 @@
+jobs:
+  a:
+    !!merge x: {runs-on: ubuntu-latest}

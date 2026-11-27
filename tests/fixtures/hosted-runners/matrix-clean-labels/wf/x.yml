@@ -1,0 +1,6 @@
+jobs:
+  ok:
+    strategy:
+      matrix:
+        r: [[self-hosted, Linux, clean-room]]
+    runs-on: ${{ matrix.r }}

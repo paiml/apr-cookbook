@@ -1,0 +1,4 @@
+jobs:
+  odd:
+    runs-on:
+      image: whatever

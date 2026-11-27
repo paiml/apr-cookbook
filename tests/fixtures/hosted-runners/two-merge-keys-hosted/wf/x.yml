@@ -1,0 +1,8 @@
+x: &h
+  runs-on: [self-hosted]
+y: &u
+  runs-on: ubuntu-latest
+jobs:
+  a:
+    <<: *h
+    <<: *u

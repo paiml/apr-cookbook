@@ -1,0 +1,6 @@
+jobs:
+  a:
+    name : "foo
+    runs-on: [self-hosted, Linux]
+  b:
+    runs-on: ubuntu-latest

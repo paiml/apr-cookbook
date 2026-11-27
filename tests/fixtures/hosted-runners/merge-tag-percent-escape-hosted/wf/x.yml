@@ -1,0 +1,5 @@
+base: &b
+  runs-on: ubuntu-latest
+jobs:
+  j:
+    !!%6Derge x: *b

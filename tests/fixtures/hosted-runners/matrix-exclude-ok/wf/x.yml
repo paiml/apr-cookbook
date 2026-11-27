@@ -1,0 +1,9 @@
+jobs:
+  a:
+    strategy:
+      matrix:
+        os: [self-hosted]
+        rust: [stable, nightly]
+        exclude:
+          - rust: nightly
+    runs-on: ${{ matrix.os }}

@@ -1,0 +1,7 @@
+jobs:
+  a:
+    runs-on: [self-hosted]
+---
+jobs:
+  b:
+    runs-on: [self-hosted]
