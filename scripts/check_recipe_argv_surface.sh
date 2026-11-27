@@ -36,6 +36,7 @@ S=""      # text being scanned
 POS=0     # cursor into S
 SCALAR="" # last scalar parsed
 ITEMS=()  # argv items parsed from one recipe
+WHY=""    # reason a scan failed closed
 NONSTR=0  # 1 when an argv item is an unquoted YAML non-string (int, bool, null, ...)
 
 # True when an unquoted YAML scalar would load as a non-string (PyYAML rules, the subset
@@ -51,7 +52,9 @@ is_nonstr_scalar() {
   [[ $v =~ ^[-+]?[0-9_]*\.[0-9_]*([eE][-+]?[0-9]+)?$ ]] && [[ $v =~ [0-9] ]] && return 0
   [[ $v =~ ^[-+]?[0-9][0-9_]*[eE][-+]?[0-9]+$ ]] && return 0
   [[ $v =~ ^[-+]?\.(inf|Inf|INF)$ || $v == .nan || $v == .NaN || $v == .NAN ]] && return 0
-  [[ $v =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] && return 0
+  [[ $v =~ ^[0-9]{4}-[0-9]{1,2}-[0-9]{1,2}($|[Tt\ \t]) ]] && return 0
+  [[ $v =~ ^[-+]?[0-9][0-9_]*(:[0-5]?[0-9])+(\.[0-9_]*)?$ ]] && return 0
+  [[ $v =~ ^[-+]0x ]] && return 0
   return 1
 }
 
@@ -90,6 +93,10 @@ decode_hex() {
   fi
   POS=$((POS + n))
   cp=$((16#$h))
+  if [ "$cp" -gt 1114111 ]; then
+    unsupported "escape beyond U+10FFFF"
+    return 1
+  fi
   if [ "$cp" -ge 1 ] && [ "$cp" -lt 128 ]; then
     printf -v h '%b' "$(printf '\\x%02x' "$cp")"
     out+=$h
@@ -185,9 +192,62 @@ parse_scalar() {
   SCALAR=$out
 }
 
+# Fail closed: record the unsupported construct in WHY and return 1.
+unsupported() {
+  WHY="unsupported YAML construct: $1"
+  return 1
+}
+
+# True when the previous character is a space or tab (so a `#` there starts a comment).
+prev_is_blank() {
+  [ "${S:POS-1:1}" = ' ' ] || [ "${S:POS-1:1}" = $'\t' ]
+}
+
+# Fail closed on an unquoted argv item that is not a plain string scalar: a tag, anchor,
+# alias, directive, nested collection or mapping. $1 is the item's first character and
+# $2 its parsed text.
+check_plain_item() {
+  case $1 in
+    '!') unsupported "tag (!) on an argv item"; return 1 ;;
+    '&') unsupported "anchor (&) on an argv item"; return 1 ;;
+    '*') unsupported "alias (*) as an argv item"; return 1 ;;
+    '[' | '{') unsupported "nested collection as an argv item"; return 1 ;;
+    '?' | '%' | '@' | '`') unsupported "indicator $1 starting an argv item"; return 1 ;;
+    ':') unsupported "mapping indicator (:) starting an argv item"; return 1 ;;
+    '-') if is_blank_or_eol "${2:1:1}"; then unsupported "nested sequence as an argv item"; return 1; fi ;;
+  esac
+  if [[ $2 == *": "* || $2 == *":" || $2 == *":"$'\t'* ]]; then
+    unsupported "mapping (key: value) as an argv item"
+    return 1
+  fi
+}
+
+# After the sequence: only blanks, comments and line breaks may follow before the end of
+# the text or a new column-0 key; anything else is a continuation this scanner skips.
+check_seq_end() {
+  skip_ws
+  if [ -n "${S:POS:1}" ] && [ "${S:POS-1:1}" != $'\n' ]; then
+    unsupported "text after or inside the argv sequence"
+  fi
+}
+
+# Column (0-based) of POS within its line; fails when POS is on the `argv:` line itself.
+col_of() {
+  local i=$POS
+  COL=0
+  while [ "$i" -gt 0 ]; do
+    i=$((i - 1))
+    if [ "${S:i:1}" = $'\n' ]; then
+      return 0
+    fi
+    COL=$((COL + 1))
+  done
+  return 1
+}
+
 # Parse the argv sequence at POS into ITEMS. Flow `[a, b]` or block `- a` lines.
 parse_argv() {
-  local c skipped start
+  local c start first expect=item dash_col=-1
   ITEMS=()
   skip_ws
   c=${S:POS:1}
@@ -197,28 +257,43 @@ parse_argv() {
       skip_ws
       c=${S:POS:1}
       case $c in
-        '') return 1 ;;
+        '') unsupported "unterminated flow sequence" || return 1 ;;
         ']')
           POS=$((POS + 1))
-          return 0
+          check_seq_end
+          return
           ;;
-        ',') POS=$((POS + 1)) ;;
-        '[' | '{' | '}') return 1 ;;
+        ',')
+          [ "$expect" = sep ] || unsupported "empty entry in flow sequence" || return 1
+          expect=item
+          POS=$((POS + 1))
+          ;;
+        '[' | '{' | '}') unsupported "nested collection or stray $c in flow sequence" || return 1 ;;
         *)
+          [ "$expect" = item ] || unsupported "flow scalar continued over lines or without a comma" || return 1
+          first=$c
           start=$POS
           parse_scalar flow || return 1
           # A scalar that consumed nothing would loop forever: fail closed.
-          [ "$POS" -gt "$start" ] || return 1
+          [ "$POS" -gt "$start" ] || unsupported "unreadable flow item" || return 1
+          case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1 ;; esac
           ITEMS+=("$SCALAR")
+          expect=sep
           ;;
       esac
-    done
+          done
   elif [ "$c" = '-' ] && is_blank_or_eol "${S:POS+1:1}"; then
     while :; do
       skip_ws
       c=${S:POS:1}
       if [ "$c" != '-' ] || ! is_blank_or_eol "${S:POS+1:1}"; then
         break
+      fi
+      col_of || unsupported "block sequence on the argv: line" || return 1
+      if [ "$dash_col" -lt 0 ]; then
+        dash_col=$COL
+      elif [ "$COL" -ne "$dash_col" ]; then
+        unsupported "block item indented differently from the first (wrapped scalar or nesting)" || return 1
       fi
       POS=$((POS + 1))
       while [ "${S:POS:1}" = ' ' ] || [ "${S:POS:1}" = $'\t' ]; do
@@ -228,41 +303,51 @@ parse_argv() {
       # A null item (`-` then a line break), a block scalar (`|`, `>`) or a comment-only
       # item is a form this scanner does not read: fail closed rather than skip it.
       case $c in
-        '' | $'\n' | $'\r' | '#' | '|' | '>') return 1 ;;
+        '' | $'\n' | $'\r' | '#' | '|' | '>') unsupported "null item, comment-only item or block scalar in argv" || return 1 ;;
       esac
+      first=$c
       parse_scalar block || return 1
+      case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1 ;; esac
       ITEMS+=("$SCALAR")
       # Nothing but a comment may follow the item on its line (no wrapped scalars).
-      skipped=0
       while [ "${S:POS:1}" = ' ' ] || [ "${S:POS:1}" = $'\t' ]; do
         POS=$((POS + 1))
-        skipped=1
       done
       c=${S:POS:1}
       case $c in
         '' | $'\n' | $'\r') ;;
-        '#') [ "$skipped" -eq 1 ] || return 1 ;;
-        *) return 1 ;;
+        '#') prev_is_blank || unsupported "# not preceded by a blank" || return 1 ;;
+        *) unsupported "text after a quoted argv item" || return 1 ;;
       esac
     done
-    # The sequence must end at the end of the text or at a new top-level key (column 0);
-    # an indented line here is a continuation this scanner did not consume.
-    if [ -n "$c" ] && [ "${S:POS-1:1}" != $'\n' ]; then
-      return 1
-    fi
+    check_seq_end || return 1
     [ "${#ITEMS[@]}" -gt 0 ]
   else
+    unsupported "argv is neither a flow nor a block sequence"
+  fi
+}
+
+# Print the line number of the one column-0 `$2:` key of FILE. Fails closed on none, on a
+# second one (it could sit inside a multi-line quoted scalar) and on a multi-document file.
+single_key_line() {
+  local f=$1 key=$2 lines count
+  if grep -Eq '^(---|\.\.\.)' -- "$f"; then
+    WHY="unsupported YAML construct: document marker (multi-document file)"
     return 1
   fi
+  lines=$({ grep -En "^$key:" -- "$f" || true; } | cut -d: -f1)
+  count=$(printf '%s' "$lines" | grep -c . || true)
+  if [ "$count" -ne 1 ]; then
+    WHY="expected exactly one top-level $key: key, found $count"
+    return 1
+  fi
+  printf '%s\n' "$lines"
 }
 
 # Read the top-level `id:` scalar of FILE into RID.
 read_id() {
   local f=$1 ln
-  ln=$({ grep -En '^id:' -- "$f" || true; } | tail -n 1 | cut -d: -f1)
-  if [ -z "$ln" ]; then
-    return 1
-  fi
+  ln=$(single_key_line "$f" id) || return 1
   S=$(tail -n +"$ln" -- "$f")
   S=${S#id:}
   POS=0
@@ -275,10 +360,7 @@ read_id() {
 # Read the top-level `argv:` sequence of FILE into ITEMS.
 read_argv() {
   local f=$1 ln
-  ln=$({ grep -En '^argv:' -- "$f" || true; } | tail -n 1 | cut -d: -f1)
-  if [ -z "$ln" ]; then
-    return 1
-  fi
+  ln=$(single_key_line "$f" argv) || return 1
   S=$(tail -n +"$ln" -- "$f")
   S=${S#argv:}
   POS=0
@@ -309,12 +391,13 @@ n=0
 declare -A listed_set=()
 for f in "${files[@]}"; do
   if ! read_id "$f"; then
-    echo "check_recipe_argv_surface.sh: $f: no top-level id" >&2
+    echo "check_recipe_argv_surface.sh: $f: ${WHY:-no top-level id}" >&2
     exit 1
   fi
   NONSTR=0
+  WHY=""
   if ! read_argv "$f"; then
-    echo "check_recipe_argv_surface.sh: $f: no argv sequence" >&2
+    echo "check_recipe_argv_surface.sh: $f: ${WHY:-no argv sequence}" >&2
     exit 1
   fi
   if [ "$NONSTR" -ne 0 ]; then
