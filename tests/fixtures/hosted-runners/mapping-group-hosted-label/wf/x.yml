@@ -1,0 +1,5 @@
+jobs:
+  big:
+    runs-on:
+      group: larger-runners
+      labels: ubuntu-latest
