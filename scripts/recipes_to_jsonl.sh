@@ -131,7 +131,7 @@ row() {
     sha=$(sha256sum "$f" | cut -d' ' -f1)
     # yq drops leading empty or comment-only documents, so more than one column-0 document marker
     # (CR stripped) is rejected before parsing, as Python's safe_load refuses a multi-document stream
-    nmark=$(sed 's/\r$//' "$f" | grep -c -E '^---( |$)' || true)
+    nmark=$(sed 's/\r$//' "$f" | grep -c -E '^---([[:space:]]|$)' || true)
     if [ "$nmark" -gt 1 ]; then
         printf 'ERROR: %s is not a single YAML mapping (more than one document marker)\n' "$f" >&2
         exit 1
