@@ -128,6 +128,29 @@ self_test() {
     row "F5a non-ASCII is escaped \\uXXXX (ensure_ascii)" "ok" "$(rj uni "${base}min_apr: \"0.2.0\xe2\x80\x94beta\"\n" | grep -qF '0.2.0\u2014beta' && echo ok || echo no)"
     row "F5b whole-number float keeps its point (1.0)" "ok" "$(rj flt "${base}min_apr: 1.0\n" | grep -qF '"min_apr": 1.0' && echo ok || echo no)"
     row "F5c falsy models: \"\" and expect: \"\" succeed (Python or {})" "0" "$(rj falsy 'id: a\nargv: [apr, run]\nmodels: ""\nexpect: ""\n' | cut -d'|' -f1)"
+    # #494 quorum findings (4ed9940): the same derivation parity, plus rc/ENV plumbing.
+    row "A multi-doc: leading empty document ('---' twice) is rc 1 (Python ComposerError)" "1" "$(rj mdA '---\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "A multi-doc: leading comment-only document is rc 1" "1" "$(rj mdB '---\n# c\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "A multi-doc: CRLF twin of the empty-leading-document case is rc 1" "1" "$(rj mdC '---\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
+    row "A multi-doc: CRLF twin of the comment-leading case is rc 1" "1" "$(rj mdD '---\r\n# c\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
+    row "A single document with ONE leading '---' still derives (rc 0)" "0" "$(rj mdE '---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "E models: [{}] (non-mapping) is rc 1 (Python AttributeError)" "1" "$(rj nmod 'id: a\nargv: [apr, run]\nmodels: [{}]\n' | cut -d'|' -f1)"
+    row "E expect: [1] (non-mapping) is rc 1" "1" "$(rj nexp 'id: a\nargv: [apr, run]\nexpect: [1]\n' | cut -d'|' -f1)"
+    # C: an empty corpus must stay rc 2 THROUGH check() (a fixture repo with scripts but no recipes).
+    local ec="$t/empty" crc=0
+    mkdir -p "$ec/recipes/apr" "$ec/evidence/recipes" "$ec/contracts"
+    cp -r scripts "$ec/scripts"
+    (cd "$ec" && "$BASH" scripts/check_recipe_shape.sh > /dev/null 2>&1) || crc=$?
+    row "C empty corpus stays rc 2 through check()" "2" "$crc"
+    # D: the missing-tool rows assert the rc AND the message, linking the REAL "$PV" (not a hardcoded pv).
+    local nj="$t/nojq" jrc=0 jerr
+    mkdir -p "$nj"; ln -sf "$(command -v yq)" "$nj/yq"; ln -sf "$(command -v "$PV")" "$nj/pv"
+    jerr=$(PV=pv PATH="$nj" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || jrc=$?
+    row "D missing jq is ENV: rc 2 and names jq" "2 ENV: jq is missing" "$jrc $jerr"
+    local ny="$t/noyq2" yrc2=0 yerr
+    mkdir -p "$ny"; ln -sf "$(command -v jq)" "$ny/jq"; ln -sf "$(command -v "$PV")" "$ny/pv"
+    yerr=$(PV=pv PATH="$ny" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || yrc2=$?
+    row "D missing yq is ENV: rc 2 and names yq" "2 ENV: yq is missing" "$yrc2 $yerr"
     local bl=skipped
     if command -v bashrs > /dev/null 2>&1; then bl=0; bashrs lint scripts/recipes_to_jsonl.sh > /dev/null 2>&1 || bl=$?; fi
     row "F1 bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
