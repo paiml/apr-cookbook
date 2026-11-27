@@ -458,7 +458,7 @@ QS=$'\001' # blanked quoted scalar; control chars are refused, so it never occur
 # open at line end (a multi-line quoted scalar), an invalid double-quote escape and text
 # glued to a closing quote are refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=$DEPTH
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=$DEPTH stk=$FSTK
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
@@ -483,7 +483,12 @@ strip_line() {
         esac
         if [ "$c" = '[' ] || [ "$c" = '{' ]; then
           if [ "$opens" -eq 1 ]; then
+            if [ "${stk: -1}" = "{" ] && { [ "$sig" = "{" ] || [ "$sig" = "," ]; }; then
+              WHY="unsupported YAML construct: flow collection as a mapping key"
+              return 1
+            fi
             depth=$((depth + 1))
+            stk+=$c
             sig=$c
           else
             sig=x
@@ -548,7 +553,7 @@ strip_line() {
         ;;
     esac
     case $c in
-      ']' | '}') if [ "$depth" -gt 0 ]; then depth=$((depth - 1)); fi ;;
+      ']' | '}') if [ "$depth" -gt 0 ]; then depth=$((depth - 1)); stk=${stk%?}; fi ;;
     esac
     out+=$c
     sig=$c
@@ -557,6 +562,7 @@ strip_line() {
   done
   STRIPPED=$out
   DEPTH=$depth
+  FSTK=$stk
 }
 
 # Refuse (return 1, WHY set) a whole document that holds a construct this checker does
@@ -583,6 +589,7 @@ check_document() {
     return 1
   fi
   DEPTH=0
+  FSTK=""
   local prev_end="" had_depth raw pre blk=-1
   while IFS= read -r line || [ -n "$line" ]; do
     raw=$line
@@ -592,6 +599,10 @@ check_document() {
       blk=-1
     fi
     had_depth=$DEPTH
+    if [ "${FSTK: -1}" = "{" ] && [[ $raw =~ ^[[:space:]]*[\[\{] && $prev_end =~ [\{,]$ ]]; then
+      WHY="unsupported YAML construct: flow collection as a mapping key"
+      return 1
+    fi
     strip_line "$line" || return 1
     line=$STRIPPED
     if [ "$had_depth" -gt 0 ] && [[ -n $line && ! $line =~ ^[[:space:]]*[\]\}] ]] &&
@@ -599,7 +610,7 @@ check_document() {
       WHY="unsupported YAML construct: multiline plain scalar inside a flow collection"
       return 1
     fi
-    if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]] && [[ -z $prev_end || ! $prev_end =~ [:-]$ ]]; then
+    if [ "$had_depth" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]] && [[ -z $prev_end || ! ( $prev_end =~ :$ || $prev_end =~ ^[[:space:]]*-([[:space:]]+-)*$ ) ]]; then
       WHY="unsupported YAML construct: flow collection continuing a plain scalar"
       return 1
     fi
