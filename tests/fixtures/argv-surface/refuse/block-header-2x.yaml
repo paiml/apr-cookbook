@@ -1,0 +1,4 @@
+id: fx
+argv: [apr, run, --input, x]
+note: |2x
+  x

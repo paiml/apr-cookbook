@@ -1,0 +1,5 @@
+id: fx
+argv: [apr, run, --input, x]
+url: https://example.org/a
+note: |2
+    plain words here

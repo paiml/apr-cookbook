@@ -371,6 +371,7 @@ read_id() {
   parse_scalar block || return 1
   RID=$SCALAR
   case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1 ;; esac
+  case $first in '|' | '>') WHY="id is a block scalar"; return 1 ;; esac
   if [ "$NONSTR" -ne 0 ]; then
     WHY="id is not a string scalar"
     return 1
@@ -446,7 +447,7 @@ QS=$'\001' # blanked quoted scalar; control chars are refused, so it never occur
 # open at line end (a multi-line quoted scalar), an invalid double-quote escape and text
 # glued to a closing quote are refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=0
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
@@ -458,7 +459,8 @@ strip_line() {
       '"' | "'")
         opens=0
         case $sig in
-          '' | '[' | '{' | ',') opens=1 ;;
+          '' | '[' | '{') opens=1 ;;
+          ',') if [ "$depth" -gt 0 ]; then opens=1; fi ;;
           ':') if [ "$ws" -eq 1 ] || [[ $out =~ ${QS}[[:space:]]*:$ ]]; then opens=1; fi ;;
           '-') if [[ $out =~ ^([[:space:]]*-[[:space:]]+)+$ ]]; then opens=1; fi ;;
         esac
@@ -483,6 +485,11 @@ strip_line() {
               if [ "$hexn" -gt 0 ]; then
                 if [ "${#s}" -lt $((i + hexn)) ] || [[ ! ${s:i:hexn} =~ ^[0-9a-fA-F]+$ ]]; then
                   WHY="unsupported YAML construct: invalid hex escape in a double-quoted scalar"
+                  return 1
+                fi
+                cp=$((16#${s:i:hexn}))
+                if [ "$cp" -gt 1114111 ] || { [ "$cp" -ge 55296 ] && [ "$cp" -le 57343 ]; }; then
+                  WHY="unsupported YAML construct: escape beyond U+10FFFF or a UTF-16 surrogate"
                   return 1
                 fi
                 i=$((i + hexn))
@@ -510,6 +517,10 @@ strip_line() {
           continue
         fi
         ;;
+    esac
+    case $c in
+      '[' | '{') depth=$((depth + 1)) ;;
+      ']' | '}') if [ "$depth" -gt 0 ]; then depth=$((depth - 1)); fi ;;
     esac
     out+=$c
     sig=$c
@@ -557,21 +568,30 @@ check_document() {
       WHY="unsupported YAML construct: tag (!), anchor (&) or alias (*)"
       return 1
     fi
-    if [[ $line =~ (^[[:space:]]*(-[[:space:]]+)*|:[[:space:]]+|[\[\{,][[:space:]]*)[@\`%] ]]; then
+    if [[ $line =~ (^[[:space:]]*(-[[:space:]]+)*|:[[:space:]]+|[\[\{,][[:space:]]*|${QS}[[:space:]]*:[[:space:]]*)[@\`%] ]]; then
       WHY="unsupported YAML construct: reserved indicator (@ \` %) at a value start"
       return 1
     fi
-    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*: || $line =~ [\{,][[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) ]]; then
+    if [[ $line =~ [\]\}][[:space:]]*: || $line =~ ^[[:space:]]*: || $line =~ [\{,][[:space:]]*:([[:space:]]|$) || $line =~ (^|[[:space:][{,])\?([[:space:]]|$) || $line =~ ${QS}[[:space:]]*:[[:space:]]*[?:] ]]; then
       WHY="unsupported YAML construct: flow collection, empty or explicit (?) mapping key"
       return 1
     fi
-    sep=${line//[!:]/}
-    if [[ $line != *[\[\{]* && ${#sep} -ge 2 && $line == *": "*": "* ]]; then
-      WHY="unsupported YAML construct: unquoted ': ' inside a plain value"
+    if [[ ! $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\[\{] ]]; then
+      sep=${line//: /$'\002'}
+      sep=${sep/%:/$'\002'}
+      sep=${sep//[!$'\002']/}
+      if [ "${#sep}" -ge 2 ]; then
+        WHY="unsupported YAML construct: unquoted ': ' inside a plain value"
+        return 1
+      fi
+    fi
+    if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>] ]] &&
+      [[ ! $line =~ [\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
+      WHY="unsupported YAML construct: invalid block scalar header"
       return 1
     fi
-    if [[ $line =~ [|\>][0-9+-]*[[:space:]]*$ && $line =~ [|\>][+-]?0 ]]; then
-      WHY="unsupported YAML construct: invalid block scalar header"
+    if [[ $line == "$QS"* ]]; then
+      WHY="unsupported YAML construct: quoted top-level key"
       return 1
     fi
     rest=${line//$flow_sep/$'\n'}
