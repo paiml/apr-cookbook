@@ -215,6 +215,8 @@ check_plain_item() {
     '&') unsupported "anchor (&) on an argv item"; return 1 ;;
     '*') unsupported "alias (*) as an argv item"; return 1 ;;
     '[' | '{') unsupported "nested collection as an argv item"; return 1 ;;
+    ',' | ']' | '}') unsupported "flow indicator $1 starting a scalar"; return 1 ;;
+    '|' | '>') unsupported "block scalar indicator $1 starting a scalar"; return 1 ;;
     '?' | '%' | '@' | '`') unsupported "indicator $1 starting an argv item"; return 1 ;;
     ':') unsupported "mapping indicator (:) starting an argv item"; return 1 ;;
     '-') if is_blank_or_eol "${2:1:1}"; then unsupported "nested sequence as an argv item"; return 1; fi ;;
@@ -283,7 +285,7 @@ parse_argv() {
           parse_scalar flow || return 1
           # A scalar that consumed nothing would loop forever: fail closed.
           [ "$POS" -gt "$start" ] || unsupported "unreadable flow item" || return 1
-          case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1 ;; esac
+          case $first in '"' | "'") ;; *) check_plain_item "$first" "$SCALAR" || return 1; if [[ $SCALAR == *\?* ]]; then unsupported "? inside a plain flow scalar"; return 1; fi ;; esac
           ITEMS+=("$SCALAR")
           expect=sep
           ;;
