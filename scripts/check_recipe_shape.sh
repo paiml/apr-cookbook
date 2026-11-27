@@ -58,9 +58,11 @@ check() {
 }
 
 self_test() {
-    local t bad=0
+    local t bad=0 root
+    # The managed temp root is TMPDIR (the runner's), without a trailing slash; /tmp when unset.
+    root="${TMPDIR:-/tmp}"; root="${root%/}"; [ -n "$root" ] || root=/tmp
     t=$(mktemp -d)
-    case "$t" in /tmp/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
+    case "$t" in "$root"/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
     row() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1 (got $3, wanted $2)"; bad=$((bad + 1)); fi; }
     # RED 1: focus_count reads by_shape only; a message that repeats the token must not inflate it.
     row "focus_count reads by_shape only (a message cannot inflate it)" "2" "$(printf '%s' '{"results":[{"message":"cookbook-recipe-v1=99"}],"by_shape":["cookbook-recipe-v1=2"]}' | focus_count)"
@@ -165,7 +167,7 @@ self_test() {
     row "bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
     row "header exit-code line names the no-yq case" "ok" "$(grep -E '^# Exit:' scripts/check_recipe_shape.sh | grep -q 'no yq' && echo ok || echo no)"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
-        case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
+        case "$t" in "$root"/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi
     echo "check_recipe_shape self-test: $([ "$bad" = 0 ] && echo PASS || echo FAIL) ($bad failed)"
     [ "$bad" = 0 ]
