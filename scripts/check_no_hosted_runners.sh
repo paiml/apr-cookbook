@@ -79,13 +79,22 @@ check() {
     fi
     # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
     # jobs": refuse instead of printing PASS (quorum finding, #454).
-    WF_FILES=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+    if [ ! -d "$WF_DIR" ]; then
+        echo "ENV: workflow dir $WF_DIR does not exist" >&2
+        return 2
+    fi
+    # Symlinks count as workflow files (main's glob read them): a link to a hosted job must FAIL, not vanish.
+    WF_FILES=$(find "$WF_DIR" -maxdepth 1 \( -type f -o -type l \) \( -name '*.yml' -o -name '*.yaml' \) | sort)
     nwf=$(printf '%s\n' "$WF_FILES" | sed '/^$/d' | wc -l)
     if [ "$nwf" -eq 0 ]; then
         echo "REFUSED: no workflow files under $WF_DIR -- zero files is broken wiring, not a clean pool"
         return 2
     fi
     actual=$(hosted_jobs) || return 1
+    if [ -e "$BASELINE" ] && [ ! -r "$BASELINE" ]; then
+        echo "ENV: baseline $BASELINE exists but is unreadable" >&2
+        return 2
+    fi
     base=$(grep -v -E "^ *#" "$BASELINE" 2> /dev/null | grep -v -E "^ *$" | sort) || base=""
     while IFS= read -r line; do
         [ -n "$line" ] || continue
@@ -149,6 +158,11 @@ self_test() {
     row "a matrix of self-hosted label lists resolves and passes" 0 "$wf" "$base"
     mkdir -p "$ST_DIR/empty"
     row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$ST_DIR/empty" "$base"
+    row "MUST-RED: a missing workflow dir is refused (rc 2)" 2 "$ST_DIR/no-such-dir" "$base"
+    mkdir -p "$ST_DIR/lw"
+    printf 'jobs:\n  s:\n    runs-on: ubuntu-latest\n' > "$ST_DIR/lw/hosted.txt"
+    (cd "$ST_DIR/lw" && ln -sfn hosted.txt x.yml)
+    row "MUST-RED: a symlinked workflow file to a hosted job is read, not skipped" 1 "$ST_DIR/lw" "$base"
     printf 'jobs:\n  big:\n    runs-on:\n      group: larger-runners\n      labels: ubuntu-latest\n' > "$wf/x.yml"
     row "MUST-RED: mapping-form runs-on {group, labels: ubuntu-latest} (hosted larger runners)" 1 "$wf" "$base"
     printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$wf/x.yml"
