@@ -1,0 +1,5 @@
+base: &b
+  runs-on: ubuntu-latest
+jobs:
+  j:
+    !<tag:yaml.org,2002:%6Derge> x: *b

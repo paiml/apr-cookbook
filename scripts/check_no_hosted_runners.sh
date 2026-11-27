@@ -36,7 +36,7 @@ set -euo pipefail
 
 BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
 # A YAML tag naming merge (!!merge, !<...:merge>, !e!merge) or a %TAG directive: refused from raw text.
-MERGE_TAG_RE='![^ ]*merge|%TAG'
+MERGE_TAG_RE='![^ =]|%TAG'
 WF_DIR=${WF_DIR:-.github/workflows}
 
 # One JSON document per workflow file in, "<file> <job>" lines out, for every job that is hosted,
