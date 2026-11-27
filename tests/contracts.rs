@@ -30,6 +30,8 @@ const CONTRACT_FILES: &[&str] = &[
     // #440: the recipes/apr/** SHACL shape (pv shapes gate over evidence/recipes/recipes.jsonl).
     "cookbook-recipe-v1.yaml",
     "docs-schema-v1.yaml",
+    // #477: README.md as a readme:Readme SHACL shape (pv-readme --check).
+    "readme-root.yaml",
     "flash-attention-v1.yaml",
     // architecture-demos (PMAT-300+): one per family + cross-family detector (PMAT-309).
     "inference-arch-alias-resolver-v1.yaml",
