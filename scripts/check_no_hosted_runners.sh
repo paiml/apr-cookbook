@@ -47,6 +47,9 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # yq's own view: a tag outside the core set, and a mapping key that is not a string.
     local tag_q='[.. | tag | select(. != "!!map" and . != "!!str" and . != "!!seq" and . != "!!bool" and . != "!!int" and . != "!!float" and . != "!!null")] | length'
     local key_q='[.. | select(tag == "!!map") | keys | .[] | select(tag != "!!str")] | length'
+    # A mapping whose keys are not unique in yq's view: a quoted "on" and a bare on are both the
+    # string "on" to yq, so the JSON carries two keys and jq keeps the last.
+    local dup_q='[.. | select(tag == "!!map") | select((keys | length) != (keys | unique | length))] | length'
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
     local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
     tmp=$(mktemp -d)
@@ -89,10 +92,12 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         # parse, which collapses them. Refuse. An empty answer (yq error) also refuses.
         yq "$tag_q" "$f" > "$tmp/odd" 2> /dev/null || true
         yq "$key_q" "$f" > "$tmp/nonstr" 2> /dev/null || true
+        yq "$dup_q" "$f" > "$tmp/dup" 2> /dev/null || true
         read -r odd < "$tmp/odd" || odd=""
         read -r nonstr < "$tmp/nonstr" || nonstr=""
-        if [ "$odd" != 0 ] || [ "$nonstr" != 0 ]; then
-            echo "FAIL  ${f##*/}: a YAML tag outside the core set, or a non-string mapping key: refused, not read" >&2
+        read -r dup < "$tmp/dup" || dup=""
+        if [ "$odd" != 0 ] || [ "$nonstr" != 0 ] || [ "$dup" != 0 ]; then
+            echo "FAIL  ${f##*/}: a YAML tag outside the core set, a non-string mapping key, or a repeated mapping key: refused, not read" >&2
             fail=1
             continue
         fi

@@ -1,0 +1,7 @@
+jobs:
+  j:
+    strategy:
+      matrix:
+        os: [self-hosted]
+        include: [{os: ubuntu-latest}]
+    runs-on: ${{ matrix.os }}
