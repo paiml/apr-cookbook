@@ -50,6 +50,9 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # A mapping whose keys are not unique in yq's view: a quoted "on" and a bare on are both the
     # string "on" to yq, so the JSON carries two keys and jq keeps the last.
     local dup_q='[.. | select(tag == "!!map") | select((keys | length) != (keys | unique | length))] | length'
+    # An explicit !!bool on a label that is not a canonical boolean: yq's JSON writes it as false,
+    # PyYAML raises. Plain true/false are !!bool with canonical text, so they pass.
+    local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
     local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
     tmp=$(mktemp -d)
@@ -96,7 +99,9 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         read -r odd < "$tmp/odd" || odd=""
         read -r nonstr < "$tmp/nonstr" || nonstr=""
         read -r dup < "$tmp/dup" || dup=""
-        if [ "$odd" != 0 ] || [ "$nonstr" != 0 ] || [ "$dup" != 0 ]; then
+        yq "$bool_q" "$f" > "$tmp/bool" 2> /dev/null || true
+        read -r boolbad < "$tmp/bool" || boolbad=""
+        if [ "$odd" != 0 ] || [ "$nonstr" != 0 ] || [ "$dup" != 0 ] || [ "$boolbad" != 0 ]; then
             echo "FAIL  ${f##*/}: a YAML tag outside the core set, a non-string mapping key, or a repeated mapping key: refused, not read" >&2
             fail=1
             continue
