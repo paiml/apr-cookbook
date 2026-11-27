@@ -97,14 +97,18 @@ fn load_recipe(f: &Path) -> Result<(String, Vec<String>, String), String> {
     if rid.is_empty() {
         return Err(format!("{}: recipe has no id", f.display()));
     }
-    let hosts: Vec<String> = r["hosts"]
-        .as_sequence()
-        .map(|s| {
-            s.iter()
-                .filter_map(|h| h.as_str().map(String::from))
-                .collect()
-        })
-        .unwrap_or_default();
+    let entries = r["hosts"].as_sequence().cloned().unwrap_or_default();
+    // A non-string entry (a stray `-`, a bare number) must refuse the recipe, never shrink
+    // the cell count: Python died on it (rc 1), so this is the same fail-closed outcome.
+    if let Some(i) = entries.iter().position(|h| !h.is_string()) {
+        return Err(format!(
+            "{rid}: host {i} is not a string -- refusing the recipe"
+        ));
+    }
+    let hosts: Vec<String> = entries
+        .iter()
+        .filter_map(|h| h.as_str().map(String::from))
+        .collect();
     if hosts.is_empty() {
         return Err(format!(
             "{rid}: declares no hosts -- nothing could ever vouch for it"
@@ -365,6 +369,18 @@ fn self_test() -> i32 {
     fx.reset();
     fs::remove_file(fx.xdir.join("CURRENT")).expect("unlink CURRENT");
     row("REFUSED: no CURRENT file -> rc 2", 2, fx.run());
+    fx.reset();
+    fs::write(
+        &fx.rf,
+        "schema: cookbook-recipe/v1\nid: r1\nhosts:\n- lambda\n- 2080\n",
+    )
+    .expect("bad hosts");
+    row(
+        "MUST-RED: a non-string host entry refuses the recipe -> FAIL",
+        1,
+        fx.run(),
+    );
+    fs::write(&fx.rf, fx.original).expect("restore");
 
     println!(
         "check_recipe_receipts self-test: {} ({bad} failed)",
