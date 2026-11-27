@@ -6,9 +6,18 @@
 #   2. `pv lint contracts --gate shapes --shape cookbook-recipe-v1` must pass with EXACTLY as many focus
 #      nodes as there are recipes (a gate that saw fewer nodes judged less than it claims).
 #
-# --self-test builds throwaway fixture repos, each with ONE planted defect in the derived rows, and
-# requires the REAL pv shapes gate to refuse every one (rc 1, naming the shape), and the unmodified real
-# rows to pass. A shape that cannot go red validates nothing.
+# --self-test has five groups of rows:
+#   (a) focus_count reads by_shape only; a missing yq or jq is ENV (rc 2, message names the tool);
+#   (b) throwaway fixture repos, each with ONE planted defect in the derived rows, which the REAL pv
+#       shapes gate must refuse (rc 1, naming the property), and the unmodified real rows must pass;
+#       plus one end-to-end row planting the defect in a recipe YAML, derived then gated;
+#   (c) derivation parity with the deleted Python on odd YAML (empty, null, list, multi-document,
+#       non-mapping models/expect, CRLF CURRENT, ASCII escapes, floats, falsy fields);
+#   (d) an empty corpus stays rc 2 through check();
+#   (e) the bashrs lint of recipes_to_jsonl.sh exits 0 (skipped when bashrs is absent), and this
+#       header names the no-yq exit case.
+# A shape that cannot go red validates nothing.
+#
 #
 # Usage: scripts/check_recipe_shape.sh [--self-test]
 # Exit: 0 conforms | 1 violation / drift / count mismatch | 2 ENV (no pv, no jq, no yq)
@@ -31,7 +40,8 @@ focus_count() { # focus_count <pv json> -> the number of cookbook-recipe-v1 focu
 
 check() {
     local out rc n want
-    bash scripts/recipes_to_jsonl.sh --check || return 1
+    rc=0; bash scripts/recipes_to_jsonl.sh --check || rc=$?
+    [ "$rc" = 0 ] || return "$rc"
     rc=0; out=$(gate contracts) || rc=$?
     n=$(printf '%s' "$out" | focus_count)
     want=$(grep -c . evidence/recipes/recipes.jsonl)
@@ -54,10 +64,10 @@ self_test() {
     row() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1 (got $3, wanted $2)"; bad=$((bad + 1)); fi; }
     # RED 1: focus_count reads by_shape only; a message that repeats the token must not inflate it.
     row "focus_count reads by_shape only (a message cannot inflate it)" "2" "$(printf '%s' '{"results":[{"message":"cookbook-recipe-v1=99"}],"by_shape":["cookbook-recipe-v1=2"]}' | focus_count)"
-    # RED 2: no yq on PATH is an ENV failure (rc 2), not a generic rc 1 from the derivation.
-    local nb="$t/noyq" yrc=0; mkdir -p "$nb"; ln -sf "$(command -v jq)" "$nb/jq"; ln -sf "$(command -v pv)" "$nb/pv"
-    PATH="$nb" "$BASH" scripts/check_recipe_shape.sh > /dev/null 2>&1 || yrc=$?
-    row "missing yq is ENV: rc 2" "2" "$yrc"
+    # RED 2: no yq on PATH is an ENV failure (rc 2 and the message "ENV: yq is missing"), not a generic rc 1.
+    local nb="$t/noyq" yrc=0 yerr0; mkdir -p "$nb"; ln -sf "$(command -v jq)" "$nb/jq"; ln -sf "$(command -v "$PV")" "$nb/pv"
+    yerr0=$(PV=pv PATH="$nb" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || yrc=$?
+    row "missing yq is ENV: rc 2 and names yq" "2 ENV: yq is missing" "$yrc $yerr0"
     # fixture <name> <jq filter editing the FIRST real row> [<property>]: a tiny repo holding the
     # contract and the real rows with ONE defect planted in the first row. Echoes "<rc> <focus> <named>".
     fixture() {
@@ -118,43 +128,39 @@ self_test() {
         printf '%s|%s' "$rc" "$(cat "$d/out.jsonl" 2> /dev/null || true)"
     }
     local base='id: a\nargv: [apr, run]\nexpect: {exit: 0}\n'
-    row "F2 empty .yaml is rc 1 (Python AttributeError)" "1" "$(rj empty '' | cut -d'|' -f1)"
-    row "F2 comment-only .yaml is rc 1" "1" "$(rj comment '# nothing\n' | cut -d'|' -f1)"
-    row "F2 null .yaml is rc 1" "1" "$(rj null 'null\n' | cut -d'|' -f1)"
-    row "F2 list .yaml is rc 1" "1" "$(rj list '- a\n- b\n' | cut -d'|' -f1)"
-    row "F3 multi-document .yaml is rc 1 (Python ComposerError)" "1" "$(rj multi "${base}---\nid: b\nargv: [apr, run]\n" | head -n 1 | cut -d'|' -f1)"
-    row "F4 CURRENT with CRLF still counts (Python .strip())" "true" "$(rj crlf "${base}hosts: [h1]\n" '0.2.0-abc\r\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
-    row "F4 CURRENT with leading blank lines still counts" "true" "$(rj blank "${base}hosts: [h1]\n" '\n\n0.2.0-abc\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
-    row "F5a non-ASCII is escaped \\uXXXX (ensure_ascii)" "ok" "$(rj uni "${base}min_apr: \"0.2.0\xe2\x80\x94beta\"\n" | grep -qF '0.2.0\u2014beta' && echo ok || echo no)"
-    row "F5b whole-number float keeps its point (1.0)" "ok" "$(rj flt "${base}min_apr: 1.0\n" | grep -qF '"min_apr": 1.0' && echo ok || echo no)"
-    row "F5c falsy models: \"\" and expect: \"\" succeed (Python or {})" "0" "$(rj falsy 'id: a\nargv: [apr, run]\nmodels: ""\nexpect: ""\n' | cut -d'|' -f1)"
+    row "derive: empty .yaml is rc 1 (Python AttributeError)" "1" "$(rj empty '' | cut -d'|' -f1)"
+    row "derive: comment-only .yaml is rc 1" "1" "$(rj comment '# nothing\n' | cut -d'|' -f1)"
+    row "derive: null .yaml is rc 1" "1" "$(rj null 'null\n' | cut -d'|' -f1)"
+    row "derive: list .yaml is rc 1" "1" "$(rj list '- a\n- b\n' | cut -d'|' -f1)"
+    row "derive: multi-document .yaml is rc 1 (Python ComposerError)" "1" "$(rj multi "${base}---\nid: b\nargv: [apr, run]\n" | head -n 1 | cut -d'|' -f1)"
+    row "derive: CURRENT with CRLF still counts (Python .strip())" "true" "$(rj crlf "${base}hosts: [h1]\n" '0.2.0-abc\r\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
+    row "derive: CURRENT with leading blank lines still counts" "true" "$(rj blank "${base}hosts: [h1]\n" '\n\n0.2.0-abc\n' | grep -o '"receipt_current_pass": true' | cut -d' ' -f2 || true)"
+    row "derive: non-ASCII is escaped \\uXXXX (ensure_ascii)" "ok" "$(rj uni "${base}min_apr: \"0.2.0\xe2\x80\x94beta\"\n" | grep -qF '0.2.0\u2014beta' && echo ok || echo no)"
+    row "derive: whole-number float keeps its point (1.0)" "ok" "$(rj flt "${base}min_apr: 1.0\n" | grep -qF '"min_apr": 1.0' && echo ok || echo no)"
+    row "derive: falsy models: \"\" and expect: \"\" succeed (Python or {})" "0" "$(rj falsy 'id: a\nargv: [apr, run]\nmodels: ""\nexpect: ""\n' | cut -d'|' -f1)"
     # #494 quorum findings (4ed9940): the same derivation parity, plus rc/ENV plumbing.
-    row "A multi-doc: leading empty document ('---' twice) is rc 1 (Python ComposerError)" "1" "$(rj mdA '---\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
-    row "A multi-doc: leading comment-only document is rc 1" "1" "$(rj mdB '---\n# c\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
-    row "A multi-doc: CRLF twin of the empty-leading-document case is rc 1" "1" "$(rj mdC '---\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
-    row "A multi-doc: CRLF twin of the comment-leading case is rc 1" "1" "$(rj mdD '---\r\n# c\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
-    row "A single document with ONE leading '---' still derives (rc 0)" "0" "$(rj mdE '---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
-    row "E models: [{}] (non-mapping) is rc 1 (Python AttributeError)" "1" "$(rj nmod 'id: a\nargv: [apr, run]\nmodels: [{}]\n' | cut -d'|' -f1)"
-    row "E expect: [1] (non-mapping) is rc 1" "1" "$(rj nexp 'id: a\nargv: [apr, run]\nexpect: [1]\n' | cut -d'|' -f1)"
+    row "derive: multi-doc, leading empty document ('---' twice) is rc 1 (Python ComposerError)" "1" "$(rj mdA '---\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "derive: multi-doc, leading comment-only document is rc 1" "1" "$(rj mdB '---\n# c\n---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "derive: multi-doc, CRLF twin of the empty-leading-document case is rc 1" "1" "$(rj mdC '---\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
+    row "derive: multi-doc, CRLF twin of the comment-leading case is rc 1" "1" "$(rj mdD '---\r\n# c\r\n---\r\nid: a\r\nargv: [apr, run]\r\n' | cut -d'|' -f1)"
+    row "derive: single document with ONE leading '---' still derives (rc 0)" "0" "$(rj mdE '---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
+    row "derive: models: [{}] (non-mapping) is rc 1 (Python AttributeError)" "1" "$(rj nmod 'id: a\nargv: [apr, run]\nmodels: [{}]\n' | cut -d'|' -f1)"
+    row "derive: expect: [1] (non-mapping) is rc 1" "1" "$(rj nexp 'id: a\nargv: [apr, run]\nexpect: [1]\n' | cut -d'|' -f1)"
     # C: an empty corpus must stay rc 2 THROUGH check() (a fixture repo with scripts but no recipes).
     local ec="$t/empty" crc=0
     mkdir -p "$ec/recipes/apr" "$ec/evidence/recipes" "$ec/contracts"
     cp -r scripts "$ec/scripts"
     (cd "$ec" && "$BASH" scripts/check_recipe_shape.sh > /dev/null 2>&1) || crc=$?
-    row "C empty corpus stays rc 2 through check()" "2" "$crc"
+    row "check: empty corpus stays rc 2 through check()" "2" "$crc"
     # D: the missing-tool rows assert the rc AND the message, linking the REAL "$PV" (not a hardcoded pv).
     local nj="$t/nojq" jrc=0 jerr
     mkdir -p "$nj"; ln -sf "$(command -v yq)" "$nj/yq"; ln -sf "$(command -v "$PV")" "$nj/pv"
     jerr=$(PV=pv PATH="$nj" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || jrc=$?
-    row "D missing jq is ENV: rc 2 and names jq" "2 ENV: jq is missing" "$jrc $jerr"
-    local ny="$t/noyq2" yrc2=0 yerr
-    mkdir -p "$ny"; ln -sf "$(command -v jq)" "$ny/jq"; ln -sf "$(command -v "$PV")" "$ny/pv"
-    yerr=$(PV=pv PATH="$ny" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || yrc2=$?
-    row "D missing yq is ENV: rc 2 and names yq" "2 ENV: yq is missing" "$yrc2 $yerr"
+    row "missing jq is ENV: rc 2 and names jq" "2 ENV: jq is missing" "$jrc $jerr"
     local bl=skipped
     if command -v bashrs > /dev/null 2>&1; then bl=0; bashrs lint scripts/recipes_to_jsonl.sh > /dev/null 2>&1 || bl=$?; fi
-    row "F1 bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
-    row "F6 header exit-code line names the no-yq case" "ok" "$(grep -E '^# Exit:' scripts/check_recipe_shape.sh | grep -q 'no yq' && echo ok || echo no)"
+    row "bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
+    row "header exit-code line names the no-yq case" "ok" "$(grep -E '^# Exit:' scripts/check_recipe_shape.sh | grep -q 'no yq' && echo ok || echo no)"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
         case "$t" in /tmp/tmp.*) rm -rf -- "$t" ;; *) ;; esac
     fi

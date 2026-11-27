@@ -118,15 +118,33 @@ def py:
 | py
 JQ
 
+# a truthy models or expect must itself be a mapping (Python calls .values() / .get() on it)
+read -r -d '' MAPPING_FILTER <<'JQ' || true
+def truthy: . != null and . != false and . != "" and . != 0 and ((type | IN("array", "object") | not) or length > 0);
+[(.models, .expect) | select(truthy) | select(type != "object")] | length == 0
+JQ
+
 # row FILE: print the JSONL row for one recipe file.
 row() {
-    local f=$1 sha yj rid rcp mf=false
+    local f=$1 sha yj rid rcp nmark mf=false
     local -a hosts=()
     sha=$(sha256sum "$f" | cut -d' ' -f1)
+    # yq drops leading empty or comment-only documents, so more than one column-0 document marker
+    # (CR stripped) is rejected before parsing, as Python's safe_load refuses a multi-document stream
+    nmark=$(sed 's/\r$//' "$f" | grep -c -E '^---( |$)' || true)
+    if [ "$nmark" -gt 1 ]; then
+        printf 'ERROR: %s is not a single YAML mapping (more than one document marker)\n' "$f" >&2
+        exit 1
+    fi
     yj=$(yq -o=json -I=0 '.' "$f")
     # one YAML document that is a mapping, like yaml.safe_load + r.get(...) (Python rc 1 otherwise)
     if ! jq -s -e 'length == 1 and (.[0] | type == "object")' <<< "$yj" > /dev/null 2>&1; then
         printf 'ERROR: %s is not a single YAML mapping (empty, null, multi-document or not an object)\n' "$f" >&2
+        exit 1
+    fi
+    # a truthy models or expect must itself be a mapping (Python calls .values() / .get() on it)
+    if ! jq -e "$MAPPING_FILTER" <<< "$yj" > /dev/null 2>&1; then
+        printf 'ERROR: %s has a models or expect that is not a mapping\n' "$f" >&2
         exit 1
     fi
     # a whole-number float (min_apr: 1.0) must keep its point, as Python's json.dumps does
