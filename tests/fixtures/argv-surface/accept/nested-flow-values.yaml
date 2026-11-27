@@ -1,0 +1,4 @@
+id: fx
+argv: [apr, run, --input, x]
+x: {a: [1, 2], b: {c: d}}
+y: [{a: 1}, [2]]

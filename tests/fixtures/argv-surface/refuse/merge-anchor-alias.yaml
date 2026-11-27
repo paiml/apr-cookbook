@@ -1,0 +1,4 @@
+id: fx
+argv: [apr, run, --input, x]
+base: &a {k: 1}
+extra: {<<: *a}

@@ -1,0 +1,2 @@
+id: "fx" bar
+argv: [apr, run, --input, x]
