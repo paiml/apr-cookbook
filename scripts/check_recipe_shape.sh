@@ -11,7 +11,7 @@
 # rows to pass. A shape that cannot go red validates nothing.
 #
 # Usage: scripts/check_recipe_shape.sh [--self-test]
-# Exit: 0 conforms | 1 violation / drift / count mismatch | 2 ENV (no pv, no jq)
+# Exit: 0 conforms | 1 violation / drift / count mismatch | 2 ENV (no pv, no jq, no yq)
 set -euo pipefail
 
 SHAPE=cookbook-recipe-v1

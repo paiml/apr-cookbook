@@ -21,6 +21,7 @@
 #
 # Zero recipes is REFUSED (rc 2): an empty corpus would let the shape gate decline quietly.
 # Usage: recipes_to_jsonl.sh [--recipes DIR] [--receipts DIR] [--out FILE] [--check]
+# Output is ASCII-only (\uXXXX escapes, like json.dumps); a recipe that is not ONE YAML mapping exits 1.
 # Needs: yq (v4, YAML to JSON), jq, sha256sum, sed, sort, find.
 set -euo pipefail
 
@@ -63,7 +64,8 @@ receipt_current_pass() {
     local rid=$1 sha=$2 cur csha h
     shift 2
     [ -r "$RECEIPTS/CURRENT" ] || return 1
-    read -r cur < "$RECEIPTS/CURRENT" || true
+    # strip like Python's read_text().strip(): leading and trailing whitespace (CR, blank lines)
+    cur=$(jq -Rrs 'sub("^\\s+"; "") | sub("\\s+$"; "")' "$RECEIPTS/CURRENT") || return 1
     case "$cur" in
         *-*) csha=$(cut -d- -f2- <<< "$cur") ;;
         *)   return 1 ;;
@@ -82,15 +84,19 @@ receipt_current_pass() {
 # same spacing and sorted keys as the former derivation (", " and ": "; null fields dropped).
 read -r -d '' ROW_FILTER <<'JQ' || true
 def orn: if . == null or . == false or . == "" or . == 0 or ((type | IN("array", "object")) and length == 0) then null else . end;
+def h4: . as $n | [12, 8, 4, 0] | map((($n / pow(2; .)) | floor) % 16 | "0123456789abcdef"[. : . + 1]) | join("");
+def esc: tojson | explode | map(if . < 128 then ([.] | implode) elif . < 65536 then "\\u" + h4 else (. - 65536) as $c | "\\u" + (55296 + ($c / 1024 | floor) | h4) + "\\u" + (56320 + ($c % 1024) | h4) end) | join("");
 def py:
-    if type == "object" then
-        "{" + ([keys[] as $k | ($k | tojson) + ": " + (.[$k] | py)] | join(", ")) + "}"
+    if type == "object" and has("__float") then "\(.__float).0"
+    elif type == "object" then
+        "{" + ([keys[] as $k | ($k | esc) + ": " + (.[$k] | py)] | join(", ")) + "}"
     elif type == "array" then
         "[" + ([.[] | py] | join(", ")) + "]"
+    elif type == "string" then esc
     else tojson end;
-(.argv // []) as $argv
-| (.models // {}) as $models
-| (.expect // {}) as $expect
+((.argv | orn) // []) as $argv
+| ((.models | orn) // {}) as $models
+| ((.expect | orn) // {}) as $expect
 | ([$argv[] | strings | capture("^\\{model:(?<s>[A-Za-z0-9_-]+)\\}$")? | .s]) as $used
 | {
     id: .id,
@@ -103,7 +109,7 @@ def py:
     model_ref: ([$models[] | (((. | orn) // {}) | .ref)] | if length == 0 then null else . end),
     expect_exit: $expect.exit,
     has_output_check: (($expect | has("stdout_contains")) or ($expect | has("stdout_json")) or ($expect | has("stdout_json_is_object"))),
-    min_apr: .min_apr,
+    min_apr: (if $minfloat and (.min_apr | type) == "number" and .min_apr == (.min_apr | floor) and (.min_apr | fabs) < 1e16 then {__float: .min_apr} else .min_apr end),
     host: (.hosts | orn),
     backend: (.backends | orn),
     receipt_current_pass: $rcp
@@ -114,18 +120,25 @@ JQ
 
 # row FILE: print the JSONL row for one recipe file.
 row() {
-    local f=$1 sha yj rid rcp
+    local f=$1 sha yj rid rcp mf=false
     local -a hosts=()
     sha=$(sha256sum "$f" | cut -d' ' -f1)
     yj=$(yq -o=json -I=0 '.' "$f")
+    # one YAML document that is a mapping, like yaml.safe_load + r.get(...) (Python rc 1 otherwise)
+    if ! jq -s -e 'length == 1 and (.[0] | type == "object")' <<< "$yj" > /dev/null 2>&1; then
+        printf 'ERROR: %s is not a single YAML mapping (empty, null, multi-document or not an object)\n' "$f" >&2
+        exit 1
+    fi
+    # a whole-number float (min_apr: 1.0) must keep its point, as Python's json.dumps does
+    [ "$(yq '.min_apr | tag' "$f")" = '!!float' ] && mf=true
     rid=$(jq -r '.id // "None"' <<< "$yj")
-    mapfile -t hosts < <(jq -r '(.hosts // [])[] | tostring' <<< "$yj")
+    mapfile -t hosts < <(jq -r '(.hosts | arrays)[]? | tostring' <<< "$yj")
     if [ "${#hosts[@]}" -gt 0 ] && receipt_current_pass "$rid" "$sha" "${hosts[@]}"; then
         rcp=true
     else
         rcp=false
     fi
-    jq -r --arg sha "$sha" --argjson rcp "$rcp" "$ROW_FILTER" <<< "$yj"
+    jq -r --arg sha "$sha" --argjson rcp "$rcp" --argjson minfloat "$mf" "$ROW_FILTER" <<< "$yj"
 }
 
 # build: one row per recipe, in list_recipes order.
@@ -157,5 +170,5 @@ if [ "$CHECK" = 1 ]; then
 fi
 
 mkdir -p "$(dirname "$OUT")"
-cp "$TMP" "$OUT"
+cat "$TMP" > "$OUT"
 printf 'wrote %s: %s recipe row(s)\n' "$OUT" "$N"
