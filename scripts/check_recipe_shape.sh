@@ -151,6 +151,11 @@ self_test() {
     row "derive: single document with ONE leading '---' still derives (rc 0)" "0" "$(rj mdE '---\nid: a\nargv: [apr, run]\n' | cut -d'|' -f1)"
     row "derive: models: [{}] (non-mapping) is rc 1 (Python AttributeError)" "1" "$(rj nmod 'id: a\nargv: [apr, run]\nmodels: [{}]\n' | cut -d'|' -f1)"
     row "derive: expect: [1] (non-mapping) is rc 1" "1" "$(rj nexp 'id: a\nargv: [apr, run]\nexpect: [1]\n' | cut -d'|' -f1)"
+    # RED (cop, gate rc contract): malformed fields must be rc 1, never jq's own rc 5.
+    row "derive: argv scalar is rc 1, not jq rc 5" "1" "$(rj argvS 'id: a\nargv: apr\nexpect: {exit: 0}\n' | cut -d'|' -f1)"
+    row "derive: models value that is a number is rc 1, not jq rc 5" "1" "$(rj modnum "${base}models: {m: 1}\n" | cut -d'|' -f1)"
+    # RED (cop): a bare CR is a YAML line break; a CR-only empty-leading document must be rc 1.
+    row "derive: bare-CR empty leading document is rc 1" "1" "$(rj mdH '---\r---\rid: a\rargv: [apr]\rexpect: {exit: 0}\r' | cut -d'|' -f1)"
     # C: an empty corpus must stay rc 2 THROUGH check() (a fixture repo with scripts but no recipes).
     local ec="$t/empty" crc=0
     mkdir -p "$ec/recipes/apr" "$ec/evidence/recipes" "$ec/contracts"
@@ -163,7 +168,12 @@ self_test() {
     jerr=$(PV=pv PATH="$nj" "$BASH" scripts/check_recipe_shape.sh 2>&1 > /dev/null) || jrc=$?
     row "missing jq is ENV: rc 2 and names jq" "2 ENV: jq is missing" "$jrc $jerr"
     local bl=skipped
-    if command -v bashrs > /dev/null 2>&1; then bl=0; bashrs lint scripts/recipes_to_jsonl.sh > /dev/null 2>&1 || bl=$?; fi
+    # self-contained: lint a copy in its own dir with the repo's .bashrsignore beside it, so the row
+    # does not depend on the caller's working directory (a bare copy elsewhere got SEC010 rc 2).
+    if command -v bashrs > /dev/null 2>&1; then
+        bl=0; mkdir -p "$t/bl"; cp scripts/recipes_to_jsonl.sh .bashrsignore "$t/bl/"
+        (cd "$t/bl" && bashrs lint recipes_to_jsonl.sh > /dev/null 2>&1) || bl=$?
+    fi
     row "bashrs lint exits 0 on recipes_to_jsonl.sh (or bashrs absent)" "ok" "$([ "$bl" = 0 ] || [ "$bl" = skipped ] && echo ok || echo "rc $bl")"
     row "header exit-code line names the no-yq case" "ok" "$(grep -E '^# Exit:' scripts/check_recipe_shape.sh | grep -q 'no yq' && echo ok || echo no)"
     if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
