@@ -52,7 +52,9 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     local dup_q='[.. | select(tag == "!!map") | select((keys | length) != (keys | unique | length))] | length'
     # An explicit !!bool on a label that is not a canonical boolean: yq's JSON writes it as false,
     # PyYAML raises. Plain true/false are !!bool with canonical text, so they pass.
-    local tag_tok_re='(^|[[:space:]]|[][,{:-])!(!|<)'
+    # Anywhere in the file, not only at a token start: a NEL or line-separator byte before the tag
+    # would hide it from a start-of-token test, and locale changes what [[:space:]] matches.
+    local tag_tok_re='!(!|<)'
     local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
     local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
@@ -71,7 +73,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
         # Any explicit tag token (!!shorthand, !<verbatim>, percent-escaped or not). yq flattens a
         # tagged collection to a null scalar (!!null [x] reads as null), hiding its subtree; the
         # real tree carries no explicit tag, so none is accepted.
-        if grep -q -E "$tag_tok_re" "$f"; then
+        if LC_ALL=C grep -q -E "$tag_tok_re" "$f"; then
             echo "FAIL  ${f##*/}: an explicit YAML tag (!!, !<): refused, not read" >&2
             fail=1
             continue
