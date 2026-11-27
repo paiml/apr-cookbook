@@ -404,6 +404,7 @@ is_risky_scalar() {
   [[ $v =~ ^[-+]?0[xXoObB] ]] && return 0
   [[ $v =~ ^[-+]?0[0-9] ]] && return 0
   [[ $v =~ ^[-+]?[0-9]{19,}$ ]] && return 0
+  [[ $v =~ ^[-+]?[0-9.]+$ && $v =~ [0-9]{19,} ]] && return 0
   [[ $v =~ ^[-+]?[0-9.][0-9a-fA-F_.:eE+-]*$ && $v == *_* ]] && return 0
   [[ $v =~ ^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)[eE][-+]?[0-9]+$ ]] && return 0
   [[ $v =~ ^[-+]?\.(inf|Inf|INF|nan|NaN|NAN)$ ]] && return 0
@@ -412,11 +413,63 @@ is_risky_scalar() {
   return 1
 }
 
+# Blank one document line for the pre-scan: each quoted scalar becomes `Q` and a comment
+# is dropped. One left-to-right pass, so a quote inside the other quote kind is text. A
+# quote only opens at a token start. A quote still open at line end (a multi-line quoted
+# scalar) cannot be judged line by line: refuse. Result in STRIPPED.
+strip_line() {
+  local s=$1 i=0 n c prev=" " q out=""
+  n=${#s}
+  while [ "$i" -lt "$n" ]; do
+    c=${s:i:1}
+    case $c in
+      '"' | "'")
+        case $prev in
+          ' ' | $'\t' | '[' | '{' | ',' | ':' | '-')
+            q=$c
+            i=$((i + 1))
+            while :; do
+              if [ "$i" -ge "$n" ]; then
+                WHY="unsupported YAML construct: quoted scalar not closed on its line"
+                return 1
+              fi
+              c=${s:i:1}
+              if [ "$q" = '"' ] && [ "$c" = '\' ]; then
+                i=$((i + 2))
+                continue
+              fi
+              if [ "$c" = "$q" ]; then
+                if [ "$q" = "'" ] && [ "${s:i+1:1}" = "'" ]; then
+                  i=$((i + 2))
+                  continue
+                fi
+                break
+              fi
+              i=$((i + 1))
+            done
+            i=$((i + 1))
+            out+=Q
+            prev=Q
+            continue
+            ;;
+        esac
+        ;;
+      '#')
+        case $prev in ' ' | $'\t') break ;; esac
+        ;;
+    esac
+    out+=$c
+    prev=$c
+    i=$((i + 1))
+  done
+  STRIPPED=$out
+}
+
 # Refuse (return 1, WHY set) a whole document that holds a construct this checker does
 # not model: NUL byte, CR, tab, merge key, tag, anchor, alias, complex key, or a risky
 # plain scalar anywhere (keys, values, flow items).
 check_document() {
-  local f=$1 text line tok rest
+  local f=$1 line tok rest
   local flow_sep='[][{},]'
   if [ "$(tr -d '\000' <"$f" | wc -c)" -ne "$(wc -c <"$f")" ]; then
     WHY="unsupported YAML construct: NUL byte"
@@ -426,12 +479,9 @@ check_document() {
     WHY="unsupported YAML construct: carriage return (bare CR or CRLF line ending)"
     return 1
   fi
-  # Blank out quoted scalars (token -> Q) and comments, line by line.
-  text=$(sed -E \
-    -e "s/(^|[[:space:][{,:-])\"([^\"\\\\]|\\\\.)*\"/\1Q/g" \
-    -e "s/(^|[[:space:][{,:-])'([^']|'')*'/\1Q/g" \
-    -e 's/(^|[[:space:]])#.*$/\1/' -- "$f")
   while IFS= read -r line || [ -n "$line" ]; do
+    strip_line "$line" || return 1
+    line=$STRIPPED
     if [[ $line == *$'\t'* ]]; then
       WHY="unsupported YAML construct: tab outside a quoted scalar"
       return 1
@@ -450,7 +500,7 @@ check_document() {
     fi
     rest=${line//$flow_sep/$'\n'}
     rest=${rest//: /$'\n'}
-    rest=${rest//-[[:space:]]/$'\n'}
+    rest=${rest#"${rest%%[![:space:]-]*}"}
     while IFS= read -r tok; do
       tok=${tok#"${tok%%[![:space:]]*}"}
       tok=${tok%"${tok##*[![:space:]]}"}
@@ -460,7 +510,7 @@ check_document() {
         return 1
       fi
     done <<<"$rest"
-  done <<<"$text"
+  done <"$f"
   return 0
 }
 

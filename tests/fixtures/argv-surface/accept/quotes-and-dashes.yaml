@@ -1,0 +1,4 @@
+id: fx
+argv: ["apr", 'run', "--input", "it's", 'say "hi"', x]
+title: Turn thinking - off, then on
+note: "a # b"   # trailing comment with "quote
