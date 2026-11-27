@@ -35,8 +35,7 @@ fn collect_yaml(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
         // Path::extension() would skip it (a fail-open gap).
         } else if p
             .file_name()
-            .and_then(|n| n.to_str())
-            .is_some_and(|n| n.ends_with(".yaml"))
+            .is_some_and(|n| n.as_encoded_bytes().ends_with(b".yaml"))
         {
             out.push(p);
         }
@@ -390,6 +389,18 @@ fn self_test() -> i32 {
     );
     fs::write(&fx.rf, fx.original).expect("restore");
     fx.reset();
+    // A bare `.yaml` is a recipe (as Python's rglob sees it): with no receipt it must FAIL.
+    fs::write(
+        fx.rdir.join(".yaml"),
+        "schema: cookbook-recipe/v1\nid: r2\nhosts:\n- lambda\n",
+    )
+    .expect("bare yaml");
+    row(
+        "MUST-RED: a bare .yaml recipe with no receipt -> FAIL",
+        1,
+        fx.run(),
+    );
+    fs::remove_file(fx.rdir.join(".yaml")).expect("unlink bare yaml");
 
     println!(
         "check_recipe_receipts self-test: {} ({bad} failed)",
