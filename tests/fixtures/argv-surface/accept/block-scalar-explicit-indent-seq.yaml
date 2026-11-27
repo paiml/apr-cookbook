@@ -1,0 +1,6 @@
+id: fx
+argv: [apr, run, --input, x]
+items:
+  - |2
+      wide: [
+  - tail

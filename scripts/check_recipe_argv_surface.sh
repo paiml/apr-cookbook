@@ -346,7 +346,7 @@ single_key_line() {
   fi
   # Count every column-0 spelling of the key (plain, quoted, space before the colon): a
   # second spelling is a duplicate key that overwrites the first in a real loader.
-  lines=$({ grep -En "^[\"']?$key[\"']?[[:space:]]*:" -- "$f" || true; } | cut -d: -f1)
+  lines=$({ grep -En "^[\"']?${key}[\"']?[[:space:]]*:" -- "$f" || true; } | cut -d: -f1)
   count=$(printf '%s' "$lines" | grep -c . || true)
   if [ "$count" -ne 1 ]; then
     WHY="expected exactly one top-level $key: key, found $count"
@@ -484,6 +484,10 @@ strip_line() {
           '-') if [[ $out =~ ^([[:space:]]*-[[:space:]]+)+$ ]]; then opens=1; fi ;;
         esac
         if [ "$c" = '[' ] || [ "$c" = '{' ]; then
+          if [ "$sig" = ":" ] && [ "$ws" -eq 0 ] && [[ $out =~ ${QS}[[:space:]]*:$ ]]; then
+            WHY="unsupported YAML construct: flow opener glued to a quoted key colon"
+            return 1
+          fi
           if [ "$opens" -eq 1 ]; then
             if [ "${stk: -1}" = "{" ] && { [ "$sig" = "{" ] || [ "$sig" = "," ]; }; then
               WHY="unsupported YAML construct: flow collection as a mapping key"
@@ -555,7 +559,23 @@ strip_line() {
         ;;
     esac
     case $c in
-      ']' | '}') if [ "$depth" -gt 0 ]; then depth=$((depth - 1)); stk=${stk%?}; fi ;;
+      ']' | '}')
+        if [ "$depth" -gt 0 ]; then
+          if { [ "$c" = ']' ] && [ "${stk: -1}" != "[" ]; } || { [ "$c" = '}' ] && [ "${stk: -1}" != "{" ]; }; then
+            WHY="unsupported YAML construct: mismatched flow closer"
+            return 1
+          fi
+          depth=$((depth - 1))
+          stk=${stk%?}
+          case ${s:i+1:1} in
+            '' | ' ' | $'\t' | ',' | ']' | '}') ;;
+            *) WHY="unsupported YAML construct: text glued to a flow closer"; return 1 ;;
+          esac
+        elif [ "$sig" = ']' ] || [ "$sig" = '}' ]; then
+          WHY="unsupported YAML construct: extra flow closer"
+          return 1
+        fi
+        ;;
     esac
     out+=$c
     sig=$c
@@ -592,13 +612,31 @@ check_document() {
   fi
   DEPTH=0
   FSTK=""
-  local prev_end="" had_depth raw pre blk=-1 prev_dash_ind=-1
+  local prev_end="" had_depth raw pre blk=-1 prev_dash_ind=-1 bci=-1 blank_max=0 prev_ind=-1 pfx tpfx
+  local hdig re_hdr='^[[:space:]]*(-[[:space:]]+)*(([^][:space:]{},#!&*|>"'"'"'-][^:]*):[[:space:]]+)?[|>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$'
   while IFS= read -r line || [ -n "$line" ]; do
     raw=$line
     if [ "$blk" -ge 0 ]; then
       pre=${raw%%[! ]*}
-      if [[ -z ${raw//[[:space:]]/} ]] || [ "${#pre}" -gt "$blk" ]; then continue; fi
+      if [[ -z ${raw//[[:space:]]/} ]]; then
+        if [ "$bci" -lt 0 ] && [ "${#raw}" -gt "$blank_max" ]; then blank_max=${#raw}; fi
+        continue
+      fi
+      if [ "${#pre}" -gt "$blk" ]; then
+        if [ "$bci" -lt 0 ]; then
+          bci=${#pre}
+          if [ "$blank_max" -gt "$bci" ]; then
+            WHY="unsupported YAML construct: block scalar leading blank line indented past its first content line"
+            return 1
+          fi
+        elif [ "${#pre}" -lt "$bci" ]; then
+          WHY="unsupported YAML construct: block scalar line dedents below its first content line"
+          return 1
+        fi
+        continue
+      fi
       blk=-1
+      bci=-1
     fi
     had_depth=$DEPTH
     if [ "$had_depth" -gt 0 ] && [[ $raw =~ ^[^[:space:]#] ]]; then
@@ -621,6 +659,17 @@ check_document() {
       WHY="unsupported YAML construct: flow collection continuing a plain scalar"
       return 1
     fi
+    if [ "$had_depth" -eq 0 ] && [[ $prev_end =~ :$ ]] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\[\{] ]]; then
+      if [[ $line =~ ^[[:space:]]*-[[:space:]] ]]; then
+        if [ "${#pre}" -lt "$prev_ind" ]; then
+          WHY="unsupported YAML construct: flow item dedented below its key"
+          return 1
+        fi
+      elif [ "${#pre}" -le "$prev_ind" ]; then
+        WHY="unsupported YAML construct: flow value not indented under its key"
+        return 1
+      fi
+    fi
     if [[ -n ${line//[[:space:]]/} ]]; then
       # A "- " line only counts as a block-sequence item when anchored: no open
       # flow, and it follows a "key:" line or a sibling item at the same indent.
@@ -633,6 +682,7 @@ check_document() {
       fi
       prev_end=$line
       prev_dash_ind=$new_dash
+      prev_ind=${#pre}
       while [[ $prev_end == *[[:space:]] ]]; do prev_end=${prev_end%?}; done
     fi
     if [[ $line == *$'\t'* ]]; then
@@ -664,14 +714,32 @@ check_document() {
         return 1
       fi
     fi
-    if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>] ]] &&
-      [[ ! $line =~ [\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
-      WHY="unsupported YAML construct: invalid block scalar header"
-      return 1
-    fi
-    if [ "$DEPTH" -eq 0 ] && [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*([A-Za-z0-9_-]+:[[:space:]]+)?[\|\>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$ ]]; then
-      pre=${raw%%[^ -]*}
-      blk=${#pre}
+    if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>] ]]; then
+      if [[ ! $line =~ $re_hdr ]]; then
+        WHY="unsupported YAML construct: invalid block scalar header"
+        return 1
+      fi
+      if [[ $line =~ ^[[:space:]]*[\|\>] ]]; then
+        WHY="unsupported YAML construct: block scalar header on its own line"
+        return 1
+      fi
+      if [ "$DEPTH" -eq 0 ]; then
+        # blk = indent of the parent node: the key column of `key: |` / `- key: |`,
+        # or the dash column of a bare `- |` (round 12).
+        [[ $raw =~ ^([ ]*(-[ ]+)*) ]]
+        pfx=${BASH_REMATCH[1]}
+        if [[ $line =~ ^[[:space:]]*(-[[:space:]]+)*[\|\>] ]]; then
+          tpfx=${pfx%"${pfx##*[! ]}"}
+          blk=$((${#tpfx} - 1))
+        else
+          blk=${#pfx}
+        fi
+        bci=-1
+        blank_max=0
+        hdig=${line##*[|>]}
+        hdig=${hdig//[!1-9]/}
+        if [ -n "$hdig" ]; then bci=$((blk + hdig)); fi
+      fi
     fi
     if [[ $line == "$QS"* ]]; then
       WHY="unsupported YAML construct: quoted top-level key"

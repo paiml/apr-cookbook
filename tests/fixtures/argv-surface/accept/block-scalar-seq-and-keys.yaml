@@ -1,0 +1,17 @@
+id: fx
+argv: [apr, run, --input, x]
+items:
+  - |
+    x: [
+     deeper
+  - >
+    y: {
+  - plain
+outer:
+  a.b: |
+    x: [
+  a c: >
+    z: {
+  "k": |
+    w: [
+  last: 1
