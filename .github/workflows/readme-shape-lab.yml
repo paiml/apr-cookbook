@@ -1,0 +1,27 @@
+# readme-shape-lab — nightly LAB only (#480, C324).
+#
+# Runs the 6-case readme-shape falsifier (tests/readme-shape-falsifier.sh,
+# #477) against the committed README.md. LAB means it can never block:
+# no pull-request or merge-queue trigger, not a required check, and no
+# continue-on-error workaround on the pull-request path. A red run is a LAB ticket.
+name: readme-shape-lab
+
+on:
+  schedule:
+    - cron: '30 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  readme-shape:
+    name: readme-shape falsifier (LAB)
+    runs-on: [self-hosted, Linux, clean-room]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - name: Run readme-shape falsifier
+        run: sh tests/readme-shape-falsifier.sh
