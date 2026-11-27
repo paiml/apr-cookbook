@@ -52,6 +52,12 @@ self_test() {
     t=$(mktemp -d)
     case "$t" in /tmp/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
     row() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1 (got $3, wanted $2)"; bad=$((bad + 1)); fi; }
+    # RED 1: focus_count reads by_shape only; a message that repeats the token must not inflate it.
+    row "focus_count reads by_shape only (a message cannot inflate it)" "2" "$(printf '%s' '{"results":[{"message":"cookbook-recipe-v1=99"}],"by_shape":["cookbook-recipe-v1=2"]}' | focus_count)"
+    # RED 2: no yq on PATH is an ENV failure (rc 2), not a generic rc 1 from the derivation.
+    local nb="$t/noyq" yrc=0; mkdir -p "$nb"; ln -sf "$(command -v jq)" "$nb/jq"; ln -sf "$(command -v pv)" "$nb/pv"
+    PATH="$nb" "$BASH" scripts/check_recipe_shape.sh > /dev/null 2>&1 || yrc=$?
+    row "missing yq is ENV: rc 2" "2" "$yrc"
     # fixture <name> <jq filter editing the FIRST real row> [<property>]: a tiny repo holding the
     # contract and the real rows with ONE defect planted in the first row. Echoes "<rc> <focus> <named>".
     fixture() {
