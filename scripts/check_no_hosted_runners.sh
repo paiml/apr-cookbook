@@ -43,12 +43,30 @@ here=$(dirname "${BASH_SOURCE[0]}")
 readonly JQ_HOSTED_RULES="$here/check_no_hosted_runners.jq"
 
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
-    local f fail=0
+    local f fail=0 tmp readable
+    tmp=$(mktemp -d)
     while IFS= read -r f; do
-        # --yaml-fix-merge-anchor-to-spec: a `<<:` merge must NOT overwrite an explicit key (yq defaults to false).
-        if ! yq --yaml-fix-merge-anchor-to-spec=true -o json '.' "$f" | jq -r -s --arg file "${f##*/}" -f "$JQ_HOSTED_RULES"; then
-            echo "FAIL  ${f##*/}: not readable (yq refused it, more than one YAML document, or a job outside the shape the gate reads)" >&2; fail=1; fi
+        # Two parses. spec: a <<: merge never overwrites an explicit key (yq defaults to false).
+        # plain: yq's default. Where they disagree, merge order decides the job: refuse, never pick one.
+        readable=1
+        if ! yq --yaml-fix-merge-anchor-to-spec=true -o json '.' "$f" > "$tmp/spec" 2> /dev/null; then readable=0; fi
+        if ! yq -o json '.' "$f" > "$tmp/plain" 2> /dev/null; then readable=0; fi
+        if [ "$readable" = 0 ]; then
+            echo "FAIL  ${f##*/}: not readable (yq refused it, more than one YAML document, or a job outside the shape the gate reads)" >&2
+            fail=1
+            continue
+        fi
+        if ! cmp -s "$tmp/spec" "$tmp/plain"; then
+            echo "FAIL  ${f##*/}: a YAML merge key (<<) decides the job (repeated, or ordered before a key it overrides): refused, not picked" >&2
+            fail=1
+            continue
+        fi
+        if ! jq -r -s --arg file "${f##*/}" -f "$JQ_HOSTED_RULES" < "$tmp/spec"; then
+            echo "FAIL  ${f##*/}: not readable (the job is outside the shape the gate reads)" >&2
+            fail=1
+        fi
     done <<< "$WF_FILES"
+    rm -rf -- "${tmp:?}"
     if [ "$fail" != 0 ]; then
         echo "FAIL  a workflow could not be parsed (see above): the gate never passes what it cannot parse" >&2
     fi
