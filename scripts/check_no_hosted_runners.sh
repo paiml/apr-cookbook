@@ -16,9 +16,9 @@
 # PARSER (#470): yq v4 (mikefarah, go-yaml v3, pinned v4.52.2) turns each workflow into JSON and
 # jq applies the rules. Bash only; no interpreter. A file yq refuses, or one with more than one
 # YAML document, is a FAIL: the gate never passes what it cannot read.
-# Known differences, all in the refusing direction: duplicate keys are refused (yq), a quoted
-# "yes"/"10" in a matrix is UNVERIFIABLE (yq drops the quoting), and a `<<` merge key is
-# resolved by go-yaml.
+# Known differences from the Python-era gate: a quoted "yes"/"10" in a matrix is UNVERIFIABLE
+# (yq drops the quoting); YAML 1.1 scalars (1e5, .inf, 1:30) parse differently, mostly refusing;
+# `<<` merge keys follow the YAML spec (explicit keys win). Duplicate keys: last one wins, in yq and PyYAML alike.
 #
 # BLIND SPOT, by construction: a job that is a `uses:` call to another repo's reusable
 # workflow has no local runs-on, so its runner is decided in that repo. The FOUR this repo
@@ -45,7 +45,8 @@ readonly JQ_HOSTED_RULES="$here/check_no_hosted_runners.jq"
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
     local f fail=0
     while IFS= read -r f; do
-        if ! yq -o json '.' "$f" | jq -r -s --arg file "${f##*/}" -f "$JQ_HOSTED_RULES"; then
+        # --yaml-fix-merge-anchor-to-spec: a `<<:` merge must NOT overwrite an explicit key (yq defaults to false).
+        if ! yq --yaml-fix-merge-anchor-to-spec=true -o json '.' "$f" | jq -r -s --arg file "${f##*/}" -f "$JQ_HOSTED_RULES"; then
             echo "FAIL  ${f##*/}: not readable (yq refused it, more than one YAML document, or a job outside the shape the gate reads)" >&2; fail=1; fi
     done <<< "$WF_FILES"
     if [ "$fail" != 0 ]; then
