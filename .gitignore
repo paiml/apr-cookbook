@@ -48,3 +48,4 @@ contracts/.pv/
 # Lean build artifacts (PMAT-047)
 lean/.lake/
 lean/lake-manifest.json
+/lcov.info
