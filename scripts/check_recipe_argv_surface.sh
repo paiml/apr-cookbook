@@ -460,7 +460,7 @@ QS=$'\001' # blanked quoted scalar; control chars are refused, so it never occur
 # open at line end (a multi-line quoted scalar), an invalid double-quote escape and text
 # glued to a closing quote are refused. Result in STRIPPED.
 strip_line() {
-  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=$DEPTH stk=$FSTK
+  local s=$1 i=0 n c sig="" ws=1 q out="" opens hexn=0 nx cp depth=$DEPTH stk=$FSTK j nxt
   n=${#s}
   while [ "$i" -lt "$n" ]; do
     c=${s:i:1}
@@ -484,7 +484,7 @@ strip_line() {
           '-') if [[ $out =~ ^([[:space:]]*-[[:space:]]+)+$ ]]; then opens=1; fi ;;
         esac
         if [ "$c" = '[' ] || [ "$c" = '{' ]; then
-          if [ "$sig" = ":" ] && [ "$ws" -eq 0 ] && [[ $out =~ ${QS}[[:space:]]*:$ ]]; then
+          if [ "$depth" -eq 0 ] && [ "$sig" = ":" ] && [ "$ws" -eq 0 ] && [[ $out =~ ${QS}[[:space:]]*:$ ]]; then
             WHY="unsupported YAML construct: flow opener glued to a quoted key colon"
             return 1
           fi
@@ -551,6 +551,28 @@ strip_line() {
             '' | ' ' | $'\t' | ',' | ']' | '}' | ':') ;;
             *) WHY="unsupported YAML construct: text glued to a closing quote"; return 1 ;;
           esac
+          # Round 13: what follows a closing quote (past blanks) must be a comment, a
+          # flow delimiter or a key colon; plain text after a quoted scalar is an error.
+          j=$i
+          while [ "${s:j:1}" = ' ' ] || [ "${s:j:1}" = $'\t' ]; do j=$((j + 1)); done
+          nxt=${s:j:1}
+          if [ "$j" -gt "$i" ]; then
+            case $nxt in
+              '' | '#' | ',' | ']' | '}' | ':') ;;
+              *) WHY="unsupported YAML construct: text after a closing quote"; return 1 ;;
+            esac
+          fi
+          if [ "$depth" -eq 0 ]; then
+            case $nxt in
+              ',' | ']' | '}') WHY="unsupported YAML construct: flow delimiter after a block-level quoted scalar"; return 1 ;;
+              ':')
+                case ${s:j+1:1} in
+                  '' | ' ' | $'\t') ;;
+                  *) WHY="unsupported YAML construct: quoted key colon not followed by a space"; return 1 ;;
+                esac
+                ;;
+            esac
+          fi
           out+=$QS
           sig=$QS
           ws=0
@@ -558,6 +580,14 @@ strip_line() {
         fi
         ;;
     esac
+    if [ "$depth" -gt 0 ] && { [ "$c" = '|' ] || [ "$c" = '>' ]; }; then
+      case $sig in
+        '[' | '{' | ',' | ':')
+          WHY="unsupported YAML construct: block scalar indicator inside a flow collection"
+          return 1
+          ;;
+      esac
+    fi
     case $c in
       ']' | '}')
         if [ "$depth" -gt 0 ]; then
@@ -612,7 +642,7 @@ check_document() {
   fi
   DEPTH=0
   FSTK=""
-  local prev_end="" had_depth raw pre blk=-1 prev_dash_ind=-1 bci=-1 blank_max=0 prev_ind=-1 pfx tpfx
+  local pend cpfx cline has_key is_dash cont_thr=-1 prev_end="" had_depth raw pre blk=-1 prev_dash_ind=-1 bci=-1 blank_max=0 prev_ind=-1 pfx tpfx
   local hdig re_hdr='^[[:space:]]*(-[[:space:]]+)*(([^][:space:]{},#!&*|>"'"'"'-][^:]*):[[:space:]]+)?[|>]([1-9][+-]?|[+-][1-9]?)?[[:space:]]*$'
   while IFS= read -r line || [ -n "$line" ]; do
     raw=$line
@@ -670,6 +700,7 @@ check_document() {
         return 1
       fi
     fi
+    pend=$prev_end
     if [[ -n ${line//[[:space:]]/} ]]; then
       # A "- " line only counts as a block-sequence item when anchored: no open
       # flow, and it follows a "key:" line or a sibling item at the same indent.
@@ -740,6 +771,48 @@ check_document() {
         hdig=${hdig//[!1-9]/}
         if [ -n "$hdig" ]; then bci=$((blk + hdig)); fi
       fi
+    fi
+    # Round 13: block-level structure. A line more indented than a scalar-valued entry
+    # is a plain-scalar continuation and may hold no key, quoted key or block header; a
+    # line that is not a continuation must be a key entry, a "- " item or the value
+    # under a "key:" line, never a bare scalar (this also catches content that fell out
+    # of a block scalar by indenting no deeper than its parent).
+    if [ "$had_depth" -eq 0 ] && [[ -n ${line//[[:space:]]/} ]]; then
+      cpfx=""
+      [[ $line =~ ^[\ ]*(-[\ ]+)* ]] && cpfx=${BASH_REMATCH[0]}
+      cline=${line%"${line##*[![:space:]]}"}
+      has_key=0
+      [[ ${line:${#cpfx}} =~ (:[[:space:]]|:$|${QS}[[:space:]]*:) ]] && has_key=1
+      is_dash=0
+      [[ $line =~ ^[[:space:]]*-([[:space:]]|$) ]] && is_dash=1
+      if [ "$cont_thr" -ge 0 ] && [ "${#pre}" -gt "$cont_thr" ]; then
+        if [ "$has_key" -eq 1 ]; then
+          WHY="unsupported YAML construct: key or quoted key on a plain-scalar continuation line"
+          return 1
+        fi
+        if [[ $line =~ (^[[:space:]]*|:[[:space:]]+|-[[:space:]]+)[\|\>] ]]; then
+          WHY="unsupported YAML construct: block scalar indicator on a plain-scalar continuation line"
+          return 1
+        fi
+      else
+        if [ "$has_key" -eq 0 ] && [ "$is_dash" -eq 0 ] && [[ ! $pend =~ :$ ]]; then
+          WHY="unsupported YAML construct: bare scalar line outside a plain-scalar continuation"
+          return 1
+        fi
+        cont_thr=-1
+        if [ "$DEPTH" -eq 0 ] && [ "$blk" -lt 0 ] && [[ $cline != *: ]]; then
+          if [ "$has_key" -eq 1 ]; then
+            cont_thr=${#cpfx}
+          elif [ "$is_dash" -eq 1 ]; then
+            tpfx=${cpfx%"${cpfx##*[! ]}"}
+            cont_thr=$((${#tpfx} - 1))
+          else
+            cont_thr=$((${#pre} - 1))
+          fi
+        fi
+      fi
+    elif [ "$had_depth" -gt 0 ]; then
+      cont_thr=-1
     fi
     if [[ $line == "$QS"* ]]; then
       WHY="unsupported YAML construct: quoted top-level key"

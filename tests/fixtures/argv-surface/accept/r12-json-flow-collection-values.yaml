@@ -1,0 +1,4 @@
+id: fx
+argv: [apr, run, --input, x]
+m: {"a":[1], 'c': 1}
+n: {"a":{"x":1}}
