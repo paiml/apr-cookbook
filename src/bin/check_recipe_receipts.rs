@@ -31,7 +31,13 @@ fn collect_yaml(dir: &Path, out: &mut Vec<PathBuf>) -> std::io::Result<()> {
         let p = entry?.path();
         if p.is_dir() {
             collect_yaml(&p, out)?;
-        } else if p.extension().is_some_and(|e| e == "yaml") {
+        // Same as Python's rglob("*.yaml"): a bare `.yaml` is a recipe too, and
+        // Path::extension() would skip it (a fail-open gap).
+        } else if p
+            .file_name()
+            .and_then(|n| n.to_str())
+            .is_some_and(|n| n.ends_with(".yaml"))
+        {
             out.push(p);
         }
     }
