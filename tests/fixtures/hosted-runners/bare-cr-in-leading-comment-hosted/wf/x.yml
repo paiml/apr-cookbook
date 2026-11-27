@@ -1,0 +1,2 @@
+#jobs: {a: {runs-on: ubuntu-latest}}
+on: push

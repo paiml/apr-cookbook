@@ -14,7 +14,7 @@ def expand($mx):
   elif test(exprre) then
     (capture(exprre).k) as $k
     | ($mx[$k]) as $v
-    | if ($mx | has("include")) or ($mx | has("exclude")) then {u: true, items: []}
+    | if ($mx | has("include")) then {u: true, items: []}
       elif ($v | type) == "array"
          and ($v | all(type == "string" or type == "array"))
          and ([$v[] | select(type == "string") | select(ambiguous)] | length == 0)

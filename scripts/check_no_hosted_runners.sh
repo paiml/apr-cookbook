@@ -55,7 +55,8 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # Anywhere in the file, not only at a token start: a NEL or line-separator byte before the tag
     # would hide it from a start-of-token test, and locale changes what [[:space:]] matches.
     local tag_tok_re='!(!|<)'
-    local nl_re='\xC2\x85|\xE2\x80[\xA8\xA9]'
+    # A bare CR (not CRLF) ends a line for PyYAML and not for yq's leading comment: refused too.
+    local nl_re='\xC2\x85|\xE2\x80[\xA8\xA9]|\r(?!\n)'
     local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
     local anchor_re='[&][A-Za-z_][A-Za-z0-9_-]*'
