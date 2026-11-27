@@ -56,10 +56,11 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
     # would hide it from a start-of-token test, and locale changes what [[:space:]] matches.
     local tag_tok_re='!(!|<)'
     # A bare CR (not CRLF) ends a line for PyYAML and not for yq's leading comment: refused too.
-    local nl_re='\xC2\x85|\xE2\x80[\xA8\xA9]|\r(?!\n)'
+    # grep -P sees each line without its LF, so a CR at the end of a line is the CRLF pair (allowed).
+    local nl_re='\xC2\x85|\xE2\x80[\xA8\xA9]|\r(?!$)'
     # A document marker with content after it (--- # c, --- key: v): yq glues the first key into the
     # comment. A control byte other than TAB, LF or CR is not valid YAML 1.2 and PyYAML refuses it.
-    local docline_re='^---.'
+    local docline_re='^---(?:[ \t]+[^ \t\r]|[^ \t\r-])'
     local ctrl_re='[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]'
     local bool_q="[.. | select(tag == \"!!bool\") | select(. != \"true\" and . != \"false\" and . != \"True\" and . != \"False\" and . != \"TRUE\" and . != \"FALSE\")] | length"
     # A YAML anchor name: "&" then a name. A name defined twice is refused (yq keeps the last).
@@ -86,7 +87,7 @@ hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a host
             fail=1
             continue
         fi
-        if LC_ALL=C grep -q -E "$docline_re" "$f" || LC_ALL=C grep -q -P "$ctrl_re" "$f"; then
+        if LC_ALL=C grep -q -P "$docline_re" "$f" || LC_ALL=C grep -q -P "$ctrl_re" "$f"; then
             echo "FAIL  ${f##*/}: content on a document marker, or a control character: refused, not read" >&2
             fail=1
             continue
