@@ -1,0 +1,5 @@
+%TAG !e! tag:yaml.org,2002:
+---
+jobs:
+  a:
+    !e!merge x: {runs-on: ubuntu-latest}
