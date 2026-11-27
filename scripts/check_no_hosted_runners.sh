@@ -13,6 +13,13 @@
 #
 # "Hosted" means a runs-on label naming a GitHub-hosted image: ubuntu-*, windows-*, macos-*.
 #
+# PARSER (#470): yq v4 (mikefarah, go-yaml v3, pinned v4.52.2) turns each workflow into JSON and
+# jq applies the rules. Bash only; no interpreter. A file yq refuses, or one with more than one
+# YAML document, is a FAIL: the gate never passes what it cannot read.
+# Known differences, all in the refusing direction: duplicate keys are refused (yq), a quoted
+# "yes"/"10" in a matrix is UNVERIFIABLE (yq drops the quoting), and a `<<` merge key is
+# resolved by go-yaml.
+#
 # BLIND SPOT, by construction: a job that is a `uses:` call to another repo's reusable
 # workflow has no local runs-on, so its runner is decided in that repo. The FOUR this repo
 # calls, checked by hand on 2026-09-23/24:
@@ -30,118 +37,124 @@ set -euo pipefail
 BASELINE=${HOSTED_BASELINE:-.github/hosted-runner-baseline.txt}
 WF_DIR=${WF_DIR:-.github/workflows}
 
+# One JSON document per workflow file in, "<file> <job>" lines out, for every job that is hosted,
+# unverifiable or not shape-checkable. --arg file names the workflow file.
+here=$(dirname "${BASH_SOURCE[0]}")
+readonly JQ_HOSTED_RULES="$here/check_no_hosted_runners.jq"
+
 hosted_jobs() { # prints "<file> <job>" for every job whose runs-on names a hosted image
-    python3 - "$WF_DIR" << 'PY'
-import pathlib, re, sys, yaml
-HOSTED = re.compile(r"^(ubuntu|windows|macos)-")
-EXPR = re.compile(r"\$\{\{\s*matrix\.([A-Za-z0-9_-]+)\s*\}\}")
-for f in sorted(pathlib.Path(sys.argv[1]).glob("*.y*ml")):
-    d = yaml.safe_load(f.read_text()) or {}
-    for jid, j in (d.get("jobs") or {}).items():
-        ro = j.get("runs-on")
-        shape_ok = True
-        if isinstance(ro, dict):
-            # Mapping form {group: ..., labels: ...} is how GitHub-HOSTED larger runners are
-            # selected; read both keys, and refuse any other key as unverifiable.
-            shape_ok = set(ro) <= {"group", "labels"}
-            lab = ro.get("labels", [])
-            labels = (lab if isinstance(lab, list) else [lab]) + ([ro["group"]] if isinstance(ro.get("group"), str) else [])
-        else:
-            labels = ro if isinstance(ro, list) else [ro] if isinstance(ro, str) else []
-        matrix = ((j.get("strategy") or {}).get("matrix") or {})
-        expanded, unverifiable = [], False
-        for l in labels:
-            if not isinstance(l, str) or "${{" not in l:
-                expanded.append(l)
-                continue
-            # An expression hides the label. `${{ matrix.<k> }}` is resolved against the job's
-            # own matrix values; anything else cannot be checked, so it is refused rather than
-            # passed (a hosted image behind an expression would otherwise read as clean).
-            m = EXPR.fullmatch(l.strip())
-            vals = matrix.get(m.group(1)) if m else None
-            if isinstance(vals, list) and all(isinstance(v, (str, list)) for v in vals):
-                for v in vals:
-                    expanded.extend(v if isinstance(v, list) else [v])
-            else:
-                unverifiable = True
-        if unverifiable or not shape_ok or any(isinstance(l, str) and HOSTED.match(l) for l in expanded):
-            print("%s %s" % (f.name, jid))
-PY
+    local f fail=0
+    while IFS= read -r f; do
+        if ! yq -o json '.' "$f" | jq -r -s --arg file "${f##*/}" -f "$JQ_HOSTED_RULES"; then
+            echo "FAIL  ${f##*/}: not readable (yq refused it, more than one YAML document, or a job outside the shape the gate reads)" >&2; fail=1; fi
+    done <<< "$WF_FILES"
+    if [ "$fail" != 0 ]; then
+        echo "FAIL  a workflow could not be parsed (see above): the gate never passes what it cannot parse" >&2
+    fi
+    return "$fail"
+}
+
+# in_list <line> <list>: pure-bash membership over newline-separated lists (no subprocess).
+in_list() {
+    local nl=$'\n'
+    local found=1
+    [[ "$nl$2$nl" == *"$nl$1$nl"* ]] && found=0
+    return "$found"
 }
 
 check() {
-    local actual base new stale nwf
-    command -v python3 > /dev/null || { echo "ENV: python3 missing" >&2; return 2; }
+    local actual base new="" stale="" line nwf WF_FILES
+    if ! command -v yq > /dev/null 2>&1; then
+        echo "ENV: yq missing" >&2
+        return 2
+    fi
+    ver=$(yq --version 2> /dev/null)
+    if [[ "$ver" != *"version v4."* ]]; then
+        echo "ENV: yq v4 (mikefarah) required" >&2
+        return 2
+    fi
+    if ! command -v jq > /dev/null 2>&1; then
+        echo "ENV: jq missing" >&2
+        return 2
+    fi
     # Zero workflow files is broken wiring (a wrong WF_DIR, an empty checkout), never "0 hosted
     # jobs": refuse instead of printing PASS (quorum finding, #454).
-    nwf=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) 2> /dev/null | wc -l)
+    WF_FILES=$(find "$WF_DIR" -maxdepth 1 -type f \( -name '*.yml' -o -name '*.yaml' \) | sort)
+    nwf=$(printf '%s\n' "$WF_FILES" | sed '/^$/d' | wc -l)
     if [ "$nwf" -eq 0 ]; then
         echo "REFUSED: no workflow files under $WF_DIR -- zero files is broken wiring, not a clean pool"
         return 2
     fi
-    actual=$(hosted_jobs | sort)
-    base=$( { grep -vE '^\s*(#|$)' "$BASELINE" 2> /dev/null || true; } | sort)
-    new=$(comm -23 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
-    stale=$(comm -13 <(printf '%s\n' "$actual" | sed '/^$/d') <(printf '%s\n' "$base" | sed '/^$/d'))
+    actual=$(hosted_jobs) || return 1
+    base=$(grep -v -E "^ *#" "$BASELINE" 2> /dev/null | grep -v -E "^ *$" | sort) || base=""
+    while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        in_list "$line" "$base" || new="$new        $line"$'\n'
+    done <<< "$actual"
+    while IFS= read -r line; do
+        [ -n "$line" ] || continue
+        in_list "$line" "$actual" || stale="$stale        $line"$'\n'
+    done <<< "$base"
     if [ -n "$new" ]; then
         printf 'FAIL  hosted-runner job(s) not in %s (fleet rule: no hosted runners):\n' "$BASELINE"
-        printf '        %s\n' "$new"
+        printf '%s' "$new"
     fi
     if [ -n "$stale" ]; then
         printf 'FAIL  stale baseline row(s), those jobs are no longer hosted -- delete them so the list only shrinks:\n'
-        printf '        %s\n' "$stale"
+        printf '%s' "$stale"
     fi
-    [ -z "$new" ] && [ -z "$stale" ] || return 1
-    printf 'PASS  %s hosted job(s) remain, all in the shrinking baseline\n' "$(printf '%s\n' "$actual" | sed '/^$/d' | wc -l | tr -d ' ')"
+    if [ -n "$new" ] || [ -n "$stale" ]; then
+        return 1
+    fi
+    local n=0
+    while IFS= read -r line; do [ -n "$line" ] && n=$((n + 1)); done <<< "$actual"
+    printf 'PASS  %s hosted job(s) remain, all in the shrinking baseline\n' "$n"
+}
+
+# gate_rc <wf dir> <baseline>: runs the gate on that tree and prints its exit code.
+gate_rc() { # sets RC (the gate exit code for WF_DIR=$1, BASELINE=$2); no subshell
+    RC=0; WF_DIR="$1" BASELINE="$2" check > /dev/null 2>&1 || RC=$?
 }
 
 self_test() {
-    local t bad=0 rc root
+    local bad=0 wf base
     # The managed temp root: TMPDIR (the runner's), without a trailing slash; /tmp when unset.
-    root="${TMPDIR:-/tmp}"; root="${root%/}"; [ -n "$root" ] || root=/tmp
-    t=$(mktemp -d)
-    case "$t" in "$root"/tmp.*) ;; *) echo "REFUSED: mktemp gave $t" >&2; return 2 ;; esac
-    mkdir -p "$t/wf"
-    printf 'jobs:\n  a:\n    runs-on: [self-hosted, Linux, clean-room]\n  b:\n    runs-on: ubuntu-latest\n' > "$t/wf/x.yml"
-    printf 'x.yml b\n' > "$t/base"
-    row() { if [ "$2" = "$3" ]; then echo "ok    $1"; else echo "FAIL  $1 (rc $3, wanted $2)"; bad=$((bad + 1)); fi; }
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "a hosted job listed in the baseline -> PASS" 0 "$rc"
-    printf '  c:\n    runs-on: ubuntu-24.04\n' >> "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: a NEW hosted job (ubuntu-24.04) not in the baseline -> FAIL" 1 "$rc"
-    printf 'jobs:\n  a:\n    runs-on: [self-hosted, Linux, clean-room]\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: a baseline row for a job no longer hosted -> FAIL (ratchet)" 1 "$rc"
-    : > "$t/base"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "no hosted jobs and an empty baseline -> PASS (the goal)" 0 "$rc"
-    printf 'jobs:\n  m:\n    runs-on: macos-14\n' > "$t/wf/y.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: macos-14 counts as hosted too" 1 "$rc"
-    rm -f "$t/wf/y.yml"; : > "$t/base"
-    printf 'jobs:\n  mx:\n    strategy:\n      matrix:\n        os: [ubuntu-latest, self-hosted]\n    runs-on: ${{ matrix.os }}\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: a hosted image behind \${{ matrix.os }} is resolved and caught" 1 "$rc"
-    printf 'jobs:\n  ex:\n    runs-on: ${{ inputs.runner }}\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: an unresolvable runs-on expression is refused, not passed" 1 "$rc"
-    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "a matrix of self-hosted label lists resolves and passes" 0 "$rc"
-    mkdir -p "$t/empty"
-    rc=0; WF_DIR="$t/empty" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$rc"
-    printf 'jobs:\n  big:\n    runs-on:\n      group: larger-runners\n      labels: ubuntu-latest\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: mapping-form runs-on {group, labels: ubuntu-latest} (hosted larger runners)" 1 "$rc"
-    printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$t/wf/x.yml"
-    rc=0; WF_DIR="$t/wf" BASELINE="$t/base" check > /dev/null || rc=$?
-    row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$rc"
-    if [ -n "$t" ] && [ "$t" != "/" ] && [ -d "$t" ]; then
-        case "$t" in "$root"/tmp.*) rm -rf -- "$t" ;; *) ;; esac
+    ST_ROOT="${TMPDIR:-/tmp}"; ST_ROOT="${ST_ROOT%/}"; [ -n "$ST_ROOT" ] || ST_ROOT=/tmp
+    IFS= read -r ST_DIR < <(mktemp -d)
+    if [[ "$ST_DIR" != "$ST_ROOT"/tmp.* ]]; then
+        echo "REFUSED: mktemp gave $ST_DIR" >&2
+        return 2
     fi
-    echo "check_no_hosted_runners self-test: $([ "$bad" = 0 ] && echo PASS || echo FAIL) ($bad failed)"
+    trap 'case "${ST_DIR:?}" in "$ST_ROOT"/tmp.*) rm -rf -- "${ST_DIR:?}" ;; esac' EXIT
+    wf="$ST_DIR/wf"; base="$ST_DIR/base"
+    mkdir -p "$wf"
+    printf 'jobs:\n  a:\n    runs-on: [self-hosted, Linux, clean-room]\n  b:\n    runs-on: ubuntu-latest\n' > "$wf/x.yml"
+    printf 'x.yml b\n' > "$base"
+    row() { gate_rc "$3" "$4"; if [ "$2" = "$RC" ]; then echo "ok    $1"; else echo "FAIL  $1 (rc $RC, wanted $2)"; bad=$((bad + 1)); fi; }
+    row "a hosted job listed in the baseline -> PASS" 0 "$wf" "$base"
+    printf '  c:\n    runs-on: ubuntu-24.04\n' >> "$wf/x.yml"
+    row "MUST-RED: a NEW hosted job (ubuntu-24.04) not in the baseline -> FAIL" 1 "$wf" "$base"
+    printf 'jobs:\n  a:\n    runs-on: [self-hosted, Linux, clean-room]\n' > "$wf/x.yml"
+    row "MUST-RED: a baseline row for a job no longer hosted -> FAIL (ratchet)" 1 "$wf" "$base"
+    : > "$base"
+    row "no hosted jobs and an empty baseline -> PASS (the goal)" 0 "$wf" "$base"
+    printf 'jobs:\n  m:\n    runs-on: macos-14\n' > "$wf/y.yml"
+    row "MUST-RED: macos-14 counts as hosted too" 1 "$wf" "$base"
+    : > "$wf/y.yml"
+    printf 'jobs:\n  mx:\n    strategy:\n      matrix:\n        os: [ubuntu-latest, self-hosted]\n    runs-on: ${{ matrix.os }}\n' > "$wf/x.yml"
+    row "MUST-RED: a hosted image behind \${{ matrix.os }} is resolved and caught" 1 "$wf" "$base"
+    printf 'jobs:\n  ex:\n    runs-on: ${{ inputs.runner }}\n' > "$wf/x.yml"
+    row "MUST-RED: an unresolvable runs-on expression is refused, not passed" 1 "$wf" "$base"
+    printf 'jobs:\n  ok:\n    strategy:\n      matrix:\n        r: [[self-hosted, Linux, clean-room]]\n    runs-on: ${{ matrix.r }}\n' > "$wf/x.yml"
+    row "a matrix of self-hosted label lists resolves and passes" 0 "$wf" "$base"
+    mkdir -p "$ST_DIR/empty"
+    row "MUST-RED: zero workflow files is refused (rc 2), never PASS" 2 "$ST_DIR/empty" "$base"
+    printf 'jobs:\n  big:\n    runs-on:\n      group: larger-runners\n      labels: ubuntu-latest\n' > "$wf/x.yml"
+    row "MUST-RED: mapping-form runs-on {group, labels: ubuntu-latest} (hosted larger runners)" 1 "$wf" "$base"
+    printf 'jobs:\n  odd:\n    runs-on:\n      image: whatever\n' > "$wf/x.yml"
+    row "MUST-RED: a mapping runs-on with an unknown key is refused as unverifiable" 1 "$wf" "$base"
+    if [ "$bad" = 0 ]; then res=PASS; else res=FAIL; fi
+    echo "check_no_hosted_runners self-test: $res ($bad failed)"
     [ "$bad" = 0 ]
 }
 
