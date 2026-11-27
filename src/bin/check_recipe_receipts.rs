@@ -369,18 +369,21 @@ fn self_test() -> i32 {
     fx.reset();
     fs::remove_file(fx.xdir.join("CURRENT")).expect("unlink CURRENT");
     row("REFUSED: no CURRENT file -> rc 2", 2, fx.run());
-    fx.reset();
+    // Write the bad recipe FIRST, then the receipts, so both carry its sha: only the
+    // non-string host check can turn this run red (a stale sha would make it red anyway).
     fs::write(
         &fx.rf,
         "schema: cookbook-recipe/v1\nid: r1\nhosts:\n- lambda\n- 2080\n",
     )
     .expect("bad hosts");
+    fx.reset();
     row(
         "MUST-RED: a non-string host entry refuses the recipe -> FAIL",
         1,
         fx.run(),
     );
     fs::write(&fx.rf, fx.original).expect("restore");
+    fx.reset();
 
     println!(
         "check_recipe_receipts self-test: {} ({bad} failed)",
